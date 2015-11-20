@@ -64,10 +64,12 @@ void Navigator::SetFromRect(m2::AnyRectD const & r, uint32_t tileSize, double vi
   tmp.SetFromRect(r);
   tmp = ScaleInto(tmp, worldR);
   if (CheckMaxScale(tmp, tileSize, visualScale))
+  {
     m_Screen = tmp;
 
-  if (!m_InAction)
-    m_StartScreen = tmp;
+    if (!m_InAction)
+      m_StartScreen = tmp;
+  }
 }
 
 void Navigator::CenterViewport(m2::PointD const & p)
@@ -183,8 +185,7 @@ ScreenBase const Navigator::ScaleInto(ScreenBase const & screen, m2::RectD bound
 
   m2::RectD clipRect = res.ClipRect();
 
-  // TODO: This assert fails in 3d mode, do proper check.
-  //ASSERT(boundRect.IsPointInside(clipRect.Center()), ("center point should be inside boundRect"));
+  ASSERT(boundRect.IsPointInside(clipRect.Center()), ("center point should be inside boundRect"));
 
   if (clipRect.minX() < boundRect.minX())
   {
@@ -444,8 +445,6 @@ bool Navigator::ScaleImpl(m2::PointD const & newPt1, m2::PointD const & newPt2,
       screen.GtoPMatrix() * ScreenBase::CalcTransform(oldPt1 + offset, oldPt2 + offset,
                                                       newPt1 + offset, newPt2 + offset,
                                                       doRotateScreen);
-
-  double oldAngle = screen.GetAngle();
   ScreenBase tmp = screen;
   tmp.SetGtoPMatrix(newM);
 
