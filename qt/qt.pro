@@ -117,13 +117,15 @@ SOURCES += \
     build_style/build_common.cpp \
     build_style/build_drules.cpp \
     build_style/build_skins.cpp \
-    build_style/build_style.cpp
+    build_style/build_style.cpp \
+    build_style/build_statistics.cpp
 
 HEADERS += \
     build_style/build_common.h \
     build_style/build_drules.h \
     build_style/build_skins.h \
-    build_style/build_style.h
+    build_style/build_style.h \
+    build_style/build_statistics.h
 
 }
 
@@ -140,7 +142,6 @@ SOURCES += \
     update_dialog.cpp \
     qtoglcontext.cpp \
     qtoglcontextfactory.cpp \
-    build_style/build_statistics.cpp
 
 HEADERS += \
     mainwindow.hpp \
@@ -154,6 +155,5 @@ HEADERS += \
     update_dialog.hpp \
     qtoglcontext.hpp \
     qtoglcontextfactory.hpp \
-    build_style/build_statistics.h
 
 RESOURCES += res/resources.qrc
