@@ -13,7 +13,12 @@ QString GetStyleTestPath()
   return resourceDir + "style_tests.app/Contents/MacOS/style_tests";
 }
 
-pair<int, QString> RunStyleTests()
+} // namespace
+
+namespace build_style
+{
+
+pair<bool, QString> RunCurrentStyleTests()
 {
   QString const resourceDir = GetPlatform().ResourcesDir().c_str();
 
@@ -23,17 +28,8 @@ pair<int, QString> RunStyleTests()
          << QString("--data_path=\"") + resourceDir + "\"";
   QString const cmd = params.join(' ');
 
-  return ExecProcess(cmd);
-}
+  auto const res = ExecProcess(cmd);
 
-} // namespace
-
-namespace build_style
-{
-
-pair<bool, QString> RunCurrentStyleTests()
-{
-  auto res = RunStyleTests();
   // Unfortunately test process returns 0 even if some test failed,
   // therefore phrase 'All tests passed.' is looked to be sure that everything is OK.
   return make_pair(res.second.contains("All tests passed."), res.second);
