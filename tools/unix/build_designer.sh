@@ -69,6 +69,12 @@ cp -r "$RELEASE_PATH/skin_generator.app" "$MAC_RESOURCES/skin_generator.app"
 cp -r "$OMIM_PATH/tools/kothic" "$MAC_RESOURCES/kothic"
 cp "$OMIM_PATH/protobuf/protobuf-2.6.1-py2.7.egg" "$MAC_RESOURCES/kothic"
 
+# Copy all drules and  resources (required for test environment)
+rm -rf $MAC_RESOURCES/drules_proto*
+rm -rf $MAC_RESOURCES/resources-*
+cp $OMIM_PATH/data/drules_proto* $MAC_RESOURCES/.
+cp -r $OMIM_PATH/data/resources-* $MAC_RESOURCES/.
+
 # Build DMG image
 rm -rf "$BUILD_PATH/deploy"
 mkdir "$BUILD_PATH/deploy"
