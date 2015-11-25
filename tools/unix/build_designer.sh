@@ -59,12 +59,13 @@ rm -rf "$RELEASE_PATH"
   make
 )
 
-# Prepare app package by copying Qt, Kothic and Skin Generator
+# Prepare app package by copying Qt, Kothic, Skin Generator, Style tests
 macdeployqt "$RELEASE_PATH/skin_generator.app"
+macdeployqt "$RELEASE_PATH/style_tests.app"
 macdeployqt "$RELEASE_PATH/MAPS.ME.Designer.app"
 MAC_RESOURCES="$RELEASE_PATH/MAPS.ME.Designer.app/Contents/Resources"
-mkdir "$MAC_RESOURCES/skin_generator"
-cp -r "$RELEASE_PATH/skin_generator.app" "$MAC_RESOURCES/skin_generator/skin_generator.app"
+cp -r "$RELEASE_PATH/style_tests.app" "$MAC_RESOURCES/style_tests.app"
+cp -r "$RELEASE_PATH/skin_generator.app" "$MAC_RESOURCES/skin_generator.app"
 cp -r "$OMIM_PATH/tools/kothic" "$MAC_RESOURCES/kothic"
 cp "$OMIM_PATH/protobuf/protobuf-2.6.1-py2.7.egg" "$MAC_RESOURCES/kothic"
 
@@ -75,4 +76,4 @@ cp -r "$RELEASE_PATH/MAPS.ME.Designer.app" "$BUILD_PATH/deploy/MAPS.ME.Designer.
 cp -r "$DATA_PATH/styles" "$BUILD_PATH/deploy/styles"
 
 DMG_NAME=MAPS.ME.Designer.$APP_VERSION
-hdiutil create -size 240m -volname $DMG_NAME -srcfolder "$BUILD_PATH/deploy" -ov -format UDZO "$BUILD_PATH/$DMG_NAME.dmg"
+hdiutil create -size 280m -volname $DMG_NAME -srcfolder "$BUILD_PATH/deploy" -ov -format UDZO "$BUILD_PATH/$DMG_NAME.dmg"

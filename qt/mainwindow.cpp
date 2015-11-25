@@ -15,6 +15,7 @@
 
 #include "build_style/build_style.h"
 #include "build_style/build_statistics.h"
+#include "build_style/run_tests.h"
 
 #include <QtGui/QCloseEvent>
 
@@ -59,7 +60,8 @@ namespace qt
 MainWindow::MainWindow(QString const & mapcssFilePath /*= QString()*/)
   : m_pBuildStyleAction(nullptr)
   , m_pDrawDebugRectAction(nullptr)
-  , m_pStatisticsAction(nullptr)
+  , m_pGetStatisticsAction(nullptr)
+  , m_pRunTestsAction(nullptr)
   , m_locationService(CreateDesktopLocationService(*this))
   , m_mapcssFilePath(mapcssFilePath)
 {
@@ -323,12 +325,20 @@ void MainWindow::CreateNavigationBar()
     dp::DebugRectRenderer::Instance().SetEnabled(false);
 
     // Add "Get statistics" button
-    m_pStatisticsAction = pToolBar->addAction(QIcon(":/navig64/chart.png"),
-                                              tr("Get statistics"),
-                                              this,
-                                              SLOT(OnGetStatistics()));
-    m_pStatisticsAction->setCheckable(false);
-    m_pStatisticsAction->setToolTip(tr("Get statistics"));
+    m_pGetStatisticsAction = pToolBar->addAction(QIcon(":/navig64/chart.png"),
+                                                 tr("Get statistics"),
+                                                 this,
+                                                 SLOT(OnGetStatistics()));
+    m_pGetStatisticsAction->setCheckable(false);
+    m_pGetStatisticsAction->setToolTip(tr("Get statistics"));
+
+    // Add "Run tests" button
+    m_pRunTestsAction = pToolBar->addAction(QIcon(":/navig64/test.png"),
+                                            tr("Run tests"),
+                                            this,
+                                            SLOT(OnRunTests()));
+    m_pRunTestsAction->setCheckable(false);
+    m_pRunTestsAction->setToolTip(tr("Run tests"));
 
 #endif // BUILD_DESIGNER
 
@@ -467,6 +477,25 @@ void MainWindow::OnGetStatistics()
   {
     QString text = build_style::GetCurrentStyleStatistics();
     InfoDialog dlg(QString("Style statistics"), text, NULL);
+    dlg.exec();
+  }
+  catch (exception & e)
+  {
+    QMessageBox msgBox;
+    msgBox.setWindowTitle("Error");
+    msgBox.setText(e.what());
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setDefaultButton(QMessageBox::Ok);
+    msgBox.exec();
+  }
+}
+
+void MainWindow::OnRunTests()
+{
+  try
+  {
+    pair<bool, QString> res = build_style::RunCurrentStyleTests();
+    InfoDialog dlg(QString("Style tests: ") + (res.first ? "OK" : "FAILED"), res.second, NULL);
     dlg.exec();
   }
   catch (exception & e)

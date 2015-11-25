@@ -26,7 +26,8 @@ namespace qt
     QAction * m_pSearchAction;
     QAction * m_pBuildStyleAction;
     QAction * m_pDrawDebugRectAction;
-    QAction * m_pStatisticsAction;
+    QAction * m_pGetStatisticsAction;
+    QAction * m_pRunTestsAction;
     DrawWidget * m_pDrawWidget;
 
     QDockWidget * m_Docks[1];
@@ -80,6 +81,7 @@ namespace qt
     void OnBuildStyle();
     void OnDebugStyle();
     void OnGetStatistics();
+    void OnRunTests();
 #endif // BUILD_DESIGNER
   };
 }

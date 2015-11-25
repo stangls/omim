@@ -59,7 +59,7 @@ inline bool SkinCoorrectColor(SkinType s) { return std::get<2>(g_skinInfo[s]); }
 QString GetSkinGeneratorPath()
 {
   QString const resourceDir = GetPlatform().ResourcesDir().c_str();
-  return resourceDir + "skin_generator/skin_generator.app/Contents/MacOS/skin_generator";
+  return resourceDir + "skin_generator.app/Contents/MacOS/skin_generator";
 }
 
 class RAII
