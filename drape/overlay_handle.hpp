@@ -14,6 +14,8 @@
 
 #include "base/buffer_vector.hpp"
 
+#include "std/chrono.hpp"
+
 namespace dp
 {
 
@@ -79,8 +81,12 @@ public:
 
   virtual bool IsBound() const { return false; }
 
+  virtual bool Enable3dExtention() const { return true; }
+
   int GetOverlayRank() const { return m_overlayRank; }
   void SetOverlayRank(int overlayRank) { m_overlayRank = overlayRank; }
+
+  bool IsMinVisibilityTimeUp() const;
 
 protected:
   FeatureID const m_id;
@@ -89,6 +95,8 @@ protected:
 
   int m_overlayRank;
   double m_extendingSize;
+
+  steady_clock::time_point m_visibilityTimestamp;
 
   typedef pair<BindingInfo, MutateRegion> TOffsetNode;
   TOffsetNode const & GetOffsetNode(uint8_t bufferID) const;
