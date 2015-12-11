@@ -14,7 +14,10 @@ import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.text.TextUtils;
+import android.util.Log;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -121,18 +124,31 @@ public enum LocationHelper implements SensorEventListener
       }
     }
 
-    if (isLocationTurnedOn &&
+    // try to create provider from simulation-file (if exists)
+    File simulationFile = new File("/storage/emulated/legacy/MapsWithMe/simulation.log");
+    Log.e("LocationHelper","searching for file "+simulationFile);
+    if (simulationFile.exists()){
+      Log.d("LocationHelper","Using MxSimulationProvider for GPS-position since simulation.log exists.");
+      try {
+        mLocationProvider = new MxSimulationProvider(simulationFile);
+      }catch(Exception e){
+        e.printStackTrace();
+      }
+    }
+    // create provider
+    if (mLocationProvider==null) {
+      if (
+        isLocationTurnedOn &&
         !forceNativeProvider &&
         GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(application) == ConnectionResult.SUCCESS &&
-        PreferenceManager.getDefaultSharedPreferences(application).getBoolean(application.getString(R.string.pref_play_services), false))
-    {
-      mLogger.d("Use fused provider.");
-      mLocationProvider = new GoogleFusedLocationProvider();
-    }
-    else
-    {
-      mLogger.d("Use native provider.");
-      mLocationProvider = new AndroidNativeProvider();
+        PreferenceManager.getDefaultSharedPreferences(application).getBoolean(application.getString(R.string.pref_play_services), false)
+      ) {
+        mLogger.d("Use fused provider.");
+        mLocationProvider = new GoogleFusedLocationProvider();
+      } else {
+        mLogger.d("Use native provider.");
+        mLocationProvider = new AndroidNativeProvider();
+      }
     }
 
     if (!mListeners.isEmpty())
@@ -187,7 +203,6 @@ public enum LocationHelper implements SensorEventListener
   {
     if (mLastLocation == null)
       return;
-
     startIteratingListeners();
     for (LocationListener listener : mListeners)
       listener.onLocationUpdated(mLastLocation);
