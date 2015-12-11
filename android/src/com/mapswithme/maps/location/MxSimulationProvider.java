@@ -40,7 +40,7 @@ public class MxSimulationProvider extends BaseLocationProvider
   private int minWaitTime = 500;
 
   public MxSimulationProvider(File file) throws IOException {
-    this(file,5);
+    this(file,3);
   }
   public MxSimulationProvider(File file, int speedup) throws IOException {
 
@@ -68,7 +68,7 @@ public class MxSimulationProvider extends BaseLocationProvider
           Location l = new Location(this.providerName);
           l.setLongitude(Double.parseDouble(longitude));
           l.setLatitude(Double.parseDouble(latitude));
-          l.setAccuracy(1); // meters with 68% confidence
+          l.setAccuracy(10); // meters with 68% confidence
           l.setTime(datetime.getTime());
           data.addLast(l);
         }catch(IllegalArgumentException e){
