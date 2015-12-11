@@ -247,7 +247,7 @@
     tr = U dönüşü yapın.
     fr = Faites demi-tour.
     nl = Keer om.
-    de = Wenden Sie.
+    de = Bitte wenden.
     ar = انعطف بدوران كامل.
     el = Κάντε αναστροφή.
     it = Effettua un'inversione a U.
@@ -337,7 +337,7 @@
     tr = Vardınız.
     fr = Vous êtes arrivé.
     nl = Bestemming bereikt.
-    de = Sie sind angekommen.
+    de = Ziel erreicht.
     ar = لقد وصلت.
     el = Έχετε Φτάσει.
     it = Sei arrivato.
