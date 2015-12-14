@@ -202,11 +202,12 @@ public final class Config
 
   public static boolean isStatisticsEnabled()
   {
-    return getBool(KEY_PREF_STATISTICS, true);
+    return getBool(KEY_PREF_STATISTICS, false);
   }
 
   public static void setStatisticsEnabled(boolean enabled)
   {
+    enabled=false;
     setBool(KEY_PREF_STATISTICS, enabled);
   }
 
