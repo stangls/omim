@@ -174,9 +174,12 @@ void CountryStatusHelper::FillControlsForState()
 void CountryStatusHelper::FillControlsForEmpty()
 {
   ASSERT(m_controls.empty(), ());
+  /*
+  // buttons and stuff for map-downloading (currently disabled)
   m_controls.push_back(MakeLabel(m_countryInfo.m_currentCountryName));
   m_controls.push_back(MakeButton(FormatDownloadMapRouting(), BUTTON_TYPE_MAP_ROUTING));
   m_controls.push_back(MakeButton(FormatDownloadMap(), BUTTON_TYPE_MAP));
+  */
 }
 
 void CountryStatusHelper::FillControlsForLoading()
