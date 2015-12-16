@@ -202,7 +202,8 @@ public final class Config
 
   public static boolean isStatisticsEnabled()
   {
-    return getBool(KEY_PREF_STATISTICS, false);
+    return false; // Always disable (disables also alohalytics in CPP code).
+    //return getBool(KEY_PREF_STATISTICS, false);
   }
 
   public static void setStatisticsEnabled(boolean enabled)
