@@ -93,6 +93,11 @@ TextShape::TextShape(m2::PointF const & basePoint, TextViewParams const & params
 
 void TextShape::Draw(ref_ptr<dp::Batcher> batcher, ref_ptr<dp::TextureManager> textures) const
 {
+  // here, typically non-rotating (regarding map rotation on screen) text is drawn like for example
+  // * poi-texts
+  // * house-numbers
+  // * highway-names
+  // * names of lakes
   ASSERT(!m_params.m_primaryText.empty(), ());
   StraightTextLayout primaryLayout(strings::MakeUniString(m_params.m_primaryText),
                                    m_params.m_primaryTextFont.m_size, textures, m_params.m_anchor);
@@ -182,7 +187,7 @@ void TextShape::DrawSubStringPlain(StraightTextLayout const & layout, dp::FontDe
   dp::AttributeProvider provider(2, staticBuffer.size());
   provider.InitStream(0, gpu::TextStaticVertex::GetBindingInfo(), make_ref(staticBuffer.data()));
   provider.InitStream(1, gpu::TextDynamicVertex::GetBindingInfo(), make_ref(initialDynBuffer.data()));
-  batcher->InsertListOfStrip(state, make_ref(&provider), move(handle), 4);
+  batcher->InsertListOfStrip(state, make_ref(&provider), move(handle), 4); // this renders the POI texts, house-numbers and such (not streetnames)
 }
 
 void TextShape::DrawSubStringOutlined(StraightTextLayout const & layout, dp::FontDecl const & font,

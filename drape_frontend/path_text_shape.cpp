@@ -204,6 +204,9 @@ void PathTextShape::DrawPathTextOutlined(ref_ptr<dp::TextureManager> textures,
 
 void PathTextShape::Draw(ref_ptr<dp::Batcher> batcher, ref_ptr<dp::TextureManager> textures) const
 {
+  // here, typically rotating text (regarding map rotation on screen) is rendered, for exapmle:
+  // * street-names
+  // * names of running water
   unique_ptr<PathTextLayout> layout = make_unique<PathTextLayout>(strings::MakeUniString(m_params.m_text),
                                                                   m_params.m_textFont.m_size, textures);
 
