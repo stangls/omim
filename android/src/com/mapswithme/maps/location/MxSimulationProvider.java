@@ -37,9 +37,10 @@ public class MxSimulationProvider extends BaseLocationProvider
   private final int[] simulationDataWaitTimeMS;
   private Thread thread;
   private Handler mHandler;
+  private int minWaitTime = 250;
 
   public MxSimulationProvider(File file) throws IOException {
-    this(file,5);
+    this(file,3);
   }
   public MxSimulationProvider(File file, int speedup) throws IOException {
 
@@ -67,7 +68,7 @@ public class MxSimulationProvider extends BaseLocationProvider
           Location l = new Location(this.providerName);
           l.setLongitude(Double.parseDouble(longitude));
           l.setLatitude(Double.parseDouble(latitude));
-          l.setAccuracy(1); // meters with 68% confidence
+          l.setAccuracy(10); // meters with 68% confidence
           l.setTime(datetime.getTime());
           data.addLast(l);
         }catch(IllegalArgumentException e){
@@ -138,9 +139,17 @@ public class MxSimulationProvider extends BaseLocationProvider
               LocationHelper.INSTANCE.setLastLocation(l);
             }
           }));
+          int time = simulationDataWaitTimeMS[currentSimulationStep];
+          while (time<minWaitTime) {
+            Log.d("MxSimulationProvider","skipping a location");
+            if (++currentSimulationStep >= numSimulationSteps) {
+              currentSimulationStep = 0;
+            }
+            time += simulationDataWaitTimeMS[currentSimulationStep];
+          }
           synchronized (thread) {
             try {
-              thread.wait(simulationDataWaitTimeMS[currentSimulationStep]);
+              thread.wait(time);
             } catch (InterruptedException e) { }
           }
           if (++currentSimulationStep >= numSimulationSteps) {
