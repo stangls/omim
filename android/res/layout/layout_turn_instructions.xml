@@ -50,7 +50,8 @@
         android:gravity="center"
         android:textAppearance="@style/MwmTextAppearance.RoutingNumber"
         android:textSize="@dimen/text_size_routing_number"
-        tools:text="23:59"/>
+        tools:text="23:59"
+        android:background="#c100ff2a" />
   </LinearLayout>
 
   <com.mapswithme.maps.widget.FlatProgressView

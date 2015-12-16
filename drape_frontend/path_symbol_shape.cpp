@@ -23,6 +23,7 @@ PathSymbolShape::PathSymbolShape(m2::SharedSpline const & spline,
 
 void PathSymbolShape::Draw(ref_ptr<dp::Batcher> batcher, ref_ptr<dp::TextureManager> textures) const
 {
+  // it seems like these are for example arrows on oneway streets (highways etc.)
   dp::TextureManager::SymbolRegion region;
   textures->GetSymbolRegion(m_params.m_symbolName, region);
   m2::RectF const & rect = region.GetTexRect();

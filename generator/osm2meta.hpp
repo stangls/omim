@@ -123,6 +123,46 @@ public:
       if (!value.empty())
         md.Set(Metadata::FMD_FLATS, value);
     }
+    else if (k == "height")
+    {
+      string const & value = ValidateAndFormat_height(v);
+      if (!value.empty())
+        md.Set(Metadata::FMD_HEIGHT, value);
+    }
+    else if (k == "building:levels")
+    {
+      // Ignoring if FMD_HEIGHT already set
+      if (md.Get(Metadata::FMD_HEIGHT).empty())
+      {
+        // Converting this attribute into height
+        string const & value = ValidateAndFormat_building_levels(v);
+        if (!value.empty())
+          md.Set(Metadata::FMD_HEIGHT, value);
+      }
+    }
+    else if (k == "min_height")
+    {
+      string const & value = ValidateAndFormat_height(v);
+      if (!value.empty())
+        md.Set(Metadata::FMD_MIN_HEIGHT, value);
+    }
+    else if (k == "building:min_level")
+    {
+      // Ignoring if min_height was already set
+      if (md.Get(Metadata::FMD_MIN_HEIGHT).empty())
+      {
+        // Converting this attribute into height
+        string const & value = ValidateAndFormat_building_levels(v);
+        if (!value.empty())
+          md.Set(Metadata::FMD_MIN_HEIGHT, value);
+      }
+    }
+    else if (k == "denomination")
+    {
+      string const & value = ValidateAndFormat_denomination(v);
+      if (!value.empty())
+        md.Set(Metadata::FMD_DENOMINATION, value);
+    }
     return false;
   }
 
@@ -210,6 +250,29 @@ protected:
     return v;
   }
   string ValidateAndFormat_flats(string const & v) const
+  {
+    return v;
+  }
+  string ValidateAndFormat_height(string const & v) const
+  {
+    double val = 0;
+    string corrected(v, 0, v.find(" "));
+    if(!strings::to_double(corrected, val) || val == 0)
+      return string();
+    stringstream ss;
+    ss << fixed << setw(2) << setprecision(1) << val;
+    return ss.str();
+  }
+  string ValidateAndFormat_building_levels(string const & v) const
+  {
+    double val = 0;
+    if(!strings::to_double(v, val) || val == 0)
+      return string();
+    stringstream ss;
+    ss << fixed << setw(2) << setprecision(1) << (val * 3 /*levels multiplied by 3 meters per level*/);
+    return ss.str();
+  }
+  string ValidateAndFormat_denomination(string const & v) const
   {
     return v;
   }

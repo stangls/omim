@@ -15,8 +15,8 @@
 
   <!-- base colors -->
   <!-- green tints -->
-  <color name="base_green">#209852</color>
-  <color name="base_green_darker">#188044</color>
+  <color name="base_green">#1976d2</color>
+  <color name="base_green_darker">#0d47a1</color>
   <color name="base_green_darkest">#146636</color>
   <color name="base_green_light">#24B460</color>
   <color name="base_green_lightest">#28CC6C</color>
@@ -51,7 +51,7 @@
   <!-- TODO change all colors below, remove old ones-->
 
   <color name="text_place_page_blue">#0288D1</color>
-  <color name="bg_top_panels">#f4ffffff</color>
+  <color name="bg_top_panels">#88ffffff</color>
   <color name="bg_azimut_arrow">#1D414651</color>
   <color name="fg_azimut_arrow">@android:color/white</color>
 
