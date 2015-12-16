@@ -51,7 +51,7 @@ static NSString * const kBundleVersion = @"BundleVersion";
 extern string const kCountryCodeKey;
 extern string const kUniqueIdKey;
 extern string const kLanguageKey;
-extern NSString * const kUserDefaultsTTSLanguage;
+extern NSString * const kUserDefaultsTTSLanguageBcp47;
 extern NSString * const kUserDafaultsNeedToEnableTTS;
 
 extern char const * kAdServerForbiddenKey;
@@ -407,7 +407,9 @@ void InitLocalizedStrings()
   navBar.shadowImage = [UIImage imageWithColor:[UIColor fadeBackground]];
   navBar.titleTextAttributes = attributes;
 
-  [[UIBarButtonItem appearance] setTitleTextAttributes:attributes forState:UIControlStateNormal];
+  UIBarButtonItem * barBtn = [UIBarButtonItem appearance];
+  [barBtn setTitleTextAttributes:attributes forState:UIControlStateNormal];
+  barBtn.tintColor = [UIColor whiteColor];
 
   UIPageControl * pageControl = [UIPageControl appearance];
   pageControl.pageIndicatorTintColor = [UIColor lightGrayColor];
@@ -573,7 +575,7 @@ void InitLocalizedStrings()
 - (void)enableTTSForTheFirstTime
 {
   NSUserDefaults * ud = [NSUserDefaults standardUserDefaults];
-  if ([ud stringForKey:kUserDefaultsTTSLanguage].length)
+  if ([ud stringForKey:kUserDefaultsTTSLanguageBcp47].length)
     return;
   [ud setBool:YES forKey:kUserDafaultsNeedToEnableTTS];
   [ud synchronize];
