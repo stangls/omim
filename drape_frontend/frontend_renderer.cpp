@@ -279,8 +279,12 @@ void FrontendRenderer::AcceptMessage(ref_ptr<Message> message)
                                                m_userEventStream.GetCurrentScreen());
 
       location::RouteMatchingInfo const & info = msg->GetRouteInfo();
-      if (info.HasDistanceFromBegin())
-        m_routeRenderer->UpdateDistanceFromBegin(info.GetDistanceFromBegin());
+      if (info.HasDistanceFromBegin()){
+        m_routeRenderer->UpdateDistanceFromBegin(
+          info.GetDistanceFromBegin(),
+          info.GetDistanceToLastNonCrossingFromBegin()
+        );
+      }
 
       break;
     }

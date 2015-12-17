@@ -181,7 +181,8 @@ void RouteRenderer::RenderRoute(ScreenBase const & screen, ref_ptr<dp::GpuProgra
     dp::UniformValuesStorage uniforms = commonUniforms;
     glsl::vec4 color = glsl::ToVec4(m_routeData->m_color);
     uniforms.SetFloatValue("u_color", color.r, color.g, color.b, alpha);
-    uniforms.SetFloatValue("u_routeParams", halfWidth, halfWidth * screen.GetScale(), m_distanceFromBegin);
+    uniforms.SetFloatValue("u_color_light", color.b, color.g, color.r, alpha);
+    uniforms.SetFloatValue("u_routeParams", halfWidth, halfWidth * screen.GetScale(), m_distanceFromBegin, m_lastNonCrossingDistanceFromBegin);
 
     // set up shaders and apply uniforms
     ref_ptr<dp::GpuProgram> prg = mng->GetProgram(gpu::ROUTE_PROGRAM);
@@ -258,7 +259,7 @@ void RouteRenderer::RenderArrow(ref_ptr<dp::GpuProgram> prg, drape_ptr<ArrowRend
   double const textureWidth = 2.0 * arrowHalfWidth * kArrowAspect;
 
   dp::UniformValuesStorage uniformStorage;
-  uniformStorage.SetFloatValue("u_routeParams", arrowHalfWidth, glbArrowHalfWidth, m_distanceFromBegin);
+  uniformStorage.SetFloatValue("u_routeParams", arrowHalfWidth, glbArrowHalfWidth, m_distanceFromBegin, m_lastNonCrossingDistanceFromBegin);
 
   // calculate arrows
   CalculateArrowBorders(property, kArrowSize, screen.GetScale(), textureWidth, glbArrowHalfWidth);
@@ -354,9 +355,10 @@ void RouteRenderer::Clear(bool keepDistanceFromBegin)
     m_distanceFromBegin = 0.0;
 }
 
-void RouteRenderer::UpdateDistanceFromBegin(double distanceFromBegin)
+void RouteRenderer::UpdateDistanceFromBegin(double distanceFromBegin, double lastNonCrossingDistanceFromBegin)
 {
   m_distanceFromBegin = distanceFromBegin;
+  m_lastNonCrossingDistanceFromBegin = lastNonCrossingDistanceFromBegin;
 }
 
 void RouteRenderer::ApplyJoinsBounds(drape_ptr<ArrowRenderProperty> const & property, double joinsBoundsScalar,

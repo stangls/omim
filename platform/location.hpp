@@ -180,6 +180,7 @@ namespace location
     bool m_isPositionMatched;
     bool m_hasDistanceFromBegin;
     double m_distanceFromBegin;
+    double m_distanceToLastNonCrossingFromBegin;
 
   public:
     RouteMatchingInfo()
@@ -190,7 +191,7 @@ namespace location
       , m_distanceFromBegin(0.0)
     {}
 
-    void Set(m2::PointD const & matchedPosition, size_t indexInRoute, double distanceFromBegin)
+    void Set(m2::PointD const & matchedPosition, size_t indexInRoute, double distanceFromBegin, double distanceToLastNonCrossingFromCurrent)
     {
       m_matchedPosition = matchedPosition;
       m_indexInRoute = indexInRoute;
@@ -198,6 +199,8 @@ namespace location
 
       m_distanceFromBegin = distanceFromBegin;
       m_hasDistanceFromBegin = true;
+
+      m_distanceToLastNonCrossingFromBegin = distanceToLastNonCrossingFromCurrent+distanceFromBegin;
     }
 
     void Reset() { m_isPositionMatched = false; }
@@ -206,6 +209,7 @@ namespace location
     m2::PointD GetPosition() const { return m_matchedPosition; }
     bool HasDistanceFromBegin() const { return m_hasDistanceFromBegin; }
     double GetDistanceFromBegin() const { return m_distanceFromBegin; }
+    double GetDistanceToLastNonCrossingFromBegin() const { return m_distanceToLastNonCrossingFromBegin; }
   };
 
   // Do not change the order and values

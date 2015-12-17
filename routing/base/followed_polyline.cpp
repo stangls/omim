@@ -1,4 +1,5 @@
 #include "followed_polyline.hpp"
+#include "base/logging.hpp"
 
 namespace routing
 {
@@ -67,7 +68,7 @@ void FollowedPolyline::Swap(FollowedPolyline & rhs)
   m_segDistance.swap(rhs.m_segDistance);
   m_segProj.swap(rhs.m_segProj);
   swap(m_current, rhs.m_current);
-  swap(m_lastNonCrossing, rhs.m_lastNonCrossing);
+  swap(m_lastNonCrossingDistance, rhs.m_lastNonCrossingDistance);
 }
 
 void FollowedPolyline::Update()
@@ -195,18 +196,27 @@ void FollowedPolyline::GetCurrentDirectionPoint(m2::PointD & pt, double toleranc
 
 void FollowedPolyline::UpdateLastNonCrossing() const
 {
-    m_lastNonCrossing = m_current;
+    double lastNonCrossingDistance = 0.0;
     if (m_current.IsValid()) {
-        int max=5;
+        double maxDist=1000.0; // maximum path length
+        uint max=1000; // total upper computation time-limit
+        m2::PointD point0 = m_current.m_pt;
         for (size_t i = m_current.m_ind+1; i<m_poly.GetSize(); i++){
-            m2::Point2D point1 = m_poly.GetPoint();
-            m2::Point2D vector = point1-m_lastNonCrossing.m_pt;
-            if (max--<=0){
+            m2::PointD point1 = m_poly.GetPoint(i);
+            m2::PointD vector = point1-point0;
+            LOG( my::LINFO, ( "vector is ", vector.x, ", ", vector.y ) );
+            lastNonCrossingDistance += point0.Length(point1);
+            if ( !(--max) || lastNonCrossingDistance >= maxDist )
                 break;
-            }
-            m_lastNonCrossing = Iter( point1, i );
+            point0 = point1;
         }
     }
+    m_lastNonCrossingDistance=lastNonCrossingDistance;
+}
+
+double FollowedPolyline::GetCurrentNonCrossingDistance() const
+{
+    return m_lastNonCrossingDistance;
 }
 
 }  //  namespace routing
