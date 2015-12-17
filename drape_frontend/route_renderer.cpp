@@ -181,7 +181,7 @@ void RouteRenderer::RenderRoute(ScreenBase const & screen, ref_ptr<dp::GpuProgra
     dp::UniformValuesStorage uniforms = commonUniforms;
     glsl::vec4 color = glsl::ToVec4(m_routeData->m_color);
     uniforms.SetFloatValue("u_color", color.r, color.g, color.b, alpha);
-    uniforms.SetFloatValue("u_color_light", color.b, color.g, color.r, alpha);
+    uniforms.SetFloatValue("u_color_light", color.r, color.g, color.b, alpha*0.5);
     uniforms.SetFloatValue("u_routeParams", halfWidth, halfWidth * screen.GetScale(), m_distanceFromBegin, m_lastNonCrossingDistanceFromBegin);
 
     // set up shaders and apply uniforms
@@ -194,7 +194,7 @@ void RouteRenderer::RenderRoute(ScreenBase const & screen, ref_ptr<dp::GpuProgra
     for (drape_ptr<dp::RenderBucket> const & bucket : m_routeData->m_route.m_buckets)
       bucket->Render(screen);
   }
-
+  return;
   // render arrows
   if (zoom >= kArrowAppearingZoomLevel && !m_routeData->m_arrows.empty())
   {
