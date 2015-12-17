@@ -47,6 +47,7 @@ public:
   };
 
   const Iter GetCurrentIter() const { return m_current; }
+  const Iter GetLastNonCrossing() const { return m_lastNonCrossing; }
 
   double GetDistanceM(Iter const & it1, Iter const & it2) const;
 
@@ -60,6 +61,7 @@ public:
 private:
   template <class DistanceFn>
   Iter GetClosestProjection(m2::RectD const & posRect, DistanceFn const & distFn) const;
+  void UpdateLastNonCrossing() const;
 
   void Update();
 
@@ -67,6 +69,9 @@ private:
 
   /// Iterator with the current position. Position sets with UpdateProjection methods.
   mutable Iter m_current;
+  /// Iterator after m_current with the a position which is surely before any crossing of the line
+  /// starting at m_current with itself. Is being set by UpdateProjection.
+  mutable Iter m_lastNonCrossing;
   /// Precalculated info for fast projection finding.
   vector<m2::ProjectionToSection<m2::PointD>> m_segProj;
   /// Accumulated cache of segments length in meters.

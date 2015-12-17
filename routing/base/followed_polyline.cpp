@@ -67,6 +67,7 @@ void FollowedPolyline::Swap(FollowedPolyline & rhs)
   m_segDistance.swap(rhs.m_segDistance);
   m_segProj.swap(rhs.m_segProj);
   swap(m_current, rhs.m_current);
+  swap(m_lastNonCrossing, rhs.m_lastNonCrossing);
 }
 
 void FollowedPolyline::Update()
@@ -91,6 +92,8 @@ void FollowedPolyline::Update()
   }
 
   m_current = Iter(m_poly.Front(), 0);
+  UpdateLastNonCrossing();
+
 }
 
 template <class DistanceFn>
@@ -136,8 +139,10 @@ Iter FollowedPolyline::UpdateProjectionByPrediction(m2::RectD const & posRect,
     return fabs(GetDistanceM(m_current, it) - predictDistance);
   });
 
-  if (res.IsValid())
+  if (res.IsValid()){
     m_current = res;
+    UpdateLastNonCrossing();
+  }
   return res;
 }
 
@@ -153,8 +158,10 @@ Iter FollowedPolyline::UpdateProjection(m2::RectD const & posRect) const
     return MercatorBounds::DistanceOnEarth(it.m_pt, currPos);
   });
 
-  if (res.IsValid())
+  if (res.IsValid()){
     m_current = res;
+    UpdateLastNonCrossing();
+  }
   return res;
 }
 
@@ -185,4 +192,21 @@ void FollowedPolyline::GetCurrentDirectionPoint(m2::PointD & pt, double toleranc
 
   pt = point;
 }
+
+void FollowedPolyline::UpdateLastNonCrossing() const
+{
+    m_lastNonCrossing = m_current;
+    if (m_current.IsValid()) {
+        int max=5;
+        for (size_t i = m_current.m_ind+1; i<m_poly.GetSize(); i++){
+            m2::Point2D point1 = m_poly.GetPoint();
+            m2::Point2D vector = point1-m_lastNonCrossing.m_pt;
+            if (max--<=0){
+                break;
+            }
+            m_lastNonCrossing = Iter( point1, i );
+        }
+    }
+}
+
 }  //  namespace routing
