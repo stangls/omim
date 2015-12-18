@@ -20,7 +20,8 @@ class Route;
 enum class RouterType
 {
   Vehicle = 0, /// For OSRM vehicle routing
-  Pedestrian   /// For A star pedestrian routing
+  Pedestrian,  /// For A star pedestrian routing
+  VehicleTour  /// For a followed (static) tour, supported by OSRM vehicle routing for returning to the tour
 };
 
 string ToString(RouterType type);
