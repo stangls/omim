@@ -444,6 +444,8 @@ void RouteRenderer::CalculateArrowBorders(drape_ptr<ArrowRenderProperty> const &
 
     if (arrowBorders.m_startDistance + property->m_start < m_distanceFromBegin)
       continue;
+    if (arrowBorders.m_startDistance + property->m_start >= m_lastNonCrossingDistanceFromBegin)
+      continue;
 
     m_arrowBorders.push_back(arrowBorders);
   }

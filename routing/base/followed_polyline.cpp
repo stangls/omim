@@ -198,49 +198,43 @@ void FollowedPolyline::GetCurrentDirectionPoint(m2::PointD & pt, double toleranc
 void FollowedPolyline::UpdateLastNonCrossing() const
 {
     if (m_current.IsValid()) {
-        const double maxDist=1.0; // maximum path length
         uint max=1000; // total upper computation time-limit
         double lastNonCrossingDistance = 0.0;
-        LOG( my::LINFO, ( "start" ) );
+        //LOG( my::LINFO, ( "start" ) );
         m2::PointD point0 = m_current.m_pt;
         size_t i = m_current.m_ind+1;
         m2::PointD point1 = m_poly.GetPoint(i);
         double angle = ang::AngleTo(point0,point1);
         double cMin=-DBL_MAX;
         double cMax=+DBL_MAX;
-        LOG( my::LINFO, ( "start angle ", angle*180/M_PI, "° in [",cMin*180/M_PI,",",cMax*180/M_PI,"]" ) );
+        //LOG( my::LINFO, ( "start angle ", angle*180/M_PI, "° in [",cMin*180/M_PI,",",cMax*180/M_PI,"]" ) );
         for (; i<m_poly.GetSize(); i++){
             point1 = m_poly.GetPoint(i);
 
             double len = point0.Length(point1);
             if (len>0.000000001) {
                 double angle = ang::AngleTo(point0,point1);
-                LOG( my::LINFO, ( "angle ", angle*180/M_PI, "° in [",cMin*180/M_PI,",",cMax*180/M_PI,"] ? dist ", lastNonCrossingDistance ) );
+                //LOG( my::LINFO, ( "angle ", angle*180/M_PI, "° in [",cMin*180/M_PI,",",cMax*180/M_PI,"] ? dist ", lastNonCrossingDistance ) );
                 if (angle<cMin)
                     angle+=2*M_PI;
                 else if (angle>cMax)
                     angle-=2*M_PI;
-                LOG( my::LINFO, ( "adapted angle ", angle*180/M_PI, "° in [",cMin*180/M_PI,",",cMax*180/M_PI,"] ? dist ", lastNonCrossingDistance ) );
+                //LOG( my::LINFO, ( "adapted angle ", angle*180/M_PI, "° in [",cMin*180/M_PI,",",cMax*180/M_PI,"] ? dist ", lastNonCrossingDistance ) );
                 if (angle>cMin && angle<cMax){
                     cMin=fmax(cMin,angle-M_PI);
                     cMax=fmin(cMax,angle+M_PI);
-                }else{
-                    LOG( my::LINFO, ("angle not in range. stopping."));
+                } else
                     break;
-                }
-            }else
-                LOG( my::LINFO, ( "angle skip" ));
+            }
 
             lastNonCrossingDistance += len;
-            if ( !(--max) || lastNonCrossingDistance >= maxDist ){
-                LOG( my::LINFO, ( "braking on max" ) );
+            if ( !(--max) ) // max==0?
                 break;
-            }
             point0 = point1;
         }
         m_lastNonCrossingDistance=lastNonCrossingDistance;
     }else{
-        // we do not know of any last point which does not cross. assume it does not exist so the route is drawn fully.
+        // we do not know of any last point which does not cross. assume it does not exist so the route is drawn fully (this is better than draw the whole route non-fully)
         m_lastNonCrossingDistance=DBL_MAX;
     }
 }
