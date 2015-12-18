@@ -212,8 +212,10 @@ void RouteRenderer::RenderRoute(ScreenBase const & screen, ref_ptr<dp::GpuProgra
     dp::ApplyState(state, prg);
     dp::ApplyUniforms(uniforms, prg);
 
-    for (drape_ptr<ArrowRenderProperty> & property : m_routeData->m_arrows)
-      RenderArrow(prg, property, halfWidth, screen);
+    for (drape_ptr<ArrowRenderProperty> & property : m_routeData->m_arrows){
+      if (property->m_start <= m_lastNonCrossingDistanceFromBegin)
+        RenderArrow(prg, property, halfWidth, screen);
+    }
   }
 }
 
@@ -443,8 +445,6 @@ void RouteRenderer::CalculateArrowBorders(drape_ptr<ArrowRenderProperty> const &
     arrowBorders.m_endDistance = min(property->m_end - property->m_start, property->m_turns[i] + halfLen * 1.2);
 
     if (arrowBorders.m_startDistance + property->m_start < m_distanceFromBegin)
-      continue;
-    if (arrowBorders.m_startDistance + property->m_start >= m_lastNonCrossingDistanceFromBegin)
       continue;
 
     m_arrowBorders.push_back(arrowBorders);
