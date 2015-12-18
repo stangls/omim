@@ -194,7 +194,6 @@ void RouteRenderer::RenderRoute(ScreenBase const & screen, ref_ptr<dp::GpuProgra
     for (drape_ptr<dp::RenderBucket> const & bucket : m_routeData->m_route.m_buckets)
       bucket->Render(screen);
   }
-  return;
   // render arrows
   if (zoom >= kArrowAppearingZoomLevel && !m_routeData->m_arrows.empty())
   {
@@ -212,10 +211,8 @@ void RouteRenderer::RenderRoute(ScreenBase const & screen, ref_ptr<dp::GpuProgra
     dp::ApplyState(state, prg);
     dp::ApplyUniforms(uniforms, prg);
 
-    for (drape_ptr<ArrowRenderProperty> & property : m_routeData->m_arrows){
-      if (property->m_start <= m_lastNonCrossingDistanceFromBegin)
-        RenderArrow(prg, property, halfWidth, screen);
-    }
+    for (drape_ptr<ArrowRenderProperty> & property : m_routeData->m_arrows)
+      RenderArrow(prg, property, halfWidth, screen);
   }
 }
 
@@ -444,7 +441,9 @@ void RouteRenderer::CalculateArrowBorders(drape_ptr<ArrowRenderProperty> const &
     arrowBorders.m_startDistance = max(0.0, property->m_turns[i] - halfLen * 0.8);
     arrowBorders.m_endDistance = min(property->m_end - property->m_start, property->m_turns[i] + halfLen * 1.2);
 
-    if (arrowBorders.m_startDistance + property->m_start < m_distanceFromBegin)
+    double start = arrowBorders.m_startDistance + property->m_start;
+    LOG( my::LINFO, ("arrow render property m_start =",start,"while non-crossing-distance is",m_lastNonCrossingDistanceFromBegin) );
+    if (start < m_distanceFromBegin || start > m_lastNonCrossingDistanceFromBegin)
       continue;
 
     m_arrowBorders.push_back(arrowBorders);
