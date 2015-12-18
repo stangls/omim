@@ -181,7 +181,8 @@ void RouteRenderer::RenderRoute(ScreenBase const & screen, ref_ptr<dp::GpuProgra
     dp::UniformValuesStorage uniforms = commonUniforms;
     glsl::vec4 color = glsl::ToVec4(m_routeData->m_color);
     uniforms.SetFloatValue("u_color", color.r, color.g, color.b, alpha);
-    uniforms.SetFloatValue("u_routeParams", halfWidth, halfWidth * screen.GetScale(), m_distanceFromBegin);
+    uniforms.SetFloatValue("u_color_light", color.r, color.g, color.b, alpha*0.5);
+    uniforms.SetFloatValue("u_routeParams", halfWidth, halfWidth * screen.GetScale(), m_distanceFromBegin, m_lastNonCrossingDistanceFromBegin);
 
     // set up shaders and apply uniforms
     ref_ptr<dp::GpuProgram> prg = mng->GetProgram(gpu::ROUTE_PROGRAM);
@@ -193,7 +194,6 @@ void RouteRenderer::RenderRoute(ScreenBase const & screen, ref_ptr<dp::GpuProgra
     for (drape_ptr<dp::RenderBucket> const & bucket : m_routeData->m_route.m_buckets)
       bucket->Render(screen);
   }
-
   // render arrows
   if (zoom >= kArrowAppearingZoomLevel && !m_routeData->m_arrows.empty())
   {
@@ -258,7 +258,7 @@ void RouteRenderer::RenderArrow(ref_ptr<dp::GpuProgram> prg, drape_ptr<ArrowRend
   double const textureWidth = 2.0 * arrowHalfWidth * kArrowAspect;
 
   dp::UniformValuesStorage uniformStorage;
-  uniformStorage.SetFloatValue("u_routeParams", arrowHalfWidth, glbArrowHalfWidth, m_distanceFromBegin);
+  uniformStorage.SetFloatValue("u_routeParams", arrowHalfWidth, glbArrowHalfWidth, m_distanceFromBegin, m_lastNonCrossingDistanceFromBegin);
 
   // calculate arrows
   CalculateArrowBorders(property, kArrowSize, screen.GetScale(), textureWidth, glbArrowHalfWidth);
@@ -354,9 +354,10 @@ void RouteRenderer::Clear(bool keepDistanceFromBegin)
     m_distanceFromBegin = 0.0;
 }
 
-void RouteRenderer::UpdateDistanceFromBegin(double distanceFromBegin)
+void RouteRenderer::UpdateDistanceFromBegin(double distanceFromBegin, double lastNonCrossingDistanceFromBegin)
 {
   m_distanceFromBegin = distanceFromBegin;
+  m_lastNonCrossingDistanceFromBegin = lastNonCrossingDistanceFromBegin;
 }
 
 void RouteRenderer::ApplyJoinsBounds(drape_ptr<ArrowRenderProperty> const & property, double joinsBoundsScalar,
@@ -440,7 +441,9 @@ void RouteRenderer::CalculateArrowBorders(drape_ptr<ArrowRenderProperty> const &
     arrowBorders.m_startDistance = max(0.0, property->m_turns[i] - halfLen * 0.8);
     arrowBorders.m_endDistance = min(property->m_end - property->m_start, property->m_turns[i] + halfLen * 1.2);
 
-    if (arrowBorders.m_startDistance + property->m_start < m_distanceFromBegin)
+    double start = arrowBorders.m_startDistance + property->m_start;
+    LOG( my::LINFO, ("arrow render property m_start =",start,"while non-crossing-distance is",m_lastNonCrossingDistanceFromBegin) );
+    if (start < m_distanceFromBegin || start > m_lastNonCrossingDistanceFromBegin)
       continue;
 
     m_arrowBorders.push_back(arrowBorders);

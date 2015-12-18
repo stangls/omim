@@ -52,7 +52,7 @@ public:
 
   void Clear(bool keepDistanceFromBegin = false);
 
-  void UpdateDistanceFromBegin(double distanceFromBegin);
+  void UpdateDistanceFromBegin(double distanceFromBegin, double lastNonCrossingDistanceFromBegin);
 
 private:
   void CalculateArrowBorders(drape_ptr<ArrowRenderProperty> const & property, double arrowLength,
@@ -66,6 +66,7 @@ private:
                        ref_ptr<dp::GpuProgramManager> mng, dp::UniformValuesStorage const & commonUniforms);
 
   double m_distanceFromBegin;
+  double m_lastNonCrossingDistanceFromBegin;
   drape_ptr<RouteData> m_routeData;
 
   vector<ArrowBorders> m_arrowBorders;

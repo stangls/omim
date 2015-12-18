@@ -1,4 +1,4 @@
-varying vec3 v_length;
+varying vec4 v_length;
 
 uniform sampler2D u_colorTex;
 uniform vec4 u_textureRect;
