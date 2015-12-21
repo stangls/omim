@@ -442,7 +442,6 @@ void RouteRenderer::CalculateArrowBorders(drape_ptr<ArrowRenderProperty> const &
     arrowBorders.m_endDistance = min(property->m_end - property->m_start, property->m_turns[i] + halfLen * 1.2);
 
     double start = arrowBorders.m_startDistance + property->m_start;
-    LOG( my::LINFO, ("arrow render property m_start =",start,"while non-crossing-distance is",m_lastNonCrossingDistanceFromBegin) );
     if (start < m_distanceFromBegin || start > m_lastNonCrossingDistanceFromBegin)
       continue;
 
