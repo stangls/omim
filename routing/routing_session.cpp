@@ -333,10 +333,9 @@ void RoutingSession::AssignRoute(Route & route, IRouter::ResultCode e)
   {
 
     if (m_tour!=nullptr){
-        vector<PointD> points;
-        m_tour->GetAllPoints( points );
-        if (points.size()>5){
-          route.AppendGeometry( points.begin(), points.end() );
+        vector<PointD> points = m_tour->GetAllPoints();
+        if (points.size()>2){
+          route.AppendGeometry( points.begin()+1, points.end() );
           // TODO: Compute turns
           // TODO: Compute estimation times
         }

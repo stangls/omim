@@ -37,8 +37,8 @@ PointD Tour::GetCurrentPoint(){
     return m_points.at(m_currentIndex);
 }
 
-void Tour::GetAllPoints( vector<PointD> & ret ){
-    ret=m_points;
+vector<PointD> &Tour::GetAllPoints(){
+    return m_points;
 }
 
 bool Tour::UpdateCurrentPosition( size_t index ){

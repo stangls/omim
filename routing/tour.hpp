@@ -17,8 +17,8 @@ public:
     Tour();
     ~Tour();
     PointD GetCurrentPoint();
-    void GetAllPoints(vector<PointD> &ret);
     bool UpdateCurrentPosition(size_t index);
+    vector<PointD> &GetAllPoints();
     string GetName();
 private:
     size_t m_currentIndex;
