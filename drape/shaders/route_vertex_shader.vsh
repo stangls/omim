@@ -5,9 +5,9 @@ attribute vec3 a_length;
 uniform mat4 modelView;
 uniform mat4 projection;
 
-uniform vec3 u_routeParams;
+uniform vec4 u_routeParams;
 
-varying vec3 v_length;
+varying vec4 v_length;
 
 void main(void)
 {
@@ -27,6 +27,6 @@ void main(void)
       len = vec2(a_length.x + a_length.y * u_routeParams.y, a_length.z);
   }
 
-  v_length = vec3(len, u_routeParams.z);
+  v_length = vec4(len, u_routeParams.z, u_routeParams.w);
   gl_Position = vec4(transformedAxisPos, a_position.z, 1.0) * projection;
 }

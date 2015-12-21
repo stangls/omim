@@ -28,6 +28,7 @@ public:
   double GetDistanceFromBeginM() const;
   double GetDistanceToEndM() const;
   double GetMercatorDistanceFromBegin() const;
+  double GetCurrentNonCrossingDistance() const;
 
   /*! \brief Return next navigation point for direction widgets.
    *  Returns first geomety point from the polyline after your location if it is farther then
@@ -60,6 +61,7 @@ public:
 private:
   template <class DistanceFn>
   Iter GetClosestProjection(m2::RectD const & posRect, DistanceFn const & distFn) const;
+  void UpdateLastNonCrossing() const;
 
   void Update();
 
@@ -67,6 +69,9 @@ private:
 
   /// Iterator with the current position. Position sets with UpdateProjection methods.
   mutable Iter m_current;
+  /// Distance from m_current on the polyline where surely no crossing of the line
+  /// with itself occurs. Is being set by UpdateProjection.
+  mutable double m_lastNonCrossingDistance;
   /// Precalculated info for fast projection finding.
   vector<m2::ProjectionToSection<m2::PointD>> m_segProj;
   /// Accumulated cache of segments length in meters.

@@ -81,12 +81,6 @@ double Route::GetCurrentDistanceToEndMeters() const
   return m_poly.GetDistanceToEndM();
 }
 
-double Route::GetMercatorDistanceFromBegin() const
-{
-  //TODO Maybe better to return FollowedRoute and user will call GetMercatorDistance etc. by itself
-  return m_poly.GetMercatorDistanceFromBegin();
-}
-
 uint32_t Route::GetTotalTimeSec() const
 {
   return m_times.empty() ? 0 : m_times.back().second;
@@ -260,7 +254,12 @@ void Route::MatchLocationToRoute(location::GpsInfo & location, location::RouteMa
       if (m_routingSettings.m_matchRoute)
         location.m_bearing = location::AngleToBearing(GetPolySegAngle(iter.m_ind));
 
-      routeMatchingInfo.Set(iter.m_pt, iter.m_ind, GetMercatorDistanceFromBegin());
+      routeMatchingInfo.Set(
+        iter.m_pt,
+        iter.m_ind,
+        m_poly.GetMercatorDistanceFromBegin(),
+        m_poly.GetCurrentNonCrossingDistance()
+      );
     }
   }
 }
