@@ -14,6 +14,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -87,6 +88,9 @@ public class MwmActivity extends BaseMwmFragmentActivity
                                  ChooseBookmarkCategoryFragment.Listener,
                                  RoutingController.Container
 {
+
+  private static final String TAG = MwmActivity.class.getName();
+
   public static final String EXTRA_TASK = "map_task";
   private static final String EXTRA_CONSUMED = "mwm.extra.intent.processed";
   private static final String EXTRA_UPDATE_COUNTRIES = ".extra.update.countries";
@@ -417,6 +421,20 @@ public class MwmActivity extends BaseMwmFragmentActivity
     });
   }
 
+  private void startTour(String statisticsEvent, String alohaEvent) {
+    Log.i(TAG, "startTour: close-menu and calling native function");
+    closeMenu(statisticsEvent, alohaEvent, new Runnable() {
+      @Override
+      public void run() {
+        //RoutingController.get().prepare(endPoint);
+        RoutingController.get().startTour();
+
+        if (mPlacePage.isDocked() || !mPlacePage.isFloating())
+          closePlacePage();
+      }
+    });
+  }
+
   private void toggleMenu()
   {
     if (mMainMenu.isOpen())
@@ -471,6 +489,10 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
         case P2P:
           startLocationToPoint(Statistics.EventName.MENU_P2P, AlohaHelper.MENU_POINT2POINT, null);
+          break;
+
+        case TOUR:
+          startTour(Statistics.EventName.MENU_TOUR, AlohaHelper.MENU_TOUR);
           break;
 
         case BOOKMARKS:
@@ -1225,6 +1247,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     if (mIsFragmentContainer)
     {
       mMainMenu.setEnabled(MainMenu.Item.P2P, !RoutingController.get().isPlanning());
+      mMainMenu.setEnabled(MainMenu.Item.TOUR, !RoutingController.get().isPlanning());
       mMainMenu.setEnabled(MainMenu.Item.SEARCH, !RoutingController.get().isWaitingPoiPick());
     }
     else if (RoutingController.get().isPlanning())

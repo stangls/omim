@@ -10,6 +10,8 @@
 #include "std/set.hpp"
 #include "std/string.hpp"
 
+#include "base/logging.hpp"
+
 
 namespace location
 {
@@ -44,6 +46,13 @@ public:
   template <class TIter> void SetGeometry(TIter beg, TIter end)
   {
     FollowedPolyline(beg, end).Swap(m_poly);
+    Update();
+  }
+  template <class TIter> void AppendGeometry( TIter beg, TIter end )
+  {
+    vector<m2::PointD> vector = m_poly.GetPolyline().GetPoints();
+    vector.insert(vector.end(),beg,end);
+    FollowedPolyline(vector.begin(),vector.end()).Swap(m_poly);
     Update();
   }
 

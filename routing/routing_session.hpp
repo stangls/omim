@@ -17,6 +17,8 @@
 #include "std/limits.hpp"
 #include "std/unique_ptr.hpp"
 
+#include "routing/tour.hpp"
+
 namespace location
 {
 class RouteMatchingInfo;
@@ -117,6 +119,9 @@ public:
   string GetTurnNotificationsLocale() const;
   void GenerateTurnNotifications(vector<string> & turnNotifications);
 
+  void SetTour( unique_ptr<Tour> tour );
+  void RemoveTour();
+
 private:
   struct DoReadyCallback
   {
@@ -173,5 +178,9 @@ private:
 
   // Passed distance on route including reroutes
   double m_passedDistanceOnRouteMeters;
+
+  // Tour to be used for replacing routing-destination (if available).
+  unique_ptr<Tour> m_tour;
+
 };
 }  // namespace routing

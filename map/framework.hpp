@@ -140,6 +140,8 @@ protected:
 
   void CallDrapeFunction(TDrapeFunction const & fn);
 
+  void BuildRoute(const m2::PointD &start, const m2::PointD &finish, unique_ptr<routing::Tour> tour, uint32_t timeoutSec);
+
 public:
   Framework();
   virtual ~Framework();
@@ -542,6 +544,8 @@ public:
 
   void SetRouteStartPoint(m2::PointD const & pt, bool isValid);
   void SetRouteFinishPoint(m2::PointD const & pt, bool isValid);
+
+  void LoadTour();
 
 private:
   void SetRouterImpl(routing::RouterType type);

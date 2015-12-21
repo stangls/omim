@@ -11,6 +11,7 @@
 #include "routing/road_graph_router.hpp"
 #include "routing/route.hpp"
 #include "routing/routing_algorithm.hpp"
+#include "routing/tour.hpp"
 
 #include "search/intermediate_result.hpp"
 #include "search/result.hpp"
@@ -1783,13 +1784,42 @@ void Framework::BuildRoute(m2::PointD const & finish, uint32_t timeoutSec)
   BuildRoute(start, finish, timeoutSec);
 }
 
+void Framework::LoadTour(){
+    ASSERT_THREAD_CHECKER(m_threadChecker, ("LoadTour"));
+    ASSERT(m_drapeEngine != nullptr, ());
+
+    if (IsRoutingActive())
+        CloseRouting();
+
+    m2::PointD start;
+    if (!m_drapeEngine->GetMyPosition(start))
+    {
+      CallRouteBuilded(IRouter::NoCurrentPosition, vector<storage::TIndex>(), vector<storage::TIndex>());
+      return;
+    }
+    SetRouter(routing::RouterType::Vehicle);
+    BuildRoute(start,m2::PointD::Zero(),move(make_unique<Tour>()),5);
+}
+
 void Framework::BuildRoute(m2::PointD const & start, m2::PointD const & finish, uint32_t timeoutSec)
+{
+    ASSERT_THREAD_CHECKER(m_threadChecker, ("BuildRoute"));
+    ASSERT(m_drapeEngine != nullptr, ());
+    BuildRoute( start, finish, nullptr, timeoutSec );
+}
+
+void Framework::BuildRoute(m2::PointD const & start, m2::PointD const & finish, unique_ptr<Tour> tour, uint32_t timeoutSec)
 {
   ASSERT_THREAD_CHECKER(m_threadChecker, ("BuildRoute"));
   ASSERT(m_drapeEngine != nullptr, ());
 
   if (IsRoutingActive())
     CloseRouting();
+
+  if (tour!=nullptr)
+      m_routingSession.SetTour( move(tour) );
+  else
+      m_routingSession.RemoveTour();
 
   SetLastUsedRouter(m_currentRouterType);
   m_routingSession.SetUserCurrentPosition(start);

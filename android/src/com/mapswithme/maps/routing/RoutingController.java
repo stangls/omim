@@ -231,11 +231,9 @@ public class RoutingController
   private void showRoutePlan()
   {
     if (mContainer != null)
-      mContainer.showRoutePlan(true, new Runnable()
-      {
+      mContainer.showRoutePlan(true, new Runnable() {
         @Override
-        public void run()
-        {
+        public void run() {
           updatePlan();
         }
       });
@@ -431,7 +429,7 @@ public class RoutingController
 
     mStartButton.setEnabled(mState == State.PREPARE && mBuildState == BuildState.BUILT);
     mStartButton.setTextColor(MwmApplication.get().getResources().getColor(mStartButton.isEnabled() ? R.color.routing_start_text
-                                                                                                    : R.color.routing_start_text_disabled));
+            : R.color.routing_start_text_disabled));
   }
 
   public void setStartButton(@Nullable Button button)
@@ -757,4 +755,14 @@ public class RoutingController
     current.add(Calendar.SECOND, seconds);
     return String.format(Locale.US, "%d:%02d", current.get(Calendar.HOUR_OF_DAY), current.get(Calendar.MINUTE));
   }
+
+  public void startTour() {
+    setState(State.PREPARE);
+    Framework.nativeLoadTour();
+    setStartFromMyPosition();
+    setEndPoint(null);
+    setState(State.NAVIGATION);
+    Framework.nativeFollowRoute();
+  }
+
 }

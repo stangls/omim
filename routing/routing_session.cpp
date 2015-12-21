@@ -50,7 +50,8 @@ RoutingSession::RoutingSession()
       m_lastWarnedSpeedCameraIndex(0),
       m_lastCheckedSpeedCameraIndex(0),
       m_speedWarningSignal(false),
-      m_passedDistanceOnRouteMeters(0.0)
+      m_passedDistanceOnRouteMeters(0.0),
+      m_tour(nullptr)
 {
 }
 
@@ -78,6 +79,9 @@ void RoutingSession::RebuildRoute(m2::PointD const & startPoint,
     TProgressCallback const & progressCallback, uint32_t timeoutSec)
 {
   ASSERT(m_router != nullptr, ());
+  if (m_tour != nullptr){
+      m_endPoint = m_tour->GetCurrentPoint();
+  }
   ASSERT_NOT_EQUAL(m_endPoint, m2::PointD::Zero(), ("End point was not set"));
   RemoveRoute();
   m_state = RouteBuilding;
@@ -133,6 +137,7 @@ void RoutingSession::Reset()
   UNUSED_VALUE(guard);
 
   RemoveRouteImpl();
+  RemoveTour();
   m_router->ClearState();
 
   m_passedDistanceOnRouteMeters = 0.0;
@@ -326,6 +331,17 @@ void RoutingSession::AssignRoute(Route & route, IRouter::ResultCode e)
 {
   if (e != IRouter::Cancelled)
   {
+
+    if (m_tour!=nullptr){
+        vector<PointD> points;
+        m_tour->GetAllPoints( points );
+        if (points.size()>5){
+          route.AppendGeometry( points.begin(), points.end() );
+          // TODO: Compute turns
+          // TODO: Compute estimation times
+        }
+    }
+
     if (route.IsValid())
       m_state = RouteNotStarted;
     else
@@ -450,4 +466,15 @@ double RoutingSession::GetDistanceToCurrentCamM(SpeedCameraRestriction & camera,
   }
   return kInvalidSpeedCameraDistance;
 }
+
+void RoutingSession::SetTour( unique_ptr<Tour> tour )
+{
+    m_tour.swap(tour);
+}
+void RoutingSession::RemoveTour()
+{
+    m_tour = nullptr;
+}
+
 }  // namespace routing
+
