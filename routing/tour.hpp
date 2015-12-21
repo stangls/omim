@@ -6,23 +6,36 @@
 #include "std/shared_ptr.hpp"
 #include "std/unique_ptr.hpp"
 
+#include <vector>
+#include <iterator>
+
 namespace routing
 {
 
 typedef m2::PointD PointD;
+typedef vector<PointD> pvec;
 
 class Tour
 {
 public:
     Tour();
+    Tour( string const & filePath );
     ~Tour();
-    PointD GetCurrentPoint();
+    string GetName();
+
     bool UpdateCurrentPosition(size_t index);
     vector<PointD> &GetAllPoints();
-    string GetName();
+
+    pvec::iterator GetCurrentIt() {
+        return m_points.begin()+m_currentIndex;
+    }
+    pvec::iterator GetEndIt() {
+        return m_points.end();
+    }
+
 private:
     size_t m_currentIndex;
-    vector<m2::PointD> m_points;
+    pvec m_points;
 };
 
 }  // end namespace routing

@@ -5,9 +5,10 @@
 namespace routing
 {
 
-Tour::Tour()
+Tour::Tour(const string &filePath)
+    : m_currentIndex(0),
+      m_points()
 {
-    m_currentIndex=0;
     // TODO: load tour from file
     m_points.push_back( PointD( MercatorBounds::LonToX(12.123192), MercatorBounds::LatToY(47.796597) ) ); // Angerer Kurve (NO) / Einfahrt Mondi Inncoat
     m_points.push_back( PointD( MercatorBounds::LonToX(12.121801), MercatorBounds::LatToY(47.797094) ) ); // Angerer (N)
@@ -31,10 +32,6 @@ Tour::~Tour()
 
 string Tour::GetName(){
     return "dummy tour";
-}
-
-PointD Tour::GetCurrentPoint(){
-    return m_points.at(m_currentIndex);
 }
 
 vector<PointD> &Tour::GetAllPoints(){

@@ -1051,9 +1051,9 @@ extern "C"
   }
 
   JNIEXPORT void JNICALL
-  Java_com_mapswithme_maps_Framework_nativeLoadTour(JNIEnv * env, jclass thiz)
+  Java_com_mapswithme_maps_Framework_nativeLoadTour(JNIEnv * env, jclass thiz, jstring filePath)
   {
-    frm()->LoadTour();
+    frm()->LoadTour(jni::ToNativeString(env, filePath));
   }
 
   JNIEXPORT void JNICALL

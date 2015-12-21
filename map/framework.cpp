@@ -1784,8 +1784,8 @@ void Framework::BuildRoute(m2::PointD const & finish, uint32_t timeoutSec)
   BuildRoute(start, finish, timeoutSec);
 }
 
-void Framework::LoadTour(){
-    ASSERT_THREAD_CHECKER(m_threadChecker, ("LoadTour"));
+void Framework::LoadTour( string const & filePath ){
+    ASSERT_THREAD_CHECKER(m_threadChecker, ("LoadTour",filePath));
     ASSERT(m_drapeEngine != nullptr, ());
 
     if (IsRoutingActive())
@@ -1798,7 +1798,7 @@ void Framework::LoadTour(){
       return;
     }
     SetRouter(routing::RouterType::Vehicle);
-    BuildRoute(start,m2::PointD::Zero(),move(make_unique<Tour>()),5);
+    BuildRoute(start,m2::PointD::Zero(),move(make_unique<Tour>(filePath)),5);
 }
 
 void Framework::BuildRoute(m2::PointD const & start, m2::PointD const & finish, uint32_t timeoutSec)

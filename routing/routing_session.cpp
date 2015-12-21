@@ -80,7 +80,7 @@ void RoutingSession::RebuildRoute(m2::PointD const & startPoint,
 {
   ASSERT(m_router != nullptr, ());
   if (m_tour != nullptr){
-      m_endPoint = m_tour->GetCurrentPoint();
+      m_endPoint = *(m_tour->GetCurrentIt());
   }
   ASSERT_NOT_EQUAL(m_endPoint, m2::PointD::Zero(), ("End point was not set"));
   RemoveRoute();
@@ -333,9 +333,10 @@ void RoutingSession::AssignRoute(Route & route, IRouter::ResultCode e)
   {
 
     if (m_tour!=nullptr){
-        vector<PointD> points = m_tour->GetAllPoints();
-        if (points.size()>2){
-          route.AppendGeometry( points.begin()+1, points.end() );
+        auto tourEnd = m_tour->GetEndIt();
+        auto tourCur = m_tour->GetCurrentIt();
+        if ( tourCur != tourEnd && tourCur+1 != tourEnd ){
+          route.AppendGeometry( tourCur+1, tourEnd, false );
           // TODO: Compute turns
           // TODO: Compute estimation times
         }

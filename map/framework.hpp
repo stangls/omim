@@ -545,7 +545,7 @@ public:
   void SetRouteStartPoint(m2::PointD const & pt, bool isValid);
   void SetRouteFinishPoint(m2::PointD const & pt, bool isValid);
 
-  void LoadTour();
+  void LoadTour( string const & filePath );
 
 private:
   void SetRouterImpl(routing::RouterType type);

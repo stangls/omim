@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -757,12 +758,16 @@ public class RoutingController
   }
 
   public void startTour() {
-    setState(State.PREPARE);
-    Framework.nativeLoadTour();
-    setStartFromMyPosition();
-    setEndPoint(null);
-    setState(State.NAVIGATION);
-    Framework.nativeFollowRoute();
+    File tourFile = new File("/storage/emulated/legacy/MapsWithMe/simulation.log");
+    Log.e("RoutingController", "searching for file " + tourFile);
+    if (tourFile.exists()) {
+      setState(State.PREPARE);
+      Framework.nativeLoadTour(tourFile.getAbsolutePath());
+      setStartFromMyPosition();
+      setEndPoint(null);
+      setState(State.NAVIGATION);
+      Framework.nativeFollowRoute();
+    }
   }
 
 }

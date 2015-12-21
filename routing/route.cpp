@@ -213,9 +213,9 @@ bool Route::MoveIterator(location::GpsInfo const & info) const
   m2::RectD const rect = MercatorBounds::MetresToXY(
         info.m_longitude, info.m_latitude,
         max(m_routingSettings.m_matchingThresholdM, info.m_horizontalAccuracy));
-  FollowedPolyline::Iter const res = m_poly.UpdateProjectionByPrediction(rect, predictDistance);
+  FollowedPolyline::Iter const res = m_poly.UpdateProjectionByPrediction(rect, predictDistance, m_nonFastForward);
   if (m_simplifiedPoly.IsValid())
-    m_simplifiedPoly.UpdateProjectionByPrediction(rect, predictDistance);
+    m_simplifiedPoly.UpdateProjectionByPrediction(rect, predictDistance, m_nonFastForward);
   return res.IsValid();
 }
 
@@ -288,6 +288,26 @@ void Route::Update()
     FollowedPolyline().Swap(m_simplifiedPoly);
   }
   m_currentTime = 0.0;
+}
+
+/**
+ * Appends an existing geometry given via start- and end-iterator.
+ * Replaces the current FollowedPolyline.
+ * @param fastForward if set to true, the Route::MoveIterator() method will not try to fast-forward into this geometry,
+ *        i.e. if the current position does match an earlier (not yet visited point in other geometries), it will use that one.
+ */
+template <class TIter> void Route::AppendGeometry( TIter beg, TIter end , bool fastForward )
+{
+  vector<m2::PointD> vector = m_poly.GetPolyline().GetPoints();
+  size_t start=vector.size();
+  vector.insert(vector.end(),beg,end);
+  if (!fastForward){
+      size_t len = vector.size()-start;
+      if (len>0)
+        m_nonFastForward.emplace_back( start, len );
+  }
+  FollowedPolyline(vector.begin(),vector.end()).Swap(m_poly);
+  Update();
 }
 
 string DebugPrint(Route const & r)

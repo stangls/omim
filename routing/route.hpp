@@ -34,7 +34,8 @@ public:
 
   template <class TIter>
   Route(string const & router, TIter beg, TIter end)
-    : m_router(router), m_routingSettings(GetCarRoutingSettings()), m_poly(beg, end)
+    : m_router(router), m_routingSettings(GetCarRoutingSettings()), m_poly(beg, end),
+      m_nonFastForward()
   {
     Update();
   }
@@ -48,13 +49,7 @@ public:
     FollowedPolyline(beg, end).Swap(m_poly);
     Update();
   }
-  template <class TIter> void AppendGeometry( TIter beg, TIter end )
-  {
-    vector<m2::PointD> vector = m_poly.GetPolyline().GetPoints();
-    vector.insert(vector.end(),beg,end);
-    FollowedPolyline(vector.begin(),vector.end()).Swap(m_poly);
-    Update();
-  }
+  template <class TIter> void AppendGeometry( TIter beg, TIter end, bool fastForward );
 
   inline void SetTurnInstructions(TTurns & v)
   {
@@ -99,7 +94,11 @@ public:
 
   void GetCurrentDirectionPoint(m2::PointD & pt) const;
 
-  /// @return true  If position was updated successfully (projection within gps error radius).
+  /**
+   * @return true  If position was updated successfully (projection within gps error radius).
+   *               May return false if a projection would only be possible into a non-fast-forward geometry.
+   *               See Route:AppendGeometry for more information.
+   **/
   bool MoveIterator(location::GpsInfo const & info) const;
 
   void MatchLocationToRoute(location::GpsInfo & location, location::RouteMatchingInfo & routeMatchingInfo) const;
@@ -140,6 +139,9 @@ private:
   TTimes m_times;
 
   mutable double m_currentTime;
+
+private:
+  vector<TInterval> m_nonFastForward;
 };
 
 } // namespace routing
