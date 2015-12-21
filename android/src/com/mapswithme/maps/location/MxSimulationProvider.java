@@ -61,10 +61,10 @@ public class MxSimulationProvider extends BaseLocationProvider
         String longitude = rowData[2];
         String latitude = rowData[3];
         String tasks = rowData[4];
-        Log.v( "MxSimulationProvider", "Read line: " + date + " " + time + " " + longitude + " " + latitude + " " + tasks );
+        //Log.v( "MxSimulationProvider", "Read line: " + date + " " + time + " " + longitude + " " + latitude + " " + tasks );
         try {
           Date datetime = df.parse(date + " " + time, new ParsePosition(0));
-          Log.v("MxSimulationProvider", "Parsed date-time: " + datetime);
+          //Log.v("MxSimulationProvider", "Parsed date-time: " + datetime);
           Location l = new Location(this.providerName);
           l.setLongitude(Double.parseDouble(longitude));
           l.setLatitude(Double.parseDouble(latitude));
@@ -141,7 +141,7 @@ public class MxSimulationProvider extends BaseLocationProvider
           }));
           int time = simulationDataWaitTimeMS[currentSimulationStep];
           while (time<minWaitTime) {
-            Log.d("MxSimulationProvider","skipping a location");
+            //Log.d("MxSimulationProvider","skipping a location");
             if (++currentSimulationStep >= numSimulationSteps) {
               currentSimulationStep = 0;
             }
