@@ -750,7 +750,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     mPlacePage.onResume();
 
     /*
-    if (!NewsFragment.showOn(this))
+//    if (!NewsFragment.showOn(this))
       LikesManager.INSTANCE.showDialogs(this);
     */
 
@@ -772,8 +772,6 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
         final NativeAppwallBanner menuBanner = nativeAppwallAd.getBanners().get(0);
         mMainMenu.showShowcase(true);
-        mMainMenu.setShowcaseText(menuBanner.getTitle());
-        mMainMenu.setShowcaseDrawable(menuBanner.getIcon().getBitmap());
       }
 
       @Override
