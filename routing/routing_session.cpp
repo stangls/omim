@@ -331,14 +331,24 @@ void RoutingSession::AssignRoute(Route & route, IRouter::ResultCode e)
 {
   if (e != IRouter::Cancelled)
   {
-
     if (m_tour!=nullptr){
-        auto tourEnd = m_tour->GetEndIt();
-        auto tourCur = m_tour->GetCurrentIt();
-        if ( tourCur != tourEnd && tourCur+1 != tourEnd ){
-          route.AppendGeometry( tourCur+1, tourEnd, false );
-          // TODO: Compute turns
-          // TODO: Compute estimation times
+        auto route_previous_size = route.GetPoly().GetSize();
+        {
+            auto end = m_tour->GetEndIt();
+            auto cur = m_tour->GetCurrentIt();
+            ASSERT( cur != end && cur+1 != end, () );
+            route.AppendGeometry( cur+1, end, false );
+        }
+        {
+            auto end = m_tour->GetTimesEndIt();
+            auto cur = m_tour->GetTimesCurrentIt();
+            ASSERT( cur != end && cur+1 != end, () );
+            route.AppendTimes( cur+1, end );
+        }
+        {
+            auto end = m_tour->GetTurnsEndIt();
+            auto cur = m_tour->GetTurnsCurrentIt();
+            route.AppendTurns( cur, end, m_tour->GetCurrentIndex()+1, route_previous_size );
         }
     }
 

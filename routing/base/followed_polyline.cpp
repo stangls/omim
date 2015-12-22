@@ -111,7 +111,6 @@ Iter FollowedPolyline::GetClosestProjection(m2::RectD const & posRect, const vec
   for (size_t i = m_current.m_ind; i < count; ++i)
   {
     if ( !noCheckFastForward ) {
-        noCheckFastForward--;
         // skip if we do not fast-forward into this interval
         bool skipTo=0; // 0==false
         for ( const TInterval &nonFF : nonFastForward ) {
@@ -127,7 +126,8 @@ Iter FollowedPolyline::GetClosestProjection(m2::RectD const & posRect, const vec
             i=skipTo-1; // will be incremented on continuing for-loop
             continue;
         }
-    }
+    }else
+        noCheckFastForward--;
 
     m2::PointD const pt = m_segProj[i](currPos);
 

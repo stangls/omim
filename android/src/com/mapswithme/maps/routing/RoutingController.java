@@ -758,7 +758,7 @@ public class RoutingController
   }
 
   public void startTour() {
-    File tourFile = new File("/storage/emulated/legacy/MapsWithMe/simulation.log");
+    File tourFile = new File("/storage/emulated/legacy/MapsWithMe/tour.xml");
     Log.e("RoutingController", "searching for file " + tourFile);
     if (tourFile.exists()) {
       setState(State.PREPARE);

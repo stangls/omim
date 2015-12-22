@@ -40,6 +40,39 @@ void Route::Swap(Route & rhs)
   swap(m_turns, rhs.m_turns);
   swap(m_times, rhs.m_times);
   m_absentCountries.swap(rhs.m_absentCountries);
+  m_nonFastForward.swap(rhs.m_nonFastForward);
+}
+
+void Route::AppendTurns(vector<turns::TurnItem>::iterator beg, vector<turns::TurnItem>::iterator end, uint32_t index_offset, uint32_t index_start)
+{
+    // TODO: Start-TurnItem
+    // TODO: (Re-)move previous End-TurnItem
+    while (beg!=end){
+        if ((*beg).m_index > index_offset){
+            turns::TurnItem ti( *beg );
+            ti.m_index-=index_offset;
+            ti.m_index+=index_start;
+            m_turns.push_back( ti );
+        }
+        beg++;
+    }
+}
+
+void Route::AppendTimes(vector<double>::iterator beg, vector<double>::iterator end)
+{
+    int cnt=0;
+    double time = 0;
+    double offset = *beg;
+    if (!m_times.empty()){
+        cnt=m_times.back().first;
+        time=m_times.back().second;
+    }
+    while (beg!=end){
+        cnt++;
+        time+=*beg-offset;
+        m_times.emplace_back( cnt, time );
+        beg++;
+    }
 }
 
 double Route::GetTotalDistanceMeters() const
@@ -73,7 +106,7 @@ void Route::GetTurnsDistances(vector<double> & distances) const
     mercatorDistance += mercatorDistanceBetweenTurns;
 
     distances.push_back(mercatorDistance);
-   }
+  }
 }
 
 double Route::GetCurrentDistanceToEndMeters() const
@@ -288,27 +321,6 @@ void Route::Update()
     FollowedPolyline().Swap(m_simplifiedPoly);
   }
   m_currentTime = 0.0;
-}
-
-/**
- * Appends an existing geometry given via start- and end-iterator.
- * Replaces the current FollowedPolyline.
- * @param fastForward if set to true, the Route::MoveIterator() method will not try to fast-forward into this geometry,
- *        i.e. if the current position does match an earlier (not yet visited point in other geometries), it will use that one.
- */
-template <class TIter> void Route::AppendGeometry( TIter beg, TIter end , bool fastForward )
-{
-  vector<m2::PointD> vector = m_poly.GetPolyline().GetPoints();
-  size_t start=vector.size();
-  vector.insert(vector.end(),beg,end);
-  if (!fastForward){
-      // mark via non-fast-forward-interval
-      size_t end = vector.size();
-      if (end != start)
-        m_nonFastForward.emplace_back( start, end );
-  }
-  FollowedPolyline(vector.begin(),vector.end()).Swap(m_poly);
-  Update();
 }
 
 string DebugPrint(Route const & r)

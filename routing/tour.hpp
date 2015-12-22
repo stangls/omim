@@ -1,13 +1,11 @@
 #ifndef TOURROUTER_H
 #define TOURROUTER_H
 
-#include "router.hpp"
+#include "route.hpp"
 
 #include "std/shared_ptr.hpp"
 #include "std/unique_ptr.hpp"
-
-#include <vector>
-#include <iterator>
+#include "std/vector.hpp"
 
 namespace routing
 {
@@ -26,6 +24,10 @@ public:
     bool UpdateCurrentPosition(size_t index);
     vector<PointD> &GetAllPoints();
 
+    size_t GetCurrentIndex() {
+        return m_currentIndex;
+    }
+
     pvec::iterator GetCurrentIt() {
         return m_points.begin()+m_currentIndex;
     }
@@ -33,9 +35,27 @@ public:
         return m_points.end();
     }
 
-private:
+    vector<double>::iterator GetTimesCurrentIt(){
+        return m_times.begin()+m_currentIndex;
+    }
+    vector<double>::iterator GetTimesEndIt(){
+        return m_times.end();
+    }
+
+    vector<turns::TurnItem>::iterator GetTurnsCurrentIt(){
+        return m_turns.begin()+m_currentIndex;
+    }
+    vector<turns::TurnItem>::iterator GetTurnsEndIt(){
+        return m_turns.end();
+    }
+
+protected:
+    void CalculateTimes();
+
     size_t m_currentIndex;
     pvec m_points;
+    vector<double> m_times;
+    vector<turns::TurnItem> m_turns;
 };
 
 }  // end namespace routing
