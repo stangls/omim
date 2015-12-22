@@ -13,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import java.io.File;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
@@ -231,11 +232,9 @@ public class RoutingController
   private void showRoutePlan()
   {
     if (mContainer != null)
-      mContainer.showRoutePlan(true, new Runnable()
-      {
+      mContainer.showRoutePlan(true, new Runnable() {
         @Override
-        public void run()
-        {
+        public void run() {
           updatePlan();
         }
       });
@@ -431,7 +430,7 @@ public class RoutingController
 
     mStartButton.setEnabled(mState == State.PREPARE && mBuildState == BuildState.BUILT);
     mStartButton.setTextColor(MwmApplication.get().getResources().getColor(mStartButton.isEnabled() ? R.color.routing_start_text
-                                                                                                    : R.color.routing_start_text_disabled));
+            : R.color.routing_start_text_disabled));
   }
 
   public void setStartButton(@Nullable Button button)
@@ -757,4 +756,18 @@ public class RoutingController
     current.add(Calendar.SECOND, seconds);
     return String.format(Locale.US, "%d:%02d", current.get(Calendar.HOUR_OF_DAY), current.get(Calendar.MINUTE));
   }
+
+  public void startTour() {
+    File tourFile = new File("/storage/emulated/legacy/MapsWithMe/tour.xml");
+    Log.e("RoutingController", "searching for file " + tourFile);
+    if (tourFile.exists()) {
+      setState(State.PREPARE);
+      Framework.nativeLoadTour(tourFile.getAbsolutePath());
+      setStartFromMyPosition();
+      setEndPoint(null);
+      setState(State.NAVIGATION);
+      Framework.nativeFollowRoute();
+    }
+  }
+
 }

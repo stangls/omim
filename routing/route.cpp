@@ -40,6 +40,39 @@ void Route::Swap(Route & rhs)
   swap(m_turns, rhs.m_turns);
   swap(m_times, rhs.m_times);
   m_absentCountries.swap(rhs.m_absentCountries);
+  m_nonFastForward.swap(rhs.m_nonFastForward);
+}
+
+void Route::AppendTurns(vector<turns::TurnItem>::iterator beg, vector<turns::TurnItem>::iterator end, uint32_t index_offset, uint32_t index_start)
+{
+    // TODO: Start-TurnItem
+    // TODO: (Re-)move previous End-TurnItem
+    while (beg!=end){
+        if ((*beg).m_index > index_offset){
+            turns::TurnItem ti( *beg );
+            ti.m_index-=index_offset;
+            ti.m_index+=index_start;
+            m_turns.push_back( ti );
+        }
+        beg++;
+    }
+}
+
+void Route::AppendTimes(vector<double>::iterator beg, vector<double>::iterator end)
+{
+    int cnt=0;
+    double time = 0;
+    double offset = *beg;
+    if (!m_times.empty()){
+        cnt=m_times.back().first;
+        time=m_times.back().second;
+    }
+    while (beg!=end){
+        cnt++;
+        time+=*beg-offset;
+        m_times.emplace_back( cnt, time );
+        beg++;
+    }
 }
 
 double Route::GetTotalDistanceMeters() const
@@ -73,7 +106,7 @@ void Route::GetTurnsDistances(vector<double> & distances) const
     mercatorDistance += mercatorDistanceBetweenTurns;
 
     distances.push_back(mercatorDistance);
-   }
+  }
 }
 
 double Route::GetCurrentDistanceToEndMeters() const
@@ -213,9 +246,9 @@ bool Route::MoveIterator(location::GpsInfo const & info) const
   m2::RectD const rect = MercatorBounds::MetresToXY(
         info.m_longitude, info.m_latitude,
         max(m_routingSettings.m_matchingThresholdM, info.m_horizontalAccuracy));
-  FollowedPolyline::Iter const res = m_poly.UpdateProjectionByPrediction(rect, predictDistance);
+  FollowedPolyline::Iter const res = m_poly.UpdateProjectionByPrediction(rect, predictDistance, m_nonFastForward);
   if (m_simplifiedPoly.IsValid())
-    m_simplifiedPoly.UpdateProjectionByPrediction(rect, predictDistance);
+    m_simplifiedPoly.UpdateProjectionByPrediction(rect, predictDistance, m_nonFastForward);
   return res.IsValid();
 }
 

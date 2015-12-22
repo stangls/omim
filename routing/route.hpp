@@ -10,6 +10,8 @@
 #include "std/set.hpp"
 #include "std/string.hpp"
 
+#include "base/logging.hpp"
+
 
 namespace location
 {
@@ -32,7 +34,8 @@ public:
 
   template <class TIter>
   Route(string const & router, TIter beg, TIter end)
-    : m_router(router), m_routingSettings(GetCarRoutingSettings()), m_poly(beg, end)
+    : m_router(router), m_routingSettings(GetCarRoutingSettings()), m_poly(beg, end),
+      m_nonFastForward()
   {
     Update();
   }
@@ -47,15 +50,39 @@ public:
     Update();
   }
 
+  /**
+   * Appends an existing geometry given via start- and end-iterator.
+   * Replaces the current FollowedPolyline.
+   * @param fastForward if set to true, the Route::MoveIterator() method will not try to fast-forward into this geometry,
+   *        i.e. if the current position does match an earlier (not yet visited point in other geometries), it will use that one.
+   */
+  template <class TIter> void AppendGeometry( TIter beg, TIter end, bool fastForward )
+  {
+      vector<m2::PointD> vector = m_poly.GetPolyline().GetPoints();
+      size_t start=vector.size();
+      vector.insert(vector.end(),beg,end);
+      if (!fastForward){
+          // mark via non-fast-forward-interval
+          size_t end = vector.size();
+          if (end != start){
+            m_nonFastForward.emplace_back( start, end );
+          }
+      }
+      FollowedPolyline(vector.begin(),vector.end()).Swap(m_poly);
+      Update();
+  }
+
   inline void SetTurnInstructions(TTurns & v)
   {
     swap(m_turns, v);
   }
+  void AppendTurns(vector<turns::TurnItem>::iterator beg, vector<turns::TurnItem>::iterator end, uint32_t index_offset , uint32_t index_start);
 
   inline void SetSectionTimes(TTimes & v)
   {
     swap(m_times, v);
   }
+  void AppendTimes( vector<double>::iterator beg, vector<double>::iterator end );
 
   uint32_t GetTotalTimeSec() const;
   uint32_t GetCurrentTimeToEndSec() const;
@@ -90,7 +117,11 @@ public:
 
   void GetCurrentDirectionPoint(m2::PointD & pt) const;
 
-  /// @return true  If position was updated successfully (projection within gps error radius).
+  /**
+   * @return true  If position was updated successfully (projection within gps error radius).
+   *               May return false if a projection would only be possible into a non-fast-forward geometry.
+   *               See Route:AppendGeometry for more information.
+   **/
   bool MoveIterator(location::GpsInfo const & info) const;
 
   void MatchLocationToRoute(location::GpsInfo & location, location::RouteMatchingInfo & routeMatchingInfo) const;
@@ -131,6 +162,8 @@ private:
   TTimes m_times;
 
   mutable double m_currentTime;
+
+  vector<TInterval> m_nonFastForward;
 };
 
 } // namespace routing

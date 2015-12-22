@@ -136,6 +136,7 @@ public class MainMenu
   {
     TOGGLE(R.id.toggle),
     SEARCH(R.id.search),
+    TOUR(R.id.tour),
     P2P(R.id.p2p),
     BOOKMARKS(R.id.bookmarks),
     SHARE(R.id.share),
@@ -336,6 +337,7 @@ public class MainMenu
   private void init()
   {
     mapItem(Item.SEARCH);
+    mapItem(Item.TOUR);
     mapItem(Item.P2P);
     mapItem(Item.BOOKMARKS);
     mapItem(Item.SHARE);

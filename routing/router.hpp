@@ -20,7 +20,7 @@ class Route;
 enum class RouterType
 {
   Vehicle = 0, /// For OSRM vehicle routing
-  Pedestrian   /// For A star pedestrian routing
+  Pedestrian,  /// For A star pedestrian routing
 };
 
 string ToString(RouterType type);
