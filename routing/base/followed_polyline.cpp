@@ -102,6 +102,7 @@ template <class DistanceFn>
 Iter FollowedPolyline::GetClosestProjection(m2::RectD const & posRect, const vector<TInterval> &nonFastForward,
                                             DistanceFn const & distFn) const
 {
+  //LOG(my::LINFO,("GetClosestProjection"));
   Iter res;
   double minDist = numeric_limits<double>::max();
 
@@ -112,18 +113,22 @@ Iter FollowedPolyline::GetClosestProjection(m2::RectD const & posRect, const vec
   {
     if ( !noCheckFastForward ) {
         // skip if we do not fast-forward into this interval
-        bool skipTo=0; // 0==false
+        int skipTo=0;
         for ( const TInterval &nonFF : nonFastForward ) {
             int start, end;
             std::tie (start, end) = nonFF;
             if ( i>=start && i<end ){
+                //LOG(my::LINFO,("? skip",start,"<=",i,"<",end));
                 ASSERT( start<end, ("internal error with ordering of non-ff-intervals") );
                 skipTo=end;
                 break;
             }
         }
         if (skipTo) {
+            //LOG(my::LINFO,("skipTo=",skipTo));
+            ASSERT( i<=skipTo-1, ("internal error with non-ff-intervals") );
             i=skipTo-1; // will be incremented on continuing for-loop
+            //LOG(my::LINFO,("skip to",i,count));
             continue;
         }
     }else
@@ -142,7 +147,7 @@ Iter FollowedPolyline::GetClosestProjection(m2::RectD const & posRect, const vec
       minDist = dp;
     }
   }
-
+  //LOG(my::LINFO,("GetClosestProjection done"));
   return res;
 }
 
@@ -222,26 +227,22 @@ void FollowedPolyline::UpdateLastNonCrossing() const
     if (m_current.IsValid()) {
         uint max=1000; // total upper computation time-limit
         double lastNonCrossingDistance = 0.0;
-        //LOG( my::LINFO, ( "start" ) );
         m2::PointD point0 = m_current.m_pt;
         size_t i = m_current.m_ind+1;
         m2::PointD point1 = m_poly.GetPoint(i);
         double angle = ang::AngleTo(point0,point1);
         double cMin=-DBL_MAX;
         double cMax=+DBL_MAX;
-        //LOG( my::LINFO, ( "start angle ", angle*180/M_PI, "° in [",cMin*180/M_PI,",",cMax*180/M_PI,"]" ) );
         for (; i<m_poly.GetSize(); i++){
             point1 = m_poly.GetPoint(i);
 
             double len = point0.Length(point1);
             if (len>0.000000001) {
                 double angle = ang::AngleTo(point0,point1);
-                //LOG( my::LINFO, ( "angle ", angle*180/M_PI, "° in [",cMin*180/M_PI,",",cMax*180/M_PI,"] ? dist ", lastNonCrossingDistance ) );
                 if (angle<cMin)
                     angle+=2*M_PI;
                 else if (angle>cMax)
                     angle-=2*M_PI;
-                //LOG( my::LINFO, ( "adapted angle ", angle*180/M_PI, "° in [",cMin*180/M_PI,",",cMax*180/M_PI,"] ? dist ", lastNonCrossingDistance ) );
                 if (angle>cMin && angle<cMax){
                     cMin=fmax(cMin,angle-M_PI);
                     cMax=fmin(cMax,angle+M_PI);
