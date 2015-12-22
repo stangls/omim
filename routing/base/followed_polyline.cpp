@@ -99,7 +99,7 @@ void FollowedPolyline::Update()
 }
 
 template <class DistanceFn>
-Iter FollowedPolyline::GetClosestProjection(m2::RectD const & posRect,
+Iter FollowedPolyline::GetClosestProjection(m2::RectD const & posRect, const vector<TInterval> &nonFastForward,
                                             DistanceFn const & distFn) const
 {
   Iter res;
@@ -107,8 +107,28 @@ Iter FollowedPolyline::GetClosestProjection(m2::RectD const & posRect,
 
   m2::PointD const currPos = posRect.Center();
   size_t const count = m_poly.GetSize() - 1;
+  int noCheckFastForward=2; // for two iterations do not check fast-forward ( = current position and next position)
   for (size_t i = m_current.m_ind; i < count; ++i)
   {
+    if ( !noCheckFastForward ) {
+        noCheckFastForward--;
+        // skip if we do not fast-forward into this interval
+        bool skipTo=0; // 0==false
+        for ( const TInterval &nonFF : nonFastForward ) {
+            int start, end;
+            std::tie (start, end) = nonFF;
+            if ( i>=start && i<end ){
+                ASSERT( start<end, ("internal error with ordering of non-ff-intervals") );
+                skipTo=end;
+                break;
+            }
+        }
+        if (skipTo) {
+            i=skipTo-1; // will be incremented on continuing for-loop
+            continue;
+        }
+    }
+
     m2::PointD const pt = m_segProj[i](currPos);
 
     if (!posRect.IsPointInside(pt))
@@ -129,7 +149,7 @@ Iter FollowedPolyline::GetClosestProjection(m2::RectD const & posRect,
 Iter FollowedPolyline::UpdateProjectionByPrediction(
         m2::RectD const & posRect,
         double predictDistance,
-        vector<TInterval> nonFastForward
+        const vector<TInterval> & nonFastForward
 ) const {
   ASSERT(m_current.IsValid(), ());
   ASSERT_LESS(m_current.m_ind, m_poly.GetSize() - 1, ());
@@ -138,7 +158,7 @@ Iter FollowedPolyline::UpdateProjectionByPrediction(
     return UpdateProjection(posRect, nonFastForward);
 
   Iter res;
-  res = GetClosestProjection(posRect, [&](Iter const & it)
+  res = GetClosestProjection(posRect, nonFastForward, [&](Iter const & it)
   {
     return fabs(GetDistanceM(m_current, it) - predictDistance);
   });
@@ -150,14 +170,14 @@ Iter FollowedPolyline::UpdateProjectionByPrediction(
   return res;
 }
 
-Iter FollowedPolyline::UpdateProjection(m2::RectD const & posRect, vector<TInterval> nonFastForward) const
+Iter FollowedPolyline::UpdateProjection(m2::RectD const & posRect, const vector<TInterval> & nonFastForward) const
 {
   ASSERT(m_current.IsValid(), ());
   ASSERT_LESS(m_current.m_ind, m_poly.GetSize() - 1, ());
 
   Iter res;
   m2::PointD const currPos = posRect.Center();
-  res = GetClosestProjection(posRect, [&](Iter const & it)
+  res = GetClosestProjection(posRect, nonFastForward, [&](Iter const & it)
   {
     return MercatorBounds::DistanceOnEarth(it.m_pt, currPos);
   });

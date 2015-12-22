@@ -54,8 +54,8 @@ public:
 
   double GetDistanceM(Iter const & it1, Iter const & it2) const;
 
-  Iter UpdateProjectionByPrediction(m2::RectD const & posRect, double predictDistance, vector<TInterval> nonFastForward) const;
-  Iter UpdateProjection(m2::RectD const & posRect, vector<TInterval> nonFastForward) const;
+  Iter UpdateProjectionByPrediction(m2::RectD const & posRect, double predictDistance, const vector<TInterval> &nonFastForward) const;
+  Iter UpdateProjection(m2::RectD const & posRect, const vector<TInterval> &nonFastForward) const;
 
   Iter Begin() const;
   Iter End() const;
@@ -63,7 +63,7 @@ public:
 
 private:
   template <class DistanceFn>
-  Iter GetClosestProjection(m2::RectD const & posRect, DistanceFn const & distFn) const;
+  Iter GetClosestProjection(m2::RectD const & posRect, const vector<TInterval> & nonFastForward, DistanceFn const & distFn) const;
   void UpdateLastNonCrossing() const;
 
   void Update();

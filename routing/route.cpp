@@ -302,9 +302,10 @@ template <class TIter> void Route::AppendGeometry( TIter beg, TIter end , bool f
   size_t start=vector.size();
   vector.insert(vector.end(),beg,end);
   if (!fastForward){
-      size_t len = vector.size()-start;
-      if (len>0)
-        m_nonFastForward.emplace_back( start, len );
+      // mark via non-fast-forward-interval
+      size_t end = vector.size();
+      if (end != start)
+        m_nonFastForward.emplace_back( start, end );
   }
   FollowedPolyline(vector.begin(),vector.end()).Swap(m_poly);
   Update();
