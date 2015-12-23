@@ -27,12 +27,14 @@ public:
     }
 
     bool UpdateCurrentPosition(size_t index);
-    vector<PointD> &GetAllPoints();
 
     size_t GetCurrentIndex() {
         return m_currentIndex;
     }
 
+    vector<PointD> &GetAllPoints(){
+        return m_points;
+    }
     pvec::iterator GetCurrentIt() {
         return m_points.begin()+m_currentIndex;
     }
@@ -45,6 +47,10 @@ public:
     }
     vector<double>::iterator GetTimesEndIt(){
         return m_times.end();
+    }
+
+    vector<turns::TurnItem> &GetAllTurns(){
+        return m_turns;
     }
 
     vector<turns::TurnItem>::iterator GetTurnsCurrentIt(){

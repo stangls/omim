@@ -14,6 +14,9 @@ namespace routing
 {
 
 namespace{ // anonymous namespace for parses
+
+using TD = turns::TurnDirection;
+
 class TourParser
 {
     Tour &m_tour; // tour to be constructed / modified
@@ -38,32 +41,33 @@ public:
     ~TourParser()
     {}
 
-    bool Push(string const & name)
+    bool Push(string const & tag)
     {
-        LOG( my::LINFO, ("push",name) );
-        m_tags.push_back(name);
+        m_tags.push_back(tag);
         return true;
     }
 
     void AddAttr(string const & attr, string const & value)
     {
-        LOG( my::LINFO, ("attr",attr,"=",value) );
+        //LOG( my::LINFO, ("attr",attr,"=",value) );
         string attrInLowerCase = attr;
         strings::AsciiToLower(attrInLowerCase);
 
-        if (IsValidAttribute("position", attrInLowerCase, "x", value))
+        if (IsValidAttribute("position", attrInLowerCase, "x", value)){
             m_x = atof(value.c_str());
-        if (IsValidAttribute("position", attrInLowerCase, "y", value))
+        }
+        if (IsValidAttribute("position", attrInLowerCase, "y", value)){
             m_y = atof(value.c_str());
+        }
         if (IsValidAttribute("junction", attrInLowerCase, "road_index", value))
             m_roadIndex = atoi(value.c_str());
         if (IsValidAttribute("road", attrInLowerCase, "angle", value))
             m_roadAngle = atoi(value.c_str());
     }
 
-    bool IsValidAttribute(string const & type, string const & attrInLowerCase, string const & attrShouldBe, string const & value) const
+    bool IsValidAttribute(string const & tag, string const & attrInLowerCase, string const & attrShouldBe, string const & value) const
     {
-        return (GetTagFromEnd(0) == type && !value.empty() && attrInLowerCase == attrShouldBe);
+        return (GetTagFromEnd(0) == tag && !value.empty() && attrInLowerCase == attrShouldBe);
     }
 
     string const & GetTagFromEnd(size_t n) const
@@ -74,13 +78,37 @@ public:
 
     void Pop(string const & tag)
     {
-        LOG( my::LINFO, ("pop",tag) );
         ASSERT_EQUAL(m_tags.back(), tag, ());
-        if (tag=="position"){
+        if (tag=="position") {
+            LOG( my::LINFO, ("adding point from XML:",m_x,m_y) );
             m_tour.GetAllPoints().emplace_back(MercatorBounds::LonToX(m_x),MercatorBounds::LatToY(m_y));
         }
-        if (tag=="section"){
-            // TODO: add turn definition
+        if (tag=="section") {
+            LOG( my::LINFO, ("adding junction") );
+            turns::TurnDirection turnDirection=turns::TurnDirection::NoTurn;
+            if (m_roadIndex!=0){
+                turnDirection=turns::TurnDirection::LeaveRoundAbout;
+            }else{
+                if (m_roadAngle>=170)
+                    turnDirection=TD::UTurnLeft;
+                else if (m_roadAngle>=90)
+                    turnDirection=TD::TurnSharpRight;
+                else if (m_roadAngle>=15)
+                    turnDirection=TD::TurnRight;
+                else if (m_roadAngle>=4)
+                    turnDirection=TD::TurnSlightRight;
+                else if (m_roadAngle<=-170)
+                    turnDirection=TD::UTurnLeft;
+                else if (m_roadAngle<=-90)
+                    turnDirection=TD::TurnSharpLeft;
+                else if (m_roadAngle<=-15)
+                    turnDirection=TD::TurnLeft;
+                else if (m_roadAngle<=-4)
+                    turnDirection=TD::TurnSlightLeft;
+                else
+                    turnDirection=TD::GoStraight;
+            }
+            m_tour.GetAllTurns().emplace_back(m_tour.GetAllPoints().size(),turnDirection,m_roadIndex);
             m_roadIndex = 0;
         }
         m_tags.pop_back();
@@ -88,7 +116,6 @@ public:
 
     void CharData(string value)
     {
-        LOG( my::LINFO, ("char data",value) );
         strings::Trim(value);
 
         size_t const count = m_tags.size();
@@ -97,7 +124,7 @@ public:
             string const & currTag = m_tags[count - 1];
             string const & prevTag = m_tags[count - 2];
             string const ppTag = count > 3 ? m_tags[count - 3] : string();
-            if (currTag=="name"){
+            if (prevTag=="tour" && currTag=="name"){
                 m_tour.SetName(value);
             }
         }
@@ -116,16 +143,13 @@ Tour::Tour(const string &filePath)
 
     // parse the file
 
-    LOG( my::LINFO, ("reading input file") );
+    LOG( my::LINFO, ("reading tour file ",filePath) );
     ReaderPtr<Reader> const & reader = new FileReader(filePath);
-    LOG( my::LINFO, ("reading input file (2)",filePath) );
     ReaderSource<ReaderPtr<Reader> > src(reader);
-    LOG( my::LINFO, ("instatiating parser") );
     TourParser parser(*this);
-    LOG( my::LINFO, ("parsing input file") );
     ParseXML(src, parser, true);
-    LOG( my::LINFO, ("done parsing.") );
-
+    LOG( my::LINFO, ("done parsing tour file",filePath) );
+/*
     m_points.push_back( PointD( MercatorBounds::LonToX(12.123192), MercatorBounds::LatToY(47.796597) ) ); // Angerer Kurve (NO) / Einfahrt Mondi Inncoat
     m_points.push_back( PointD( MercatorBounds::LonToX(12.121801), MercatorBounds::LatToY(47.797094) ) ); // Angerer (N)
     m_points.push_back( PointD( MercatorBounds::LonToX(12.120500), MercatorBounds::LatToY(47.797566) ) ); // Kreuzung Angerer / B15
@@ -140,7 +164,7 @@ Tour::Tour(const string &filePath)
     m_points.push_back( PointD( MercatorBounds::LonToX(12.120404), MercatorBounds::LatToY(47.802446) ) ); // Eschenweg Richtung W
     m_points.push_back( PointD( MercatorBounds::LonToX(12.119868), MercatorBounds::LatToY(47.802172) ) ); // Kreuzung Eschenweg / B15
     m_points.push_back( PointD( MercatorBounds::LonToX(12.120449), MercatorBounds::LatToY(47.801371) ) ); // Kreuzung Eichenweg / B15
-
+*/
     LOG( my::LINFO, ("calculating times.") );
     CalculateTimes();
     LOG( my::LINFO, ("placing last turndirection") );
@@ -149,9 +173,6 @@ Tour::Tour(const string &filePath)
 
 Tour::~Tour()
 {
-}
-vector<PointD> &Tour::GetAllPoints(){
-    return m_points;
 }
 
 bool Tour::UpdateCurrentPosition( size_t index ){
