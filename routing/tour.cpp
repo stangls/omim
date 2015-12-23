@@ -77,7 +77,7 @@ public:
         LOG( my::LINFO, ("pop",tag) );
         ASSERT_EQUAL(m_tags.back(), tag, ());
         if (tag=="position"){
-            m_tour.GetAllPoints().emplace_back(MercatorBounds::LonToX(m_x),MercatorBounds::LonToY(m_y));
+            m_tour.GetAllPoints().emplace_back(MercatorBounds::LonToX(m_x),MercatorBounds::LatToY(m_y));
         }
         if (tag=="section"){
             // TODO: add turn definition
@@ -97,7 +97,9 @@ public:
             string const & currTag = m_tags[count - 1];
             string const & prevTag = m_tags[count - 2];
             string const ppTag = count > 3 ? m_tags[count - 3] : string();
-            // TODO
+            if (currTag=="name"){
+                m_tour.SetName(value);
+            }
         }
     }
 };
@@ -107,8 +109,11 @@ public:
 Tour::Tour(const string &filePath)
     : m_currentIndex(0),
       m_points(),
-      m_times()
+      m_times(),
+      m_turns(),
+      m_name("unnamed dummy tour")
 {
+
     // parse the file
 
     LOG( my::LINFO, ("reading input file") );
@@ -145,11 +150,6 @@ Tour::Tour(const string &filePath)
 Tour::~Tour()
 {
 }
-
-string Tour::GetName(){
-    return "dummy tour";
-}
-
 vector<PointD> &Tour::GetAllPoints(){
     return m_points;
 }

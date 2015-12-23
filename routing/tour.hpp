@@ -19,7 +19,12 @@ public:
     Tour();
     Tour( string const & filePath );
     ~Tour();
-    string GetName();
+    string GetName(){
+        return m_name;
+    }
+    void SetName(string name){
+        m_name=name;
+    }
 
     bool UpdateCurrentPosition(size_t index);
     vector<PointD> &GetAllPoints();
@@ -52,6 +57,7 @@ public:
 protected:
     void CalculateTimes();
 
+    string m_name;
     size_t m_currentIndex;
     pvec m_points;
     vector<double> m_times;
