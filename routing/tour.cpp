@@ -7,6 +7,7 @@
 #include "coding/file_reader.hpp"
 #include "coding/reader.hpp"
 #include "base/string_utils.hpp"
+//#include <stdlib.h>
 
 
 namespace routing
@@ -17,6 +18,12 @@ class TourParser
 {
     Tour &m_tour; // tour to be constructed / modified
     vector<string> m_tags;
+
+    PointD m_curPosition;
+    int m_roadAngle=0;
+    int m_roadIndex=0;
+    double m_x=0;
+    double m_y=0;
 
     void Reset()
     { }
@@ -43,16 +50,20 @@ public:
         LOG( my::LINFO, ("attr",attr,"=",value) );
         string attrInLowerCase = attr;
         strings::AsciiToLower(attrInLowerCase);
-/*
-        if (IsValidAttribute(kStyle, value, attrInLowerCase))
-            m_styleId = value;
-        else if (IsValidAttribute(kStyleMap, value, attrInLowerCase))
-            m_mapStyleId = value;*/
+
+        if (IsValidAttribute("position", attrInLowerCase, "x", value))
+            m_x = atof(value.c_str());
+        if (IsValidAttribute("position", attrInLowerCase, "y", value))
+            m_y = atof(value.c_str());
+        if (IsValidAttribute("junction", attrInLowerCase, "road_index", value))
+            m_roadIndex = atoi(value.c_str());
+        if (IsValidAttribute("road", attrInLowerCase, "angle", value))
+            m_roadAngle = atoi(value.c_str());
     }
 
-    bool IsValidAttribute(string const & type, string const & value, string const & attrInLowerCase) const
+    bool IsValidAttribute(string const & type, string const & attrInLowerCase, string const & attrShouldBe, string const & value) const
     {
-        return (GetTagFromEnd(0) == type && !value.empty() && attrInLowerCase == "id");
+        return (GetTagFromEnd(0) == type && !value.empty() && attrInLowerCase == attrShouldBe);
     }
 
     string const & GetTagFromEnd(size_t n) const
@@ -65,41 +76,13 @@ public:
     {
         LOG( my::LINFO, ("pop",tag) );
         ASSERT_EQUAL(m_tags.back(), tag, ());
-/*
-        if (tag == kPlacemark)
-        {
-            if (MakeValid())
-            {
-                if (GEOMETRY_TYPE_POINT == m_geometryType)
-                {
-                    Bookmark * bm = static_cast<Bookmark *>(m_controller.CreateUserMark(m_org));
-                    bm->SetData(BookmarkData(m_name, m_type, m_description, m_scale, m_timeStamp));
-                    bm->RunCreationAnim();
-                }
-                else if (GEOMETRY_TYPE_LINE == m_geometryType)
-                {
-                    Track::Params params;
-                    params.m_colors.push_back({ 5.0f, m_trackColor });
-                    params.m_name = m_name;
-
-                    /// @todo Add description, style, timestamp
-                    m_category.AddTrack(make_unique<Track>(m_points, params));
-                }
-            }
-            Reset();
+        if (tag=="position"){
+            m_tour.GetAllPoints().emplace_back(MercatorBounds::LonToX(m_x),MercatorBounds::LonToY(m_y));
         }
-        else if (tag == kStyle)
-        {
-            if (GetTagFromEnd(1) == kDocument)
-            {
-                if (!m_styleId.empty())
-                {
-                    m_styleUrl2Color[m_styleId] = m_trackColor;
-                    m_trackColor = kDefaultTrackColor;
-                }
-            }
+        if (tag=="section"){
+            // TODO: add turn definition
+            m_roadIndex = 0;
         }
-*/
         m_tags.pop_back();
     }
 
@@ -127,16 +110,17 @@ Tour::Tour(const string &filePath)
       m_times()
 {
     // parse the file
-    /*
+
     LOG( my::LINFO, ("reading input file") );
     ReaderPtr<Reader> const & reader = new FileReader(filePath);
-    LOG( my::LINFO, ("reading input file (2)") );
+    LOG( my::LINFO, ("reading input file (2)",filePath) );
     ReaderSource<ReaderPtr<Reader> > src(reader);
     LOG( my::LINFO, ("instatiating parser") );
     TourParser parser(*this);
     LOG( my::LINFO, ("parsing input file") );
     ParseXML(src, parser, true);
-    */
+    LOG( my::LINFO, ("done parsing.") );
+
     m_points.push_back( PointD( MercatorBounds::LonToX(12.123192), MercatorBounds::LatToY(47.796597) ) ); // Angerer Kurve (NO) / Einfahrt Mondi Inncoat
     m_points.push_back( PointD( MercatorBounds::LonToX(12.121801), MercatorBounds::LatToY(47.797094) ) ); // Angerer (N)
     m_points.push_back( PointD( MercatorBounds::LonToX(12.120500), MercatorBounds::LatToY(47.797566) ) ); // Kreuzung Angerer / B15
@@ -151,7 +135,10 @@ Tour::Tour(const string &filePath)
     m_points.push_back( PointD( MercatorBounds::LonToX(12.120404), MercatorBounds::LatToY(47.802446) ) ); // Eschenweg Richtung W
     m_points.push_back( PointD( MercatorBounds::LonToX(12.119868), MercatorBounds::LatToY(47.802172) ) ); // Kreuzung Eschenweg / B15
     m_points.push_back( PointD( MercatorBounds::LonToX(12.120449), MercatorBounds::LatToY(47.801371) ) ); // Kreuzung Eichenweg / B15
+
+    LOG( my::LINFO, ("calculating times.") );
     CalculateTimes();
+    LOG( my::LINFO, ("placing last turndirection") );
     m_turns.emplace_back(m_points.size()-1,turns::TurnDirection::ReachedYourDestination);
 }
 
