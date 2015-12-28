@@ -80,7 +80,9 @@ void RoutingSession::RebuildRoute(m2::PointD const & startPoint,
 {
   ASSERT(m_router != nullptr, ());
   if (m_tour != nullptr){
-      m_endPoint = *(m_tour->GetCurrentIt());
+      auto it=m_tour->GetCurrentIt();
+      ASSERT (it!=m_tour->GetEndIt(), ());
+      m_endPoint = *(it);
   }
   ASSERT_NOT_EQUAL(m_endPoint, m2::PointD::Zero(), ("End point was not set"));
   RemoveRoute();
@@ -224,7 +226,6 @@ RoutingSession::State RoutingSession::OnLocationPositionChanged(GpsInfo const & 
       m_state = RouteNeedRebuild;
     }
   }
-
   return m_state;
 }
 
@@ -352,16 +353,19 @@ void RoutingSession::AssignRoute(Route & route, IRouter::ResultCode e)
         }
     }
 
-    if (route.IsValid())
+    if (route.IsValid()){
       m_state = RouteNotStarted;
-    else
+    }else{
       m_state = RoutingNotActive;
+    }
 
-    if (e != IRouter::NoError)
+    if (e != IRouter::NoError){
       m_state = RouteNotReady;
+    }
   }
-  else
+  else{
     m_state = RoutingNotActive;
+  }
 
   route.SetRoutingSettings(m_routingSettings);
   m_route.Swap(route);
@@ -439,7 +443,6 @@ void RoutingSession::SetTurnNotificationsUnits(Settings::Units const units)
 
 void RoutingSession::SetTurnNotificationsLocale(string const & locale)
 {
-  LOG(LINFO, ("The language for turn notifications is", locale));
   threads::MutexGuard guard(m_routeSessionMutex);
   UNUSED_VALUE(guard);
   m_turnNotificationsMgr.SetLocale(locale);

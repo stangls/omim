@@ -369,6 +369,7 @@ public class RoutingController
     Statistics.INSTANCE.trackEvent(Statistics.EventName.ROUTING_START);
     AlohaHelper.logClick(AlohaHelper.ROUTING_START);
     setState(State.NAVIGATION);
+    Framework.nativeDisableFollowing();
     Framework.nativeFollowRoute();
 
     mContainer.showRoutePlan(false, null);
@@ -762,11 +763,14 @@ public class RoutingController
     Log.e("RoutingController", "searching for file " + tourFile);
     if (tourFile.exists()) {
       setState(State.PREPARE);
+      setBuildState(BuildState.BUILDING);
       Framework.nativeLoadTour(tourFile.getAbsolutePath());
       setStartFromMyPosition();
       setEndPoint(null);
-      setState(State.NAVIGATION);
-      Framework.nativeFollowRoute();
+      /*
+      Framework.nativeDisableFollowing();
+      Framework.nativeFollowRoute();*/
+      start();
     }
   }
 

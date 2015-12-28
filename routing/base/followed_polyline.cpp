@@ -2,6 +2,9 @@
 #include "geometry/angles.hpp"
 #include "base/logging.hpp"
 
+#include <math.h>
+#include <float.h>
+
 namespace routing
 {
 
@@ -128,7 +131,7 @@ Iter FollowedPolyline::GetClosestProjection(m2::RectD const & posRect, const vec
             //LOG(my::LINFO,("skipTo=",skipTo));
             ASSERT( i<=skipTo-1, ("internal error with non-ff-intervals") );
             i=skipTo-1; // will be incremented on continuing for-loop
-            //LOG(my::LINFO,("skip to",i,count));
+            LOG(my::LINFO,("skip to",i,count));
             continue;
         }
     }else
@@ -229,12 +232,10 @@ void FollowedPolyline::UpdateLastNonCrossing() const
         double lastNonCrossingDistance = 0.0;
         m2::PointD point0 = m_current.m_pt;
         size_t i = m_current.m_ind+1;
-        m2::PointD point1 = m_poly.GetPoint(i);
-        double angle = ang::AngleTo(point0,point1);
         double cMin=-DBL_MAX;
         double cMax=+DBL_MAX;
         for (; i<m_poly.GetSize(); i++){
-            point1 = m_poly.GetPoint(i);
+            m2::PointD point1 = m_poly.GetPoint(i);
 
             double len = point0.Length(point1);
             if (len>0.000000001) {
