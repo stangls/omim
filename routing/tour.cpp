@@ -16,6 +16,7 @@ namespace routing
 namespace{ // anonymous namespace for parses
 
 using TD = turns::TurnDirection;
+using TI = turns::TurnItem;
 
 class TourParser
 {
@@ -80,10 +81,13 @@ public:
     {
         ASSERT_EQUAL(m_tags.back(), tag, ());
         if (tag=="position") {
-            LOG( my::LINFO, ("adding point from XML:",m_x,m_y) );
-            m_tour.GetAllPoints().emplace_back(MercatorBounds::LonToX(m_x),MercatorBounds::LatToY(m_y));
+            auto points = m_tour.GetAllPoints();
+            if (points.size()<2){
+                LOG( my::LINFO, ("adding point (",points.size(),") from XML:",m_x,m_y) );
+                m_tour.AddPoint(m_x,m_y);
+            }
         }
-        if (tag=="section") {
+        /*if (tag=="section") {
             LOG( my::LINFO, ("adding junction") );
             turns::TurnDirection turnDirection=turns::TurnDirection::NoTurn;
             if (m_roadIndex!=0){
@@ -108,9 +112,9 @@ public:
                 else
                     turnDirection=TD::GoStraight;
             }
-            m_tour.GetAllTurns().emplace_back(m_tour.GetAllPoints().size(),turnDirection,m_roadIndex);
+            m_tour.AddTurn(TI(m_tour.GetAllPoints().size()-1,turnDirection,m_roadIndex));
             m_roadIndex = 0;
-        }
+        }*/
         m_tags.pop_back();
     }
 
@@ -134,15 +138,13 @@ public:
 
 
 Tour::Tour(const string &filePath)
-    : m_currentIndex(0),
+    : m_name("unnamed dummy tour"),
+      m_currentIndex(0),
       m_points(),
       m_times(),
-      m_turns(),
-      m_name("unnamed dummy tour")
+      m_turns()
 {
-
-    // parse the file
-
+    // parse the XML file
     LOG( my::LINFO, ("reading tour file ",filePath) );
     ReaderPtr<Reader> const & reader = new FileReader(filePath);
     ReaderSource<ReaderPtr<Reader> > src(reader);
@@ -167,8 +169,15 @@ Tour::Tour(const string &filePath)
 */
     LOG( my::LINFO, ("calculating times.") );
     CalculateTimes();
+    if (m_turns.size()>0) {
+        LOG( my::LINFO, ("removing last turndirection") );
+        m_turns.pop_back();
+    }
     LOG( my::LINFO, ("placing last turndirection") );
     m_turns.emplace_back(m_points.size()-1,turns::TurnDirection::ReachedYourDestination);
+
+    ASSERT( m_points.size()==m_times.size(), () );
+    ASSERT( m_turns.back().m_index == m_points.size()-1, () );
 }
 
 Tour::~Tour()

@@ -80,7 +80,9 @@ void RoutingSession::RebuildRoute(m2::PointD const & startPoint,
 {
   ASSERT(m_router != nullptr, ());
   if (m_tour != nullptr){
-      m_endPoint = *(m_tour->GetCurrentIt());
+      auto it=m_tour->GetCurrentIt();
+      ASSERT (it!=m_tour->GetEndIt(), ());
+      m_endPoint = *(it);
   }
   ASSERT_NOT_EQUAL(m_endPoint, m2::PointD::Zero(), ("End point was not set"));
   RemoveRoute();
@@ -149,35 +151,44 @@ void RoutingSession::Reset()
 
 RoutingSession::State RoutingSession::OnLocationPositionChanged(GpsInfo const & info, Index const & index)
  {
+  LOG(my::LINFO,("OnLocationPositionChanged 1"));
   ASSERT(m_state != RoutingNotActive, ());
   ASSERT(m_router != nullptr, ());
 
+  LOG(my::LINFO,("OnLocationPositionChanged 2"));
   if (m_state == RouteNeedRebuild || m_state == RouteFinished || m_state == RouteBuilding ||
       m_state == RouteNotReady || m_state == RouteNoFollowing)
     return m_state;
 
+  LOG(my::LINFO,("OnLocationPositionChanged 3"));
   threads::MutexGuard guard(m_routeSessionMutex);
   UNUSED_VALUE(guard);
   ASSERT(m_route.IsValid(), ());
 
+  LOG(my::LINFO,("OnLocationPositionChanged 5"));
   m_turnNotificationsMgr.SetSpeedMetersPerSecond(info.m_speed);
 
+  LOG(my::LINFO,("OnLocationPositionChanged 5"));
   if (m_route.MoveIterator(info))
   {
+    LOG(my::LINFO,("OnLocationPositionChanged 6a"));
     m_moveAwayCounter = 0;
     m_lastDistance = 0.0;
 
     if (m_route.IsCurrentOnEnd())
     {
+        LOG(my::LINFO,("OnLocationPositionChanged 7aa"));
       m_passedDistanceOnRouteMeters += m_route.GetTotalDistanceMeters();
       m_state = RouteFinished;
 
       alohalytics::TStringMap params = {{"router", m_route.GetRouterId()},
                                         {"passedDistance", strings::to_string(m_passedDistanceOnRouteMeters)}};
       alohalytics::LogEvent("RouteTracking_ReachedDestination", params);
+      LOG(my::LINFO,("OnLocationPositionChanged 8aa"));
     }
     else
     {
+        LOG(my::LINFO,("OnLocationPositionChanged 7ab"));
       m_state = OnRoute;
 
       // Warning signals checks
@@ -196,17 +207,20 @@ RoutingSession::State RoutingSession::OnLocationPositionChanged(GpsInfo const & 
           }
         }
       }
+      LOG(my::LINFO,("OnLocationPositionChanged 8ab"));
     }
     m_lastGoodPosition = m_userCurrentPosition;
   }
   else
   {
+      LOG(my::LINFO,("OnLocationPositionChanged 6b"));
     // Distance from the last known projection on route
     // (check if we are moving far from the last known projection).
     double const dist = MercatorBounds::DistanceOnEarth(m_route.GetFollowedPolyline().GetCurrentIter().m_pt,
                                                         MercatorBounds::FromLatLon(info.m_latitude, info.m_longitude));
     if (my::AlmostEqualAbs(dist, m_lastDistance, kRunawayDistanceSensitivityMeters))
         return m_state;
+    LOG(my::LINFO,("OnLocationPositionChanged 7b"));
     if (dist > m_lastDistance)
     {
       ++m_moveAwayCounter;
@@ -223,13 +237,15 @@ RoutingSession::State RoutingSession::OnLocationPositionChanged(GpsInfo const & 
       m_passedDistanceOnRouteMeters += m_route.GetCurrentDistanceFromBeginMeters();
       m_state = RouteNeedRebuild;
     }
+    LOG(my::LINFO,("OnLocationPositionChanged 8b"));
   }
-
+  LOG(my::LINFO,("OnLocationPositionChanged 9"));
   return m_state;
 }
 
 void RoutingSession::GetRouteFollowingInfo(FollowingInfo & info) const
 {
+  LOG(my::LINFO,("start"));
   auto formatDistFn = [](double dist, string & value, string & suffix)
   {
     /// @todo Make better formatting of distance and units.
@@ -241,9 +257,11 @@ void RoutingSession::GetRouteFollowingInfo(FollowingInfo & info) const
     value.erase(delim);
   };
 
+  LOG(my::LINFO,("guard"));
   threads::MutexGuard guard(m_routeSessionMutex);
   UNUSED_VALUE(guard);
 
+  LOG(my::LINFO,("isvalid?"));
   if (!m_route.IsValid())
   {
     // nothing should be displayed on the screen about turns if these lines are executed
@@ -251,21 +269,26 @@ void RoutingSession::GetRouteFollowingInfo(FollowingInfo & info) const
     return;
   }
 
+  LOG(my::LINFO,("is navigable?"));
   if (!IsNavigable())
   {
     info = FollowingInfo();
+    LOG(my::LINFO,("-> GetTotalDistanceMeters"));
     formatDistFn(m_route.GetTotalDistanceMeters(), info.m_distToTarget, info.m_targetUnitsSuffix);
     return;
   }
 
+  LOG(my::LINFO,("-> GetCurrentDistanceToEndMeters"));
   formatDistFn(m_route.GetCurrentDistanceToEndMeters(), info.m_distToTarget, info.m_targetUnitsSuffix);
 
   double distanceToTurnMeters = 0.;
   turns::TurnItem turn;
+  LOG(my::LINFO,("-> GetCurrentTurn"));
   m_route.GetCurrentTurn(distanceToTurnMeters, turn);
   formatDistFn(distanceToTurnMeters, info.m_distToTurn, info.m_turnUnitsSuffix);
   info.m_turn = turn.m_turn;
 
+  LOG(my::LINFO,("-> second turn"));
   // The turn after the next one.
   if (m_routingSettings.m_showTurnAfterNext)
     info.m_nextTurn = m_turnNotificationsMgr.GetSecondTurnNotification();
@@ -273,6 +296,7 @@ void RoutingSession::GetRouteFollowingInfo(FollowingInfo & info) const
     info.m_nextTurn = routing::turns::TurnDirection::NoTurn;
 
   info.m_exitNum = turn.m_exitNum;
+  LOG(my::LINFO,("-> GetCurrentTimeToEndSec"));
   info.m_time = m_route.GetCurrentTimeToEndSec();
   info.m_sourceName = turn.m_sourceName;
   info.m_targetName = turn.m_targetName;
@@ -280,6 +304,7 @@ void RoutingSession::GetRouteFollowingInfo(FollowingInfo & info) const
     (m_passedDistanceOnRouteMeters + m_route.GetCurrentDistanceFromBeginMeters()) /
     (m_passedDistanceOnRouteMeters + m_route.GetTotalDistanceMeters());
 
+  LOG(my::LINFO,("-> lane information"));
   // Lane information.
   if (distanceToTurnMeters < kShowLanesDistInMeters)
   {
@@ -297,16 +322,19 @@ void RoutingSession::GetRouteFollowingInfo(FollowingInfo & info) const
     info.m_lanes.clear();
   }
 
+  LOG(my::LINFO,("-> speed cam"));
   // Speedcam signal information.
   info.m_speedWarningSignal = m_speedWarningSignal;
   m_speedWarningSignal = false;
 
+  LOG(my::LINFO,("-> ped info"));
   // Pedestrian info
   m2::PointD pos;
   m_route.GetCurrentDirectionPoint(pos);
   info.m_pedestrianDirectionPos = MercatorBounds::ToLatLon(pos);
   info.m_pedestrianTurn =
       (distanceToTurnMeters < kShowPedestrianTurnInMeters) ? turn.m_pedestrianTurn : turns::PedestrianDirection::None;
+  LOG(my::LINFO,("done"));
 }
 
 void RoutingSession::GenerateTurnNotifications(vector<string> & turnNotifications)
@@ -333,41 +361,57 @@ void RoutingSession::AssignRoute(Route & route, IRouter::ResultCode e)
   {
     if (m_tour!=nullptr){
         auto route_previous_size = route.GetPoly().GetSize();
+        LOG(my::LINFO,("appending tour to route of length",route_previous_size));
+        LOG(my::LINFO,("poly length",route.GetPoly().GetSize()));
+        LOG(my::LINFO,("times length",route.m_times.size()));
+        LOG(my::LINFO,("last turn index",route.GetTurns().back().m_index));
         {
             auto end = m_tour->GetEndIt();
             auto cur = m_tour->GetCurrentIt();
             ASSERT( cur != end && cur+1 != end, () );
             route.AppendGeometry( cur+1, end, false );
         }
+        LOG(my::LINFO,("appending times"));
         {
             auto end = m_tour->GetTimesEndIt();
             auto cur = m_tour->GetTimesCurrentIt();
             ASSERT( cur != end && cur+1 != end, () );
             route.AppendTimes( cur+1, end );
         }
+        LOG(my::LINFO,("appending turns"));
         {
             auto end = m_tour->GetTurnsEndIt();
             auto cur = m_tour->GetTurnsCurrentIt();
             route.AppendTurns( cur, end, m_tour->GetCurrentIndex()+1, route_previous_size );
         }
+        LOG(my::LINFO,("poly length",route.GetPoly().GetSize()));
+        LOG(my::LINFO,("times length",route.m_times.size()));
+        LOG(my::LINFO,("last turn index",route.GetTurns().back().m_index));
     }
 
-    if (route.IsValid())
+    if (route.IsValid()){
       m_state = RouteNotStarted;
-    else
+      LOG(my::LINFO,("route is valid"));
+    }else{
       m_state = RoutingNotActive;
+      LOG(my::LINFO,("route is invalid"));
+    }
 
-    if (e != IRouter::NoError)
+    if (e != IRouter::NoError){
+      LOG(my::LINFO,("no error during route computation"));
       m_state = RouteNotReady;
+    }
   }
-  else
+  else{
     m_state = RoutingNotActive;
+  }
 
   route.SetRoutingSettings(m_routingSettings);
   m_route.Swap(route);
   m_lastWarnedSpeedCameraIndex = 0;
   m_lastCheckedSpeedCameraIndex = 0;
   m_lastFoundCamera = SpeedCameraRestriction();
+  LOG(my::LINFO,("done"));
 }
 
 void RoutingSession::SetRouter(unique_ptr<IRouter> && router,
