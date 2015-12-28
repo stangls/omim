@@ -15,8 +15,13 @@ void main(void)
   lowp vec4 fakeColor = texture2D(u_colorTex, vec2(0.0, 0.0)) * kFakeColorScalar;
 #endif
 
+    // we can safely assume that v_length.w ( = position of non-crossing ) is greater than v_length.z ( = position of user )
     if (v_length.x > v_length.w){
+#ifdef SAMSUNG_GOOGLE_NEXUS
       gl_FragColor = u_color_light + fakeColor;
+#else
+      gl_FragColor = u_color_light;
+#endif
     }else{
       vec4 color = u_color;
       if (v_length.x < v_length.z)
