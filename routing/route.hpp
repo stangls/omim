@@ -146,7 +146,7 @@ private:
   double GetPolySegAngle(size_t ind) const;
   TTurns::const_iterator GetCurrentTurn() const;
 
-private:
+public:
   friend string DebugPrint(Route const & r);
 
   string m_router;

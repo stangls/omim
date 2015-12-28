@@ -330,6 +330,7 @@ void FrontendRenderer::AcceptMessage(ref_ptr<Message> message)
 
   case Message::FlushRoute:
     {
+      LOG(my::LDEBUG,("flush route message received"));
       ref_ptr<FlushRouteMessage> msg = message;
       drape_ptr<RouteData> routeData = msg->AcceptRouteData();
       m2::PointD const startPoint = routeData->m_sourcePolyline.Front();
@@ -337,6 +338,7 @@ void FrontendRenderer::AcceptMessage(ref_ptr<Message> message)
       m_routeRenderer->SetRouteData(move(routeData), make_ref(m_gpuProgramManager));
       if (!m_routeRenderer->GetStartPoint())
       {
+        LOG(my::LDEBUG,("flush route message -> cache start sign"));
         m_commutator->PostMessage(ThreadsCommutator::ResourceUploadThread,
                                   make_unique_dp<CacheRouteSignMessage>(startPoint, true /* isStart */,
                                                                         true /* isValid */),
@@ -344,13 +346,16 @@ void FrontendRenderer::AcceptMessage(ref_ptr<Message> message)
       }
       if (!m_routeRenderer->GetFinishPoint())
       {
+          LOG(my::LDEBUG,("flush route message -> cache finish sign"));
         m_commutator->PostMessage(ThreadsCommutator::ResourceUploadThread,
                                   make_unique_dp<CacheRouteSignMessage>(finishPoint, false /* isStart */,
                                                                         true /* isValid */),
                                   MessagePriority::High);
       }
 
+      LOG(my::LDEBUG,("flush route message -> activate routing"));
       m_myPositionController->ActivateRouting();
+      LOG(my::LDEBUG,("flush route message -> done"));
       break;
     }
 
