@@ -252,7 +252,6 @@ public class MwmApplication extends Application
 
   public void runNativeFunctorOnUiThread(final long functorPointer)
   {
-    Log.d(TAG, "runNativeFunctorOnUiThread: "+functorPointer);
     Message m = Message.obtain(mMainLoopHandler, new Runnable()
     {
       @Override

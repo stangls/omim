@@ -10,8 +10,6 @@
 
 #include "3party/Alohalytics/src/alohalytics.h"
 
-#include "base/logging.hpp"
-
 namespace df
 {
 
@@ -137,7 +135,6 @@ bool MyPositionController::IsModeChangeViewport() const
 
 bool MyPositionController::IsModeHasPosition() const
 {
-  LOG(my::LDEBUG,("IsModeHasPosition true iff",GetMode(),">=",location::MODE_NOT_FOLLOW));
   return GetMode() >= location::MODE_NOT_FOLLOW;
 }
 
@@ -255,7 +252,6 @@ void MyPositionController::NextMode(int preferredZoomLevel)
     newMode = IsRotationActive() ? location::MODE_ROTATE_AND_FOLLOW : location::MODE_FOLLOW;
   }
 
-  LOG(my::LDEBUG,("!!!! from",currentMode,"to",newMode,"while routing is",IsInRouting()?"on":"off"));
   SetModeInfo(ChangeMode(m_modeInfo, newMode), IsInRouting());
   Follow(preferredZoomLevel);
 }
@@ -434,15 +430,12 @@ void MyPositionController::SetModeInfo(uint32_t modeInfo, bool force)
 {
   location::EMyPositionMode const newMode = ResetAllModeBits(modeInfo);
   location::EMyPositionMode const oldMode = GetMode();
-  LOG(my::LDEBUG,("from",oldMode,"to",newMode,force?"forced":"unforced"));
   m_modeInfo = modeInfo;
   if (newMode != oldMode || force)
   {
     AnimateStateTransition(oldMode, newMode);
     CallModeListener(newMode);
-    LOG(my::LDEBUG,("performed"));
   }
-  LOG(my::LDEBUG,("done"));
 }
 
 location::EMyPositionMode MyPositionController::GetMode() const
@@ -454,8 +447,6 @@ void MyPositionController::CallModeListener(uint32_t mode)
 {
   if (m_modeChangeCallback != nullptr)
     m_modeChangeCallback(ResetAllModeBits(mode));
-  else
-    LOG(my::LDEBUG,("mode change callback is NULL !"));
 }
 
 bool MyPositionController::IsInRouting() const
@@ -573,15 +564,11 @@ void MyPositionController::CreateAnim(m2::PointD const & oldPos, double oldAzimu
 
 void MyPositionController::ActivateRouting()
 {
-  LOG(my::LDEBUG,("ActivateRouting"));
   if (!IsInRouting())
   {
-    LOG(my::LDEBUG,("-> NOT IsInRouting"));
     location::EMyPositionMode newMode = GetMode();
-    if (IsModeHasPosition()){
-      LOG(my::LDEBUG,("-> IsModeHasPosition"));
+    if (IsModeHasPosition())
       newMode = location::MODE_NOT_FOLLOW;
-    }
 
     SetModeInfo(ChangeMode(SetModeBit(m_modeInfo, RoutingSessionBit), newMode));
   }
@@ -589,7 +576,6 @@ void MyPositionController::ActivateRouting()
 
 void MyPositionController::DeactivateRouting()
 {
-  LOG(my::LDEBUG,("DeactivateRouting"));
   if (IsInRouting())
   {
     SetModeInfo(ResetModeBit(m_modeInfo, RoutingSessionBit));
