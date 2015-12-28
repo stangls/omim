@@ -82,12 +82,10 @@ public:
         ASSERT_EQUAL(m_tags.back(), tag, ());
         if (tag=="position") {
             auto points = m_tour.GetAllPoints();
-            if (points.size()<2){
-                LOG( my::LINFO, ("adding point (",points.size(),") from XML:",m_x,m_y) );
-                m_tour.AddPoint(m_x,m_y);
-            }
+            //LOG( my::LINFO, ("adding point (",points.size(),") from XML:",m_x,m_y) );
+            m_tour.AddPoint(m_x,m_y);
         }
-        /*if (tag=="section") {
+        if (tag=="section") {
             LOG( my::LINFO, ("adding junction") );
             turns::TurnDirection turnDirection=turns::TurnDirection::NoTurn;
             if (m_roadIndex!=0){
@@ -114,7 +112,7 @@ public:
             }
             m_tour.AddTurn(TI(m_tour.GetAllPoints().size()-1,turnDirection,m_roadIndex));
             m_roadIndex = 0;
-        }*/
+        }
         m_tags.pop_back();
     }
 
