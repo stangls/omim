@@ -28,6 +28,7 @@ class TourParser
     int m_roadIndex=0;
     double m_x=0;
     double m_y=0;
+    bool m_tracePosition=false;
 
     void Reset()
     { }
@@ -45,6 +46,15 @@ public:
     bool Push(string const & tag)
     {
         m_tags.push_back(tag);
+        size_t const count = m_tags.size();
+        if (count > 1)
+        {
+            string const & currTag = m_tags[count - 1];
+            string const & prevTag = m_tags[count - 2];
+            if (currTag=="position" && prevTag=="trace"){
+                m_tracePosition=true;
+            }
+        }
         return true;
     }
 
@@ -83,7 +93,10 @@ public:
         if (tag=="position") {
             auto points = m_tour.GetAllPoints();
             //LOG( my::LINFO, ("adding point (",points.size(),") from XML:",m_x,m_y) );
-            m_tour.AddPoint(m_x,m_y);
+            if (m_tracePosition){
+                m_tour.AddPoint(m_x,m_y);
+                m_tracePosition=false;
+            }
         }
         if (tag=="section") {
             LOG( my::LINFO, ("adding junction") );
