@@ -546,6 +546,9 @@ public:
   void SetRouteFinishPoint(m2::PointD const & pt, bool isValid);
 
   void LoadTour( string const & filePath );
+  bool IsTourRouting(){
+      return m_routingSession.hasTour();
+  }
 
 private:
   void SetRouterImpl(routing::RouterType type);

@@ -44,9 +44,18 @@ void LayerRenderer::Merge(ref_ptr<LayerRenderer> other)
   {
     TRenderers::iterator it = m_renderers.find(r.first);
     if (it != m_renderers.end())
+    {
       it->second = move(r.second);
+      if (m_activeOverlay != nullptr && m_activeOverlayWidget == r.first)
+      {
+        m_activeOverlay->OnTapEnd();
+        m_activeOverlay = nullptr;
+      }
+    }
     else
+    {
       m_renderers.insert(make_pair(r.first, move(r.second)));
+    }
   }
 
   other->m_renderers.clear();
@@ -82,6 +91,7 @@ bool LayerRenderer::OnTouchDown(m2::RectD const & touchArea)
     m_activeOverlay = r.second->ProcessTapEvent(touchArea);
     if (m_activeOverlay != nullptr)
     {
+      m_activeOverlayWidget = r.first;
       m_activeOverlay->OnTapBegin();
       return true;
     }
@@ -176,6 +186,9 @@ drape_ptr<LayerRenderer> LayerCacher::RecacheWidgets(TWidgetsInitInfo const & in
       sizeInfo[node.first] = cacheFunction->second(node.second, make_ref(renderer), textures);
   }
 
+  // Flush gui geometry.
+  GLFunctions::glFlush();
+
   return renderer;
 }
 
@@ -191,6 +204,10 @@ drape_ptr<LayerRenderer> LayerCacher::RecacheCountryStatus(ref_ptr<dp::TextureMa
   RegisterButtonHandler(handlers, CountryStatusHelper::BUTTON_TRY_AGAIN);
 
   renderer->AddShapeRenderer(WIDGET_COUNTRY_STATUS, countryStatus.Draw(textures, handlers));
+
+  // Flush gui geometry.
+  GLFunctions::glFlush();
+
   return renderer;
 }
 

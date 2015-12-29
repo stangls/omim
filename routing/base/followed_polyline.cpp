@@ -131,7 +131,7 @@ Iter FollowedPolyline::GetClosestProjection(m2::RectD const & posRect, const vec
             //LOG(my::LINFO,("skipTo=",skipTo));
             ASSERT( i<=skipTo-1, ("internal error with non-ff-intervals") );
             i=skipTo-1; // will be incremented on continuing for-loop
-            LOG(my::LINFO,("skip to",i,count));
+            //LOG(my::LINFO,("skip to",i));
             continue;
         }
     }else

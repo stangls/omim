@@ -121,8 +121,6 @@ public class Framework
 
   public native static void nativeBuildRoute(double startLat, double startLon, double finishLat, double finishLon);
 
-  public native static void nativeLoadTour(String filePath);
-
   public native static void nativeFollowRoute();
 
   public native static void nativeDisableFollowing();
@@ -179,4 +177,9 @@ public class Framework
   public native static void nativeRegisterMaps();
 
   public native static void nativeDeregisterMaps();
+
+  /////////////////// TOUR routing
+
+  public native static void nativeLoadTour(String filePath);
+  public native static boolean nativeIsTourRouting();
 }

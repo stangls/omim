@@ -62,7 +62,7 @@ class FrontendRenderer : public BaseRenderer
 {
 public:
   using TModelViewChanged = function<void (ScreenBase const & screen)>;
-  using TIsCountryLoaded = TIsCountryLoaded;
+  //using TIsCountryLoaded = TIsCountryLoaded;
   using TTapEventInfoFn = function<void (m2::PointD const & pxPoint, bool isLong, bool isMyPosition, FeatureID const & id)>;
   using TUserPositionChangedFn = function<void (m2::PointD const & pt)>;
 
@@ -102,6 +102,8 @@ public:
 
   FrontendRenderer(Params const & params);
   ~FrontendRenderer() override;
+
+  void Teardown();
 
 #ifdef DRAW_INFO
   double m_tpf;
@@ -232,6 +234,10 @@ private:
   int m_currentZoomLevel = -1;
   ref_ptr<RequestedTiles> m_requestedTiles;
   uint64_t m_maxGeneration;
+
+#ifdef DEBUG
+  bool m_isTeardowned;
+#endif
 };
 
 } // namespace df

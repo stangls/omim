@@ -58,7 +58,13 @@ public:
         return m_turns;
     }
     vector<TI>::iterator GetTurnsCurrentIt(){
-        return m_turns.begin()+m_currentIndex;
+        auto it = m_turns.begin();
+        while (it!=m_turns.end()){
+            if ((*it).m_index>=m_currentIndex)
+                break;
+            it++;
+        }
+        return it;
     }
     vector<TI>::iterator GetTurnsEndIt(){
         return m_turns.end();

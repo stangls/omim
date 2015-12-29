@@ -6,6 +6,7 @@
 #include "drape_frontend/user_mark_shapes.hpp"
 
 #include "drape/debug_rect_renderer.hpp"
+#include "drape/support_manager.hpp"
 
 #include "drape/utils/glyph_usage_tracker.hpp"
 #include "drape/utils/gpu_mem_tracker.hpp"
@@ -55,6 +56,10 @@ FrontendRenderer::FrontendRenderer(Params const & params)
   m_fps = 0.0;
 #endif
 
+#ifdef DEBUG
+  m_isTeardowned = false;
+#endif
+
   ASSERT(m_tapEventInfoFn, ());
   ASSERT(m_userPositionChangedFn, ());
 
@@ -66,7 +71,15 @@ FrontendRenderer::FrontendRenderer(Params const & params)
 
 FrontendRenderer::~FrontendRenderer()
 {
+  ASSERT(m_isTeardowned, ());
+}
+
+void FrontendRenderer::Teardown()
+{
   StopThread();
+#ifdef DEBUG
+  m_isTeardowned = true;
+#endif
 }
 
 #ifdef DRAW_INFO
@@ -330,6 +343,7 @@ void FrontendRenderer::AcceptMessage(ref_ptr<Message> message)
 
   case Message::FlushRoute:
     {
+      LOG(my::LDEBUG,("flush route message received"));
       ref_ptr<FlushRouteMessage> msg = message;
       drape_ptr<RouteData> routeData = msg->AcceptRouteData();
       m2::PointD const startPoint = routeData->m_sourcePolyline.Front();
@@ -337,6 +351,7 @@ void FrontendRenderer::AcceptMessage(ref_ptr<Message> message)
       m_routeRenderer->SetRouteData(move(routeData), make_ref(m_gpuProgramManager));
       if (!m_routeRenderer->GetStartPoint())
       {
+        LOG(my::LDEBUG,("flush route message -> cache start sign"));
         m_commutator->PostMessage(ThreadsCommutator::ResourceUploadThread,
                                   make_unique_dp<CacheRouteSignMessage>(startPoint, true /* isStart */,
                                                                         true /* isValid */),
@@ -344,13 +359,16 @@ void FrontendRenderer::AcceptMessage(ref_ptr<Message> message)
       }
       if (!m_routeRenderer->GetFinishPoint())
       {
+          LOG(my::LDEBUG,("flush route message -> cache finish sign"));
         m_commutator->PostMessage(ThreadsCommutator::ResourceUploadThread,
                                   make_unique_dp<CacheRouteSignMessage>(finishPoint, false /* isStart */,
                                                                         true /* isValid */),
                                   MessagePriority::High);
       }
 
+      LOG(my::LDEBUG,("flush route message -> activate routing"));
       m_myPositionController->ActivateRouting();
+      LOG(my::LDEBUG,("flush route message -> done"));
       break;
     }
 
@@ -814,6 +832,10 @@ void FrontendRenderer::OnTwoFingersTap()
 
 bool FrontendRenderer::OnSingleTouchFiltrate(m2::PointD const & pt, TouchEvent::ETouchType type)
 {
+  // This method can be called before gui rendererer initialization.
+  if (m_guiRenderer == nullptr)
+    return false;
+
   float const rectHalfSize = df::VisualParams::Instance().GetTouchRectRadius();
   m2::RectD r(-rectHalfSize, -rectHalfSize, rectHalfSize, rectHalfSize);
   r.SetCenter(pt);
@@ -929,6 +951,8 @@ void FrontendRenderer::Routine::Do()
   context->makeCurrent();
   GLFunctions::Init();
   GLFunctions::AttachCache(this_thread::get_id());
+
+  dp::SupportManager::Instance().Init();
 
   GLFunctions::glPixelStore(gl_const::GLUnpackAlignment, 1);
   GLFunctions::glEnable(gl_const::GLDepthTest);

@@ -121,6 +121,9 @@ public:
 
   void SetTour( unique_ptr<Tour> tour );
   void RemoveTour();
+  bool hasTour(){
+      return m_tour!=nullptr;
+  }
 
 private:
   struct DoReadyCallback
@@ -181,6 +184,10 @@ private:
 
   // Tour to be used for replacing routing-destination (if available).
   unique_ptr<Tour> m_tour;
+  // Index of "point nav" ( = endpoint of routing-computation, first point of tour in m_route ) in m_route
+  size_t m_tourStartIndexInRoute;
+  // Index of "point nav" in m_tour
+  size_t m_tourStartIndex;
 
 };
 }  // namespace routing

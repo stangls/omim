@@ -194,8 +194,10 @@ public enum LocationHelper implements SensorEventListener
     mIteratingListener = false;
     if (!mListenersToRemove.isEmpty())
     {
+      mLogger.d("removing "+mListenersToRemove.size()+" listeners");
       mListeners.removeAll(mListenersToRemove);
       mListenersToRemove.clear();
+      mLogger.d(""+mListeners.size()+" listeners remaining");
     }
   }
 
@@ -204,8 +206,10 @@ public enum LocationHelper implements SensorEventListener
     if (mLastLocation == null)
       return;
     startIteratingListeners();
-    for (LocationListener listener : mListeners)
+    for (LocationListener listener : mListeners) {
+      mLogger.d("notifying about location update : "+listener);
       listener.onLocationUpdated(mLastLocation);
+    }
     finishIteratingListeners();
   }
 
@@ -228,6 +232,7 @@ public enum LocationHelper implements SensorEventListener
   @android.support.annotation.UiThread
   public void addLocationListener(LocationListener listener)
   {
+    mLogger.d("adding listener " + listener);
     UiThread.cancelDelayedTasks(mStopLocationTask);
     if (mListeners.isEmpty())
       mLocationProvider.startUpdates();
@@ -238,6 +243,7 @@ public enum LocationHelper implements SensorEventListener
   @android.support.annotation.UiThread
   public void removeLocationListener(LocationListener listener)
   {
+    mLogger.d("removing listener "+listener);
     boolean empty = false;
     if (mIteratingListener)
     {

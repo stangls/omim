@@ -28,6 +28,10 @@ BackendRenderer::BackendRenderer(Params const & params)
   , m_readManager(make_unique_dp<ReadManager>(params.m_commutator, m_model))
   , m_requestedTiles(params.m_requestedTiles)
 {
+#ifdef DEBUG
+  m_isTeardowned = false;
+#endif
+
   gui::DrapeGui::Instance().SetRecacheCountryStatusSlot([this]()
   {
     m_commutator->PostMessage(ThreadsCommutator::ResourceUploadThread,
@@ -37,6 +41,7 @@ BackendRenderer::BackendRenderer(Params const & params)
 
   m_routeBuilder = make_unique_dp<RouteBuilder>([this](drape_ptr<RouteData> && routeData)
   {
+    LOG(my::LDEBUG,("BackendRenderer -> m_routeBuilder"));
     m_commutator->PostMessage(ThreadsCommutator::RenderThread,
                               make_unique_dp<FlushRouteMessage>(move(routeData)),
                               MessagePriority::Normal);
@@ -52,8 +57,16 @@ BackendRenderer::BackendRenderer(Params const & params)
 
 BackendRenderer::~BackendRenderer()
 {
+  ASSERT(m_isTeardowned, ());
+}
+
+void BackendRenderer::Teardown()
+{
   gui::DrapeGui::Instance().ClearRecacheCountryStatusSlot();
   StopThread();
+#ifdef DEBUG
+  m_isTeardowned = true;
+#endif
 }
 
 unique_ptr<threads::IRoutine> BackendRenderer::CreateRoutine()
@@ -287,6 +300,7 @@ void BackendRenderer::RecacheMyPosition()
   auto msg = make_unique_dp<MyPositionShapeMessage>(make_unique_dp<MyPosition>(m_texMng),
                                                     make_unique_dp<SelectionShape>(m_texMng));
 
+  GLFunctions::glFlush();
   m_commutator->PostMessage(ThreadsCommutator::RenderThread, move(msg), MessagePriority::High);
 }
 

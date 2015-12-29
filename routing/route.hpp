@@ -55,8 +55,9 @@ public:
    * Replaces the current FollowedPolyline.
    * @param fastForward if set to true, the Route::MoveIterator() method will not try to fast-forward into this geometry,
    *        i.e. if the current position does match an earlier (not yet visited point in other geometries), it will use that one.
+   * @return index of first point in overall geometry
    */
-  template <class TIter> void AppendGeometry( TIter beg, TIter end, bool fastForward )
+  template <class TIter> size_t AppendGeometry( TIter beg, TIter end, bool fastForward )
   {
       vector<m2::PointD> vector = m_poly.GetPolyline().GetPoints();
       size_t start=vector.size();
@@ -70,6 +71,7 @@ public:
       }
       FollowedPolyline(vector.begin(),vector.end()).Swap(m_poly);
       Update();
+      return start;
   }
 
   inline void SetTurnInstructions(TTurns & v)
@@ -146,7 +148,7 @@ private:
   double GetPolySegAngle(size_t ind) const;
   TTurns::const_iterator GetCurrentTurn() const;
 
-private:
+public:
   friend string DebugPrint(Route const & r);
 
   string m_router;

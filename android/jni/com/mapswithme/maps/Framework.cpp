@@ -1051,12 +1051,6 @@ extern "C"
   }
 
   JNIEXPORT void JNICALL
-  Java_com_mapswithme_maps_Framework_nativeLoadTour(JNIEnv * env, jclass thiz, jstring filePath)
-  {
-    frm()->LoadTour(jni::ToNativeString(env, filePath));
-  }
-
-  JNIEXPORT void JNICALL
   Java_com_mapswithme_maps_Framework_nativeBuildRoute(JNIEnv * env, jclass thiz, jdouble startLat,
                                                       jdouble startLon,  jdouble finishLat,
                                                       jdouble finishLon)
@@ -1317,5 +1311,17 @@ extern "C"
   Java_com_mapswithme_maps_Framework_nativeDeregisterMaps(JNIEnv * env, jclass thiz)
   {
     frm()->DeregisterAllMaps();
+  }
+
+  JNIEXPORT void JNICALL
+  Java_com_mapswithme_maps_Framework_nativeLoadTour(JNIEnv * env, jclass thiz, jstring filePath)
+  {
+    frm()->LoadTour(jni::ToNativeString(env, filePath));
+  }
+
+  JNIEXPORT jboolean JNICALL
+  Java_com_mapswithme_maps_Framework_nativeIsTourRouting(JNIEnv * env, jclass thiz, jstring filePath)
+  {
+    return frm()->IsTourRouting() ? JNI_TRUE : JNI_FALSE;
   }
 } // extern "C"

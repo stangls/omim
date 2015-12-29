@@ -114,11 +114,13 @@ public class RoutingController
 
           if (mLastResultCode == ResultCodesHelper.NO_ERROR)
           {
+            Log.d(TAG, "-> nativeGetRouteFollowingInfo");
             mCachedRoutingInfo = Framework.nativeGetRouteFollowingInfo();
             setBuildState(BuildState.BUILT);
             mLastBuildProgress = 100;
           }
 
+          Log.d(TAG, "-> processRoutingEvent");
           processRoutingEvent();
         }
       });
@@ -154,7 +156,13 @@ public class RoutingController
 
     if (mLastResultCode == ResultCodesHelper.NO_ERROR)
     {
-      updatePlan();
+      if ( Framework.nativeIsTourRouting() ) {
+        Log.d(TAG, "processRoutingEvent: Starting tour.");
+        start();
+      } else {
+        Log.d(TAG, "processRoutingEvent: Updating route-plan");
+        updatePlan();
+      }
       return;
     }
 
@@ -218,9 +226,9 @@ public class RoutingController
     Log.d(TAG, "[B] State: " + mState + ", BuildState: " + mBuildState + " -> " + newState);
     mBuildState = newState;
 
-    if (mBuildState == BuildState.BUILT &&
-        !(mStartPoint instanceof MapObject.MyPosition))
+    if (mBuildState == BuildState.BUILT && !(mStartPoint instanceof MapObject.MyPosition)) {
       Framework.nativeDisableFollowing();
+    }
   }
 
   private void updateProgress()
@@ -369,7 +377,7 @@ public class RoutingController
     Statistics.INSTANCE.trackEvent(Statistics.EventName.ROUTING_START);
     AlohaHelper.logClick(AlohaHelper.ROUTING_START);
     setState(State.NAVIGATION);
-    Framework.nativeDisableFollowing();
+    //Framework.nativeDisableFollowing();
     Framework.nativeFollowRoute();
 
     mContainer.showRoutePlan(false, null);
@@ -636,7 +644,7 @@ public class RoutingController
   @SuppressWarnings("Duplicates")
   public boolean setEndPoint(MapObject point)
   {
-    Log.d(TAG, "setEndPoint");
+    Log.d(TAG, "setEndPoint "+point);
 
     if (MapObject.same(mEndPoint, point))
     {
@@ -760,17 +768,16 @@ public class RoutingController
 
   public void startTour() {
     File tourFile = new File("/storage/emulated/legacy/MapsWithMe/tour.xml");
-    Log.e("RoutingController", "searching for file " + tourFile);
+    Log.d("RoutingController", "searching for file " + tourFile);
     if (tourFile.exists()) {
+      Log.d(TAG, "startTour: initializing RoutingController");
       setState(State.PREPARE);
       setBuildState(BuildState.BUILDING);
-      Framework.nativeLoadTour(tourFile.getAbsolutePath());
       setStartFromMyPosition();
       setEndPoint(null);
-      /*
-      Framework.nativeDisableFollowing();
-      Framework.nativeFollowRoute();*/
-      start();
+      Log.d(TAG, "startTour: native load tour");
+      Framework.nativeLoadTour(tourFile.getAbsolutePath());
+      Log.d(TAG, "startTour: ok");
     }
   }
 
