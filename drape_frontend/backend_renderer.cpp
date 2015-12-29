@@ -41,6 +41,7 @@ BackendRenderer::BackendRenderer(Params const & params)
 
   m_routeBuilder = make_unique_dp<RouteBuilder>([this](drape_ptr<RouteData> && routeData)
   {
+    LOG(my::LDEBUG,("BackendRenderer -> m_routeBuilder"));
     m_commutator->PostMessage(ThreadsCommutator::RenderThread,
                               make_unique_dp<FlushRouteMessage>(move(routeData)),
                               MessagePriority::Normal);

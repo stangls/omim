@@ -28,6 +28,7 @@ extern "C"
       jlong time, jdouble lat, jdouble lon,
       jfloat accuracy, jdouble altitude, jfloat speed, jfloat bearing)
   {
+    LOG(my::LINFO,("nativeLocationUpdated"));
     location::GpsInfo info;
     info.m_source = location::EAndroidNative;
 

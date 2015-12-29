@@ -114,11 +114,13 @@ public class RoutingController
 
           if (mLastResultCode == ResultCodesHelper.NO_ERROR)
           {
+            Log.d(TAG, "-> nativeGetRouteFollowingInfo");
             mCachedRoutingInfo = Framework.nativeGetRouteFollowingInfo();
             setBuildState(BuildState.BUILT);
             mLastBuildProgress = 100;
           }
 
+          Log.d(TAG, "-> processRoutingEvent");
           processRoutingEvent();
         }
       });
@@ -642,7 +644,7 @@ public class RoutingController
   @SuppressWarnings("Duplicates")
   public boolean setEndPoint(MapObject point)
   {
-    Log.d(TAG, "setEndPoint");
+    Log.d(TAG, "setEndPoint "+point);
 
     if (MapObject.same(mEndPoint, point))
     {

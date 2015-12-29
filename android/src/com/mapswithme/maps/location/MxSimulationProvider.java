@@ -28,6 +28,7 @@ import java.util.Locale;
 public class MxSimulationProvider extends BaseLocationProvider
 {
 
+  private static final String TAG = MxSimulationProvider.class.getSimpleName();
   private boolean mIsActive;
   public static String providerName="MOBIWORX position provider for simulations";
 
@@ -129,19 +130,33 @@ public class MxSimulationProvider extends BaseLocationProvider
     currentSimulationStep = 0;
     thread = new Thread(new Runnable() {
       public void run() {
+        Log.d(TAG,"start thread");
         while (mIsActive) {
           final Location l = retrieveCurrentLocation();
+          Log.d(TAG,"sending location");
           // ensure we run on the original thread to avoid synchronization issues and CalledFromWrongThreadException
-          mHandler.sendMessage( Message.obtain( mHandler, new Runnable() {
-            @Override
-            public void run() {
-              LocationHelper.INSTANCE.initMagneticField(l); // maydo
-              LocationHelper.INSTANCE.setLastLocation(l);
-            }
-          }));
+          try{
+            mHandler.sendMessage( Message.obtain( mHandler, new Runnable() {
+              @Override
+              public void run() {
+                try {
+                  LocationHelper.INSTANCE.initMagneticField(l); // maydo
+                  LocationHelper.INSTANCE.setLastLocation(l);
+                }catch(Exception e){
+                  Log.d(TAG,"sending location exception",e);
+                }catch(Error e){
+                  Log.d(TAG,"sending location error",e);
+                }
+              }
+            }));
+          }catch(Exception e){
+            Log.d(TAG,"sending location exception",e);
+          }catch(Error e){
+            Log.d(TAG,"sending location error",e);
+          }
           int time = simulationDataWaitTimeMS[currentSimulationStep];
           while (time<minWaitTime) {
-            //Log.d("MxSimulationProvider","skipping a location");
+            Log.d(TAG,"skipping a location");
             if (++currentSimulationStep >= numSimulationSteps) {
               currentSimulationStep = 0;
             }
@@ -156,6 +171,7 @@ public class MxSimulationProvider extends BaseLocationProvider
             currentSimulationStep = 0;
           }
         }
+        Log.d(TAG,"stop thread");
       }
     });
     mIsActive = true;
