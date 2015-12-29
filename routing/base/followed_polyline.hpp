@@ -8,7 +8,12 @@
 namespace routing
 {
 
-typedef std::tuple<size_t, size_t> TInterval;
+struct GeometryInterval{
+    size_t min, max;
+    size_t internalFastForward;
+    size_t externalFastForward;
+};
+using GeometryIntervals = vector<GeometryInterval>;
 
 class FollowedPolyline
 {
@@ -54,8 +59,8 @@ public:
 
   double GetDistanceM(Iter const & it1, Iter const & it2) const;
 
-  Iter UpdateProjectionByPrediction(m2::RectD const & posRect, double predictDistance, const vector<TInterval> &nonFastForward) const;
-  Iter UpdateProjection(m2::RectD const & posRect, const vector<TInterval> &nonFastForward) const;
+  Iter UpdateProjectionByPrediction(m2::RectD const & posRect, double predictDistance, const GeometryIntervals &nonFastForward) const;
+  Iter UpdateProjection(m2::RectD const & posRect, const GeometryIntervals &nonFastForward) const;
 
   Iter Begin() const;
   Iter End() const;
@@ -63,7 +68,7 @@ public:
 
 private:
   template <class DistanceFn>
-  Iter GetClosestProjection(m2::RectD const & posRect, const vector<TInterval> & nonFastForward, DistanceFn const & distFn) const;
+  Iter GetClosestProjection(m2::RectD const & posRect, const GeometryIntervals & nonFastForward, DistanceFn const & distFn) const;
   void UpdateLastNonCrossing() const;
 
   void Update();

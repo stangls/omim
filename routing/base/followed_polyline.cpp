@@ -102,7 +102,7 @@ void FollowedPolyline::Update()
 }
 
 template <class DistanceFn>
-Iter FollowedPolyline::GetClosestProjection(m2::RectD const & posRect, const vector<TInterval> &nonFastForward,
+Iter FollowedPolyline::GetClosestProjection(m2::RectD const & posRect, const GeometryIntervals &nonFastForward,
                                             DistanceFn const & distFn) const
 {
   //LOG(my::LINFO,("GetClosestProjection"));
@@ -117,13 +117,11 @@ Iter FollowedPolyline::GetClosestProjection(m2::RectD const & posRect, const vec
     if ( !noCheckFastForward ) {
         // skip if we do not fast-forward into this interval
         int skipTo=0;
-        for ( const TInterval &nonFF : nonFastForward ) {
-            int start, end;
-            std::tie (start, end) = nonFF;
-            if ( i>=start && i<end ){
+        for ( const GeometryInterval &nonFF : nonFastForward ) {
+            if ( i>=nonFF.min && i<nonFF.max ){
                 //LOG(my::LINFO,("? skip",start,"<=",i,"<",end));
-                ASSERT( start<end, ("internal error with ordering of non-ff-intervals") );
-                skipTo=end;
+                ASSERT( nonFF.min<nonFF.max, ("internal error with ordering of non-ff-intervals") );
+                skipTo=nonFF.max;
                 break;
             }
         }
@@ -134,8 +132,9 @@ Iter FollowedPolyline::GetClosestProjection(m2::RectD const & posRect, const vec
             //LOG(my::LINFO,("skip to",i));
             continue;
         }
-    }else
+    }else{
         noCheckFastForward--;
+    }
 
     m2::PointD const pt = m_segProj[i](currPos);
 
@@ -157,7 +156,7 @@ Iter FollowedPolyline::GetClosestProjection(m2::RectD const & posRect, const vec
 Iter FollowedPolyline::UpdateProjectionByPrediction(
         m2::RectD const & posRect,
         double predictDistance,
-        const vector<TInterval> & nonFastForward
+        const GeometryIntervals & nonFastForward
 ) const {
   ASSERT(m_current.IsValid(), ());
   ASSERT_LESS(m_current.m_ind, m_poly.GetSize() - 1, ());
@@ -178,7 +177,7 @@ Iter FollowedPolyline::UpdateProjectionByPrediction(
   return res;
 }
 
-Iter FollowedPolyline::UpdateProjection(m2::RectD const & posRect, const vector<TInterval> & nonFastForward) const
+Iter FollowedPolyline::UpdateProjection(m2::RectD const & posRect, const GeometryIntervals & nonFastForward) const
 {
   ASSERT(m_current.IsValid(), ());
   ASSERT_LESS(m_current.m_ind, m_poly.GetSize() - 1, ());

@@ -165,7 +165,7 @@ private:
 
   mutable double m_currentTime;
 
-  vector<TInterval> m_nonFastForward;
+  GeometryIntervals m_nonFastForward;
 };
 
 } // namespace routing
