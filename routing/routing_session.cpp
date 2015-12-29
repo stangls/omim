@@ -435,15 +435,17 @@ void RoutingSession::MatchLocationToRoute(location::GpsInfo & location,
   m_route.MatchLocationToRoute(location, routeMatchingInfo);
   // update position on the tour
   if (m_tour!=nullptr){
-      size_t idx = routeMatchingInfo.GetIndexInRoute();
-      LOG(my::LDEBUG,("are we on the tour?",idx,">=",m_tourStartIndexInRoute,"?"));
-      // are we on the tour?
-      if (idx>=m_tourStartIndexInRoute){
-          // the index on the route relative to the startpoint of the (remaining) tour on the route.
-          // has to be translated to a tour-index (regarding the already processed points of the tour).
-          size_t newIndex=m_tourStartIndex+(idx-m_tourStartIndexInRoute);
-          LOG(my::LDEBUG,("we are on the tour ⇒ updating tour position",m_tourStartIndex,"+(",idx,"-",m_tourStartIndexInRoute,")=",newIndex));
-          m_tour->UpdateCurrentPosition(newIndex+1);
+      if (routeMatchingInfo.IsMatched()){
+          size_t idx = routeMatchingInfo.GetIndexInRoute();
+          LOG(my::LDEBUG,("are we on the tour?",idx,">=",m_tourStartIndexInRoute,"?"));
+          // are we on the tour?
+          if (idx>=m_tourStartIndexInRoute){
+              // the index on the route relative to the startpoint of the (remaining) tour on the route.
+              // has to be translated to a tour-index (regarding the already processed points of the tour).
+              size_t newIndex=m_tourStartIndex+(idx-m_tourStartIndexInRoute);
+              LOG(my::LDEBUG,("we are on the tour ⇒ updating tour position",m_tourStartIndex,"+(",idx,"-",m_tourStartIndexInRoute,")=",newIndex));
+              m_tour->UpdateCurrentPosition(newIndex+1);
+          }
       }
   }
 }
