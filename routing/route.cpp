@@ -50,9 +50,8 @@ void Route::AppendTurns(vector<turns::TurnItem>::iterator beg, vector<turns::Tur
     while (beg!=end){
         if ((*beg).m_index >= index_offset){
             turns::TurnItem ti( *beg );
-            ti.m_index-=index_offset;
             ti.m_index+=index_start;
-            LOG(my::LINFO,("adding turn",(*beg).m_index,"as",ti.m_index));
+            ti.m_index-=index_offset;
             m_turns.push_back( ti );
         }else{
             LOG(my::LINFO,("skipping turn with index",(*beg).m_index,"because index_offset is",index_offset));
