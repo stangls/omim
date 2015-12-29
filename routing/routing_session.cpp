@@ -83,6 +83,7 @@ void RoutingSession::RebuildRoute(m2::PointD const & startPoint,
       auto it=m_tour->GetCurrentIt();
       ASSERT (it!=m_tour->GetEndIt(), ());
       m_endPoint = *(it);
+      m_tourStartIndex = m_tour->GetCurrentIndex();
   }
   ASSERT_NOT_EQUAL(m_endPoint, m2::PointD::Zero(), ("End point was not set"));
   RemoveRoute();
@@ -338,7 +339,7 @@ void RoutingSession::AssignRoute(Route & route, IRouter::ResultCode e)
             auto end = m_tour->GetEndIt();
             auto cur = m_tour->GetCurrentIt();
             ASSERT( cur != end && cur+1 != end, () );
-            route.AppendGeometry( cur+1, end, false );
+            m_tourStartIndexInRoute = route.AppendGeometry( cur+1, end, false );
         }
         {
             auto end = m_tour->GetTimesEndIt();
@@ -391,6 +392,16 @@ void RoutingSession::MatchLocationToRoute(location::GpsInfo & location,
   threads::MutexGuard guard(m_routeSessionMutex);
   UNUSED_VALUE(guard);
   m_route.MatchLocationToRoute(location, routeMatchingInfo);
+  // update position on the tour
+  if (m_tour!=nullptr){
+      size_t idx = routeMatchingInfo.GetIndexInRoute();
+      // are we on the tour?
+      if (idx>=m_tourStartIndexInRoute){
+          // the index on the route relative to the startpoint of the (remaining) tour on the route.
+          // has to be translated to a tour-index (regarding the already processed points of the tour).
+          m_tour->UpdateCurrentPosition(m_tourStartIndex+(idx-m_tourStartIndexInRoute));
+      }
+  }
 }
 
 bool RoutingSession::DisableFollowMode()
@@ -482,6 +493,8 @@ double RoutingSession::GetDistanceToCurrentCamM(SpeedCameraRestriction & camera,
 
 void RoutingSession::SetTour( unique_ptr<Tour> tour )
 {
+    // set index to maximum because tour has (probably) not been injected into route yet.
+    m_tourStartIndexInRoute = SIZE_MAX;
     m_tour.swap(tour);
 }
 void RoutingSession::RemoveTour()
