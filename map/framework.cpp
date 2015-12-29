@@ -1,5 +1,4 @@
 #include "map/framework.hpp"
-#include "base/logging.hpp"
 
 #include "map/ge0_parser.hpp"
 #include "map/geourl_process.hpp"
@@ -110,9 +109,7 @@ void Framework::OnLocationError(TLocationError /*error*/)
 
 void Framework::OnLocationUpdate(GpsInfo const & info)
 {
-    LOG(my::LINFO, ("OnLocationUpdate"));
 #ifdef FIXED_LOCATION
-    LOG(my::LINFO, ("OnLocationUpdate (fixed location)"));
   GpsInfo rInfo(info);
 
   // get fixed coordinates
@@ -122,28 +119,22 @@ void Framework::OnLocationUpdate(GpsInfo const & info)
   // pretend like GPS position
   rInfo.m_horizontalAccuracy = 5.0;
 
-  LOG(my::LINFO, ("OnLocationUpdate (fixed location -> HasNorth)"));
   if (m_fixedPos.HasNorth())
   {
     // pass compass value (for devices without compass)
     CompassInfo compass;
-    LOG(my::LINFO, ("OnLocationUpdate (fixed location -> GetNorth)"));
     m_fixedPos.GetNorth(compass.m_bearing);
     OnCompassUpdate(compass);
   }
 
 #else
-  LOG(my::LINFO, ("OnLocationUpdate (gpsinfo)"));
   GpsInfo rInfo(info);
 #endif
-  LOG(my::LINFO, ("OnLocationUpdate -> CheckLocationForRouting"));
   location::RouteMatchingInfo routeMatchingInfo;
   CheckLocationForRouting(rInfo);
 
-  LOG(my::LINFO, ("OnLocationUpdate -> MatchLocationToRoute"));
   MatchLocationToRoute(rInfo, routeMatchingInfo);
 
-  LOG(my::LINFO, ("OnLocationUpdate -> SetGpsInfo"));
   CallDrapeFunction(bind(&df::DrapeEngine::SetGpsInfo, _1, rInfo,
                          m_routingSession.IsNavigable(), routeMatchingInfo));
 }
@@ -1803,15 +1794,11 @@ void Framework::LoadTour( string const & filePath ){
     m2::PointD start;
     if (!m_drapeEngine->GetMyPosition(start))
     {
-      LOG(my::LINFO,("!GetMyPosition"));
       CallRouteBuilded(IRouter::NoCurrentPosition, vector<storage::TIndex>(), vector<storage::TIndex>());
       return;
     }
-    LOG(my::LINFO,("-> SetRouter"));
     SetRouter(routing::RouterType::Vehicle);
-    LOG(my::LINFO,("-> BuildRoute"));
     BuildRoute(start,m2::PointD::Zero(),move(make_unique<Tour>(filePath)),5);
-    LOG(my::LINFO,("done"));
 }
 
 void Framework::BuildRoute(m2::PointD const & start, m2::PointD const & finish, uint32_t timeoutSec)
@@ -1839,24 +1826,19 @@ void Framework::BuildRoute(m2::PointD const & start, m2::PointD const & finish, 
 
   auto readyCallback = [this] (Route const & route, IRouter::ResultCode code)
   {
-    LOG(my::LINFO,("readyCallback"));
     vector<storage::TIndex> absentCountries;
     vector<storage::TIndex> absentRoutingIndexes;
     if (code == IRouter::NoError)
     {
       double const kRouteScaleMultiplier = 1.5;
 
-      LOG(my::LINFO,("readyCallback -> InsertRoute"));
       InsertRoute(route);
       m2::RectD routeRect = route.GetPoly().GetLimitRect();
-      LOG(my::LINFO,("readyCallback -> Scale"));
       routeRect.Scale(kRouteScaleMultiplier);
-      LOG(my::LINFO,("readyCallback -> ShowRect"));
       ShowRect(routeRect, -1);
     }
     else
     {
-      LOG(my::LINFO,("readyCallback -> absent countries stuff"));
       for (string const & name : route.GetAbsentCountries())
       {
         storage::TIndex fileIndex = m_storage.FindIndexByFile(name);
@@ -1869,7 +1851,6 @@ void Framework::BuildRoute(m2::PointD const & start, m2::PointD const & finish, 
       if (code != IRouter::NeedMoreMaps)
         RemoveRoute(true /* deactivateFollowing */);
     }
-    LOG(my::LINFO,("readyCallback -> CallRouteBuilded"));
     CallRouteBuilded(code, absentCountries, absentRoutingIndexes);
   };
 
@@ -1982,11 +1963,9 @@ void Framework::InsertRoute(Route const & route)
 
 void Framework::CheckLocationForRouting(GpsInfo const & info)
 {
-  LOG(my::LINFO,("CheckLocationForRouting"));
   if (!IsRoutingActive())
     return;
 
-  LOG(my::LINFO,("CheckLocationForRouting -> OnLocationPositionChanged"));
   RoutingSession::State state = m_routingSession.OnLocationPositionChanged(info, m_model.GetIndex());
   if (state == RoutingSession::RouteNeedRebuild)
   {
@@ -1994,17 +1973,14 @@ void Framework::CheckLocationForRouting(GpsInfo const & info)
     {
       if (code == IRouter::NoError)
       {
-        LOG(my::LINFO,("CheckLocationForRouting -> readyCallback"));
         RemoveRoute(false /* deactivateFollowing */);
         InsertRoute(route);
       }
     };
 
-    LOG(my::LINFO,("CheckLocationForRouting -> RebuildRoute"));
     m_routingSession.RebuildRoute(MercatorBounds::FromLatLon(info.m_latitude, info.m_longitude),
                                   readyCallback, m_progressCallback, 0 /* timeoutSec */);
   }
-  LOG(my::LINFO,("CheckLocationForRouting (done)"));
 }
 
 void Framework::MatchLocationToRoute(location::GpsInfo & location, location::RouteMatchingInfo & routeMatchingInfo) const
@@ -2019,7 +1995,6 @@ void Framework::CallRouteBuilded(IRouter::ResultCode code, vector<storage::TInde
 {
   if (code == IRouter::Cancelled)
     return;
-  LOG(my::LINFO,("-> m_routingCallback"));
   m_routingCallback(code, absentCountries, absentRoutingFiles);
 }
 

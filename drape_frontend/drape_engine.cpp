@@ -215,7 +215,6 @@ void DrapeEngine::AddUserEvent(UserEvent const & e)
 void DrapeEngine::ModelViewChanged(ScreenBase const & screen)
 {
   Platform & pl = GetPlatform();
-  LOG(my::LDEBUG,("RunOnGuiThread -> ModelViewChangedGuiThread"));
   pl.RunOnGuiThread(bind(&DrapeEngine::ModelViewChangedGuiThread, this, screen));
 }
 
@@ -228,10 +227,8 @@ void DrapeEngine::ModelViewChangedGuiThread(ScreenBase const & screen)
 void DrapeEngine::MyPositionModeChanged(location::EMyPositionMode mode)
 {
   Settings::Set(LocationStateMode, mode);
-  LOG(my::LDEBUG,("RunOnGuiThread ->* m_myPositionModeChanged"));
   GetPlatform().RunOnGuiThread([this, mode]()
   {
-    LOG(my::LDEBUG,("( RunOnGuiThread ->* m_myPositionModeChanged ) =>",m_myPositionModeChanged!=nullptr));
     if (m_myPositionModeChanged != nullptr)
       m_myPositionModeChanged(mode);
   });
@@ -239,7 +236,6 @@ void DrapeEngine::MyPositionModeChanged(location::EMyPositionMode mode)
 
 void DrapeEngine::TapEvent(m2::PointD const & pxPoint, bool isLong, bool isMyPosition, FeatureID const & feature)
 {
-  LOG(my::LDEBUG,("RunOnGuiThread ->* m_tapListener"));
   GetPlatform().RunOnGuiThread([=]()
   {
     if (m_tapListener)
@@ -249,7 +245,6 @@ void DrapeEngine::TapEvent(m2::PointD const & pxPoint, bool isLong, bool isMyPos
 
 void DrapeEngine::UserPositionChanged(m2::PointD const & position)
 {
-  LOG(my::LDEBUG,("RunOnGuiThread ->* m_userPositionChangedFn"));
   GetPlatform().RunOnGuiThread([this, position]()
   {
     if (m_userPositionChangedFn)
@@ -294,7 +289,6 @@ void DrapeEngine::SetGpsInfo(location::GpsInfo const & info, bool isNavigable, c
 
 void DrapeEngine::MyPositionNextMode()
 {
-  LOG(my::LDEBUG,("sends message ChangeMyPositionModeMessage::NextMode"));
   m_threadCommutator->PostMessage(ThreadsCommutator::RenderThread,
                                   make_unique_dp<ChangeMyPositionModeMessage>(ChangeMyPositionModeMessage::TYPE_NEXT),
                                   MessagePriority::High);
@@ -302,7 +296,6 @@ void DrapeEngine::MyPositionNextMode()
 
 void DrapeEngine::FollowRoute(int preferredZoomLevel)
 {
-  LOG(my::LDEBUG,("sends message ChangeMyPositionModeMessage::NextMode"));
   m_threadCommutator->PostMessage(ThreadsCommutator::RenderThread,
                                   make_unique_dp<ChangeMyPositionModeMessage>(ChangeMyPositionModeMessage::TYPE_NEXT,
                                                                               preferredZoomLevel),
