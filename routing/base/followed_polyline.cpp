@@ -110,30 +110,37 @@ Iter FollowedPolyline::GetClosestProjection(m2::RectD const & posRect, const Geo
   double minDist = numeric_limits<double>::max();
 
   m2::PointD const currPos = posRect.Center();
+  size_t cur = m_current.m_ind;
   size_t const count = m_poly.GetSize() - 1;
-  int noCheckFastForward=2; // for two iterations do not check fast-forward ( = current position and next position)
-  for (size_t i = m_current.m_ind; i < count; ++i)
+  for (size_t i = cur; i < count; ++i)
   {
-    if ( !noCheckFastForward ) {
-        // skip if we do not fast-forward into this interval
-        int skipTo=0;
-        for ( const GeometryInterval &nonFF : nonFastForward ) {
-            if ( i>=nonFF.min && i<nonFF.max ){
-                //LOG(my::LINFO,("? skip",start,"<=",i,"<",end));
-                ASSERT( nonFF.min<nonFF.max, ("internal error with ordering of non-ff-intervals") );
+    // skip if we do not fast-forward in(to) this interval
+    int skipTo=0;
+    // TODO: if the intervals were sorted by maximum, this could be done much more efficiently.
+    //       if intervals are distinct (they are as long as we only append geometries), we could completely
+    //       remove one loop.
+    //       currently nonFastForward is assumed to be very small, so efficiency is not an issue here.
+    for ( const GeometryInterval &nonFF : nonFastForward ) {
+        // are we iterating through the interval?
+        if ( i>=nonFF.min && i<nonFF.max ){
+            size_t maxFastForward=nonFF.externalFastForward;
+            // are we already in the interval? then we are internally fast-forwarding
+            if ( cur>=nonFF.min && cur<nonFF.max ){
+                //LOG(my::LINFO,("in ",nonFF.min,"<=",i,"<",nonFF.max));
+                maxFastForward=nonFF.internalFastForward;
+            }
+            // see if we are fast-forwarding (instead of just forwarding), then skip.
+            if ( (i-cur)>maxFastForward ){
+                //LOG(my::LINFO,("not fast-forwarding ",(i-cur)," steps (>"+maxFastForward+") since ",nonFF.min,"<=",i,"<",nonFF.max));
                 skipTo=nonFF.max;
                 break;
             }
         }
-        if (skipTo) {
-            //LOG(my::LINFO,("skipTo=",skipTo));
-            ASSERT( i<=skipTo-1, ("internal error with non-ff-intervals") );
-            i=skipTo-1; // will be incremented on continuing for-loop
-            //LOG(my::LINFO,("skip to",i));
-            continue;
-        }
-    }else{
-        noCheckFastForward--;
+    }
+    if (skipTo) {
+        ASSERT( i<=skipTo-1, ("internal error with non-ff-intervals") );
+        i=skipTo-1; // will be incremented on continuing for-loop
+        continue;
     }
 
     m2::PointD const pt = m_segProj[i](currPos);

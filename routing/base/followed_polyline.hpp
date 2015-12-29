@@ -9,9 +9,12 @@ namespace routing
 {
 
 struct GeometryInterval{
+    GeometryInterval(size_t min, size_t max) : min(min),max(max){
+        ASSERT_LESS(min,max,());
+    }
     size_t min, max;
-    size_t internalFastForward;
-    size_t externalFastForward;
+    size_t internalFastForward=10;
+    size_t externalFastForward=2;
 };
 using GeometryIntervals = vector<GeometryInterval>;
 
