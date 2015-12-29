@@ -383,6 +383,7 @@ void RoutingSession::AssignRoute(Route & route, IRouter::ResultCode e)
         {
             auto end = m_tour->GetTurnsEndIt();
             auto cur = m_tour->GetTurnsCurrentIt();
+            ASSERT( cur != end, () );
             route.AppendTurns( cur, end, m_tour->GetCurrentIndex()+1, route_previous_size );
         }
         LOG(my::LINFO,("poly length",route.GetPoly().GetSize()));
