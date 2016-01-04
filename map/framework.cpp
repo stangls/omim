@@ -445,13 +445,17 @@ void Framework::RegisterAllMaps()
   m_storage.GetLocalMaps(maps);
   for (auto const & localFile : maps)
   {
+    LOG(my::LINFO,("registering map ",localFile->GetCountryName()));
     auto p = RegisterMap(*localFile);
-    if (p.second != MwmSet::RegResult::Success)
+    if (p.second != MwmSet::RegResult::Success){
+      LOG(my::LINFO,("no success with ",localFile->GetCountryName()," return code = ",p.second));
       continue;
+    }
 
     MwmSet::MwmId const & id = p.first;
     ASSERT(id.IsAlive(), ());
     minFormat = min(minFormat, static_cast<int>(id.GetInfo()->m_version.format));
+    LOG(my::LINFO,(localFile->GetCountryName()," registered with country name ",id.GetInfo()->GetCountryName()));
   }
 
   m_activeMaps->Init(maps);
