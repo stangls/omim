@@ -48,6 +48,12 @@ public class Framework
     void onRouteBuildingProgress(float progress);
   }
 
+  public static class Params3dMode
+  {
+    public boolean enabled;
+    public boolean buildings;
+  }
+
   // this class is just bridge between Java and C++ worlds, we must not create it
   private Framework() {}
 
@@ -182,4 +188,10 @@ public class Framework
 
   public native static void nativeLoadTour(String filePath);
   public native static boolean nativeIsTourRouting();
+
+  /////////////////// end TOUR routing
+
+  public native static void nativeGet3dMode(Params3dMode result);
+
+  public native static void nativeSet3dMode(boolean allow3d, boolean allow3dBuildings);
 }
