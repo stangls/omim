@@ -13,6 +13,8 @@
 namespace dp
 {
 
+//#define COLLECT_DISPLACEMENT_INFO
+
 namespace detail
 {
 
@@ -50,7 +52,7 @@ class OverlayTree : public m4::Tree<detail::OverlayInfo, detail::OverlayTraits>
 public:
   OverlayTree();
 
-  bool Frame();
+  bool Frame(bool is3d);
   bool IsNeedUpdate() const;
   void ForceUpdate();
 
@@ -60,6 +62,23 @@ public:
 
   using TSelectResult = buffer_vector<ref_ptr<OverlayHandle>, 8>;
   void Select(m2::RectD const & rect, TSelectResult & result) const;
+  void Select(m2::PointD const & glbPoint, TSelectResult & result) const;
+
+  void SetFollowingMode(bool mode);
+
+#ifdef COLLECT_DISPLACEMENT_INFO
+  struct DisplacementData
+  {
+    m2::PointF m_arrowStart;
+    m2::PointF m_arrowEnd;
+    dp::Color m_arrowColor;
+    DisplacementData(m2::PointF const & arrowStart, m2::PointF const & arrowEnd, dp::Color const & arrowColor)
+      : m_arrowStart(arrowStart), m_arrowEnd(arrowEnd), m_arrowColor(arrowColor)
+    {}
+  };
+  using TDisplacementInfo = vector<DisplacementData>;
+  TDisplacementInfo const & GetDisplacementInfo() const;
+#endif
 
 private:
   ScreenBase const & GetModelView() const { return m_traits.m_modelView; }
@@ -72,6 +91,11 @@ private:
   int m_frameCounter;
   array<vector<ref_ptr<OverlayHandle>>, dp::OverlayRanksCount> m_handles;
   vector<detail::OverlayInfo> m_handlesToDelete;
+  bool m_followingMode;
+
+#ifdef COLLECT_DISPLACEMENT_INFO
+  TDisplacementInfo m_displacementInfo;
+#endif
 };
 
 } // namespace dp
