@@ -6,6 +6,7 @@
 #include "drape_frontend/transparent_layer.hpp"
 #include "drape_frontend/visual_params.hpp"
 #include "drape_frontend/user_mark_shapes.hpp"
+#include "drape_frontend/batch_merge_helper.hpp"
 
 #include "drape/debug_rect_renderer.hpp"
 #include "drape/shader_def.hpp"
@@ -501,9 +502,6 @@ void FrontendRenderer::AcceptMessage(ref_ptr<Message> message)
       m_commutator->PostMessage(ThreadsCommutator::ResourceUploadThread,
                                 make_unique_dp<UpdateReadManagerMessage>(),
                                 MessagePriority::UberHighSingleton);
-
-      RefreshBgColor();
-
       break;
     }
 
@@ -569,7 +567,7 @@ void FrontendRenderer::OnResize(ScreenBase const & screen)
   m2::RectD const viewportRect = screen.isPerspective() ? screen.PixelRectIn3d() : screen.PixelRect();
 
   m_myPositionController->UpdatePixelPosition(screen);
-  m_myPositionController->SetPixelRect(viewportRect);
+  m_myPositionController->OnNewPixelRect();
 
   m_viewport.SetViewport(0, 0, viewportRect.SizeX(), viewportRect.SizeY());
   m_contextFactory->getDrawContext()->resize(viewportRect.SizeX(), viewportRect.SizeY());
@@ -670,8 +668,8 @@ bool FrontendRenderer::CheckTileGenerations(TileKey const & tileKey)
 
 void FrontendRenderer::OnCompassTapped()
 {
-  m_myPositionController->StopCompassFollow();
-  m_userEventStream.AddEvent(RotateEvent(0.0));
+  if (!m_myPositionController->StopCompassFollow())
+    m_userEventStream.AddEvent(RotateEvent(0.0));
 }
 
 FeatureID FrontendRenderer::GetVisiblePOI(m2::PointD const & pixelPoint) const
@@ -768,6 +766,7 @@ void FrontendRenderer::RenderScene(ScreenBase const & modelView)
   m_renderGroups.resize(m_renderGroups.size() - eraseCount);
 
   m_viewport.Apply();
+  RefreshBgColor();
   GLFunctions::glClear();
 
   dp::GLState::DepthLayer prevLayer = dp::GLState::GeometryLayer;
@@ -800,7 +799,6 @@ void FrontendRenderer::RenderScene(ScreenBase const & modelView)
     RenderSingleGroup(modelView, make_ref(group));
   }
 
-  //GLFunctions::glClearDepth();
   GLFunctions::glDisable(gl_const::GLDepthTest);
   bool hasSelectedPOI = false;
   if (m_selectionShape != nullptr)
@@ -814,9 +812,10 @@ void FrontendRenderer::RenderScene(ScreenBase const & modelView)
     }
     else if (selectedObject == SelectionShape::OBJECT_POI)
     {
-      hasSelectedPOI = true;
-      if (!isPerspective)
+      if (!isPerspective && !has3dAreas)
         m_selectionShape->Render(modelView, make_ref(m_gpuProgramManager), m_generalUniforms);
+      else
+        hasSelectedPOI = true;
     }
   }
 
@@ -826,6 +825,7 @@ void FrontendRenderer::RenderScene(ScreenBase const & modelView)
   if (has3dAreas)
   {
     m_framebuffer->Enable();
+    GLFunctions::glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
     GLFunctions::glClear();
     GLFunctions::glClearDepth();
 
@@ -842,7 +842,7 @@ void FrontendRenderer::RenderScene(ScreenBase const & modelView)
     m_transparentLayer->Render(m_framebuffer->GetTextureId(), make_ref(m_gpuProgramManager));
   }
 
-  if (isPerspective && hasSelectedPOI)
+  if (hasSelectedPOI)
   {
     GLFunctions::glDisable(gl_const::GLDepthTest);
     m_selectionShape->Render(modelView, make_ref(m_gpuProgramManager), m_generalUniforms);
@@ -898,6 +898,49 @@ void FrontendRenderer::RenderScene(ScreenBase const & modelView)
 #ifdef DRAW_INFO
   AfterDrawFrame();
 #endif
+
+  MergeBuckets();
+}
+
+void FrontendRenderer::MergeBuckets()
+{
+  if (BatchMergeHelper::IsMergeSupported() == false)
+    return;
+
+  ++m_mergeBucketsCounter;
+  if (m_mergeBucketsCounter < 60)
+    return;
+
+  if (m_renderGroups.empty())
+    return;
+
+  using TGroup = pair<dp::GLState, TileKey>;
+  using TGroupMap = map<TGroup, vector<drape_ptr<RenderGroup>>>;
+  TGroupMap forMerge;
+
+  vector<drape_ptr<RenderGroup>> newGroups;
+  newGroups.reserve(m_renderGroups.size());
+
+  m_mergeBucketsCounter = 0;
+  size_t groupsCount = m_renderGroups.size();
+  for (size_t i = 0; i < groupsCount; ++i)
+  {
+    ref_ptr<RenderGroup> group = make_ref(m_renderGroups[i]);
+    dp::GLState state = group->GetState();
+    if (state.GetDepthLayer() == dp::GLState::GeometryLayer &&
+        group->IsPendingOnDelete() == false)
+    {
+      TGroup const key = make_pair(state, group->GetTileKey());
+      forMerge[key].push_back(move(m_renderGroups[i]));
+    }
+    else
+      newGroups.push_back(move(m_renderGroups[i]));
+  }
+
+  for (TGroupMap::value_type & node : forMerge)
+      BatchMergeHelper::MergeBatches(node.second, newGroups);
+
+  m_renderGroups = move(newGroups);
 }
 
 bool FrontendRenderer::IsPerspective() const
@@ -962,7 +1005,7 @@ void FrontendRenderer::RefreshBgColor()
 {
   uint32_t color = drule::rules().GetBgColor(df::GetDrawTileScale(m_userEventStream.GetCurrentScreen()));
   dp::Color c = dp::Extract(color, 0 /*255 - (color >> 24)*/);
-  GLFunctions::glClearColor(c.GetRedF(), c.GetGreenF(), c.GetBlueF(), 0.0f);
+  GLFunctions::glClearColor(c.GetRedF(), c.GetGreenF(), c.GetBlueF(), 1.0f);
 }
 
 int FrontendRenderer::GetCurrentZoomLevel() const
@@ -1107,6 +1150,11 @@ void FrontendRenderer::OnScaleEnded()
   m_myPositionController->ScaleEnded();
 }
 
+void FrontendRenderer::OnAnimationStarted(ref_ptr<BaseModelViewAnimation> anim)
+{
+  m_myPositionController->AnimationStarted(anim);
+}
+
 void FrontendRenderer::ResolveTileKeys(ScreenBase const & screen, TTilesCollection & tiles)
 {
   m2::RectD const & clipRect = screen.ClipRect();
@@ -1167,8 +1215,6 @@ void FrontendRenderer::Routine::Do()
 
   GLFunctions::glPixelStore(gl_const::GLUnpackAlignment, 1);
   GLFunctions::glEnable(gl_const::GLDepthTest);
-
-  m_renderer.RefreshBgColor();
 
   GLFunctions::glClearDepthValue(1.0);
   GLFunctions::glDepthFunc(gl_const::GLLessOrEqual);
@@ -1329,7 +1375,6 @@ ScreenBase const & FrontendRenderer::ProcessEvents(bool & modelViewChanged, bool
 void FrontendRenderer::PrepareScene(ScreenBase const & modelView)
 {
   RefreshModelView(modelView);
-  RefreshBgColor();
   RefreshPivotTransform(modelView);
 
   m_myPositionController->UpdatePixelPosition(modelView);

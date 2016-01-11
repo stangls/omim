@@ -301,6 +301,8 @@
 	<string name="show_on_backscreen">Показать на втором экране</string>
 	<!-- Prints version number in About dialog -->
 	<string name="version">Версия: %s</string>
+	<!-- Data version in «About» screen -->
+	<string name="data_version">Версия данных: %d</string>
 	<!-- Confirmation in downloading countries dialog -->
 	<string name="are_you_sure">Вы уверены, что хотите продолжить?</string>
 	<!-- Title for tracks category in bookmarks manager -->
@@ -326,6 +328,12 @@
 	<string name="pref_map_style_classic_dark">Классическая тёмная</string>
 	<!-- «Map style» entry value -->
 	<string name="pref_map_style_modern_light">Современная светлая</string>
+	<!-- Settings «Map» category: «Perspective view» title -->
+	<string name="pref_map_3d_title">Перспективный вид</string>
+	<!-- Settings «Map» category: «3D buildings» title -->
+	<string name="pref_map_3d_buildings_title">3D здания</string>
+	<!-- Settings «Map» category: «3D buildings» summary -->
+	<string name="pref_map_3d_buildings_subtitle">Увеличивает расход батареи</string>
 	<!-- Settings «Route» category: «Tts enabled» title -->
 	<string name="pref_tts_enable_title">Голосовые инструкции</string>
 	<!-- Settings «Route» category: «Tts language» title -->
@@ -756,6 +764,7 @@
 	<string name="dialog_routing_disclaimer_priority">— Дорожная обстановка, ПДД и знаки приоритетнее советов приложения;</string>
 	<string name="dialog_routing_disclaimer_precision">— Карта может быть неточной, а предложенный маршрут не всегда оптимален;</string>
 	<string name="dialog_routing_disclaimer_recommendations">— Предлагаемые маршруты — лишь рекомендации;</string>
+	<string name="dialog_routing_disclaimer_borders">— Будьте внимательны с маршрутами в приграничных зонах: в построенных программой маршрутах иногда возможны пересечения границ в неположенных местах;</string>
 	<string name="dialog_routing_disclaimer_beware">Будьте внимательны на дорогах и берегите себя!</string>
 	<string name="dialog_routing_check_gps">Проверьте сигнал GPS</string>
 	<string name="dialog_routing_error_location_not_found">Маршрут не построен. Текущая геопозиция не определена.</string>
@@ -825,7 +834,7 @@
 	<string name="search_history_text">Быстрый доступ к последним поисковым запросам.</string>
 	<string name="clear_search">Очистить историю поиска</string>
 	<!-- Title for settings to enable/disable showcase menu button -->
-	<string name="showcase_settings_title">Показывать предложения партнёров</string>
+	<string name="showcase_settings_title">Показывать предложения</string>
 	<string name="showcase_more_apps">Другие приложения My.com</string>
 	<string name="p2p_route_planning">Планирование маршрута</string>
 	<string name="p2p_your_location">Ваше местоположение</string>
@@ -837,9 +846,12 @@
 	<string name="p2p_to_here">Сюда</string>
 	<string name="p2p_only_from_current">Навигация возможна только из текущего местоположения.</string>
 	<string name="p2p_reroute_from_current">Хотите перестроить маршрут от вашего местоположения?</string>
-	<string name="whats_new_where_to_turn">MAPS.ME подскажет, куда поворачивать</string>
-	<string name="whats_new_voice_instructions">Друзья, вы давно просили голосовые подсказки во время навигации — мы сделали это! Ваш новый штурман вовремя предупредит о маневре.</string>
-	<string name="whats_new_between_any_points">Стройте маршрут между любыми объектами</string>
-	<string name="whats_new_happy_day">Да, да, это правда! Сегодня счастливый день и еще одно улучшение. Планируйте свои путешествия заранее с MAPS.ME.</string>
-	<string name="whats_new_next">Далее</string>
+	<string name="whats_new_3d_title">Любимые карты под новым углом</string>
+	<string name="whats_new_3d_subtitle">Мы добавили перспективный обзор в режим навигации.</string>
+	<string name="whats_new_3d_buildings_title">Новое измерение в MAPS.ME</string>
+	<string name="whats_new_3d_buildings_subtitle">С 3D зданиями наши карты стали более информативными и красивыми.</string>
+	<string name="whats_new_3d_update_maps">Для полноценной работы функции, пожалуйста, обновите карты.</string>
+	<string name="whats_new_3d_on">Включить перспективный вид</string>
+	<string name="whats_new_3d_buildings_on">Включить 3D здания</string>
+	<string name="whats_new_next_button">Далее</string>
 </resources>

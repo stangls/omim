@@ -467,6 +467,9 @@
 /* Prints version number in About dialog */
 "version" = "Verze: %@";
 
+/* Data version in «About» screen */
+"data_version" = "Data version: %d";
+
 /* Confirmation in downloading countries dialog */
 "are_you_sure" = "Opravdu chcete pokračovat?";
 
@@ -506,6 +509,15 @@
 
 /* «Map style» entry value */
 "pref_map_style_modern_light" = "Modern light";
+
+/* Settings «Map» category: «Perspective view» title */
+"pref_map_3d_title" = "Zobrazení perspektivy";
+
+/* Settings «Map» category: «3D buildings» title */
+"pref_map_3d_buildings_title" = "3D budovy";
+
+/* Settings «Map» category: «3D buildings» summary */
+"pref_map_3d_buildings_subtitle" = "Ovlivňuje výdrž baterie";
 
 /* Settings «Route» category: «Tts enabled» title */
 "pref_tts_enable_title" = "Hlasové instrukce";
@@ -1158,6 +1170,8 @@
 
 "dialog_routing_disclaimer_recommendations" = "— Navrhované trasy je třeba brát pouze jako doporučení;";
 
+"dialog_routing_disclaimer_borders" = "— U tratí v hraničních zónách buďte opatrní: trasy vytvořené naší aplikací občas překračují hranice zemí na nepovolených místech;";
+
 "dialog_routing_disclaimer_beware" = "Na silnici buďte pozorní a chovejte se bezpečně!";
 
 "dialog_routing_check_gps" = "Zkontrolovat signál GPS";
@@ -1286,7 +1300,7 @@
 "clear_search" = "Vymazat historii vyhledávání";
 
 /* Title for settings to enable/disable showcase menu button */
-"showcase_settings_title" = "Zobrazit nabídky partnerů";
+"showcase_settings_title" = "Zobrazit nabídky";
 
 "showcase_more_apps" = "Více aplikací My.com";
 
@@ -1313,12 +1327,18 @@
 
 "p2p_reroute_from_current" = "Chcete, abychom naplánovali trasu z vašeho současného umístění?";
 
-"whats_new_where_to_turn" = "MAPS.ME vám řekne, kdy zatočit";
+"whats_new_3d_title" = "Vaše oblíbené mapy z nové perspektivy";
 
-"whats_new_voice_instructions" = "Vážení přátelé, již dlouho jste žádali o mluvené instrukce při navádění – my jsme to udělali! Nyní vás náš navigátor včas varuje před další zatáčkou.";
+"whats_new_3d_subtitle" = "Přidali jsme do navigačního režimu zobrazení perspektivy.";
 
-"whats_new_between_any_points" = "Vytvořte cesty mezi dvěma body";
+"whats_new_3d_buildings_title" = "Nová dimenze v MAPS.ME";
 
-"whats_new_happy_day" = "Přejeme vám opravdu hezký den! Naplánujte svůj výlet předem s aplikací MAPS.ME.";
+"whats_new_3d_buildings_subtitle" = "Díky 3D budovám jsou naše mapy pěknější a více informativní.";
 
-"whats_new_next" = "Další";
+"whats_new_3d_update_maps" = "Využijte naplno tuto funkci, aktualizujte prosím svá mapová data.";
+
+"whats_new_3d_on" = "Povolit zobrazení perspektivy";
+
+"whats_new_3d_buildings_on" = "Povolit 3D Budovy";
+
+"whats_new_next_button" = "Další";

@@ -312,6 +312,12 @@
 	<string name="prefs_group_route">Navigace</string>
 	<string name="pref_zoom_title">Tlačítka přiblížení/oddálení</string>
 	<string name="pref_zoom_summary">Zobrazit na obrazovce</string>
+	<!-- Settings «Map» category: «Perspective view» title -->
+	<string name="pref_map_3d_title">Zobrazení perspektivy</string>
+	<!-- Settings «Map» category: «3D buildings» title -->
+	<string name="pref_map_3d_buildings_title">3D budovy</string>
+	<!-- Settings «Map» category: «3D buildings» summary -->
+	<string name="pref_map_3d_buildings_subtitle">Ovlivňuje výdrž baterie</string>
 	<!-- Settings «Route» category: «Tts enabled» title -->
 	<string name="pref_tts_enable_title">Hlasové instrukce</string>
 	<!-- Settings «Route» category: «Tts language» title -->
@@ -726,6 +732,7 @@
 	<string name="dialog_routing_disclaimer_priority">• Situace na silnici, dopravní předpisy a dopravní značení mají vždy prioritu před pokyny navigace.</string>
 	<string name="dialog_routing_disclaimer_precision">— Mapa může být nepřesná a navrhovaná trasa nemusí být vždy optimální cestou, jak dojet do cíle;</string>
 	<string name="dialog_routing_disclaimer_recommendations">— Navrhované trasy je třeba brát pouze jako doporučení;</string>
+	<string name="dialog_routing_disclaimer_borders">— U tratí v hraničních zónách buďte opatrní: trasy vytvořené naší aplikací občas překračují hranice zemí na nepovolených místech;</string>
 	<string name="dialog_routing_disclaimer_beware">Na silnici buďte pozorní a chovejte se bezpečně!</string>
 	<string name="dialog_routing_check_gps">Zkontrolovat signál GPS</string>
 	<string name="dialog_routing_error_location_not_found">Trasu se nepodařilo vytvořit. Nelze zjistit aktuální souřadnice GPS.</string>
@@ -795,7 +802,7 @@
 	<string name="search_history_text">Získejte rychlý přístup k hledaným výrazům.</string>
 	<string name="clear_search">Vymazat historii vyhledávání</string>
 	<!-- Title for settings to enable/disable showcase menu button -->
-	<string name="showcase_settings_title">Zobrazit nabídky partnerů</string>
+	<string name="showcase_settings_title">Zobrazit nabídky</string>
 	<string name="showcase_more_apps">Více aplikací My.com</string>
 	<string name="p2p_route_planning">Plánování trasy</string>
 	<string name="p2p_your_location">Vaše umístění</string>
@@ -807,9 +814,12 @@
 	<string name="p2p_to_here">Do</string>
 	<string name="p2p_only_from_current">Navigace je dostupná pouze z vašeho současného umístění.</string>
 	<string name="p2p_reroute_from_current">Chcete, abychom naplánovali trasu z vašeho současného umístění?</string>
-	<string name="whats_new_where_to_turn">MAPS.ME vám řekne, kdy zatočit</string>
-	<string name="whats_new_voice_instructions">Vážení přátelé, již dlouho jste žádali o mluvené instrukce při navádění – my jsme to udělali! Nyní vás náš navigátor včas varuje před další zatáčkou.</string>
-	<string name="whats_new_between_any_points">Vytvořte cesty mezi dvěma body</string>
-	<string name="whats_new_happy_day">Přejeme vám opravdu hezký den! Naplánujte svůj výlet předem s aplikací MAPS.ME.</string>
-	<string name="whats_new_next">Další</string>
+	<string name="whats_new_3d_title">Vaše oblíbené mapy z nové perspektivy</string>
+	<string name="whats_new_3d_subtitle">Přidali jsme do navigačního režimu zobrazení perspektivy.</string>
+	<string name="whats_new_3d_buildings_title">Nová dimenze v MAPS.ME</string>
+	<string name="whats_new_3d_buildings_subtitle">Díky 3D budovám jsou naše mapy pěknější a více informativní.</string>
+	<string name="whats_new_3d_update_maps">Využijte naplno tuto funkci, aktualizujte prosím svá mapová data.</string>
+	<string name="whats_new_3d_on">Povolit zobrazení perspektivy</string>
+	<string name="whats_new_3d_buildings_on">Povolit 3D Budovy</string>
+	<string name="whats_new_next_button">Další</string>
 </resources>

@@ -467,6 +467,9 @@
 /* Prints version number in About dialog */
 "version" = "Verzió: %@";
 
+/* Data version in «About» screen */
+"data_version" = "Data version: %d";
+
 /* Confirmation in downloading countries dialog */
 "are_you_sure" = "Valóban folytatni akarja?";
 
@@ -506,6 +509,15 @@
 
 /* «Map style» entry value */
 "pref_map_style_modern_light" = "Modern light";
+
+/* Settings «Map» category: «Perspective view» title */
+"pref_map_3d_title" = "Távlati kép";
+
+/* Settings «Map» category: «3D buildings» title */
+"pref_map_3d_buildings_title" = "3D-s épületek";
+
+/* Settings «Map» category: «3D buildings» summary */
+"pref_map_3d_buildings_subtitle" = "Akkumulátor élettartamára hat";
 
 /* Settings «Route» category: «Tts enabled» title */
 "pref_tts_enable_title" = "Hangutasítások";
@@ -1158,6 +1170,8 @@
 
 "dialog_routing_disclaimer_recommendations" = "— A javasolt útvonalakat mindössze javaslatoknak kell tekinteni;";
 
+"dialog_routing_disclaimer_borders" = "— A határmenti útvonalakon közlekedjen óvatosan: az alkalmazásunk által létrehozott útvonalak néha olyan helyeken szelhetik át az országhatárokat, amelyek nem engedélyezettek;";
+
 "dialog_routing_disclaimer_beware" = "Kérjük, mindig maradjon éber és vezessen biztonságosan az utakon!";
 
 "dialog_routing_check_gps" = "Ellenőrizze a GPS jelet";
@@ -1286,7 +1300,7 @@
 "clear_search" = "A keresési előzmények törlése";
 
 /* Title for settings to enable/disable showcase menu button */
-"showcase_settings_title" = "Partnerek ajánlatainak mutatása";
+"showcase_settings_title" = "Ajánlatok mutatása";
 
 "showcase_more_apps" = "Több My.com alkalmazás";
 
@@ -1313,12 +1327,18 @@
 
 "p2p_reroute_from_current" = "Szeretne útvonaltervet készíttetni a jelenlegi pozíciójától?";
 
-"whats_new_where_to_turn" = "A MAPS.ME segítségével tudni fogod, hogy merre kanyarodj";
+"whats_new_3d_title" = "Kedvenc térképei új perspektívából";
 
-"whats_new_voice_instructions" = "Kedves barátaink! Már régóta kértétek tőlünk a hangirányítás hozzáadását a navigációhoz, most végre kész lett! Most a navigátor időben figyelmeztet, hogy mikor kell legközelebb kanyarodnod.";
+"whats_new_3d_subtitle" = "A navigációs módban már perspektívikus nézet is választható.";
 
-"whats_new_between_any_points" = "Alakíts ki egy útvonalat két tetszőleges pont között";
+"whats_new_3d_buildings_title" = "Új dimenzió a MAPS.ME-ben";
 
-"whats_new_happy_day" = "Micsoda boldog nap ez! Tervezd meg az utaidat előre a MAPS.ME-vel!";
+"whats_new_3d_buildings_subtitle" = "A 3D-s épületeknek köszönhetően a térképeink még több információval szolgálnak, és még szebbek lettek.";
 
-"whats_new_next" = "Következő";
+"whats_new_3d_update_maps" = "Ezen tulajdonság teljes körű kihasználásához, kérjük, frissítse térképének az adatát.";
+
+"whats_new_3d_on" = "Távlati kép engedélyezése";
+
+"whats_new_3d_buildings_on" = "3D Épületek engedélyezése";
+
+"whats_new_next_button" = "Következő";

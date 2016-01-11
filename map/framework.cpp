@@ -1386,17 +1386,18 @@ bool Framework::ShowMapForURL(string const & url)
   }
   else if (StartsWith(url, "mapswithme://") || StartsWith(url, "mwm://"))
   {
+    // clear every current API-mark.
+    {
+      UserMarkControllerGuard guard(m_bmManager, UserMarkType::API_MARK);
+      guard.m_controller.Clear();
+      guard.m_controller.SetIsVisible(true);
+      guard.m_controller.SetIsDrawable(true);
+    }
+
     if (m_ParsedMapApi.SetUriAndParse(url))
     {
       if (!m_ParsedMapApi.GetViewportRect(rect))
         rect = df::GetWorldRect();
-
-      // set up controller guard to show api marks
-      {
-        UserMarkControllerGuard guard(m_bmManager, UserMarkType::API_MARK);
-        guard.m_controller.SetIsVisible(true);
-        guard.m_controller.SetIsDrawable(true);
-      }
 
       if ((apiMark = m_ParsedMapApi.GetSinglePoint()))
         result = NEED_CLICK;
@@ -1406,7 +1407,6 @@ bool Framework::ShowMapForURL(string const & url)
     else
     {
       UserMarkControllerGuard guard(m_bmManager, UserMarkType::API_MARK);
-      guard.m_controller.Clear();
       guard.m_controller.SetIsVisible(false);
     }
   }
@@ -1450,7 +1450,7 @@ bool Framework::ShowMapForURL(string const & url)
 
     return true;
   }
-  
+
   return false;
 }
 
@@ -1796,6 +1796,11 @@ void Framework::UpdateSavedDataVersion()
   Settings::Set("DataVersion", m_storage.GetCurrentDataVersion());
 }
 
+int64_t Framework::GetCurrentDataVersion()
+{
+  return m_storage.GetCurrentDataVersion();
+}
+
 void Framework::BuildRoute(m2::PointD const & finish, uint32_t timeoutSec)
 {
   ASSERT_THREAD_CHECKER(m_threadChecker, ("BuildRoute"));
@@ -1859,7 +1864,10 @@ void Framework::FollowRoute()
 {
   ASSERT(m_drapeEngine != nullptr, ());
 
-  int const scale = (m_currentRouterType == RouterType::Pedestrian) ? scales::GetUpperComfortScale()
+  if (!m_routingSession.EnableFollowMode())
+    return;
+
+  int const scale = (m_currentRouterType == RouterType::Pedestrian) ? scales::GetPedestrianNavigationScale()
                                                                     : scales::GetNavigationScale();
   int const scale3d = (m_currentRouterType == RouterType::Pedestrian) ? scales::GetPedestrianNavigation3dScale()
                                                                       : scales::GetNavigation3dScale();

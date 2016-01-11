@@ -14,13 +14,7 @@
 
   <SwitchPreference
     android:key="@string/pref_3d"
-    android:title="3D mode"
-    android:switchTextOn=""
-    android:switchTextOff=""/>
-
-  <SwitchPreference
-    android:key="@string/pref_3d_buildings"
-    android:title="3D buildings"
+    android:title="@string/pref_map_3d_title"
     android:switchTextOn=""
     android:switchTextOff=""/>
 </PreferenceScreen>

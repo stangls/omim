@@ -467,6 +467,9 @@
 /* Prints version number in About dialog */
 "version" = "Phiên bản: %@";
 
+/* Data version in «About» screen */
+"data_version" = "Data version: %d";
+
 /* Confirmation in downloading countries dialog */
 "are_you_sure" = "Bạn có chắc muốn tiếp tục không?";
 
@@ -506,6 +509,15 @@
 
 /* «Map style» entry value */
 "pref_map_style_modern_light" = "Modern light";
+
+/* Settings «Map» category: «Perspective view» title */
+"pref_map_3d_title" = "Góc nhìn phối cảnh";
+
+/* Settings «Map» category: «3D buildings» title */
+"pref_map_3d_buildings_title" = "Nhà cửa 3D";
+
+/* Settings «Map» category: «3D buildings» summary */
+"pref_map_3d_buildings_subtitle" = "Ảnh hưởng tới tuổi thọ của pin";
 
 /* Settings «Route» category: «Tts enabled» title */
 "pref_tts_enable_title" = "Hướng dẫn bằng Giọng nói";
@@ -1158,6 +1170,8 @@
 
 "dialog_routing_disclaimer_recommendations" = "— Các tuyến đường được đề nghị chỉ nên được coi là các khuyến nghị;";
 
+"dialog_routing_disclaimer_borders" = "— Chú ý khi thể dục theo những con đường gần đường biên giới: những con đường do ứng dụng của chúng tôi tạo ra đôi khi có khả năng vượt ra khỏi biên giới vào những địa điểm không được phép;";
+
 "dialog_routing_disclaimer_beware" = "Hãy cảnh giác và giữ an toàn trên đường!";
 
 "dialog_routing_check_gps" = "Kiểm tra tín hiệu GPS";
@@ -1286,7 +1300,7 @@
 "clear_search" = "Xóa Lịch sử Tìm kiếm";
 
 /* Title for settings to enable/disable showcase menu button */
-"showcase_settings_title" = "Hiển thị các giảm giá của đối tác";
+"showcase_settings_title" = "Hiển thị lời mời";
 
 "showcase_more_apps" = "Thêm Ứng dụng My.com";
 
@@ -1313,12 +1327,18 @@
 
 "p2p_reroute_from_current" = "Bạn có muốn chúng tôi vạch đường từ vị trí hiện tại của bạn không?";
 
-"whats_new_where_to_turn" = "MAPS.ME sẽ cho bạn biết chỗ rẽ";
+"whats_new_3d_title" = "Bản đồ yêu thích của bạn từ một góc nhìn mới";
 
-"whats_new_voice_instructions" = "Bạn thân mến, các bạn đã yêu cầu từ lâu về việc chỉ dẫn bằng giọng nói trong khi điều hướng - chúng tôi đã thực hiện điều đó! Bây giờ bộ điều hướng của chúng tôi sẽ kịp thời cảnh báo cho bạn ngã rẽ tiếp theo của bạn.";
+"whats_new_3d_subtitle" = "Chúng tôi đã thêm góc nhìn phối cảnh cho chế độ điều hướng.";
 
-"whats_new_between_any_points" = "Lập đường đi giữa bất kỳ các điểm nào";
+"whats_new_3d_buildings_title" = "Một chiều mới trong MAPS.ME";
 
-"whats_new_happy_day" = "Một ngày thực sự hạnh phúc! Hãy lên kế hoạch trước chuyến đi của bạn với MAPS.ME.";
+"whats_new_3d_buildings_subtitle" = "Với các tòa nhà 3 chiều, bản đồ của chúng tôi cung cấp thêm nhiều thông tin hơn và đẹp hơn.";
 
-"whats_new_next" = "Tiếp theo";
+"whats_new_3d_update_maps" = "Để tận dụng tính năng này, vui lòng cập nhật dữ liệu bản đồ của bạn.";
+
+"whats_new_3d_on" = "Kích hoạt góc nhìn phối cảnh";
+
+"whats_new_3d_buildings_on" = "Kích hoạt Tòa nhà 3D";
+
+"whats_new_next_button" = "Tiếp theo";

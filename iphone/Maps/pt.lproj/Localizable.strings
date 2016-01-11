@@ -467,6 +467,9 @@
 /* Prints version number in About dialog */
 "version" = "Versão: %@";
 
+/* Data version in «About» screen */
+"data_version" = "Data version: %d";
+
 /* Confirmation in downloading countries dialog */
 "are_you_sure" = "Tem a certeza de que pretende continuar?";
 
@@ -506,6 +509,15 @@
 
 /* «Map style» entry value */
 "pref_map_style_modern_light" = "Modern light";
+
+/* Settings «Map» category: «Perspective view» title */
+"pref_map_3d_title" = "Visão em Perspectiva";
+
+/* Settings «Map» category: «3D buildings» title */
+"pref_map_3d_buildings_title" = "Prédios em 3D";
+
+/* Settings «Map» category: «3D buildings» summary */
+"pref_map_3d_buildings_subtitle" = "Afeta a vida da bateria";
 
 /* Settings «Route» category: «Tts enabled» title */
 "pref_tts_enable_title" = "Instruções de voz";
@@ -1158,6 +1170,8 @@
 
 "dialog_routing_disclaimer_recommendations" = "— As rotas indicadas devem ser tratadas apenas como sugestões;";
 
+"dialog_routing_disclaimer_borders" = "— Use de cautela em rotas de zonas fronteiriças: as rotas criadas por nosso aplicativo podem algumas vezes cruzar fronteiras nacionais em locais não autorizados;";
+
 "dialog_routing_disclaimer_beware" = "Fique sempre alerta nas estradas!";
 
 "dialog_routing_check_gps" = "Verifique o sinal do GPS";
@@ -1286,7 +1300,7 @@
 "clear_search" = "Limpar histórico de pesquisa";
 
 /* Title for settings to enable/disable showcase menu button */
-"showcase_settings_title" = "Mostrar anúncios";
+"showcase_settings_title" = "Mostrar ofertas";
 
 "showcase_more_apps" = "Mais aplicativos do My.com";
 
@@ -1313,12 +1327,18 @@
 
 "p2p_reroute_from_current" = "Deseja planejar uma rota a partir da sua localização atual?";
 
-"whats_new_where_to_turn" = "MAPS.ME te permitirá saber dónde girar";
+"whats_new_3d_title" = "Seus mapas favoritos a partir de uma nova perspectiva";
 
-"whats_new_voice_instructions" = "Estimados amigos: hace tiempo que solicitáis instrucciones de voz durante la navegación. ¡Lo hemos hecho posible! Ahora, nuestro navegador te indicará oportunamente dónde debes girar a continuación.";
+"whats_new_3d_subtitle" = "Nós adicionamos a visão em perspectiva ao modo de navegação.";
 
-"whats_new_between_any_points" = "Crea rutas entre los puntos que quieras";
+"whats_new_3d_buildings_title" = "Uma nova dimensão no MAPS.ME";
 
-"whats_new_happy_day" = "¡Que tengas un buen día! Planifica tus viajes por adelantado con MAPS.ME.";
+"whats_new_3d_buildings_subtitle" = "Com os prédios em 3D, nossos mapas ficaram mais informativos e bonitos.";
 
-"whats_new_next" = "Próxima";
+"whats_new_3d_update_maps" = "Para aproveitar por completo este recurso, atualize os dados do seu mapa.";
+
+"whats_new_3d_on" = "Habilitar visão em perspectiva";
+
+"whats_new_3d_buildings_on" = "Habilitar Prédios em 3D";
+
+"whats_new_next_button" = "Próxima";

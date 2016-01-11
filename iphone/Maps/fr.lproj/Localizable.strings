@@ -467,6 +467,9 @@
 /* Prints version number in About dialog */
 "version" = "Version : %@";
 
+/* Data version in «About» screen */
+"data_version" = "Data version: %d";
+
 /* Confirmation in downloading countries dialog */
 "are_you_sure" = "Êtes-vous certain de vouloir continuer ?";
 
@@ -506,6 +509,15 @@
 
 /* «Map style» entry value */
 "pref_map_style_modern_light" = "Modern light";
+
+/* Settings «Map» category: «Perspective view» title */
+"pref_map_3d_title" = "Vue en perspective";
+
+/* Settings «Map» category: «3D buildings» title */
+"pref_map_3d_buildings_title" = "Bâtiments en 3D";
+
+/* Settings «Map» category: «3D buildings» summary */
+"pref_map_3d_buildings_subtitle" = "Affecte la vie de la batterie";
 
 /* Settings «Route» category: «Tts enabled» title */
 "pref_tts_enable_title" = "Instructions vocales";
@@ -1158,6 +1170,8 @@
 
 "dialog_routing_disclaimer_recommendations" = "— L'itinéraire proposé doit être considéré comme une simple recommandation;";
 
+"dialog_routing_disclaimer_borders" = "— Faites attention aux itinéraires traversant des zones frontalières : les itinéraires générés par l'application peuvent parfois franchir des frontières étatiques dans des zones interdites;";
+
 "dialog_routing_disclaimer_beware" = "Restez vigilant et soyez prudent sur la route !";
 
 "dialog_routing_check_gps" = "Vérifiez le signal GPS";
@@ -1286,7 +1300,7 @@
 "clear_search" = "Effacer l'historique de recherche";
 
 /* Title for settings to enable/disable showcase menu button */
-"showcase_settings_title" = "Afficher les offres des partenaires";
+"showcase_settings_title" = "Afficher les offres";
 
 "showcase_more_apps" = "Plus d'applications My.com";
 
@@ -1313,12 +1327,18 @@
 
 "p2p_reroute_from_current" = "Souhaitez-vous que nous planifiions un itinéraire à partir de votre emplacement actuel ?";
 
-"whats_new_where_to_turn" = "MAPS.ME vous dit quand tourner";
+"whats_new_3d_title" = "Vos cartes préférées prennent de la profondeur";
 
-"whats_new_voice_instructions" = "Chers amis, vous nous demandiez depuis longtemps d'inclure des instructions vocales au cours de la navigation – nous l'avons fait ! Désormais, notre navigateur vous préviendra à l'avance de votre prochain virage.";
+"whats_new_3d_subtitle" = "Nous avons ajouté de la perspective au mode navigation.";
 
-"whats_new_between_any_points" = "Obtenez des itinéraires entre n'importe quels points";
+"whats_new_3d_buildings_title" = "La nouvelle dimension de MAPS.ME";
 
-"whats_new_happy_day" = "Nous vous souhaitons une bonne journée ! Préparez vos trajet en avance avec MAPS.ME";
+"whats_new_3d_buildings_subtitle" = "Grâce à l'affichage des bâtiments en 3D, nos cartes sont désormais plus informatives et plus belles.";
 
-"whats_new_next" = "Neste";
+"whats_new_3d_update_maps" = "Pour profiter pleinement de cette fonction, veuillez mettre à jour les données de votre carte.";
+
+"whats_new_3d_on" = "Activer la vue en perspective";
+
+"whats_new_3d_buildings_on" = "Activer les bâtiments en 3D";
+
+"whats_new_next_button" = "Neste";

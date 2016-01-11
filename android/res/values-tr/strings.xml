@@ -315,6 +315,12 @@
 	<string name="prefs_group_route">Navigasyon</string>
 	<string name="pref_zoom_title">Yakınlaştırma butonları</string>
 	<string name="pref_zoom_summary">Ekranda göster</string>
+	<!-- Settings «Map» category: «Perspective view» title -->
+	<string name="pref_map_3d_title">Perspektif görünüm</string>
+	<!-- Settings «Map» category: «3D buildings» title -->
+	<string name="pref_map_3d_buildings_title">3 Boyutlu Binalar</string>
+	<!-- Settings «Map» category: «3D buildings» summary -->
+	<string name="pref_map_3d_buildings_subtitle">Pil ömrünü etkiler</string>
 	<!-- Settings «Route» category: «Tts enabled» title -->
 	<string name="pref_tts_enable_title">Sesli Talimatlar</string>
 	<!-- Settings «Route» category: «Tts language» title -->
@@ -723,6 +729,7 @@
 	<string name="dialog_routing_disclaimer_priority">— Yol durumları, trafik kuralları ve trafik işaretleri, her zaman navigasyon tavsiyelerinden önceliklidir;</string>
 	<string name="dialog_routing_disclaimer_precision">— Harita doğru olmayabilir, önerilen güzergah da hedefinize ulaşmak için en uygun yol olmayabilir;</string>
 	<string name="dialog_routing_disclaimer_recommendations">— Önerilen güzergahlar yalnızca tavsiye olarak kabul edilmelidir;</string>
+	<string name="dialog_routing_disclaimer_borders">— Sınır bölgelerinde rotalar konusunda dikkatli olun: uygulamamız tarafından oluşturulan rotalar bazen izin verilmeyen yerlerdeki ülke sınırlarını geçebilir;</string>
 	<string name="dialog_routing_disclaimer_beware">Lütfen yolda dikkatli ve emniyetli olun!</string>
 	<string name="dialog_routing_check_gps">GPS sinyalini kontrol edin</string>
 	<string name="dialog_routing_error_location_not_found">Güzergah oluşturulamıyor. Mevcut GPS koordinatları tanımlanamadı.</string>
@@ -792,7 +799,7 @@
 	<string name="search_history_text">En son yapılan arama sorgularına hızlı erişim.</string>
 	<string name="clear_search">Arama geçmişini temizle</string>
 	<!-- Title for settings to enable/disable showcase menu button -->
-	<string name="showcase_settings_title">Ortakların tekliflerini göster</string>
+	<string name="showcase_settings_title">Teklifleri göster</string>
 	<string name="showcase_more_apps">Daha fazla My.com uygulamaları</string>
 	<string name="p2p_route_planning">Rota planlama</string>
 	<string name="p2p_your_location">Konumunuz</string>
@@ -804,9 +811,12 @@
 	<string name="p2p_to_here">Hedef</string>
 	<string name="p2p_only_from_current">Navigasyon sadece şu anki konumunuzdan mevcut.</string>
 	<string name="p2p_reroute_from_current">Mevcut konumunuzdan bir rota planlamamızı ister misiniz?</string>
-	<string name="whats_new_where_to_turn">MAPS.ME nereye döneceğinizi bilmenizi sağlayacak</string>
-	<string name="whats_new_voice_instructions">Sevgili arkadaşlar, navigasyon sırasında sesli talimatları uzun süredir sormaktaydınız - Bunu yaptık! Artık navigatörümüz bir sonraki dönüşünüz için zamanı geldiğinde sizi uyaracak.</string>
-	<string name="whats_new_between_any_points">Herhangi noktalar arasında rotalar oluşturun</string>
-	<string name="whats_new_happy_day">Çok mutlu bir gün öyle değil mi! Yolculuğunuzu önceden MAPS.ME ile planlayın.</string>
-	<string name="whats_new_next">Sonraki</string>
+	<string name="whats_new_3d_title">En sevdiğiniz haritalar yeni bir perspektiften</string>
+	<string name="whats_new_3d_subtitle">Navigasyon moduna perspektif görünüm ekledik.</string>
+	<string name="whats_new_3d_buildings_title">MAPS.ME\&#39;de yeni bir boyut</string>
+	<string name="whats_new_3d_buildings_subtitle">3 boyutlu binalarla haritalarımız daha bilgilendirici ve daha güzel hale geldi.</string>
+	<string name="whats_new_3d_update_maps">Bu özellikten tam anlamıyla faydalanabilmek için, lütfen harita verilerinizi güncelleyin.</string>
+	<string name="whats_new_3d_on">Perspektif görünümü etkinleştir</string>
+	<string name="whats_new_3d_buildings_on">3D Binalar seçeneğini etkinleştir</string>
+	<string name="whats_new_next_button">Sonraki</string>
 </resources>

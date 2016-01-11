@@ -191,7 +191,7 @@
 	<!-- Toast which is displayed when GPS has been deactivated -->
 	<string name="gps_is_disabled_long_text">GPS is disabled. Please enable it in Settings.</string>
 	<!-- Measurement units title in settings activity -->
-	<string name="measurement_units">Measurement Units</string>
+	<string name="measurement_units">Measurement units</string>
 	<!-- Detailed description of Measurement Units settings button -->
 	<string name="measurement_units_summary">Choose between miles and kilometres</string>
 	<!-- Do search in all sources -->
@@ -303,6 +303,8 @@
 	<string name="show_on_backscreen">Show on Back screen</string>
 	<!-- Prints version number in About dialog -->
 	<string name="version">Version: %s</string>
+	<!-- Data version in «About» screen -->
+	<string name="data_version">Data version: %d</string>
 	<!-- Confirmation in downloading countries dialog -->
 	<string name="are_you_sure">Are you sure you want to continue?</string>
 	<!-- Title for tracks category in bookmarks manager -->
@@ -328,6 +330,12 @@
 	<string name="pref_map_style_classic_dark">Classic dark</string>
 	<!-- «Map style» entry value -->
 	<string name="pref_map_style_modern_light">Modern light</string>
+	<!-- Settings «Map» category: «Perspective view» title -->
+	<string name="pref_map_3d_title">Perspective view</string>
+	<!-- Settings «Map» category: «3D buildings» title -->
+	<string name="pref_map_3d_buildings_title">3D buildings</string>
+	<!-- Settings «Map» category: «3D buildings» summary -->
+	<string name="pref_map_3d_buildings_subtitle">Affects battery life</string>
 	<!-- Settings «Route» category: «Tts enabled» title -->
 	<string name="pref_tts_enable_title">Voice Instructions</string>
 	<!-- Settings «Route» category: «Tts language» title -->
@@ -758,6 +766,7 @@
 	<string name="dialog_routing_disclaimer_priority">— Road conditions, traffic laws and road signs always take priority over the navigational advice;</string>
 	<string name="dialog_routing_disclaimer_precision">— The map might be inaccurate and the suggested route might not always be the most optimal way to reach the destination;</string>
 	<string name="dialog_routing_disclaimer_recommendations">— Suggested routes are to be taken only as recommendations;</string>
+	<string name="dialog_routing_disclaimer_borders">— Exercise caution with routes in border zones: the routes created by our app may sometimes cross country borders in unauthorized places;</string>
 	<string name="dialog_routing_disclaimer_beware">Please stay alert and safe on the roads!</string>
 	<string name="dialog_routing_check_gps">Check GPS signal</string>
 	<string name="dialog_routing_error_location_not_found">Unable to create route. Current GPS coordinates could not be identified.</string>
@@ -827,7 +836,7 @@
 	<string name="search_history_text">View recent searches.</string>
 	<string name="clear_search">Clear Search History</string>
 	<!-- Title for settings to enable/disable showcase menu button -->
-	<string name="showcase_settings_title">Show partners\&#39; offers</string>
+	<string name="showcase_settings_title">Show offers</string>
 	<string name="showcase_more_apps">More My.com Apps</string>
 	<!-- Place Page link to Wikipedia article (if map object has it). -->
 	<string name="read_in_wikipedia">Wikipedia</string>
@@ -841,9 +850,12 @@
 	<string name="p2p_to_here">To</string>
 	<string name="p2p_only_from_current">Navigation is available only from your current location.</string>
 	<string name="p2p_reroute_from_current">Do you want us to plan a route from your current location?</string>
-	<string name="whats_new_where_to_turn">MAPS.ME will let you know where to turn</string>
-	<string name="whats_new_voice_instructions">Dear friends, you have long been asking for voice instructions during navigation - we have done that! Now our navigator will timely warn you of your next turn.</string>
-	<string name="whats_new_between_any_points">Build routes between any points</string>
-	<string name="whats_new_happy_day">A happy day indeed! Plan your trips ahead with MAPS.ME.</string>
-	<string name="whats_new_next">Next</string>
+	<string name="whats_new_3d_title">Your favorite maps from a new perspective</string>
+	<string name="whats_new_3d_subtitle">We have added perspective view to the navigation mode.</string>
+	<string name="whats_new_3d_buildings_title">A new dimension in MAPS.ME</string>
+	<string name="whats_new_3d_buildings_subtitle">With 3D buildings, our maps have become more informative and more beautiful.</string>
+	<string name="whats_new_3d_update_maps">To take full advantage of this feature, please, update your map data.</string>
+	<string name="whats_new_3d_on">Enable Perspective View</string>
+	<string name="whats_new_3d_buildings_on">Enable 3D Buildings</string>
+	<string name="whats_new_next_button">Next</string>
 </resources>
