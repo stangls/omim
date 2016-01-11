@@ -1,6 +1,7 @@
 #pragma once
 
 #define DATA_FILE_EXTENSION ".mwm"
+#define LAYER_FILE_EXTENSION ".mwml"
 #define DATA_FILE_EXTENSION_TMP ".mwm.tmp"
 #define FONT_FILE_EXTENSION ".ttf"
 #define OSM2FEATURE_FILE_EXTENSION ".osm2ft"
