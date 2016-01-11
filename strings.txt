@@ -3176,7 +3176,7 @@
 
   [measurement_units]
     tags = ios,android,tizen
-    en = Measurement Units
+    en = Measurement units
     comment = Measurement units title in settings activity
     cs = Měřicí jednotky
     sk = Meracie jednotky
@@ -4957,6 +4957,12 @@
     nb = Versjon: %@
     fi = Versio: %@
 
+  [data_version]
+    tags = ios,android
+    comment = Data version in «About» screen
+    en = Data version: %d
+    ru = Версия данных: %d
+
   [are_you_sure]
     tags = android,tizen
     comment = Confirmation in downloading countries dialog
@@ -5268,34 +5274,127 @@
     fi = Näytä ruudulla
 
   [pref_map_style_title]
-     tags = android
-     comment = Settings «Map» category: «Map style» title
-     en = Map style
-     ru = Стиль карты
+    tags = android
+    comment = Settings «Map» category: «Map style» title
+    en = Map style
+    ru = Стиль карты
 
   [pref_map_style_summary]
-     tags = android
-     comment = Settings «Map» category: «Map style» summary
-     en = Change map presentation
-     ru = Стиль отображения карты
+    tags = android
+    comment = Settings «Map» category: «Map style» summary
+    en = Change map presentation
+    ru = Стиль отображения карты
 
   [pref_map_style_classic_light]
-     tags = android
-     comment = «Map style» entry value
-     en = Classic light
-     ru = Классическая светлая
+    tags = android
+    comment = «Map style» entry value
+    en = Classic light
+    ru = Классическая светлая
 
   [pref_map_style_classic_dark]
-     tags = android
-     comment = «Map style» entry value
-     en = Classic dark
-     ru = Классическая тёмная
+    tags = android
+    comment = «Map style» entry value
+    en = Classic dark
+    ru = Классическая тёмная
 
   [pref_map_style_modern_light]
-     tags = android
-     comment = «Map style» entry value
-     en = Modern light
-     ru = Современная светлая
+    tags = android
+    comment = «Map style» entry value
+    en = Modern light
+    ru = Современная светлая
+
+  [pref_map_3d_title]
+    comment = Settings «Map» category: «Perspective view» title
+    tags = ios, android
+    en = Perspective view 
+    ru = Перспективный вид
+    fr = Vue en perspective
+    da = Perspektivvisning
+    id = Pandangan perspektif
+    ko = 원근 보기
+    sv = Perspektivvy
+    tr = Perspektif görünüm
+    uk = Перспективний вид
+    vi = Góc nhìn phối cảnh
+    hu = Távlati kép
+    de = Perspektivenansicht
+    fi = Perspektiivinäkymä
+    cs = Zobrazení perspektivy
+    it = Vista in prospettiva
+    nb = Perspektivvisning
+    zh-Hant = 透視圖
+    zh-Hans = 透视图
+    th = มุมมองเพอร์สเปกทีฟ
+    ja = パースペクティブ表示
+    ro = Vizualizare în perspectivă
+    ar = العرض المنظوري
+    sk = Perspektívne zobrazenie
+    es = Vista de perspectiva
+    pl = Widok z perspektywy
+    nl = Perspectiefbeeld
+    pt = Visão em Perspectiva
+
+  [pref_map_3d_buildings_title]
+    comment = Settings «Map» category: «3D buildings» title
+    tags = ios, android
+    en = 3D buildings
+    ru = 3D здания
+    fr = Bâtiments en 3D
+    da = 3D-bygninger
+    id = Bangunan 3D
+    ko = 주변 건물 3D
+    sv = 3D-byggnader
+    tr = 3 Boyutlu Binalar
+    uk = Будівлі у 3D
+    vi = Nhà cửa 3D
+    hu = 3D-s épületek
+    de = 3D-Gebäude
+    fi = 3D-rakennukset
+    cs = 3D budovy
+    it = Edifici in 3D
+    nb = Bygninger i 3D
+    zh-Hant = 3D建築
+    zh-Hans = 3D建筑
+    th = ตึก 3D
+    ja = 3Dビルディング
+    ro = Clădiri 3D
+    ar = مباني ثلاثية الأبعاد
+    sk = 3D budovy
+    es = Edificios en 3D
+    pl = Budynki w 3D
+    nl = 3D-gebouwen
+    pt = Prédios em 3D
+    
+  [pref_map_3d_buildings_subtitle]
+    tags = ios, android
+    comment = Settings «Map» category: «3D buildings» summary
+    en = Affects battery life
+    ru = Увеличивает расход батареи
+    fr = Affecte la vie de la batterie
+    da = Påvirker batteriets levetid
+    id = Memengaruhi daya baterai
+    ko = 배터리 수명에 영향
+    sv = Påverkar batteriets livslängd
+    tr = Pil ömrünü etkiler
+    uk = Негативно впливає на ресурс акумулятора
+    vi = Ảnh hưởng tới tuổi thọ của pin
+    hu = Akkumulátor élettartamára hat
+    de = Beeinträchtigt die Akkulaufzeit
+    fi = Vaikuttaa akun kestoon
+    cs = Ovlivňuje výdrž baterie
+    it = Diminuisce la durata della batteria
+    nb = Påvirker batteriets levetid
+    zh-Hant = 影響電池壽命
+    zh-Hans = 影响电池寿命
+    th = มีผลกระทบต่ออายุการใช้งานแบตเตอรี่
+    ja = 電池の持ち時間に影響します
+    ro = Afectează durata de funcționare a bateriei
+    ar = تؤثر على عمر البطارية
+    sk = Ovplyvňuje životnosť batérie
+    es = Afecta a la duración de la batería
+    pl = Wpływa na czas pracy baterii
+    nl = Beïnvloedt batterijduur
+    pt = Afeta a vida da bateria
 
   [pref_tts_enable_title]
      tags = android,ios
@@ -6361,7 +6460,7 @@
     ar = تقييم التطبيق
     da = Bedøm appen
     tr = Uygulamayı değerlendir
-    sv = Get appen ett betyg
+    sv = Ge appen ett betyg
     he = דרגו את האפליקציה
     id = Beri nilai aplikasi
     vi = Cho điểm ứng dụng
@@ -6679,6 +6778,7 @@
     ro = Calibrare busolă
     nb = Kompasskalibrering
     fi = Kompassin kalibrointi
+    sv = Kompasskalibrering
 
   [wifi]
     tags = ios,android,tizen
@@ -12212,6 +12312,37 @@
     nl = — Beschouw de voorgestelde routes enkel als aanbevelingen;
     pt = — As rotas indicadas devem ser tratadas apenas como sugestões;
 
+  [dialog_routing_disclaimer_borders]
+    tags = ios,android
+    en = — Exercise caution with routes in border zones: the routes created by our app may sometimes cross country borders in unauthorized places;
+    ru = — Будьте внимательны с маршрутами в приграничных зонах: в построенных программой маршрутах иногда возможны пересечения границ в неположенных местах;
+    fr = — Faites attention aux itinéraires traversant des zones frontalières : les itinéraires générés par l'application peuvent parfois franchir des frontières étatiques dans des zones interdites;
+    da = — Vær forsigtig med ruter i grænseområder: de ruter, vores app har skabt, kan nogle gange krydse landegrænser på uautoriserede steder;
+    id = — Berhati-hatilah dengan rute di zona perbatasan: rute yang dibuat oleh aplikasi kami terkadang mungkin saja melintasi batas negara di lokasi yang tidak sah;
+    ko = — 국경 지역에서 경로를 주의하십시오: 앱에 의해 생성된 경로는 허가받지 않은 장소에서 국가 경계에 걸쳐 종종 일어날 수 있습니다;
+    sv = — Iakttag försiktighet med rutter i gränszoner: rutterna som vår app skapat kan ibland korsa landsgränser på otillåtna platser;
+    tr = — Sınır bölgelerinde rotalar konusunda dikkatli olun: uygulamamız tarafından oluşturulan rotalar bazen izin verilmeyen yerlerdeki ülke sınırlarını geçebilir;
+    uk = — Дотримуйтеся обережності з маршрутами у прикордонних зонах: маршрути, створені нашою програмою, іноді можуть перетинати кордони країн у несанкціонованих місцях;
+    vi = — Chú ý khi thể dục theo những con đường gần đường biên giới: những con đường do ứng dụng của chúng tôi tạo ra đôi khi có khả năng vượt ra khỏi biên giới vào những địa điểm không được phép;
+    hu = — A határmenti útvonalakon közlekedjen óvatosan: az alkalmazásunk által létrehozott útvonalak néha olyan helyeken szelhetik át az országhatárokat, amelyek nem engedélyezettek;
+    de = — Bitte seien Sie vorsichtig bei Routen in Grenzgebieten: die Routen, die unsere App erstellt, können manchmal Landesgrenzen überschreiten und durch Sperrgebiete führen;
+    fi = — Ole varovainen reittien suhteen raja-alueilla: sovelluksemme luomat reitit voivat toisinaan ylittää maiden rajoja luvattomissa paikoissa;
+    cs = — U tratí v hraničních zónách buďte opatrní: trasy vytvořené naší aplikací občas překračují hranice zemí na nepovolených místech;
+    it = — Fai attenzione ai percorsi nelle zone di confine: i percorsi creati dalla nostra app possono, a volte, attraversare i confini di stato in zone non autorizzate;
+    nb = — Vær forsiktig når det gjelder ruter i grenseområder: rutene som appen vår oppretter kan komme til å krysse landegrenser i uatoriserte områder;
+    zh-Hant = — 小心對待國界區的路線：我們應用創造的路線有時會在未經授權的地方跨越國界;
+    zh-Hans = — 小心对待国界区的路线：我们应用创造的路线有时会在未经授权的地方跨越国界;
+    th = — โปรดระมัดระวังเมื่อใช้เส้นทางในพื้นที่ชายแดน: บางครั้งเส้นทางที่สร้างขึ้นโดยแอปของเรานั้นอาจข้ามผ่านชายแดนประเทศในพื้นที่ที่ไม่ได้รับการอนุญา;
+    ja = — 国境付近のルートにご注意ください。アプリの作成したルートは時々入国の許可されていない国への国境を超える場合があります;
+    ro = — Aveți grijă în zonele de graniță: rutele create de aplicația noastră ar putea, ocazional, să treacă granița prin locuri nepermise;
+    ar = — تحذير بشأن مسارات في منطقة حدودية: المسارات التي تم إنشاؤها بواسطة تطبيقنا قد تعبر حدود الدولة في أماكن غير مصرح بها في بعض الأحيان;
+    sk = — Buďte opatrní na cestách v pohraničných oblastiach: trasy vytvorené aplikáciou môžu prekročiť hranice štátov na nepovolených miestach;
+    es = — Actúa con cautela en las rutas con zonas fronterizas: las rutas creadas por nuestra aplicación en ocasiones pueden atravesar las fronteras de países en lugares no autorizados;
+    pl = — Prosimy zachować ostrożność na trasach w strefie nadgranicznej: wyznaczone przez naszą aplikację trasy mogą przecinać granice państw w niedozwolonych do przekroczenia miejscach;
+    nl = — Wees voorzichtig met de routes in de grenszones: de routes die door onze app gecreëerd zijn, gaan wellicht door landgrenzen in ongeautoriseerde plaatsen;
+    pt = — Use de cautela em rotas de zonas fronteiriças: as rotas criadas por nosso aplicativo podem algumas vezes cruzar fronteiras nacionais em locais não autorizados;
+
+
   [dialog_routing_disclaimer_beware]
     tags = ios,android
     en = Please stay alert and safe on the roads!
@@ -14031,33 +14162,33 @@
   [showcase_settings_title]
     tags = ios, android
     comment = Title for settings to enable/disable showcase menu button
-    en = Show partners' offers
-    ru = Показывать предложения партнёров
-    fr = Afficher les offres des partenaires
-    da = Vis reklame
-    id = Tunjukkan penawaran dari para mitra
-    ko = 파트너 광고 보기
-    sv = Visa våra partners erbjudanden
-    tr = Ortakların tekliflerini göster
-    uk = Показати пропозиції партнерів
-    vi = Hiển thị các giảm giá của đối tác
-    hu = Partnerek ajánlatainak mutatása
-    de = Partnerangebote anzeigen
-    fi = Näytä mainokset
-    cs = Zobrazit nabídky partnerů
-    it = Mostra offerte dei partner
-    nb = Vis annonser
-    zh-Hant = 顯示合作夥伴的優惠
-    zh-Hans = 顯示合作夥伴的優惠
-    th = แสดงข้อเสนอของพันธมิตร
-    ja = パートナーのオファーを表示
-    ro = Afișare oferte parteneri
-    ar = إظهار عروض شركائنا
-    sk = Zobraziť ponuku našich partnerov
-    es = Mostrar las ofertas de socios
-    pl = Wyświetl oferty partnerów
-    nl = Laat de aanbiedingen van partners zien
-    pt = Mostrar anúncios
+    en = Show offers
+    ru = Показывать предложения
+    fr = Afficher les offres
+    da = Vis tilbud
+    id = Tampilkan penawaran
+    ko = 추천 보기
+    sv = Visa erbjudanden
+    tr = Teklifleri göster
+    uk = Показати пропозиції
+    vi = Hiển thị lời mời
+    hu = Ajánlatok mutatása
+    de = Angebote anzeigen
+    fi = Näytä tarjoukset
+    cs = Zobrazit nabídky
+    it = Mostra offerte
+    nb = Vis tilbud
+    zh-Hant = 顯示優惠
+    zh-Hans = 显示优惠
+    th = แสดงข้อเสนอ
+    ja = オファーを表示
+    ro = Afișare oferte
+    ar = رؤية العروض
+    sk = Zobraziť akcie
+    es = Mostrar ofertas
+    pl = Pokaż oferty
+    nl = Aanbiedingen weergeven
+    pt = Mostrar ofertas
 
   [showcase_more_apps]
     tags = ios, android
@@ -14394,128 +14525,221 @@
     nl = Wilt u dat wij een route plannen vanaf uw huidige locatie?
     pt = Deseja planejar uma rota a partir da sua localização atual?
 
-  [whats_new_where_to_turn]
+  [whats_new_3d_title]
     tags = ios, android
-    en = MAPS.ME will let you know where to turn
-    ru = MAPS.ME подскажет, куда поворачивать
-    fr = MAPS.ME vous dit quand tourner
-    da = MAPS.ME vil fortælle dig, hvor du skal dreje
-    id = MAPS.ME akan memberi tahu Anda tempat untuk berbelok
-    ko = MAPS.ME는 어디로 회전해야 하는지 알려 줍니다
-    sv = MAPS.ME berättar var du ska svänga
-    tr = MAPS.ME nereye döneceğinizi bilmenizi sağlayacak
-    uk = MAPS.ME підкаже, куди повернути
-    vi = MAPS.ME sẽ cho bạn biết chỗ rẽ
-    hu = A MAPS.ME segítségével tudni fogod, hogy merre kanyarodj
-    de = MAPS.ME sagt euch, wo ihr abbiegen müsst
-    fi = MAPS.ME kertoo sinulle, minne kääntyä
-    cs = MAPS.ME vám řekne, kdy zatočit
-    it = MAPS.ME ti farà sapere dove girare
-    nb = MAPS.ME gir deg perfekte veibeskrivelser
-    zh-Hant = MAPS.ME 會讓您知道應該在哪裡轉彎
-    zh-Hans = MAPS.ME会告诉您在哪转弯
-    th = MAPS.ME จะแจ้งให้คุณทราบถึงจุดเลี้ยว
-    ja = MAPS.MEが道順をご案内します
-    ro = MAPS.ME vă va spune unde să cotiți
-    ar = سوف تمكنك MAPS.ME من معرفة أين تتجه
-    sk = MAPS.ME vám dá vedieť, kde sa obrátiť
-    es = MAPS.ME te permitirá saber dónde girar
-    pl = MAPS.ME powiadomią Cię, gdzie skręcić
-    nl = MAPS.ME zal u laten weten waar u moet afslaan
-    pt = MAPS.ME te permitirá saber dónde girar
+    en = Your favorite maps from a new perspective
+    ru = Любимые карты под новым углом
+    fr = Vos cartes préférées prennent de la profondeur
+    da = Dine foretrukne kort fra et nyt perspektiv
+    id = Peta favorit Anda dari perspektif yang baru
+    ko = 새로운 관점에서 좋아하는 지도
+    sv = Dina favoritkartor från ett nytt perspektiv
+    tr = En sevdiğiniz haritalar yeni bir perspektiften
+    uk = Улюблені карти під новим кутом
+    vi = Bản đồ yêu thích của bạn từ một góc nhìn mới
+    hu = Kedvenc térképei új perspektívából
+    de = Ihre Lieblingskarten aus einer neuen Perspektive
+    fi = Suosikkikarttasi uudella perspektiivillä
+    cs = Vaše oblíbené mapy z nové perspektivy
+    it = Le tue mappe preferite in una nuova prospettiva
+    nb = Favorittkartene dine fra et nytt perspektiv
+    zh-Hant = 從全新的角度看您最愛的地圖
+    zh-Hans = 从全新的角度看您最爱的地图
+    th = แผนที่โปรดของคุณจากมุมมองใหม่
+    ja = お気に入りの地図を新たな視点で
+    ro = Hărțile dvs. preferate dintr-o nouă perspectivă
+    ar = خرائطك المفضلة من منظور جديد
+    sk = Vaše obľúbené mapy z nového uhla pohľadu
+    es = Tus mapas favoritos desde una nueva perspectiva
+    pl = Twoje ulubione mapy teraz w nowej perspektywie
+    nl = Uw favoriete kaarten vanuit een nieuw perspectief
+    pt = Seus mapas favoritos a partir de uma nova perspectiva
 
-  [whats_new_voice_instructions]
+  [whats_new_3d_subtitle]
     tags = ios, android
-    en = Dear friends, you have long been asking for voice instructions during navigation - we have done that! Now our navigator will timely warn you of your next turn.
-    ru = Друзья, вы давно просили голосовые подсказки во время навигации — мы сделали это! Ваш новый штурман вовремя предупредит о маневре.
-    fr = Chers amis, vous nous demandiez depuis longtemps d'inclure des instructions vocales au cours de la navigation – nous l'avons fait ! Désormais, notre navigateur vous préviendra à l'avance de votre prochain virage.
-    da = Kære venner, I har længe bedt om stemmeinstruktioner under navigering - det har vi gjort! Nu vil vores navigatør varsle dit næste sving i tide.
-    id = Teman-teman, Anda telah lama meminta petunjuk suara selama navigasi - kami telah menyelesaikannya! Sekarang navigator kami secara tepat waktu akan memperingatkan Anda tentang belokan berikutnya.
-    ko = 친애하는 친구 여러분, 네비게이션 동안 음성 안내를 오랫동안 요구했습니다. 우리가 이를 해냈습니다! 이제 네비게이터는 적시에 다음 회전할 차례를 알려 줍니다.
-    sv = Kära vänner, ni har länge frågat efter röstinstruktioner under navigering – vi har gjort det! Nu meddelar vår navigator dig lagom till nästa sväng.
-    tr = Sevgili arkadaşlar, navigasyon sırasında sesli talimatları uzun süredir sormaktaydınız - Bunu yaptık! Artık navigatörümüz bir sonraki dönüşünüz için zamanı geldiğinde sizi uyaracak.
-    uk = Любі друзі, Ви давно просили додати голосові підказки під час навігації - і ми це зробили! Ваш новий штурман вчасно попередить про маневр.
-    vi = Bạn thân mến, các bạn đã yêu cầu từ lâu về việc chỉ dẫn bằng giọng nói trong khi điều hướng - chúng tôi đã thực hiện điều đó! Bây giờ bộ điều hướng của chúng tôi sẽ kịp thời cảnh báo cho bạn ngã rẽ tiếp theo của bạn.
-    hu = Kedves barátaink! Már régóta kértétek tőlünk a hangirányítás hozzáadását a navigációhoz, most végre kész lett! Most a navigátor időben figyelmeztet, hogy mikor kell legközelebb kanyarodnod.
-    de = Hallo Leute! Ihr habt lange nach Sprachausgabe für die GPS-Navigation gefragt - und wir haben es geschafft! Jetzt wird die Navigationssoftware rechtzeitig bescheid sagen, wenn es Zeit zum Abbiegen wird.
-    fi = Hyvät ystävät, olette pyytäneet ääniopastusta navigoinnin avuksi jo pitkän aikaa - toiveenne on kuultu! Nyt navigaattorimme varoittaa sinua hyvissä ajoin, ennen kuin sinun pitää kääntyä.
-    cs = Vážení přátelé, již dlouho jste žádali o mluvené instrukce při navádění – my jsme to udělali! Nyní vás náš navigátor včas varuje před další zatáčkou.
-    it = Cari amici, ci avete chiesto, per tanto tempo, di inserire le istruzioni vocali durante la navigazione; bene, lo abbiamo fatto! Ora, il nostro navigatore vi comunicherà, in tempo, quando dovrete girare.
-    nb = Kjære venner, vi har nå oppfylt deres ønske om tale av veibeskrivelser! Nå vil navigatøren vår gi deg veibeskrivelser i god tid.
-    zh-Hant = 親愛的朋友，您一直要求在導航時提供語音指示 - 我們已經做到了！現在，我們的導航儀會及時在您下一次轉變之前發出警示。
-    zh-Hans = 亲爱的朋友们，您一直都在要求导航中的声音指导——我们做到了！现在我们的导航会及时警告您下次转弯。
-    th = เรียน เพื่อน ๆ จากที่คุณได้ร้องขอในเรื่องคำแนะนำด้วยเสียงพูดในระหว่างการนำทาง - เราได้ทำมันแล้ว! ต่อไปนี้ตัวนำทางของเราจะเตือนเกี่ยวกับการเลี้ยวครั้งถัดไปของคุณได้ทันเวลา
-    ja = お友達の皆様へ。皆様が長い間待ち望んでいたナビゲーションの音声案内を、ついに実現しました！ナビゲーターがリアルタイムで次の道順をご案内します。
-    ro = Dragi prieteni, ați solicitat în repetate rânduri indicații audio în timpul navigării – iar noi am realizat acest lucru! Noul dvs. copilot vă va avertiza la timp despre manevre.
-    ar = الأصدقاء الأعزاء، لطالما طالبتم بتوفير تعليمات صوتية أثناء التنقل – لقد قمنا بذلك! سوف يتولى الملاح الخاص بنا الآن تحذيريكم في الوقت المناسب عند قرب المنعطف القادم.
-    sk = Vážení priatelia, už dlhší čas požadujete hlasové pokyny počas navigácie - ma sme vám vyhoveli! Teraz vás náš navigátor včas upozorní na váš ďalší obrat.
-    es = Estimados amigos: hace tiempo que solicitáis instrucciones de voz durante la navegación. ¡Lo hemos hecho posible! Ahora, nuestro navegador te indicará oportunamente dónde debes girar a continuación.
-    pl = Drodzy Użytkownicy! Od dawna prosiliście, aby podczas nawigowania udzielane były instrukcje głosowe. Właśnie wprowadziliśmy taką możliwość! Nasz nawigator w odpowiednim czasie poinformuje, kiedy należy skręcić.
-    nl = Beste vrienden, jullie vragen al lang om gesproken instructies voor tijdens het navigeren - dat hebben we gerealiseerd! Nu zal onze navigator u tijdig op de hoogte brengen van uw volgende afslag.
-    pt = Estimados amigos: hace tiempo que solicitáis instrucciones de voz durante la navegación. ¡Lo hemos hecho posible! Ahora, nuestro navegador te indicará oportunamente dónde debes girar a continuación.
+    en = We have added perspective view to the navigation mode.
+    ru = Мы добавили перспективный обзор в режим навигации.
+    fr = Nous avons ajouté de la perspective au mode navigation.
+    da = Vi har tilføjet perspektivvisning til navigeringstilstanden.
+    id = Kami telah menambahkan tampilan perspektif ke mode navigasi.
+    ko = 배경도를 탐색 모드에 추가했습니다.
+    sv = Vi har lagt till perspektivvy till navigeringsläget.
+    tr = Navigasyon moduna perspektif görünüm ekledik.
+    uk = Ми додали переспективний огляд у режим навігації.
+    vi = Chúng tôi đã thêm góc nhìn phối cảnh cho chế độ điều hướng.
+    hu = A navigációs módban már perspektívikus nézet is választható.
+    de = Wir haben dem Navigationsmodus perspektivische Ansichten hinzugefügt.
+    fi = Olemme lisänneet perspektiivinäkymän navigointitilaan.
+    cs = Přidali jsme do navigačního režimu zobrazení perspektivy.
+    it = Abbiamo aggiunto la visualizzazione prospettica alla modalità di navigazione.
+    nb = Vi har lagt til perspektivvisning i navigeringsmodusen.
+    zh-Hant = 我們添加了視角視圖到導航模式。
+    zh-Hans = 我们添加了视角视图到导航模式。
+    th = เราได้เพิ่มมุมมองเพอร์สเปกทีฟในโหมดการนำทาง
+    ja = ナビゲーションモードに視点表示が追加されました。
+    ro = Am adăugat modul de vizualizare în perspectivă la modul de navigație.
+    ar = لقد أضفنا عرض المنظور إلى نمط الملاحة.
+    sk = Do navigačného režimu sme pridali perspektívny pohľad.
+    es = Hemos añadido la vista en perspectiva al modo de navegación.
+    pl = Do trybu nawigacji dodaliśmy widok z perspektywy.
+    nl = We hebben perspectief toegevoegd aan de navigatiestand.
+    pt = Nós adicionamos a visão em perspectiva ao modo de navegação.
 
-  [whats_new_between_any_points]
+  [whats_new_3d_buildings_title]
     tags = ios, android
-    en = Build routes between any points
-    ru = Стройте маршрут между любыми объектами
-    fr = Obtenez des itinéraires entre n'importe quels points
-    da = Byg ruter mellem alle punkter
-    id = Buat rute antar titik mana saja
-    ko = 모든 지점 사이로 경로 구축
-    sv = Skapa rutter mellan valfria punkter
-    tr = Herhangi noktalar arasında rotalar oluşturun
-    uk = Прокладіть маршрут між будь-якими об'єктами
-    vi = Lập đường đi giữa bất kỳ các điểm nào
-    hu = Alakíts ki egy útvonalat két tetszőleges pont között
-    de = Routenberechnung zwischen zwei frei wählbaren Zielen
-    fi = Luo reittejä minkä tahansa kohteiden välille
-    cs = Vytvořte cesty mezi dvěma body
-    it = Crea percorsi fra punti qualsiasi
-    nb = Sett sammen en reiserute mellom to steder
-    zh-Hant = 創建任何點之間的路線
-    zh-Hans = 在任何点中间构建路线
-    th = สร้างเส้นทางระหว่างทุกจุด
-    ja = 出発地から目的時までのルートを作成
-    ro = Elaborați un traseu între orice obiecte
-    ar = إنشاء الطرق بين أي نقاط
-    sk = Vytvorte si trasy medzi ľubovoľnými bodmi
-    es = Crea rutas entre los puntos que quieras
-    pl = Twórz trasy pomiędzy dowolnymi punktami
-    nl = Maak routes tussen alle punten
-    pt = Crea rutas entre los puntos que quieras
+    en = A new dimension in MAPS.ME
+    ru = Новое измерение в MAPS.ME
+    fr = La nouvelle dimension de MAPS.ME
+    da = En ny dimension i MAPS.ME
+    id = Dimensi yang baru di MAPS.ME
+    ko = MAPS.ME의 새로운 차원
+    sv = En ny dimension av MAPS.ME
+    tr = MAPS.ME'de yeni bir boyut
+    uk = Новий вимір в MAPS.ME
+    vi = Một chiều mới trong MAPS.ME
+    hu = Új dimenzió a MAPS.ME-ben
+    de = Eine neue Dimension in MAPS.ME
+    fi = Uusi ulottuvuus MAPS.ME-sovellukseen
+    cs = Nová dimenze v MAPS.ME
+    it = MAPS.ME ha una nuova dimensione
+    nb = En ny dimensjon av MAPS.ME
+    zh-Hant = MAPS.ME中的全新維度
+    zh-Hans = MAPS.ME中的全新维度
+    th = มิติใหม่ใน MAPS.ME
+    ja = MAPS.MEに新たな次元を追加
+    ro = O nouă dimensiune în MAPS.ME
+    ar = بُعد جديد في MAPS.ME
+    sk = Nová dimenzia v MAPS.ME
+    es = Una nueva dimensión en MAPS.ME
+    pl = Nowy wymiar w MAPS.ME
+    nl = Een nieuwe dimensie in MAPS.ME
+    pt = Uma nova dimensão no MAPS.ME
 
-  [whats_new_happy_day]
+  [whats_new_3d_buildings_subtitle]
     tags = ios, android
-    en = A happy day indeed! Plan your trips ahead with MAPS.ME.
-    ru = Да, да, это правда! Сегодня счастливый день и еще одно улучшение. Планируйте свои путешествия заранее с MAPS.ME.
-    fr = Nous vous souhaitons une bonne journée ! Préparez vos trajet en avance avec MAPS.ME
-    da = En god dag ganske vidst! Planlæg dine rejser på forhånd med MAPS.ME.
-    id = Memang hari yang membahagiakan! Rencanakan perjalanan Anda ke depan bersama MAPS.ME.
-    ko = 정말로 행복한 하루되세요! MAPS.ME로 향후 여행을 계획하세요.
-    sv = Definitivt en dag att fira! Planera dina resor i förväg med MAPS.ME.
-    tr = Çok mutlu bir gün öyle değil mi! Yolculuğunuzu önceden MAPS.ME ile planlayın.
-    uk = Так, це насправді! Сьогодні щасливий день і ще одне покращення. Заздалегідь заплануйте свої подорожі разом з MAPS.ME.
-    vi = Một ngày thực sự hạnh phúc! Hãy lên kế hoạch trước chuyến đi của bạn với MAPS.ME.
-    hu = Micsoda boldog nap ez! Tervezd meg az utaidat előre a MAPS.ME-vel!
-    de = Welch ein schöner Tag! Reiseplanung im Voraus mit MAPS.ME.
-    fi = Elämä hymyilee! Suunnittele matkasi etukäteen MAPS.ME -sovelluksen avulla.
-    cs = Přejeme vám opravdu hezký den! Naplánujte svůj výlet předem s aplikací MAPS.ME.
-    it = Un giorno davvero felice! Pianifica in anticipo i tuoi viaggi con MAPS.ME.
-    nb = I dag er en god dag! Planlegg reisene dine i forveien med MAPS.ME.
-    zh-Hant = 真是愉快的一天！使用MAPS.ME提前計劃您的旅行。
-    zh-Hans = 真是快乐的一天！用MAPS.ME事先计划路程吧。
-    th = เป็นวันที่แสนสุขจริง ๆ! วางแผนทริปของคุณล่วงหน้าด้วย MAPS.ME
-    ja = 実にすがすがしい日ですね！MAPS.MEで旅程を立てましょう。
-    ro = Da, da, e adevărat! Astăzi este o zi fericită cu încă o îmbunătățire! Planificați-vă călătoria din timp cu MAPS.ME.
-    ar = يوم سعيد حقا! قم بتخطيط رحلاتك مقدماً مع MAPS.ME.
-    sk = Naozaj šťastný deň! Plánujte si výlety napred s MAPS.ME.
-    es = ¡Que tengas un buen día! Planifica tus viajes por adelantado con MAPS.ME.
-    pl = To będzie dobry dzień! Planuj swoje podróże z MAPS.ME.
-    nl = Inderdaad een prettige dag! Plan uw reizen vooruit met MAPS.ME.
-    pt = ¡Que tengas un buen día! Planifica tus viajes por adelantado con MAPS.ME.
-
-  [whats_new_next]
+    en = With 3D buildings, our maps have become more informative and more beautiful.
+    ru = С 3D зданиями наши карты стали более информативными и красивыми.
+    fr = Grâce à l'affichage des bâtiments en 3D, nos cartes sont désormais plus informatives et plus belles.
+    da = Med 3D-bygninger er vores kort blevet smukkere og mere informative.
+    id = Dengan bangunan 3D, peta kami telah menjadi lebih indah dan informatif.
+    ko = 3D 건물과 함께, 지도는 더 많은 정보로 더 아름답게 나타냅니다.
+    sv = Med byggnader i 3D blir våra karter mer informativa och vackrare.
+    tr = 3 boyutlu binalarla haritalarımız daha bilgilendirici ve daha güzel hale geldi.
+    uk = З 3D будівлями наші карти стали більш інформативними і гарними.
+    vi = Với các tòa nhà 3 chiều, bản đồ của chúng tôi cung cấp thêm nhiều thông tin hơn và đẹp hơn.
+    hu = A 3D-s épületeknek köszönhetően a térképeink még több információval szolgálnak, és még szebbek lettek.
+    de = Durch die 3D-Gebäude sind unsere Karten noch informativer und schöner geworden.
+    fi = Karttamme ovat entistä informatiivisempia ja kauniimpia 3D-rakennusten avulla.
+    cs = Díky 3D budovám jsou naše mapy pěknější a více informativní.
+    it = Le nostre mappe ora sono ancora più efficaci e ricche di contenuti, grazie agli edifici in 3D.
+    nb = Med bygninger i 3D, blir kartene våre enda mer informative og vakre.
+    zh-Hant = 有了3D大樓，我們的地圖信息量更豐富也更美了。
+    zh-Hans = 有了3D大楼，我们的地图信息量更丰富也更美了。
+    th = ด้วยตึกแบบ 3D แผนที่ของเราจะมอบข้อมูลให้มากขึ้นและสวยงามยิ่งขึ้น
+    ja = 建物を3Dで表示することで、地図がより詳細で美しくなりました。
+    ro = Cu ajutorul clădirilor 3D, hărțile noastre conțin mai multe informații și sunt mai frumoase.
+    ar = مع المباني ثلاثية الأبعاد، أصبحت خرائطنا أكثر معلوماتية وجمالا.
+    sk = Vďaka budovám v 3D sú naše mapy prehľadnejšie a krajšie.
+    es = Con edificios en 3D, nuestros mapas ofrecen más información y son más atractivos.
+    pl = Dzięki budynkom w 3D nasze mapy mają większą wartość informacyjną i są ładniejsze.
+    nl = Met 3D-gebouwen zijn onze kaarten informatiever en mooier geworden.
+    pt = Com os prédios em 3D, nossos mapas ficaram mais informativos e bonitos.
+    
+  [whats_new_3d_update_maps]
     tags = ios, android
+    en = To take full advantage of this feature, please, update your map data.
+    ru = Для полноценной работы функции, пожалуйста, обновите карты.
+    fr = Pour profiter pleinement de cette fonction, veuillez mettre à jour les données de votre carte.
+    da = For at udnytte denne funktion fuldt ud skal du opdatere dine kortdata.
+    id = Untuk memaksimalkan pemanfaatan fitur ini, harap perbarui data peta Anda.
+    ko = 이 기능의 모든 장점을 취하세요, 당신의 맵 데이터를 업데이트 하세요.
+    sv = Uppdatera dina kartdata för att kunna använda denna funktion fullt ut.
+    tr = Bu özellikten tam anlamıyla faydalanabilmek için, lütfen harita verilerinizi güncelleyin.
+    uk = Щоб повною мірою скористатися цією функцією, будь ласка, оновіть дані своєї карти.
+    vi = Để tận dụng tính năng này, vui lòng cập nhật dữ liệu bản đồ của bạn.
+    hu = Ezen tulajdonság teljes körű kihasználásához, kérjük, frissítse térképének az adatát.
+    de = Um alle Vorteile dieser Funktion nutzen zu können, aktualisieren Sie bitte Ihre Kartendaten.
+    fi = Päivitä karttatietosi voidaksesi käyttää tätä toimintoa täysimääräisesti.
+    cs = Využijte naplno tuto funkci, aktualizujte prosím svá mapová data.
+    it = Per sfruttare al massimo questa funzione, aggiorna i dati della tua mappa.
+    nb = Oppdater kartdata for å kunne bruke denne funksjonen fullt ut.
+    zh-Hant = 要充分利用此功能，請更新您的地圖資料。
+    zh-Hans = 要充分利用此功能，请更新您的地图数据。
+    th = เพื่อรับประโยชน์อย่างเต็มที่สำหรับฟีเจอร์นี้ กรุณาอัปเดตข้อมูลแผนที่ของคุณ
+    ja = この機能をフル活用するために、マップデータを更新してください。
+    ro = Pentru a beneficia integral de această funcție, vă rugăm să actualizați datele hărții dvs.
+    ar = للتمتع بالمزايا الكاملة لهذه الخاصية، قم بتحديث بيانات الخرائط لديك.
+    sk = Pre plné využitie tejto funkcie aktualizujte údaje k mape.
+    es = Para aprovechar al máximo esta característica, por favor, actualiza tus datos de mapa.
+    pl = Aby w pełni korzystać z tej funkcji, uaktualnij dane map.
+    nl = Werk uw kaartgegevens bij om volledig te kunnen profiteren van deze functie.
+    pt = Para aproveitar por completo este recurso, atualize os dados do seu mapa.  
+    
+    
+  [whats_new_3d_on]    
+    tags = ios
+    en = Enable Perspective View
+    ru = Включить перспективный вид
+    fr = Activer la vue en perspective
+    da = Aktivér perspektivvisning
+    id = Aktifkan pandangan perspektif
+    ko = 원근 보기 활성
+    sv = Aktivera perspektivvy
+    tr = Perspektif görünümü etkinleştir
+    uk = Включити перспективний вид
+    vi = Kích hoạt góc nhìn phối cảnh
+    hu = Távlati kép engedélyezése
+    de = Perspektivenansicht aktualisieren
+    fi = Aktivoi perspektiivinäkymä
+    cs = Povolit zobrazení perspektivy
+    it = Attiva vista in prospettiva
+    nb = Aktiver perspektivvisning
+    zh-Hant = 啟用透視圖
+    zh-Hans = 启用透视图
+    th = เปิดใช้งานมุมมองเพอร์สเปกทีฟ
+    ja = パースペクティブ表示を有効化
+    ro = Activare vizualizare în perspectivă
+    ar = تفعيل العرض المنظوري
+    sk = Povoliť perspektívne zobrazenie
+    es = Habilitar vista de perspectiva
+    pl = Włącz widok z perspektywy
+    nl = Perspectiefbeeld inschakelen
+    pt = Habilitar visão em perspectiva    
+    
+    
+    
+  [whats_new_3d_buildings_on]
+    tags = ios
+    en = Enable 3D Buildings
+    ru = Включить 3D здания
+    fr = Activer les bâtiments en 3D
+    da = Aktivér 3D-bygninger
+    id = Aktifkan Bangunan 3D
+    ko = 3D 빌딩 보기 활성
+    sv = Aktivera 3D-byggnader
+    tr = 3D Binalar seçeneğini etkinleştir
+    uk = Включити 3D-будівлі
+    vi = Kích hoạt Tòa nhà 3D
+    hu = 3D Épületek engedélyezése
+    de = 3D-Gebäude aktivieren
+    fi = Aktivoi 3D-rakennukset
+    cs = Povolit 3D Budovy
+    it = Attiva Edifici in 3D
+    nb = Aktiver 3D-bygninger
+    zh-Hant = 啟用3D建築
+    zh-Hans = 启用3D建筑
+    th = เปิดใช้งานตึก 3D
+    ja = 3Dビルディングを有効化
+    ro = Activare Clădiri 3D
+    ar = قم بتفعيل المباني ثلاثية الأبعاد
+    sk = Povoliť 3D budovy
+    es = Habilitar edificios en 3D
+    pl = Włącz budynki 3D
+    nl = 3D-Gebouwen inschakelen
+    pt = Habilitar Prédios em 3D    
+    
+  [whats_new_next_button]    
+    tags = ios
     en = Next
     ru = Далее
     fr = Neste

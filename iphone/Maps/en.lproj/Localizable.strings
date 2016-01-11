@@ -298,7 +298,7 @@
 "gps_is_disabled_long_text" = "GPS is disabled. Please enable it in Settings.";
 
 /* Measurement units title in settings activity */
-"measurement_units" = "Measurement Units";
+"measurement_units" = "Measurement units";
 
 /* Detailed description of Measurement Units settings button */
 "measurement_units_summary" = "Choose between miles and kilometres";
@@ -467,6 +467,9 @@
 /* Prints version number in About dialog */
 "version" = "Version: %@";
 
+/* Data version in «About» screen */
+"data_version" = "Data version: %d";
+
 /* Confirmation in downloading countries dialog */
 "are_you_sure" = "Are you sure you want to continue?";
 
@@ -506,6 +509,15 @@
 
 /* «Map style» entry value */
 "pref_map_style_modern_light" = "Modern light";
+
+/* Settings «Map» category: «Perspective view» title */
+"pref_map_3d_title" = "Perspective view";
+
+/* Settings «Map» category: «3D buildings» title */
+"pref_map_3d_buildings_title" = "3D buildings";
+
+/* Settings «Map» category: «3D buildings» summary */
+"pref_map_3d_buildings_subtitle" = "Affects battery life";
 
 /* Settings «Route» category: «Tts enabled» title */
 "pref_tts_enable_title" = "Voice Instructions";
@@ -1158,6 +1170,8 @@
 
 "dialog_routing_disclaimer_recommendations" = "— Suggested routes are to be taken only as recommendations;";
 
+"dialog_routing_disclaimer_borders" = "— Exercise caution with routes in border zones: the routes created by our app may sometimes cross country borders in unauthorized places;";
+
 "dialog_routing_disclaimer_beware" = "Please stay alert and safe on the roads!";
 
 "dialog_routing_check_gps" = "Check GPS signal";
@@ -1286,7 +1300,7 @@
 "clear_search" = "Clear Search History";
 
 /* Title for settings to enable/disable showcase menu button */
-"showcase_settings_title" = "Show partners' offers";
+"showcase_settings_title" = "Show offers";
 
 "showcase_more_apps" = "More My.com Apps";
 
@@ -1313,12 +1327,18 @@
 
 "p2p_reroute_from_current" = "Do you want us to plan a route from your current location?";
 
-"whats_new_where_to_turn" = "MAPS.ME will let you know where to turn";
+"whats_new_3d_title" = "Your favorite maps from a new perspective";
 
-"whats_new_voice_instructions" = "Dear friends, you have long been asking for voice instructions during navigation - we have done that! Now our navigator will timely warn you of your next turn.";
+"whats_new_3d_subtitle" = "We have added perspective view to the navigation mode.";
 
-"whats_new_between_any_points" = "Build routes between any points";
+"whats_new_3d_buildings_title" = "A new dimension in MAPS.ME";
 
-"whats_new_happy_day" = "A happy day indeed! Plan your trips ahead with MAPS.ME.";
+"whats_new_3d_buildings_subtitle" = "With 3D buildings, our maps have become more informative and more beautiful.";
 
-"whats_new_next" = "Next";
+"whats_new_3d_update_maps" = "To take full advantage of this feature, please, update your map data.";
+
+"whats_new_3d_on" = "Enable Perspective View";
+
+"whats_new_3d_buildings_on" = "Enable 3D Buildings";
+
+"whats_new_next_button" = "Next";

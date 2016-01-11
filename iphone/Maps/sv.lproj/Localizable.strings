@@ -467,6 +467,9 @@
 /* Prints version number in About dialog */
 "version" = "Version: %@";
 
+/* Data version in «About» screen */
+"data_version" = "Data version: %d";
+
 /* Confirmation in downloading countries dialog */
 "are_you_sure" = "Är du säker på att du vill fortsätta?";
 
@@ -506,6 +509,15 @@
 
 /* «Map style» entry value */
 "pref_map_style_modern_light" = "Modern light";
+
+/* Settings «Map» category: «Perspective view» title */
+"pref_map_3d_title" = "Perspektivvy";
+
+/* Settings «Map» category: «3D buildings» title */
+"pref_map_3d_buildings_title" = "3D-byggnader";
+
+/* Settings «Map» category: «3D buildings» summary */
+"pref_map_3d_buildings_subtitle" = "Påverkar batteriets livslängd";
 
 /* Settings «Route» category: «Tts enabled» title */
 "pref_tts_enable_title" = "Röstinstruktioner";
@@ -614,7 +626,7 @@
 "subscribe_to_news" = "Prenumerera på våra nyheter";
 
 /* Text in menu */
-"rate_the_app" = "Get appen ett betyg";
+"rate_the_app" = "Ge appen ett betyg";
 
 /* Rate in Google Play (Android only) */
 "rate_gp" = "Rate on Google Play";
@@ -653,7 +665,7 @@
 "email_error_title" = "Fel när mailet skulle skickas";
 
 /* Settings item title */
-"pref_calibration_title" = "Compass calibration";
+"pref_calibration_title" = "Kompasskalibrering";
 
 /* Search Suggestion */
 "wifi" = "WiFi";
@@ -1158,6 +1170,8 @@
 
 "dialog_routing_disclaimer_recommendations" = "— Föreslagna vägar endast är rekommendationer;";
 
+"dialog_routing_disclaimer_borders" = "— Iakttag försiktighet med rutter i gränszoner: rutterna som vår app skapat kan ibland korsa landsgränser på otillåtna platser;";
+
 "dialog_routing_disclaimer_beware" = "Var uppmärksam och kör säkert på vägarna!";
 
 "dialog_routing_check_gps" = "Kontrollera GPS-signal";
@@ -1286,7 +1300,7 @@
 "clear_search" = "Rensa sökhistorik";
 
 /* Title for settings to enable/disable showcase menu button */
-"showcase_settings_title" = "Visa våra partners erbjudanden";
+"showcase_settings_title" = "Visa erbjudanden";
 
 "showcase_more_apps" = "Mai multe aplicații My.com";
 
@@ -1313,12 +1327,18 @@
 
 "p2p_reroute_from_current" = "Vill du att vi planerar en färdväg från din nuvarande plats?";
 
-"whats_new_where_to_turn" = "MAPS.ME berättar var du ska svänga";
+"whats_new_3d_title" = "Dina favoritkartor från ett nytt perspektiv";
 
-"whats_new_voice_instructions" = "Kära vänner, ni har länge frågat efter röstinstruktioner under navigering – vi har gjort det! Nu meddelar vår navigator dig lagom till nästa sväng.";
+"whats_new_3d_subtitle" = "Vi har lagt till perspektivvy till navigeringsläget.";
 
-"whats_new_between_any_points" = "Skapa rutter mellan valfria punkter";
+"whats_new_3d_buildings_title" = "En ny dimension av MAPS.ME";
 
-"whats_new_happy_day" = "Definitivt en dag att fira! Planera dina resor i förväg med MAPS.ME.";
+"whats_new_3d_buildings_subtitle" = "Med byggnader i 3D blir våra karter mer informativa och vackrare.";
 
-"whats_new_next" = "Nästa";
+"whats_new_3d_update_maps" = "Uppdatera dina kartdata för att kunna använda denna funktion fullt ut.";
+
+"whats_new_3d_on" = "Aktivera perspektivvy";
+
+"whats_new_3d_buildings_on" = "Aktivera 3D-byggnader";
+
+"whats_new_next_button" = "Nästa";

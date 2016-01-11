@@ -467,6 +467,9 @@
 /* Prints version number in About dialog */
 "version" = "เวอร์ชัน: %@";
 
+/* Data version in «About» screen */
+"data_version" = "Data version: %d";
+
 /* Confirmation in downloading countries dialog */
 "are_you_sure" = "คุณแน่ใจหรือไม่ว่าคุณต้องการดำเนินการต่อ?";
 
@@ -506,6 +509,15 @@
 
 /* «Map style» entry value */
 "pref_map_style_modern_light" = "Modern light";
+
+/* Settings «Map» category: «Perspective view» title */
+"pref_map_3d_title" = "มุมมองเพอร์สเปกทีฟ";
+
+/* Settings «Map» category: «3D buildings» title */
+"pref_map_3d_buildings_title" = "ตึก 3D";
+
+/* Settings «Map» category: «3D buildings» summary */
+"pref_map_3d_buildings_subtitle" = "มีผลกระทบต่ออายุการใช้งานแบตเตอรี่";
 
 /* Settings «Route» category: «Tts enabled» title */
 "pref_tts_enable_title" = "คำแนะนำด้วยเสียง";
@@ -1158,6 +1170,8 @@
 
 "dialog_routing_disclaimer_recommendations" = "— เส้นทางที่แนะนำเป็นเพียงคำแนะนำเท่านั้น;";
 
+"dialog_routing_disclaimer_borders" = "— โปรดระมัดระวังเมื่อใช้เส้นทางในพื้นที่ชายแดน: บางครั้งเส้นทางที่สร้างขึ้นโดยแอปของเรานั้นอาจข้ามผ่านชายแดนประเทศในพื้นที่ที่ไม่ได้รับการอนุญา;";
+
 "dialog_routing_disclaimer_beware" = "โปรดมีสติอยู่เสมอและยึดถือความปลอดภัยบนถนน!";
 
 "dialog_routing_check_gps" = "ตรวจสอบสัญญาณ GPS";
@@ -1286,7 +1300,7 @@
 "clear_search" = "ล้างการค้นหาประวัติ";
 
 /* Title for settings to enable/disable showcase menu button */
-"showcase_settings_title" = "แสดงข้อเสนอของพันธมิตร";
+"showcase_settings_title" = "แสดงข้อเสนอ";
 
 "showcase_more_apps" = "แอป My.com เพิ่มเติม";
 
@@ -1313,12 +1327,18 @@
 
 "p2p_reroute_from_current" = "คุณต้องการให้เราาวงแผนเส้นทางจากสถานที่ตั้งปัจจุบันของคุณหรือไม่?";
 
-"whats_new_where_to_turn" = "MAPS.ME จะแจ้งให้คุณทราบถึงจุดเลี้ยว";
+"whats_new_3d_title" = "แผนที่โปรดของคุณจากมุมมองใหม่";
 
-"whats_new_voice_instructions" = "เรียน เพื่อน ๆ จากที่คุณได้ร้องขอในเรื่องคำแนะนำด้วยเสียงพูดในระหว่างการนำทาง - เราได้ทำมันแล้ว! ต่อไปนี้ตัวนำทางของเราจะเตือนเกี่ยวกับการเลี้ยวครั้งถัดไปของคุณได้ทันเวลา";
+"whats_new_3d_subtitle" = "เราได้เพิ่มมุมมองเพอร์สเปกทีฟในโหมดการนำทาง";
 
-"whats_new_between_any_points" = "สร้างเส้นทางระหว่างทุกจุด";
+"whats_new_3d_buildings_title" = "มิติใหม่ใน MAPS.ME";
 
-"whats_new_happy_day" = "เป็นวันที่แสนสุขจริง ๆ! วางแผนทริปของคุณล่วงหน้าด้วย MAPS.ME";
+"whats_new_3d_buildings_subtitle" = "ด้วยตึกแบบ 3D แผนที่ของเราจะมอบข้อมูลให้มากขึ้นและสวยงามยิ่งขึ้น";
 
-"whats_new_next" = "ถัดไป";
+"whats_new_3d_update_maps" = "เพื่อรับประโยชน์อย่างเต็มที่สำหรับฟีเจอร์นี้ กรุณาอัปเดตข้อมูลแผนที่ของคุณ";
+
+"whats_new_3d_on" = "เปิดใช้งานมุมมองเพอร์สเปกทีฟ";
+
+"whats_new_3d_buildings_on" = "เปิดใช้งานตึก 3D";
+
+"whats_new_next_button" = "ถัดไป";

@@ -181,7 +181,8 @@ RoutingSession::State RoutingSession::OnLocationPositionChanged(GpsInfo const & 
     }
     else
     {
-      m_state = OnRoute;
+      if (m_state != RouteFollowing)
+        m_state = OnRoute;
 
       // Warning signals checks
       if (m_routingSettings.m_speedCameraWarning && !m_speedWarningSignal)
@@ -413,6 +414,16 @@ bool RoutingSession::DisableFollowMode()
   if (m_state == RouteNotStarted || m_state == OnRoute)
   {
     m_state = RouteNoFollowing;
+    return true;
+  }
+  return false;
+}
+
+bool RoutingSession::EnableFollowMode()
+{
+  if (m_state == RouteNotStarted || m_state == OnRoute)
+  {
+    m_state = RouteFollowing;
     return true;
   }
   return false;

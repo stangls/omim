@@ -311,6 +311,12 @@
 	<string name="prefs_group_route">Navigering</string>
 	<string name="pref_zoom_title">Zoom-knappar</string>
 	<string name="pref_zoom_summary">Visa på skärmen</string>
+	<!-- Settings «Map» category: «Perspective view» title -->
+	<string name="pref_map_3d_title">Perspektivvy</string>
+	<!-- Settings «Map» category: «3D buildings» title -->
+	<string name="pref_map_3d_buildings_title">3D-byggnader</string>
+	<!-- Settings «Map» category: «3D buildings» summary -->
+	<string name="pref_map_3d_buildings_subtitle">Påverkar batteriets livslängd</string>
 	<!-- Settings «Route» category: «Tts enabled» title -->
 	<string name="pref_tts_enable_title">Röstinstruktioner</string>
 	<!-- Settings «Route» category: «Tts language» title -->
@@ -371,7 +377,7 @@
 	<!-- Text in menu -->
 	<string name="subscribe_to_news">Prenumerera på våra nyheter</string>
 	<!-- Text in menu -->
-	<string name="rate_the_app">Get appen ett betyg</string>
+	<string name="rate_the_app">Ge appen ett betyg</string>
 	<!-- Text in menu -->
 	<string name="help">Hjälp</string>
 	<!-- Text in menu -->
@@ -388,6 +394,8 @@
 	<string name="email_error_body">E-mailklienten har inte konfigurerats. Konfigurera den eller använd ett annat sätt att kontakta oss på %s</string>
 	<!-- Alert title -->
 	<string name="email_error_title">Fel när mailet skulle skickas</string>
+	<!-- Settings item title -->
+	<string name="pref_calibration_title">Kompasskalibrering</string>
 	<!-- Update map suggestion -->
 	<string name="routing_map_outdated">Uppdatera kartan för att skapa en rutt.</string>
 	<!-- Update maps suggestion -->
@@ -719,6 +727,7 @@
 	<string name="dialog_routing_disclaimer_priority">— Vägförhållanden, trafiklagar och vägskyltar alltid ska prioriteras över navigeringsråd;</string>
 	<string name="dialog_routing_disclaimer_precision">— Kartan kan vara felaktig och den föreslagna vägen inte alltid är det optimala sättet att ta sig till destinationen;</string>
 	<string name="dialog_routing_disclaimer_recommendations">— Föreslagna vägar endast är rekommendationer;</string>
+	<string name="dialog_routing_disclaimer_borders">— Iakttag försiktighet med rutter i gränszoner: rutterna som vår app skapat kan ibland korsa landsgränser på otillåtna platser;</string>
 	<string name="dialog_routing_disclaimer_beware">Var uppmärksam och kör säkert på vägarna!</string>
 	<string name="dialog_routing_check_gps">Kontrollera GPS-signal</string>
 	<string name="dialog_routing_error_location_not_found">Kan inte skapa väg. Nuvarande GPS-koordinater kan inte identifieras.</string>
@@ -788,7 +797,7 @@
 	<string name="search_history_text">Få snabbare åtkomst till senaste sökförfrågan.</string>
 	<string name="clear_search">Rensa sökhistorik</string>
 	<!-- Title for settings to enable/disable showcase menu button -->
-	<string name="showcase_settings_title">Visa våra partners erbjudanden</string>
+	<string name="showcase_settings_title">Visa erbjudanden</string>
 	<string name="showcase_more_apps">Mai multe aplicații My.com</string>
 	<string name="p2p_route_planning">Ruttplanering</string>
 	<string name="p2p_your_location">Din plats</string>
@@ -800,9 +809,12 @@
 	<string name="p2p_to_here">Till</string>
 	<string name="p2p_only_from_current">Navigering är endast tillgänglig från din aktuella plats.</string>
 	<string name="p2p_reroute_from_current">Vill du att vi planerar en färdväg från din nuvarande plats?</string>
-	<string name="whats_new_where_to_turn">MAPS.ME berättar var du ska svänga</string>
-	<string name="whats_new_voice_instructions">Kära vänner, ni har länge frågat efter röstinstruktioner under navigering – vi har gjort det! Nu meddelar vår navigator dig lagom till nästa sväng.</string>
-	<string name="whats_new_between_any_points">Skapa rutter mellan valfria punkter</string>
-	<string name="whats_new_happy_day">Definitivt en dag att fira! Planera dina resor i förväg med MAPS.ME.</string>
-	<string name="whats_new_next">Nästa</string>
+	<string name="whats_new_3d_title">Dina favoritkartor från ett nytt perspektiv</string>
+	<string name="whats_new_3d_subtitle">Vi har lagt till perspektivvy till navigeringsläget.</string>
+	<string name="whats_new_3d_buildings_title">En ny dimension av MAPS.ME</string>
+	<string name="whats_new_3d_buildings_subtitle">Med byggnader i 3D blir våra karter mer informativa och vackrare.</string>
+	<string name="whats_new_3d_update_maps">Uppdatera dina kartdata för att kunna använda denna funktion fullt ut.</string>
+	<string name="whats_new_3d_on">Aktivera perspektivvy</string>
+	<string name="whats_new_3d_buildings_on">Aktivera 3D-byggnader</string>
+	<string name="whats_new_next_button">Nästa</string>
 </resources>

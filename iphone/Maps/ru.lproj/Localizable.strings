@@ -467,6 +467,9 @@
 /* Prints version number in About dialog */
 "version" = "Версия: %@";
 
+/* Data version in «About» screen */
+"data_version" = "Версия данных: %d";
+
 /* Confirmation in downloading countries dialog */
 "are_you_sure" = "Вы уверены, что хотите продолжить?";
 
@@ -506,6 +509,15 @@
 
 /* «Map style» entry value */
 "pref_map_style_modern_light" = "Современная светлая";
+
+/* Settings «Map» category: «Perspective view» title */
+"pref_map_3d_title" = "Перспективный вид";
+
+/* Settings «Map» category: «3D buildings» title */
+"pref_map_3d_buildings_title" = "3D здания";
+
+/* Settings «Map» category: «3D buildings» summary */
+"pref_map_3d_buildings_subtitle" = "Увеличивает расход батареи";
 
 /* Settings «Route» category: «Tts enabled» title */
 "pref_tts_enable_title" = "Голосовые инструкции";
@@ -1158,6 +1170,8 @@
 
 "dialog_routing_disclaimer_recommendations" = "— Предлагаемые маршруты — лишь рекомендации;";
 
+"dialog_routing_disclaimer_borders" = "— Будьте внимательны с маршрутами в приграничных зонах: в построенных программой маршрутах иногда возможны пересечения границ в неположенных местах;";
+
 "dialog_routing_disclaimer_beware" = "Будьте внимательны на дорогах и берегите себя!";
 
 "dialog_routing_check_gps" = "Проверьте сигнал GPS";
@@ -1286,7 +1300,7 @@
 "clear_search" = "Очистить историю поиска";
 
 /* Title for settings to enable/disable showcase menu button */
-"showcase_settings_title" = "Показывать предложения партнёров";
+"showcase_settings_title" = "Показывать предложения";
 
 "showcase_more_apps" = "Другие приложения My.com";
 
@@ -1313,12 +1327,18 @@
 
 "p2p_reroute_from_current" = "Хотите перестроить маршрут от вашего местоположения?";
 
-"whats_new_where_to_turn" = "MAPS.ME подскажет, куда поворачивать";
+"whats_new_3d_title" = "Любимые карты под новым углом";
 
-"whats_new_voice_instructions" = "Друзья, вы давно просили голосовые подсказки во время навигации — мы сделали это! Ваш новый штурман вовремя предупредит о маневре.";
+"whats_new_3d_subtitle" = "Мы добавили перспективный обзор в режим навигации.";
 
-"whats_new_between_any_points" = "Стройте маршрут между любыми объектами";
+"whats_new_3d_buildings_title" = "Новое измерение в MAPS.ME";
 
-"whats_new_happy_day" = "Да, да, это правда! Сегодня счастливый день и еще одно улучшение. Планируйте свои путешествия заранее с MAPS.ME.";
+"whats_new_3d_buildings_subtitle" = "С 3D зданиями наши карты стали более информативными и красивыми.";
 
-"whats_new_next" = "Далее";
+"whats_new_3d_update_maps" = "Для полноценной работы функции, пожалуйста, обновите карты.";
+
+"whats_new_3d_on" = "Включить перспективный вид";
+
+"whats_new_3d_buildings_on" = "Включить 3D здания";
+
+"whats_new_next_button" = "Далее";

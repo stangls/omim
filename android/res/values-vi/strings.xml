@@ -311,6 +311,12 @@
 	<string name="prefs_group_route">Điều hướng</string>
 	<string name="pref_zoom_title">Nút Phóng to/Thu nhỏ</string>
 	<string name="pref_zoom_summary">Hiển thị trên màn hình</string>
+	<!-- Settings «Map» category: «Perspective view» title -->
+	<string name="pref_map_3d_title">Góc nhìn phối cảnh</string>
+	<!-- Settings «Map» category: «3D buildings» title -->
+	<string name="pref_map_3d_buildings_title">Nhà cửa 3D</string>
+	<!-- Settings «Map» category: «3D buildings» summary -->
+	<string name="pref_map_3d_buildings_subtitle">Ảnh hưởng tới tuổi thọ của pin</string>
 	<!-- Settings «Route» category: «Tts enabled» title -->
 	<string name="pref_tts_enable_title">Hướng dẫn bằng Giọng nói</string>
 	<!-- Settings «Route» category: «Tts language» title -->
@@ -719,6 +725,7 @@
 	<string name="dialog_routing_disclaimer_priority">— Điều kiện đường, luật giao thông và biển báo đường bộ luôn được ưu tiên hơn lời khuyên định hướng;</string>
 	<string name="dialog_routing_disclaimer_precision">— Bản đồ có thể không chính xác và tuyến đường được đề xuất có thể không luôn là cách tối ưu nhất để đi đến đích;</string>
 	<string name="dialog_routing_disclaimer_recommendations">— Các tuyến đường được đề nghị chỉ nên được coi là các khuyến nghị;</string>
+	<string name="dialog_routing_disclaimer_borders">— Chú ý khi thể dục theo những con đường gần đường biên giới: những con đường do ứng dụng của chúng tôi tạo ra đôi khi có khả năng vượt ra khỏi biên giới vào những địa điểm không được phép;</string>
 	<string name="dialog_routing_disclaimer_beware">Hãy cảnh giác và giữ an toàn trên đường!</string>
 	<string name="dialog_routing_check_gps">Kiểm tra tín hiệu GPS</string>
 	<string name="dialog_routing_error_location_not_found">Không thể tạo tuyến đường. Không xác định được tọa độ GPS hiện tại.</string>
@@ -788,7 +795,7 @@
 	<string name="search_history_text">Truy cập nhanh chóng đến câu hỏi tìm kiếm gần đây.</string>
 	<string name="clear_search">Xóa Lịch sử Tìm kiếm</string>
 	<!-- Title for settings to enable/disable showcase menu button -->
-	<string name="showcase_settings_title">Hiển thị các giảm giá của đối tác</string>
+	<string name="showcase_settings_title">Hiển thị lời mời</string>
 	<string name="showcase_more_apps">Thêm Ứng dụng My.com</string>
 	<string name="p2p_route_planning">Hoạch định đường đi</string>
 	<string name="p2p_your_location">Vị trí của bạn</string>
@@ -800,9 +807,12 @@
 	<string name="p2p_to_here">Đến</string>
 	<string name="p2p_only_from_current">Chức năng tìm đường chỉ có sẵn từ vị trí hiện tại của bạn.</string>
 	<string name="p2p_reroute_from_current">Bạn có muốn chúng tôi vạch đường từ vị trí hiện tại của bạn không?</string>
-	<string name="whats_new_where_to_turn">MAPS.ME sẽ cho bạn biết chỗ rẽ</string>
-	<string name="whats_new_voice_instructions">Bạn thân mến, các bạn đã yêu cầu từ lâu về việc chỉ dẫn bằng giọng nói trong khi điều hướng - chúng tôi đã thực hiện điều đó! Bây giờ bộ điều hướng của chúng tôi sẽ kịp thời cảnh báo cho bạn ngã rẽ tiếp theo của bạn.</string>
-	<string name="whats_new_between_any_points">Lập đường đi giữa bất kỳ các điểm nào</string>
-	<string name="whats_new_happy_day">Một ngày thực sự hạnh phúc! Hãy lên kế hoạch trước chuyến đi của bạn với MAPS.ME.</string>
-	<string name="whats_new_next">Tiếp theo</string>
+	<string name="whats_new_3d_title">Bản đồ yêu thích của bạn từ một góc nhìn mới</string>
+	<string name="whats_new_3d_subtitle">Chúng tôi đã thêm góc nhìn phối cảnh cho chế độ điều hướng.</string>
+	<string name="whats_new_3d_buildings_title">Một chiều mới trong MAPS.ME</string>
+	<string name="whats_new_3d_buildings_subtitle">Với các tòa nhà 3 chiều, bản đồ của chúng tôi cung cấp thêm nhiều thông tin hơn và đẹp hơn.</string>
+	<string name="whats_new_3d_update_maps">Để tận dụng tính năng này, vui lòng cập nhật dữ liệu bản đồ của bạn.</string>
+	<string name="whats_new_3d_on">Kích hoạt góc nhìn phối cảnh</string>
+	<string name="whats_new_3d_buildings_on">Kích hoạt Tòa nhà 3D</string>
+	<string name="whats_new_next_button">Tiếp theo</string>
 </resources>

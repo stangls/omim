@@ -7,6 +7,8 @@ uniform sampler2D u_colorTex;
 uniform vec4 u_color;
 uniform vec4 u_color_light;
 
+const float kAntialiasingThreshold = 0.92;
+
 void main(void)
 {
 #ifdef SAMSUNG_GOOGLE_NEXUS
@@ -15,21 +17,26 @@ void main(void)
   lowp vec4 fakeColor = texture2D(u_colorTex, vec2(0.0, 0.0)) * kFakeColorScalar;
 #endif
 
-    // we can safely assume that v_length.w ( = position of non-crossing ) is greater than v_length.z ( = position of user )
-    if (v_length.x > v_length.w){
-#ifdef SAMSUNG_GOOGLE_NEXUS
-      gl_FragColor = u_color_light + fakeColor;
-#else
-      gl_FragColor = u_color_light;
-#endif
-    }else{
-      vec4 color = u_color;
-      if (v_length.x < v_length.z)
-        color.a = 0.0;
-#ifdef SAMSUNG_GOOGLE_NEXUS
-    gl_FragColor = color + fakeColor;
-#else
-    gl_FragColor = color;
+  // default color
+  vec4 color = u_color;
+
+  // MX-addition: this allows blending out the route/tour in case it crosses itself
+  if (v_length.x > v_length.w){
+    color = u_color_light;
   }
+
+  // before user-position: no rendering of route/tour
+  if (v_length.x < v_length.z){
+    color.a = 0.0;
+  }else{
+    // anti-aliasing of route/tour
+    color.a *= (1.0 - smoothstep(kAntialiasingThreshold, 1.0, abs(v_length.y)));
+  }
+
+  // see above
+#ifdef SAMSUNG_GOOGLE_NEXUS
+  gl_FragColor = color + fakeColor;
+#else
+  gl_FragColor = color;
 #endif
 }

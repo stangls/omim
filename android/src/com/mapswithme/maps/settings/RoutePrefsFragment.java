@@ -151,35 +151,24 @@ public class RoutePrefsFragment extends PreferenceFragment
 
     mPrefEnabled = (TwoStatePreference) findPreference(getString(R.string.pref_tts_enabled));
     mPrefLanguages = (ListPreference) findPreference(getString(R.string.pref_tts_language));
-    update();
 
-    Framework.Params3dMode _3d = new Framework.Params3dMode();
+    final Framework.Params3dMode _3d = new Framework.Params3dMode();
     Framework.nativeGet3dMode(_3d);
 
     final TwoStatePreference pref3d = (TwoStatePreference)findPreference(getString(R.string.pref_3d));
-    final TwoStatePreference pref3dBuildings = (TwoStatePreference)findPreference(getString(R.string.pref_3d_buildings));
     pref3d.setChecked(_3d.enabled);
-    pref3dBuildings.setChecked(_3d.buildings);
 
     pref3d.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
     {
       @Override
       public boolean onPreferenceChange(Preference preference, Object newValue)
       {
-        Framework.nativeSet3dMode((Boolean)newValue, pref3dBuildings.isChecked());
+        Framework.nativeSet3dMode((Boolean)newValue, _3d.buildings);
         return true;
       }
     });
 
-    pref3dBuildings.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
-    {
-      @Override
-      public boolean onPreferenceChange(Preference preference, Object newValue)
-      {
-        Framework.nativeSet3dMode(pref3d.isChecked(), (Boolean)newValue);
-        return true;
-      }
-    });
+    update();
   }
 
   @Override

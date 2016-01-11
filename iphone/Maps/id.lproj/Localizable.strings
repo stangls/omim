@@ -467,6 +467,9 @@
 /* Prints version number in About dialog */
 "version" = "Versi: %@";
 
+/* Data version in «About» screen */
+"data_version" = "Data version: %d";
+
 /* Confirmation in downloading countries dialog */
 "are_you_sure" = "Apakah Anda yakin ingin melanjutkan?";
 
@@ -506,6 +509,15 @@
 
 /* «Map style» entry value */
 "pref_map_style_modern_light" = "Modern light";
+
+/* Settings «Map» category: «Perspective view» title */
+"pref_map_3d_title" = "Pandangan perspektif";
+
+/* Settings «Map» category: «3D buildings» title */
+"pref_map_3d_buildings_title" = "Bangunan 3D";
+
+/* Settings «Map» category: «3D buildings» summary */
+"pref_map_3d_buildings_subtitle" = "Memengaruhi daya baterai";
 
 /* Settings «Route» category: «Tts enabled» title */
 "pref_tts_enable_title" = "Petunjuk Suara";
@@ -1158,6 +1170,8 @@
 
 "dialog_routing_disclaimer_recommendations" = "— Rute yang disarankan hanya untuk digunakan sebagai rekomendasi;";
 
+"dialog_routing_disclaimer_borders" = "— Berhati-hatilah dengan rute di zona perbatasan: rute yang dibuat oleh aplikasi kami terkadang mungkin saja melintasi batas negara di lokasi yang tidak sah;";
+
 "dialog_routing_disclaimer_beware" = "Jaga selalu kewaspadaan dan keselamatan di jalan!";
 
 "dialog_routing_check_gps" = "Periksa sinyal GPS";
@@ -1286,7 +1300,7 @@
 "clear_search" = "Bersihkan riwayat pencarian";
 
 /* Title for settings to enable/disable showcase menu button */
-"showcase_settings_title" = "Tunjukkan penawaran dari para mitra";
+"showcase_settings_title" = "Tampilkan penawaran";
 
 "showcase_more_apps" = "Lebih Banyak Aplikasi My.com";
 
@@ -1313,12 +1327,18 @@
 
 "p2p_reroute_from_current" = "Apakah Anda ingin kami merencanakan sebuah rute dari lokasi Anda saat ini?";
 
-"whats_new_where_to_turn" = "MAPS.ME akan memberi tahu Anda tempat untuk berbelok";
+"whats_new_3d_title" = "Peta favorit Anda dari perspektif yang baru";
 
-"whats_new_voice_instructions" = "Teman-teman, Anda telah lama meminta petunjuk suara selama navigasi - kami telah menyelesaikannya! Sekarang navigator kami secara tepat waktu akan memperingatkan Anda tentang belokan berikutnya.";
+"whats_new_3d_subtitle" = "Kami telah menambahkan tampilan perspektif ke mode navigasi.";
 
-"whats_new_between_any_points" = "Buat rute antar titik mana saja";
+"whats_new_3d_buildings_title" = "Dimensi yang baru di MAPS.ME";
 
-"whats_new_happy_day" = "Memang hari yang membahagiakan! Rencanakan perjalanan Anda ke depan bersama MAPS.ME.";
+"whats_new_3d_buildings_subtitle" = "Dengan bangunan 3D, peta kami telah menjadi lebih indah dan informatif.";
 
-"whats_new_next" = "Berikut";
+"whats_new_3d_update_maps" = "Untuk memaksimalkan pemanfaatan fitur ini, harap perbarui data peta Anda.";
+
+"whats_new_3d_on" = "Aktifkan pandangan perspektif";
+
+"whats_new_3d_buildings_on" = "Aktifkan Bangunan 3D";
+
+"whats_new_next_button" = "Berikut";

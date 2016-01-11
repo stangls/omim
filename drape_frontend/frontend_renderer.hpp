@@ -137,6 +137,7 @@ protected:
 private:
   void OnResize(ScreenBase const & screen);
   void RenderScene(ScreenBase const & modelView);
+  void MergeBuckets();
   void RenderSingleGroup(ScreenBase const & modelView, ref_ptr<BaseRenderGroup> group);
   void RefreshProjection(ScreenBase const & screen);
   void RefreshModelView(ScreenBase const & screen);
@@ -172,6 +173,7 @@ private:
   void CorrectScalePoint(m2::PointD & pt1, m2::PointD & pt2) const override;
   void CorrectGlobalScalePoint(m2::PointD & pt) const override;
   void OnScaleEnded() override;
+  void OnAnimationStarted(ref_ptr<BaseModelViewAnimation> anim) override;
 
   class Routine : public threads::IRoutine
   {
@@ -251,6 +253,7 @@ private:
   
   ref_ptr<RequestedTiles> m_requestedTiles;
   uint64_t m_maxGeneration;
+  int m_mergeBucketsCounter = 0;
 
 #ifdef DEBUG
   bool m_isTeardowned;

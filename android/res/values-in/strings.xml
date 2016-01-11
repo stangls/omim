@@ -311,6 +311,12 @@
 	<string name="prefs_group_route">Navigasi</string>
 	<string name="pref_zoom_title">Tombol perbesaran</string>
 	<string name="pref_zoom_summary">Tampilkan pada layar</string>
+	<!-- Settings «Map» category: «Perspective view» title -->
+	<string name="pref_map_3d_title">Pandangan perspektif</string>
+	<!-- Settings «Map» category: «3D buildings» title -->
+	<string name="pref_map_3d_buildings_title">Bangunan 3D</string>
+	<!-- Settings «Map» category: «3D buildings» summary -->
+	<string name="pref_map_3d_buildings_subtitle">Memengaruhi daya baterai</string>
 	<!-- Settings «Route» category: «Tts enabled» title -->
 	<string name="pref_tts_enable_title">Petunjuk Suara</string>
 	<!-- Settings «Route» category: «Tts language» title -->
@@ -718,6 +724,7 @@
 	<string name="dialog_routing_disclaimer_priority">— Kondisi jalan, peraturan lalu lintas, dan marka jalan harus selalu didahulukan daripada saran navigasi;</string>
 	<string name="dialog_routing_disclaimer_precision">— Peta mungkin tidak akurat dan rute yang disarankan tidak mutlak merupakan cara paling optimal untuk mencapai tujuan;</string>
 	<string name="dialog_routing_disclaimer_recommendations">— Rute yang disarankan hanya untuk digunakan sebagai rekomendasi;</string>
+	<string name="dialog_routing_disclaimer_borders">— Berhati-hatilah dengan rute di zona perbatasan: rute yang dibuat oleh aplikasi kami terkadang mungkin saja melintasi batas negara di lokasi yang tidak sah;</string>
 	<string name="dialog_routing_disclaimer_beware">Jaga selalu kewaspadaan dan keselamatan di jalan!</string>
 	<string name="dialog_routing_check_gps">Periksa sinyal GPS</string>
 	<string name="dialog_routing_error_location_not_found">Tidak dapat membuat rute. Koordinat GPS saat ini tidak dapat dikenali.</string>
@@ -787,7 +794,7 @@
 	<string name="search_history_text">Akses kueri pencarian terbaru dengan cepat.</string>
 	<string name="clear_search">Bersihkan riwayat pencarian</string>
 	<!-- Title for settings to enable/disable showcase menu button -->
-	<string name="showcase_settings_title">Tunjukkan penawaran dari para mitra</string>
+	<string name="showcase_settings_title">Tampilkan penawaran</string>
 	<string name="showcase_more_apps">Lebih Banyak Aplikasi My.com</string>
 	<string name="p2p_route_planning">Perencana Rute</string>
 	<string name="p2p_your_location">Lokasi Anda</string>
@@ -799,9 +806,12 @@
 	<string name="p2p_to_here">Ke</string>
 	<string name="p2p_only_from_current">Navigasi tersedia hanya dari lokasi Anda saat ini.</string>
 	<string name="p2p_reroute_from_current">Apakah Anda ingin kami merencanakan sebuah rute dari lokasi Anda saat ini?</string>
-	<string name="whats_new_where_to_turn">MAPS.ME akan memberi tahu Anda tempat untuk berbelok</string>
-	<string name="whats_new_voice_instructions">Teman-teman, Anda telah lama meminta petunjuk suara selama navigasi - kami telah menyelesaikannya! Sekarang navigator kami secara tepat waktu akan memperingatkan Anda tentang belokan berikutnya.</string>
-	<string name="whats_new_between_any_points">Buat rute antar titik mana saja</string>
-	<string name="whats_new_happy_day">Memang hari yang membahagiakan! Rencanakan perjalanan Anda ke depan bersama MAPS.ME.</string>
-	<string name="whats_new_next">Berikut</string>
+	<string name="whats_new_3d_title">Peta favorit Anda dari perspektif yang baru</string>
+	<string name="whats_new_3d_subtitle">Kami telah menambahkan tampilan perspektif ke mode navigasi.</string>
+	<string name="whats_new_3d_buildings_title">Dimensi yang baru di MAPS.ME</string>
+	<string name="whats_new_3d_buildings_subtitle">Dengan bangunan 3D, peta kami telah menjadi lebih indah dan informatif.</string>
+	<string name="whats_new_3d_update_maps">Untuk memaksimalkan pemanfaatan fitur ini, harap perbarui data peta Anda.</string>
+	<string name="whats_new_3d_on">Aktifkan pandangan perspektif</string>
+	<string name="whats_new_3d_buildings_on">Aktifkan Bangunan 3D</string>
+	<string name="whats_new_next_button">Berikut</string>
 </resources>

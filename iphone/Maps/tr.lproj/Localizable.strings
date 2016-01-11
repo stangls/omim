@@ -467,6 +467,9 @@
 /* Prints version number in About dialog */
 "version" = "Sürüm: %@";
 
+/* Data version in «About» screen */
+"data_version" = "Data version: %d";
+
 /* Confirmation in downloading countries dialog */
 "are_you_sure" = "Devam etmek istediğinizden emin misiniz?";
 
@@ -506,6 +509,15 @@
 
 /* «Map style» entry value */
 "pref_map_style_modern_light" = "Modern light";
+
+/* Settings «Map» category: «Perspective view» title */
+"pref_map_3d_title" = "Perspektif görünüm";
+
+/* Settings «Map» category: «3D buildings» title */
+"pref_map_3d_buildings_title" = "3 Boyutlu Binalar";
+
+/* Settings «Map» category: «3D buildings» summary */
+"pref_map_3d_buildings_subtitle" = "Pil ömrünü etkiler";
 
 /* Settings «Route» category: «Tts enabled» title */
 "pref_tts_enable_title" = "Sesli Talimatlar";
@@ -1158,6 +1170,8 @@
 
 "dialog_routing_disclaimer_recommendations" = "— Önerilen güzergahlar yalnızca tavsiye olarak kabul edilmelidir;";
 
+"dialog_routing_disclaimer_borders" = "— Sınır bölgelerinde rotalar konusunda dikkatli olun: uygulamamız tarafından oluşturulan rotalar bazen izin verilmeyen yerlerdeki ülke sınırlarını geçebilir;";
+
 "dialog_routing_disclaimer_beware" = "Lütfen yolda dikkatli ve emniyetli olun!";
 
 "dialog_routing_check_gps" = "GPS sinyalini kontrol edin";
@@ -1286,7 +1300,7 @@
 "clear_search" = "Arama geçmişini temizle";
 
 /* Title for settings to enable/disable showcase menu button */
-"showcase_settings_title" = "Ortakların tekliflerini göster";
+"showcase_settings_title" = "Teklifleri göster";
 
 "showcase_more_apps" = "Daha fazla My.com uygulamaları";
 
@@ -1313,12 +1327,18 @@
 
 "p2p_reroute_from_current" = "Mevcut konumunuzdan bir rota planlamamızı ister misiniz?";
 
-"whats_new_where_to_turn" = "MAPS.ME nereye döneceğinizi bilmenizi sağlayacak";
+"whats_new_3d_title" = "En sevdiğiniz haritalar yeni bir perspektiften";
 
-"whats_new_voice_instructions" = "Sevgili arkadaşlar, navigasyon sırasında sesli talimatları uzun süredir sormaktaydınız - Bunu yaptık! Artık navigatörümüz bir sonraki dönüşünüz için zamanı geldiğinde sizi uyaracak.";
+"whats_new_3d_subtitle" = "Navigasyon moduna perspektif görünüm ekledik.";
 
-"whats_new_between_any_points" = "Herhangi noktalar arasında rotalar oluşturun";
+"whats_new_3d_buildings_title" = "MAPS.ME'de yeni bir boyut";
 
-"whats_new_happy_day" = "Çok mutlu bir gün öyle değil mi! Yolculuğunuzu önceden MAPS.ME ile planlayın.";
+"whats_new_3d_buildings_subtitle" = "3 boyutlu binalarla haritalarımız daha bilgilendirici ve daha güzel hale geldi.";
 
-"whats_new_next" = "Sonraki";
+"whats_new_3d_update_maps" = "Bu özellikten tam anlamıyla faydalanabilmek için, lütfen harita verilerinizi güncelleyin.";
+
+"whats_new_3d_on" = "Perspektif görünümü etkinleştir";
+
+"whats_new_3d_buildings_on" = "3D Binalar seçeneğini etkinleştir";
+
+"whats_new_next_button" = "Sonraki";

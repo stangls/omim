@@ -467,6 +467,9 @@
 /* Prints version number in About dialog */
 "version" = "Version: %@";
 
+/* Data version in «About» screen */
+"data_version" = "Data version: %d";
+
 /* Confirmation in downloading countries dialog */
 "are_you_sure" = "Er du sikker på, at du vil fortsætte?";
 
@@ -506,6 +509,15 @@
 
 /* «Map style» entry value */
 "pref_map_style_modern_light" = "Modern light";
+
+/* Settings «Map» category: «Perspective view» title */
+"pref_map_3d_title" = "Perspektivvisning";
+
+/* Settings «Map» category: «3D buildings» title */
+"pref_map_3d_buildings_title" = "3D-bygninger";
+
+/* Settings «Map» category: «3D buildings» summary */
+"pref_map_3d_buildings_subtitle" = "Påvirker batteriets levetid";
 
 /* Settings «Route» category: «Tts enabled» title */
 "pref_tts_enable_title" = "Stemmeinstruktioner";
@@ -1158,6 +1170,8 @@
 
 "dialog_routing_disclaimer_recommendations" = "— De foreslåede ruter skal kun betragtes som anbefalinger;";
 
+"dialog_routing_disclaimer_borders" = "— Vær forsigtig med ruter i grænseområder: de ruter, vores app har skabt, kan nogle gange krydse landegrænser på uautoriserede steder;";
+
 "dialog_routing_disclaimer_beware" = "Vær altid særligt opmærksom og årvågen, når du sidder bag rattet!";
 
 "dialog_routing_check_gps" = "Tjek GPS-signalet";
@@ -1286,7 +1300,7 @@
 "clear_search" = "Ryd historiksøgning";
 
 /* Title for settings to enable/disable showcase menu button */
-"showcase_settings_title" = "Vis reklame";
+"showcase_settings_title" = "Vis tilbud";
 
 "showcase_more_apps" = "Flere My.com apps";
 
@@ -1313,12 +1327,18 @@
 
 "p2p_reroute_from_current" = "Ønsker du, at vi planlægger en rute fra din nuværende placering?";
 
-"whats_new_where_to_turn" = "MAPS.ME vil fortælle dig, hvor du skal dreje";
+"whats_new_3d_title" = "Dine foretrukne kort fra et nyt perspektiv";
 
-"whats_new_voice_instructions" = "Kære venner, I har længe bedt om stemmeinstruktioner under navigering - det har vi gjort! Nu vil vores navigatør varsle dit næste sving i tide.";
+"whats_new_3d_subtitle" = "Vi har tilføjet perspektivvisning til navigeringstilstanden.";
 
-"whats_new_between_any_points" = "Byg ruter mellem alle punkter";
+"whats_new_3d_buildings_title" = "En ny dimension i MAPS.ME";
 
-"whats_new_happy_day" = "En god dag ganske vidst! Planlæg dine rejser på forhånd med MAPS.ME.";
+"whats_new_3d_buildings_subtitle" = "Med 3D-bygninger er vores kort blevet smukkere og mere informative.";
 
-"whats_new_next" = "Næste";
+"whats_new_3d_update_maps" = "For at udnytte denne funktion fuldt ud skal du opdatere dine kortdata.";
+
+"whats_new_3d_on" = "Aktivér perspektivvisning";
+
+"whats_new_3d_buildings_on" = "Aktivér 3D-bygninger";
+
+"whats_new_next_button" = "Næste";
