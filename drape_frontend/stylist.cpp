@@ -8,6 +8,7 @@
 #include "indexer/scales.hpp"
 
 #include "std/bind.hpp"
+#include "std/limits.hpp"
 
 namespace df
 {
@@ -44,6 +45,8 @@ inline drule::rule_type_t Convert(Type t)
     return drule::count_of_rules;
   }
 }
+
+double constexpr kMinPriority = numeric_limits<double>::lowest();
 
 // ==================================== //
 
@@ -333,8 +336,12 @@ CaptionDescription & Stylist::GetCaptionDescriptionImpl()
   return m_captionDescriptor;
 }
 
-bool InitStylist(FeatureType const & f, int const zoomLevel, Stylist & s)
+bool InitStylist(FeatureType const & f, int const zoomLevel, bool buildings3d, Stylist & s)
 {
+  if (!buildings3d && ftypes::IsBuildingPartChecker::Instance()(f) &&
+      !ftypes::IsBuildingChecker::Instance()(f))
+    return false;
+
   drule::KeysT keys;
   pair<int, bool> geomType = feature::GetDrawRule(f, zoomLevel, keys);
 
@@ -379,6 +386,28 @@ bool InitStylist(FeatureType const & f, int const zoomLevel, Stylist & s)
   s.m_rules.swap(keyFunctor.m_rules);
   descr.FormatCaptions(f, mainGeomType, keyFunctor.m_mainTextType, keyFunctor.m_auxCaptionFound);
   return true;
+}
+
+double GetFeaturePriority(FeatureType const & f, int const zoomLevel)
+{
+  drule::KeysT keys;
+  pair<int, bool> const geomType = feature::GetDrawRule(f, zoomLevel, keys);
+
+  FilterRulesByRuntimeSelector(f, zoomLevel, keys);
+
+  feature::EGeomType const mainGeomType = feature::EGeomType(geomType.first);
+
+  KeyFunctor keyFunctor(f, mainGeomType, zoomLevel, keys.size(), false /* isNameExists */);
+  for_each(keys.begin(), keys.end(), bind(&KeyFunctor::ProcessKey, &keyFunctor, _1));
+
+  double maxPriority = kMinPriority;
+  for (auto const & rule : keyFunctor.m_rules)
+  {
+    if (rule.second > maxPriority)
+      maxPriority = rule.second;
+  }
+
+  return maxPriority;
 }
 
 } // namespace df

@@ -11,8 +11,11 @@
 
 #include "base/timer.hpp"
 
+#include "std/function.hpp"
+
 namespace df
 {
+class BaseModelViewAnimation;
 
 class MyPositionController
 {
@@ -43,7 +46,8 @@ public:
   MyPositionController(location::EMyPositionMode initMode);
   ~MyPositionController();
 
-  void SetPixelRect(m2::RectD const & pixelRect);
+  void OnNewPixelRect();
+  void UpdatePixelPosition(ScreenBase const & screen);
   void SetListener(ref_ptr<Listener> listener);
 
   m2::PointD const & Position() const;
@@ -55,6 +59,7 @@ public:
   void DragStarted();
   void DragEnded(m2::PointD const & distance);
 
+  void AnimationStarted(ref_ptr<BaseModelViewAnimation> anim);
   void ScaleStarted();
   void Rotated();
   void CorrectScalePoint(m2::PointD & pt) const;
@@ -70,7 +75,7 @@ public:
   void DeactivateRouting();
 
   void StopLocationFollow();
-  void StopCompassFollow();
+  bool StopCompassFollow();
   void NextMode(int preferredZoomLevel = -1);
   void TurnOff();
   void Invalidate();
@@ -84,6 +89,8 @@ public:
               dp::UniformValuesStorage const & commonUniforms);
 
   bool IsFollowingActive() const;
+  bool IsRotationActive() const;
+  bool IsInRouting() const;
 
 private:
   void AnimateStateTransition(location::EMyPositionMode oldMode, location::EMyPositionMode newMode);
@@ -95,9 +102,6 @@ private:
   void SetModeInfo(uint32_t modeInfo, bool force = false);
   location::EMyPositionMode GetMode() const;
   void CallModeListener(uint32_t mode);
-
-  bool IsInRouting() const;
-  bool IsRotationActive() const;
 
   bool IsVisible() const { return m_isVisible; }
   void SetIsVisible(bool isVisible) { m_isVisible = isVisible; }
@@ -137,18 +141,28 @@ private:
   drape_ptr<MyPosition> m_shape;
   ref_ptr<Listener> m_listener;
 
-  double m_errorRadius;   //< error radius in mercator
-  m2::PointD m_position;  //< position in mercator
+  double m_errorRadius;  // error radius in mercator
+  m2::PointD m_position; // position in mercator
   double m_drawDirection;
   my::HighResTimer m_lastGPSBearing;
 
   m2::RectD m_pixelRect;
+  m2::PointD m_pixelPositionRaF;
+  m2::PointD m_pixelPositionF;
+  double m_positionYOffset;
 
   bool m_isVisible;
   bool m_isDirtyViewport;
+  bool m_isPendingAnimation = false;
+
+  m2::PointD m_oldPosition; // position in mercator
+  double m_oldDrawDirection;
 
   class MyPositionAnim;
   mutable drape_ptr<MyPositionAnim> m_anim;
+
+  using TAnimationCreator = function<void()>;
+  TAnimationCreator m_animCreator;
 };
 
 }

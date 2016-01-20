@@ -467,6 +467,9 @@
 /* Prints version number in About dialog */
 "version" = "Versjon: %@";
 
+/* Data version in «About» screen */
+"data_version" = "Data version: %d";
+
 /* Confirmation in downloading countries dialog */
 "are_you_sure" = "Er du sikker på at du ønsker å fortsette?";
 
@@ -506,6 +509,15 @@
 
 /* «Map style» entry value */
 "pref_map_style_modern_light" = "Modern light";
+
+/* Settings «Map» category: «Perspective view» title */
+"pref_map_3d_title" = "Perspektivvisning";
+
+/* Settings «Map» category: «3D buildings» title */
+"pref_map_3d_buildings_title" = "Bygninger i 3D";
+
+/* Settings «Map» category: «3D buildings» summary */
+"pref_map_3d_buildings_subtitle" = "Påvirker batteriets levetid";
 
 /* Settings «Route» category: «Tts enabled» title */
 "pref_tts_enable_title" = "Taleinstrukser";
@@ -1158,6 +1170,8 @@
 
 "dialog_routing_disclaimer_recommendations" = "– Foreslåtte ruter bør bare anses som anbefalinger;";
 
+"dialog_routing_disclaimer_borders" = "— Vær forsiktig når det gjelder ruter i grenseområder: rutene som appen vår oppretter kan komme til å krysse landegrenser i uatoriserte områder;";
+
 "dialog_routing_disclaimer_beware" = "Kjør trygt!";
 
 "dialog_routing_check_gps" = "Sjekk GPS-signal";
@@ -1286,7 +1300,7 @@
 "clear_search" = "Tøm søkehistorikk";
 
 /* Title for settings to enable/disable showcase menu button */
-"showcase_settings_title" = "Vis annonser";
+"showcase_settings_title" = "Vis tilbud";
 
 "showcase_more_apps" = "Flere apper fra My.com";
 
@@ -1313,12 +1327,18 @@
 
 "p2p_reroute_from_current" = "Vil du vi skal planlegge en rute fra din nåværende posisjon?";
 
-"whats_new_where_to_turn" = "MAPS.ME gir deg perfekte veibeskrivelser";
+"whats_new_3d_title" = "Favorittkartene dine fra et nytt perspektiv";
 
-"whats_new_voice_instructions" = "Kjære venner, vi har nå oppfylt deres ønske om tale av veibeskrivelser! Nå vil navigatøren vår gi deg veibeskrivelser i god tid.";
+"whats_new_3d_subtitle" = "Vi har lagt til perspektivvisning i navigeringsmodusen.";
 
-"whats_new_between_any_points" = "Sett sammen en reiserute mellom to steder";
+"whats_new_3d_buildings_title" = "En ny dimensjon av MAPS.ME";
 
-"whats_new_happy_day" = "I dag er en god dag! Planlegg reisene dine i forveien med MAPS.ME.";
+"whats_new_3d_buildings_subtitle" = "Med bygninger i 3D, blir kartene våre enda mer informative og vakre.";
 
-"whats_new_next" = "Neste";
+"whats_new_3d_update_maps" = "Oppdater kartdata for å kunne bruke denne funksjonen fullt ut.";
+
+"whats_new_3d_on" = "Aktiver perspektivvisning";
+
+"whats_new_3d_buildings_on" = "Aktiver 3D-bygninger";
+
+"whats_new_next_button" = "Neste";

@@ -467,6 +467,9 @@
 /* Prints version number in About dialog */
 "version" = "版本:%@";
 
+/* Data version in «About» screen */
+"data_version" = "Data version: %d";
+
 /* Confirmation in downloading countries dialog */
 "are_you_sure" = "您确定要继续吗?";
 
@@ -506,6 +509,15 @@
 
 /* «Map style» entry value */
 "pref_map_style_modern_light" = "Modern light";
+
+/* Settings «Map» category: «Perspective view» title */
+"pref_map_3d_title" = "透视图";
+
+/* Settings «Map» category: «3D buildings» title */
+"pref_map_3d_buildings_title" = "3D建筑";
+
+/* Settings «Map» category: «3D buildings» summary */
+"pref_map_3d_buildings_subtitle" = "影响电池寿命";
 
 /* Settings «Route» category: «Tts enabled» title */
 "pref_tts_enable_title" = "语音指导";
@@ -1158,6 +1170,8 @@
 
 "dialog_routing_disclaimer_recommendations" = "— 建议的路线仅作为推荐路线供您采纳。；";
 
+"dialog_routing_disclaimer_borders" = "— 小心对待国界区的路线：我们应用创造的路线有时会在未经授权的地方跨越国界;";
+
 "dialog_routing_disclaimer_beware" = "上路时请当心，祝您一路平安！";
 
 "dialog_routing_check_gps" = "检查 GPS 信号";
@@ -1286,7 +1300,7 @@
 "clear_search" = "清除历史搜索";
 
 /* Title for settings to enable/disable showcase menu button */
-"showcase_settings_title" = "顯示合作夥伴的優惠";
+"showcase_settings_title" = "显示优惠";
 
 "showcase_more_apps" = "更多My.com应用";
 
@@ -1313,12 +1327,18 @@
 
 "p2p_reroute_from_current" = "你是否想要规划当前位置的路线？";
 
-"whats_new_where_to_turn" = "MAPS.ME会告诉您在哪转弯";
+"whats_new_3d_title" = "从全新的角度看您最爱的地图";
 
-"whats_new_voice_instructions" = "亲爱的朋友们，您一直都在要求导航中的声音指导——我们做到了！现在我们的导航会及时警告您下次转弯。";
+"whats_new_3d_subtitle" = "我们添加了视角视图到导航模式。";
 
-"whats_new_between_any_points" = "在任何点中间构建路线";
+"whats_new_3d_buildings_title" = "MAPS.ME中的全新维度";
 
-"whats_new_happy_day" = "真是快乐的一天！用MAPS.ME事先计划路程吧。";
+"whats_new_3d_buildings_subtitle" = "有了3D大楼，我们的地图信息量更丰富也更美了。";
 
-"whats_new_next" = "下一页";
+"whats_new_3d_update_maps" = "要充分利用此功能，请更新您的地图数据。";
+
+"whats_new_3d_on" = "启用透视图";
+
+"whats_new_3d_buildings_on" = "启用3D建筑";
+
+"whats_new_next_button" = "下一页";

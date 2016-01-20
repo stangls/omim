@@ -467,6 +467,9 @@
 /* Prints version number in About dialog */
 "version" = "Versie: %@";
 
+/* Data version in «About» screen */
+"data_version" = "Data version: %d";
+
 /* Confirmation in downloading countries dialog */
 "are_you_sure" = "Weet u zeker dat u wilt doorgaan?";
 
@@ -506,6 +509,15 @@
 
 /* «Map style» entry value */
 "pref_map_style_modern_light" = "Modern light";
+
+/* Settings «Map» category: «Perspective view» title */
+"pref_map_3d_title" = "Perspectiefbeeld";
+
+/* Settings «Map» category: «3D buildings» title */
+"pref_map_3d_buildings_title" = "3D-gebouwen";
+
+/* Settings «Map» category: «3D buildings» summary */
+"pref_map_3d_buildings_subtitle" = "Beïnvloedt batterijduur";
 
 /* Settings «Route» category: «Tts enabled» title */
 "pref_tts_enable_title" = "Gesproken instructies";
@@ -1158,6 +1170,8 @@
 
 "dialog_routing_disclaimer_recommendations" = "— Beschouw de voorgestelde routes enkel als aanbevelingen;";
 
+"dialog_routing_disclaimer_borders" = "— Wees voorzichtig met de routes in de grenszones: de routes die door onze app gecreëerd zijn, gaan wellicht door landgrenzen in ongeautoriseerde plaatsen;";
+
 "dialog_routing_disclaimer_beware" = "Blijf alert en rij veilig!";
 
 "dialog_routing_check_gps" = "Controleer gps-signaal";
@@ -1286,7 +1300,7 @@
 "clear_search" = "Zoekgeschiedenis wissen";
 
 /* Title for settings to enable/disable showcase menu button */
-"showcase_settings_title" = "Laat de aanbiedingen van partners zien";
+"showcase_settings_title" = "Aanbiedingen weergeven";
 
 "showcase_more_apps" = "Meer My.com apps";
 
@@ -1313,12 +1327,18 @@
 
 "p2p_reroute_from_current" = "Wilt u dat wij een route plannen vanaf uw huidige locatie?";
 
-"whats_new_where_to_turn" = "MAPS.ME zal u laten weten waar u moet afslaan";
+"whats_new_3d_title" = "Uw favoriete kaarten vanuit een nieuw perspectief";
 
-"whats_new_voice_instructions" = "Beste vrienden, jullie vragen al lang om gesproken instructies voor tijdens het navigeren - dat hebben we gerealiseerd! Nu zal onze navigator u tijdig op de hoogte brengen van uw volgende afslag.";
+"whats_new_3d_subtitle" = "We hebben perspectief toegevoegd aan de navigatiestand.";
 
-"whats_new_between_any_points" = "Maak routes tussen alle punten";
+"whats_new_3d_buildings_title" = "Een nieuwe dimensie in MAPS.ME";
 
-"whats_new_happy_day" = "Inderdaad een prettige dag! Plan uw reizen vooruit met MAPS.ME.";
+"whats_new_3d_buildings_subtitle" = "Met 3D-gebouwen zijn onze kaarten informatiever en mooier geworden.";
 
-"whats_new_next" = "Volgende";
+"whats_new_3d_update_maps" = "Werk uw kaartgegevens bij om volledig te kunnen profiteren van deze functie.";
+
+"whats_new_3d_on" = "Perspectiefbeeld inschakelen";
+
+"whats_new_3d_buildings_on" = "3D-Gebouwen inschakelen";
+
+"whats_new_next_button" = "Volgende";

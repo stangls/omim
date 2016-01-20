@@ -47,8 +47,6 @@ public:
   static void glBlendEquation(glConst function);
   static void glBlendFunc(glConst srcFactor, glConst dstFactor);
 
-  static void glBindFramebuffer(glConst target, uint32_t id);
-
   /// VAO support
   static uint32_t glGenVertexArray();
   static void glBindVertexArray(uint32_t vao);
@@ -63,8 +61,11 @@ public:
   static void glBufferData(glConst target, uint32_t size, void const * data, glConst usage);
   static void glBufferSubData(glConst target, uint32_t size, void const * data, uint32_t offset);
 
-  static void * glMapBuffer(glConst target);
+  static void * glMapBuffer(glConst target, glConst access = gl_const::GLWriteOnly);
   static void glUnmapBuffer(glConst target);
+
+  static void * glMapBufferRange(glConst target, uint32_t offset, uint32_t length, glConst access);
+  static void glFlushMappedBufferRange(glConst target, uint32_t offset, uint32_t length);
 
   /// Shaders support
   static uint32_t glCreateShader(glConst type);
@@ -133,6 +134,13 @@ public:
   // Draw support
   static void glDrawElements(uint32_t sizeOfIndex, uint32_t indexCount, uint32_t startIndex = 0);
   static void glDrawArrays(glConst mode, int32_t first, uint32_t count);
+
+  // FBO support
+  static void glGenFramebuffer(uint32_t * fbo);
+  static void glDeleteFramebuffer(uint32_t * fbo);
+  static void glBindFramebuffer(uint32_t fbo);
+  static void glFramebufferTexture2D(glConst attachment, glConst texture);
+  static uint32_t glCheckFramebufferStatus();
 };
 
 void CheckGLError(my::SrcPoint const &src);

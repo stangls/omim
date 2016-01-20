@@ -1,5 +1,10 @@
 #include "drape_frontend/user_event_stream.hpp"
+#include "drape_frontend/animation_constants.hpp"
 #include "drape_frontend/visual_params.hpp"
+
+#include "indexer/scales.hpp"
+
+#include "platform/platform.hpp"
 
 #include "base/logging.hpp"
 #include "base/macros.hpp"
@@ -19,8 +24,6 @@ namespace
 uint64_t const kDoubleTapPauseMs = 250;
 uint64_t const kLongTouchMs = 1000;
 uint64_t const kKineticDelayMs = 500;
-
-double const kMaxAnimationTimeSec = 1.5; // in seconds
 
 float const kForceTapThreshold = 0.75;
 
@@ -138,6 +141,9 @@ ScreenBase const & UserEventStream::ProcessEvents(bool & modelViewChange, bool &
   bool breakAnim = false;
   for (UserEvent const & e : events)
   {
+    if (m_perspectiveAnimation != nullptr && FilterEventWhile3dAnimation(e.m_type))
+      continue;
+
     switch (e.m_type)
     {
     case UserEvent::EVENT_SCALE:
@@ -155,6 +161,11 @@ ScreenBase const & UserEventStream::ProcessEvents(bool & modelViewChange, bool &
       TouchCancel(m_touches);
       break;
     case UserEvent::EVENT_SET_RECT:
+      if (m_perspectiveAnimation != nullptr)
+      {
+        m_pendingEvent.reset(new UserEvent(e.m_rectEvent));
+        break;
+      }
       breakAnim = SetRect(e.m_rectEvent.m_rect, e.m_rectEvent.m_zoom, e.m_rectEvent.m_applyRotation, e.m_rectEvent.m_isAnim);
       TouchCancel(m_touches);
       break;
@@ -167,9 +178,18 @@ ScreenBase const & UserEventStream::ProcessEvents(bool & modelViewChange, bool &
       break;
     case UserEvent::EVENT_ROTATE:
       {
-        m2::AnyRectD dstRect = GetTargetRect();
-        dstRect.SetAngle(e.m_rotate.m_targetAzimut);
-        breakAnim = SetRect(dstRect, true);
+        ScreenBase const & screen = m_navigator.Screen();
+        if (screen.isPerspective())
+        {
+          m2::PointD pt = screen.P3dtoP(screen.PixelRectIn3d().Center());
+          breakAnim = SetFollowAndRotate(screen.PtoG(pt), pt, e.m_rotate.m_targetAzimut, -1, true);
+        }
+        else
+        {
+          m2::AnyRectD dstRect = GetTargetRect();
+          dstRect.SetAngle(e.m_rotate.m_targetAzimut);
+          breakAnim = SetRect(dstRect, true);
+        }
       }
       break;
     case UserEvent::EVENT_FOLLOW_AND_ROTATE:
@@ -177,6 +197,32 @@ ScreenBase const & UserEventStream::ProcessEvents(bool & modelViewChange, bool &
                                      e.m_followAndRotate.m_azimuth, e.m_followAndRotate.m_preferredZoomLevel,
                                      e.m_followAndRotate.m_isAnim);
       TouchCancel(m_touches);
+      break;
+    case UserEvent::EVENT_ENABLE_PERSPECTIVE:
+      if (!e.m_enable3dMode.m_immediatelyStart)
+        m_pendingEvent.reset(new UserEvent(e.m_enable3dMode));
+      else
+        SetEnable3dMode(e.m_enable3dMode.m_rotationAngle, e.m_enable3dMode.m_angleFOV,
+                        e.m_enable3dMode.m_isAnim, viewportChanged);
+      m_discardedFOV = m_discardedAngle = 0.0;
+      break;
+    case UserEvent::EVENT_DISABLE_PERSPECTIVE:
+      if (m_navigator.Screen().isPerspective())
+        SetDisable3dModeAnimation();
+      m_discardedFOV = m_discardedAngle = 0.0;
+      break;
+    case UserEvent::EVENT_SWITCH_VIEW_MODE:
+      if (e.m_switchViewMode.m_to2d)
+      {
+        m_discardedFOV = m_navigator.Screen().GetAngleFOV();
+        m_discardedAngle = m_navigator.Screen().GetRotationAngle();
+        SetDisable3dModeAnimation();
+      }
+      else if (m_discardedFOV > 0.0)
+      {
+        SetEnable3dMode(m_discardedAngle, m_discardedFOV, true /* isAnim */, viewportChanged);
+        m_discardedFOV = m_discardedAngle = 0.0;
+      }
       break;
     default:
       ASSERT(false, ());
@@ -192,11 +238,46 @@ ScreenBase const & UserEventStream::ProcessEvents(bool & modelViewChange, bool &
 
   if (m_animation != nullptr)
   {
-    m2::AnyRectD rect = m_animation->GetCurrentRect(GetCurrentScreen());
+    m2::AnyRectD const rect = m_animation->GetCurrentRect(GetCurrentScreen());
     m_navigator.SetFromRect(rect);
     modelViewChange = true;
     if (m_animation->IsFinished())
+    {
+      if (m_animation->GetType() == ModelViewAnimationType::FollowAndRotate &&
+          m_pendingEvent != nullptr && m_pendingEvent->m_type == UserEvent::EVENT_ENABLE_PERSPECTIVE)
+      {
+        SetEnable3dMode(m_pendingEvent->m_enable3dMode.m_rotationAngle,
+                        m_pendingEvent->m_enable3dMode.m_angleFOV,
+                        m_pendingEvent->m_enable3dMode.m_isAnim,
+                        viewportChanged);
+
+        m_pendingEvent.reset();
+      }
       m_animation.reset();
+    }
+  }
+
+  if (m_perspectiveAnimation != nullptr)
+  {
+    double const angle = m_perspectiveAnimation->GetRotationAngle();
+    m_navigator.SetRotationIn3dMode(angle);
+    modelViewChange = true;
+    TouchCancel(m_touches);
+
+    if (m_perspectiveAnimation->IsFinished())
+    {
+      if (angle == 0.0)
+      {
+        m_navigator.Disable3dMode();
+        viewportChanged = true;
+
+        if (m_pendingEvent != nullptr && m_pendingEvent->m_type == UserEvent::EVENT_SET_RECT)
+          SetRect(m_pendingEvent->m_rectEvent.m_rect, m_pendingEvent->m_rectEvent.m_zoom,
+                  m_pendingEvent->m_rectEvent.m_applyRotation, m_pendingEvent->m_rectEvent.m_isAnim);
+      }
+      m_pendingEvent.reset();
+      m_perspectiveAnimation.reset();
+    }
   }
 
   if (GetValidTouchesCount(m_touches) == 1)
@@ -226,20 +307,23 @@ bool UserEventStream::SetScale(m2::PointD const & pxScaleCenter, double factor, 
     // Reset current animation if there is any.
     ResetCurrentAnimation();
 
-    m2::PointD glbScaleCenter = m_navigator.PtoG(scaleCenter);
+    m2::PointD glbScaleCenter = m_navigator.PtoG(m_navigator.P3dtoP(scaleCenter));
     if (m_listener)
       m_listener->CorrectGlobalScalePoint(glbScaleCenter);
 
-    ScreenBase screen = GetCurrentScreen();
-    m_navigator.CalculateScale(scaleCenter, factor, screen);
-    m2::PointD offset = GetCurrentScreen().PixelRect().Center() - scaleCenter;
+    m2::PointD const offset = GetCurrentScreen().PixelRect().Center() - m_navigator.P3dtoP(scaleCenter);
 
     auto const creator = [this, &glbScaleCenter, &offset](m2::AnyRectD const & startRect, m2::AnyRectD const & endRect,
                                                           double aDuration, double mDuration, double sDuration)
     {
       m_animation.reset(new ScaleAnimation(startRect, endRect, aDuration, mDuration,
                                            sDuration, glbScaleCenter, offset));
+      if (m_listener)
+        m_listener->OnAnimationStarted(make_ref(m_animation));
     };
+
+    ScreenBase screen = GetCurrentScreen();
+    m_navigator.CalculateScale(scaleCenter, factor, screen);
 
     return SetRect(screen.GlobalRect(), true, creator);
   }
@@ -248,15 +332,85 @@ bool UserEventStream::SetScale(m2::PointD const & pxScaleCenter, double factor, 
   return true;
 }
 
+// static
+bool UserEventStream::IsScaleAllowableIn3d(int scale)
+{
+  int minScale = scales::GetMinAllowableIn3dScale();
+  if (df::VisualParams::Instance().GetVisualScale() <= 1.0)
+    --minScale;
+  if (GetPlatform().IsTablet())
+    ++minScale;
+  return scale >= minScale;
+}
+
 bool UserEventStream::SetCenter(m2::PointD const & center, int zoom, bool isAnim)
 {
-  if (zoom == -1)
+  m2::PointD targetCenter = center;
+  ang::AngleD angle;
+  m2::RectD localRect;
+
+  ScreenBase const & currentScreen = GetCurrentScreen();
+
+  ScreenBase screen = currentScreen;
+  bool finishIn2d = false;
+  bool finishIn3d = false;
+  if (zoom != -1)
   {
-    m2::AnyRectD r = GetTargetRect();
-    return SetRect(m2::AnyRectD(center, r.Angle(), r.GetLocalRect()), isAnim);
+    bool const isScaleAllowableIn3d = IsScaleAllowableIn3d(zoom);
+    finishIn3d = m_discardedFOV > 0.0 && isScaleAllowableIn3d;
+    finishIn2d = currentScreen.isPerspective() && !isScaleAllowableIn3d;
+
+    if (finishIn3d)
+      screen.ApplyPerspective(m_discardedAngle, m_discardedAngle, m_discardedFOV);
+    else if (finishIn2d)
+      screen.ResetPerspective();
   }
 
-  return SetRect(df::GetRectForDrawScale(zoom, center), zoom, true, isAnim);
+  double const scale3d = screen.PixelRect().SizeX() / screen.PixelRectIn3d().SizeX();
+
+  if (zoom == -1)
+  {
+    m2::AnyRectD const r = GetTargetRect();
+    angle = r.Angle();
+    localRect = r.GetLocalRect();
+  }
+  else
+  {
+    angle = screen.GlobalRect().Angle();
+
+    localRect = df::GetRectForDrawScale(zoom, center);
+    CheckMinGlobalRect(localRect);
+    CheckMinMaxVisibleScale(m_isCountryLoaded, localRect, zoom);
+
+    localRect.Offset(-center);
+    localRect.Scale(scale3d);
+
+    double const aspectRatio = screen.PixelRect().SizeY() / screen.PixelRect().SizeX();
+    if (aspectRatio > 1.0)
+      localRect.Inflate(0.0, localRect.SizeY() / 2.0 * aspectRatio);
+    else
+      localRect.Inflate(localRect.SizeX() / 2.0 / aspectRatio, 0.0);
+  }
+
+  if (screen.isPerspective())
+  {
+    double const centerOffset3d = localRect.SizeY() * (1.0 - 1.0 / (scale3d * cos(screen.GetRotationAngle()))) / 2.0;
+    targetCenter = targetCenter.Move(centerOffset3d, angle.cos(), -angle.sin());
+  }
+
+  if (finishIn2d || finishIn3d)
+  {
+    double const scaleToCurrent =
+        finishIn2d ? currentScreen.PixelRect().SizeX() / currentScreen.PixelRectIn3d().SizeX()
+                   : 1.0 / scale3d;
+
+    double const currentGSizeY = localRect.SizeY() * scaleToCurrent;
+    targetCenter = targetCenter.Move((currentGSizeY - localRect.SizeY()) / 2.0,
+                                     angle.cos(), -angle.sin());
+    localRect.Scale(scaleToCurrent);
+  }
+
+  return SetRect(m2::AnyRectD(targetCenter, angle, localRect), isAnim);
 }
 
 bool UserEventStream::SetRect(m2::RectD rect, int zoom, bool applyRotation, bool isAnim)
@@ -276,6 +430,8 @@ bool UserEventStream::SetRect(m2::AnyRectD const & rect, bool isAnim)
                                       double aDuration, double mDuration, double sDuration)
   {
     m_animation.reset(new ModelViewAnimation(startRect, endRect, aDuration, mDuration, sDuration));
+    if (m_listener)
+      m_listener->OnAnimationStarted(make_ref(m_animation));
   });
 }
 
@@ -341,6 +497,8 @@ bool UserEventStream::SetFollowAndRotate(m2::PointD const & userPos, m2::PointD 
     {
       m_animation.reset(new FollowAndRotateAnimation(startRect, targetLocalRect, userPos,
                                                      screen.GtoP(userPos), pixelPos, azimuth, duration));
+      if (m_listener)
+        m_listener->OnAnimationStarted(make_ref(m_animation));
       return false;
     }
   }
@@ -349,6 +507,40 @@ bool UserEventStream::SetFollowAndRotate(m2::PointD const & userPos, m2::PointD 
   m2::PointD const center = FollowAndRotateAnimation::CalculateCenter(m_navigator.Screen(), userPos, pixelPos, -azimuth);
   m_navigator.SetFromRect(m2::AnyRectD(center, -azimuth, targetLocalRect));
   return true;
+}
+
+bool UserEventStream::FilterEventWhile3dAnimation(UserEvent::EEventType type) const
+{
+  return type != UserEvent::EVENT_RESIZE &&
+      type != UserEvent::EVENT_SET_RECT;
+}
+
+void UserEventStream::SetEnable3dMode(double maxRotationAngle, double angleFOV, bool isAnim, bool & viewportChanged)
+{
+  bool const finishAnimation = m_animation != nullptr && m_animation->GetType() == ModelViewAnimationType::Default;
+  ResetCurrentAnimation(finishAnimation);
+
+  double const startAngle = isAnim ? 0.0 : maxRotationAngle;
+  if (isAnim)
+  {
+    double const endAngle = maxRotationAngle;
+    double const rotateDuration = PerspectiveAnimation::GetRotateDuration(startAngle, endAngle);
+    m_perspectiveAnimation.reset(
+        new PerspectiveAnimation(rotateDuration, 0.0 /* delay */, startAngle, endAngle));
+  }
+  m_navigator.Enable3dMode(startAngle, maxRotationAngle, angleFOV);
+  viewportChanged = true;
+}
+
+void UserEventStream::SetDisable3dModeAnimation()
+{
+  bool const finishAnimation = m_animation != nullptr && m_animation->GetType() == ModelViewAnimationType::Default;
+  ResetCurrentAnimation(finishAnimation);
+
+  double const startAngle = m_navigator.Screen().GetRotationAngle();
+  double const endAngle = 0.0;
+  double const rotateDuration = PerspectiveAnimation::GetRotateDuration(startAngle, endAngle);
+  m_perspectiveAnimation.reset(new PerspectiveAnimation(rotateDuration, 0.0 /* delay */, startAngle, endAngle));
 }
 
 void UserEventStream::ResetCurrentAnimation(bool finishAnimation)
@@ -663,6 +855,8 @@ bool UserEventStream::EndDrag(Touch const & t, bool cancelled)
   if (m_kineticTimer.TimeElapsedAs<milliseconds>().count() >= kKineticDelayMs)
   {
     m_animation = m_scroller.CreateKineticAnimation(m_navigator.Screen());
+    if (m_listener)
+      m_listener->OnAnimationStarted(make_ref(m_animation));
     m_scroller.CancelGrab();
     return false;
   }
@@ -851,6 +1045,11 @@ bool UserEventStream::IsInUserAction() const
 bool UserEventStream::IsWaitingForActionCompletion() const
 {
   return m_state != STATE_EMPTY;
+}
+
+bool UserEventStream::IsInPerspectiveAnimation() const
+{
+  return m_perspectiveAnimation != nullptr;
 }
 
 }

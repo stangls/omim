@@ -33,6 +33,48 @@
   #define WRITE_ONLY_DEF 0x88B9
 #endif
 
+#if defined(GL_READ_ONLY)
+  #define READ_ONLY_DEF GL_READ_ONLY
+#else
+  #define READ_ONLY_DEF 0x88B8
+#endif
+
+#if defined(GL_MAP_READ_BIT_EXT)
+  #define READ_BIT_DEF GL_MAP_READ_BIT_EXT
+#else
+  #define READ_BIT_DEF 0x0001
+#endif
+
+#if defined(GL_MAP_WRITE_BIT_EXT)
+  #define WRITE_BIT_DEF GL_MAP_WRITE_BIT_EXT
+#else
+  #define WRITE_BIT_DEF 0x0002
+#endif
+
+#if defined(GL_MAP_INVALIDATE_RANGE_BIT_EXT)
+  #define INVALIDATE_RANGE_BIT_DEF GL_MAP_INVALIDATE_RANGE_BIT_EXT
+#else
+  #define INVALIDATE_RANGE_BIT_DEF 0x0004
+#endif
+
+#if defined(GL_MAP_INVALIDATE_BUFFER_BIT_EXT)
+  #define INVALIDATE_BUFFER_BIT_DEF GL_MAP_INVALIDATE_BUFFER_BIT_EXT
+#else
+  #define INVALIDATE_BUFFER_BIT_DEF 0x0008
+#endif
+
+#if defined(GL_MAP_FLUSH_EXPLICIT_BIT_EXT)
+  #define FLUSH_EXPLICIT_BIT_DEF GL_MAP_FLUSH_EXPLICIT_BIT_EXT
+#else
+  #define FLUSH_EXPLICIT_BIT_DEF 0x0010
+#endif
+
+#if defined(GL_MAP_UNSYNCHRONIZED_BIT_EXT)
+  #define UNSYNCHRONIZED_BIT_DEF GL_MAP_UNSYNCHRONIZED_BIT_EXT
+#else
+  #define UNSYNCHRONIZED_BIT_DEF 0x0020
+#endif
+
 namespace gl_const
 {
 
@@ -53,6 +95,14 @@ const glConst GLBufferSize          = GL_BUFFER_SIZE;
 const glConst GLBufferUsage         = GL_BUFFER_USAGE;
 
 const glConst GLWriteOnly           = WRITE_ONLY_DEF;
+const glConst GLReadOnly            = READ_ONLY_DEF;
+
+const glConst GLReadBufferBit       = READ_BIT_DEF;
+const glConst GLWriteBufferBit      = WRITE_BIT_DEF;
+const glConst GLInvalidateRange     = INVALIDATE_RANGE_BIT_DEF;
+const glConst GLInvalidateBuffer    = INVALIDATE_BUFFER_BIT_DEF;
+const glConst GLFlushExplicit       = FLUSH_EXPLICIT_BIT_DEF;
+const glConst GLUnsynchronized      = UNSYNCHRONIZED_BIT_DEF;
 
 const glConst GLStaticDraw          = GL_STATIC_DRAW;
 const glConst GLStreamDraw          = GL_STREAM_DRAW;
@@ -67,6 +117,7 @@ const glConst GLRGB                 = GL_RGB;
 const glConst GLAlpha               = GL_ALPHA;
 const glConst GLLuminance           = GL_LUMINANCE;
 const glConst GLAlphaLuminance      = GL_LUMINANCE_ALPHA;
+const glConst GLDepthComponent      = GL_DEPTH_COMPONENT;
 
 const glConst GLRGBA8               = GL_RGBA8_OES;
 const glConst GLRGBA4               = GL_RGBA4_OES;
@@ -150,5 +201,13 @@ const glConst GLAlways              = GL_ALWAYS;
 const glConst GLActiveUniforms      = GL_ACTIVE_UNIFORMS;
 
 const glConst GLLineStrip           = GL_LINE_STRIP;
+const glConst GLTriangles           = GL_TRIANGLES;
+const glConst GLTriangleStrip       = GL_TRIANGLE_STRIP;
+
+const glConst GLColorAttachment     = GL_COLOR_ATTACHMENT0;
+const glConst GLDepthAttachment     = GL_DEPTH_ATTACHMENT;
+const glConst GLStencilAttachment   = GL_STENCIL_ATTACHMENT;
+
+const glConst GLFramebufferComplete = GL_FRAMEBUFFER_COMPLETE;
 
 } // namespace GLConst

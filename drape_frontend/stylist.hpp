@@ -63,6 +63,7 @@ public:
 private:
   friend bool InitStylist(FeatureType const &,
                           int const,
+                          bool buildings3d,
                           Stylist &);
 
   void RaiseCoastlineFlag();
@@ -82,6 +83,9 @@ private:
 
 bool InitStylist(FeatureType const & f,
                  int const zoomLevel,
+                 bool buildings3d,
                  Stylist & s);
+
+double GetFeaturePriority(FeatureType const & f, int const zoomLevel);
 
 } // namespace df

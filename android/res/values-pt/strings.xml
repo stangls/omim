@@ -308,6 +308,12 @@
 	<string name="prefs_group_route">Navegação</string>
 	<string name="pref_zoom_title">Botões de zoom</string>
 	<string name="pref_zoom_summary">Mostrar no ecrã</string>
+	<!-- Settings «Map» category: «Perspective view» title -->
+	<string name="pref_map_3d_title">Visão em Perspectiva</string>
+	<!-- Settings «Map» category: «3D buildings» title -->
+	<string name="pref_map_3d_buildings_title">Prédios em 3D</string>
+	<!-- Settings «Map» category: «3D buildings» summary -->
+	<string name="pref_map_3d_buildings_subtitle">Afeta a vida da bateria</string>
 	<!-- Settings «Route» category: «Tts enabled» title -->
 	<string name="pref_tts_enable_title">Instruções de voz</string>
 	<!-- Settings «Route» category: «Tts language» title -->
@@ -716,6 +722,7 @@
 	<string name="dialog_routing_disclaimer_priority">— As condições da estrada, as leis de trânsito e as sinalizações da pista sempre terão prioridade acima das sugestões de navegação;</string>
 	<string name="dialog_routing_disclaimer_precision">— O mapa pode estar desatualizado, e a rota indicada pode não ser a melhor maneira de chegar-se ao destino;</string>
 	<string name="dialog_routing_disclaimer_recommendations">— As rotas indicadas devem ser tratadas apenas como sugestões;</string>
+	<string name="dialog_routing_disclaimer_borders">— Use de cautela em rotas de zonas fronteiriças: as rotas criadas por nosso aplicativo podem algumas vezes cruzar fronteiras nacionais em locais não autorizados;</string>
 	<string name="dialog_routing_disclaimer_beware">Fique sempre alerta nas estradas!</string>
 	<string name="dialog_routing_check_gps">Verifique o sinal do GPS</string>
 	<string name="dialog_routing_error_location_not_found">A rota não foi traçada, pois não foi possível identificar as coordenadas do GPS.</string>
@@ -785,7 +792,7 @@
 	<string name="search_history_text">Acesse os termos de busca recentes rapidamente.</string>
 	<string name="clear_search">Limpar histórico de pesquisa</string>
 	<!-- Title for settings to enable/disable showcase menu button -->
-	<string name="showcase_settings_title">Mostrar anúncios</string>
+	<string name="showcase_settings_title">Mostrar ofertas</string>
 	<string name="showcase_more_apps">Mais aplicativos do My.com</string>
 	<string name="p2p_route_planning">Planejar rota</string>
 	<string name="p2p_your_location">Localização atual</string>
@@ -797,9 +804,12 @@
 	<string name="p2p_to_here">Para</string>
 	<string name="p2p_only_from_current">Só é possível navegar a partir da sua localização atual.</string>
 	<string name="p2p_reroute_from_current">Deseja planejar uma rota a partir da sua localização atual?</string>
-	<string name="whats_new_where_to_turn">MAPS.ME te permitirá saber dónde girar</string>
-	<string name="whats_new_voice_instructions">Estimados amigos: hace tiempo que solicitáis instrucciones de voz durante la navegación. ¡Lo hemos hecho posible! Ahora, nuestro navegador te indicará oportunamente dónde debes girar a continuación.</string>
-	<string name="whats_new_between_any_points">Crea rutas entre los puntos que quieras</string>
-	<string name="whats_new_happy_day">¡Que tengas un buen día! Planifica tus viajes por adelantado con MAPS.ME.</string>
-	<string name="whats_new_next">Próxima</string>
+	<string name="whats_new_3d_title">Seus mapas favoritos a partir de uma nova perspectiva</string>
+	<string name="whats_new_3d_subtitle">Nós adicionamos a visão em perspectiva ao modo de navegação.</string>
+	<string name="whats_new_3d_buildings_title">Uma nova dimensão no MAPS.ME</string>
+	<string name="whats_new_3d_buildings_subtitle">Com os prédios em 3D, nossos mapas ficaram mais informativos e bonitos.</string>
+	<string name="whats_new_3d_update_maps">Para aproveitar por completo este recurso, atualize os dados do seu mapa.</string>
+	<string name="whats_new_3d_on">Habilitar visão em perspectiva</string>
+	<string name="whats_new_3d_buildings_on">Habilitar Prédios em 3D</string>
+	<string name="whats_new_next_button">Próxima</string>
 </resources>

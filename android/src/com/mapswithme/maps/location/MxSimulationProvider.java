@@ -37,7 +37,7 @@ public class MxSimulationProvider extends BaseLocationProvider
   private final int[] simulationDataWaitTimeMS;
   private Thread thread;
   private Handler mHandler;
-  private int minWaitTime = 250;
+  private int minWaitTime = 100;
 
   public MxSimulationProvider(File file) throws IOException {
     this(file,3);

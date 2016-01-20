@@ -315,6 +315,12 @@
 	<string name="prefs_group_route">الملاحة</string>
 	<string name="pref_zoom_title">أزرار التكبير</string>
 	<string name="pref_zoom_summary">عرض على الشاشة</string>
+	<!-- Settings «Map» category: «Perspective view» title -->
+	<string name="pref_map_3d_title">العرض المنظوري</string>
+	<!-- Settings «Map» category: «3D buildings» title -->
+	<string name="pref_map_3d_buildings_title">مباني ثلاثية الأبعاد</string>
+	<!-- Settings «Map» category: «3D buildings» summary -->
+	<string name="pref_map_3d_buildings_subtitle">تؤثر على عمر البطارية</string>
 	<!-- Settings «Route» category: «Tts enabled» title -->
 	<string name="pref_tts_enable_title">تعليمات صوتية</string>
 	<!-- Settings «Route» category: «Tts language» title -->
@@ -723,6 +729,7 @@
 	<string name="dialog_routing_disclaimer_priority">— دائمًا ما يكون لظروف الطريق وقوانين وإشارات المرور الأولوية على المشورة الملاحية;</string>
 	<string name="dialog_routing_disclaimer_precision">— قد تكون الخريطة غير دقيقة وقد لا يكون المسار المقترح هو المسار الأمثل دائمًا للوصول إلى الوجهة.;</string>
 	<string name="dialog_routing_disclaimer_recommendations">— يتم التعامل مع المسارات المقترحة كتوصيات فقط;</string>
+	<string name="dialog_routing_disclaimer_borders">— تحذير بشأن مسارات في منطقة حدودية: المسارات التي تم إنشاؤها بواسطة تطبيقنا قد تعبر حدود الدولة في أماكن غير مصرح بها في بعض الأحيان;</string>
 	<string name="dialog_routing_disclaimer_beware">يجب أن تظل يقظًا وآمنًا على الطريق!</string>
 	<string name="dialog_routing_check_gps">تحقق من إشارة نظام تحديد المواقع العالمي \&quot;GPS\&quot;</string>
 	<string name="dialog_routing_error_location_not_found">تعذر إنشاء مسار. لا يمكن تحديد إحداثيات GPS الحالية.</string>
@@ -792,7 +799,7 @@
 	<string name="search_history_text">الوصول إلى استعلامات البحث الحديثة بسرعة.</string>
 	<string name="clear_search">مسح تاريخ البحث</string>
 	<!-- Title for settings to enable/disable showcase menu button -->
-	<string name="showcase_settings_title">إظهار عروض شركائنا</string>
+	<string name="showcase_settings_title">رؤية العروض</string>
 	<string name="showcase_more_apps">المزيد من تطبيقات My.com</string>
 	<string name="p2p_route_planning">تخطيط الطريق</string>
 	<string name="p2p_your_location">موقعك</string>
@@ -804,9 +811,12 @@
 	<string name="p2p_to_here">إلى</string>
 	<string name="p2p_only_from_current">تتوافر إمكانية التنقل فقط من خلال موقعك الحالي. هل تريد أن نخطط لك طريقاً بديلاً؟</string>
 	<string name="p2p_reroute_from_current">هل ترغب في أن نرسم مسار لك من موقعك الحالي؟</string>
-	<string name="whats_new_where_to_turn">سوف تمكنك MAPS.ME من معرفة أين تتجه</string>
-	<string name="whats_new_voice_instructions">الأصدقاء الأعزاء، لطالما طالبتم بتوفير تعليمات صوتية أثناء التنقل – لقد قمنا بذلك! سوف يتولى الملاح الخاص بنا الآن تحذيريكم في الوقت المناسب عند قرب المنعطف القادم.</string>
-	<string name="whats_new_between_any_points">إنشاء الطرق بين أي نقاط</string>
-	<string name="whats_new_happy_day">يوم سعيد حقا! قم بتخطيط رحلاتك مقدماً مع MAPS.ME.</string>
-	<string name="whats_new_next">التالي</string>
+	<string name="whats_new_3d_title">خرائطك المفضلة من منظور جديد</string>
+	<string name="whats_new_3d_subtitle">لقد أضفنا عرض المنظور إلى نمط الملاحة.</string>
+	<string name="whats_new_3d_buildings_title">بُعد جديد في MAPS.ME</string>
+	<string name="whats_new_3d_buildings_subtitle">مع المباني ثلاثية الأبعاد، أصبحت خرائطنا أكثر معلوماتية وجمالا.</string>
+	<string name="whats_new_3d_update_maps">للتمتع بالمزايا الكاملة لهذه الخاصية، قم بتحديث بيانات الخرائط لديك.</string>
+	<string name="whats_new_3d_on">تفعيل العرض المنظوري</string>
+	<string name="whats_new_3d_buildings_on">قم بتفعيل المباني ثلاثية الأبعاد</string>
+	<string name="whats_new_next_button">التالي</string>
 </resources>

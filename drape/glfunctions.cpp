@@ -41,7 +41,6 @@ typedef void (DP_APIENTRY *TglClearFn)(GLbitfield mask);
 typedef void (DP_APIENTRY *TglViewportFn)(GLint x, GLint y, GLsizei w, GLsizei h);
 typedef void (DP_APIENTRY *TglFlushFn)();
 
-typedef void (DP_APIENTRY *TglBindFramebufferFn)(GLenum target, GLuint id);
 typedef void (DP_APIENTRY *TglActiveTextureFn)(GLenum texture);
 typedef void (DP_APIENTRY *TglBlendEquationFn)(GLenum mode);
 
@@ -57,6 +56,8 @@ typedef void (DP_APIENTRY *TglBufferDataFn)(GLenum target, GLsizeiptr size, GLvo
 typedef void (DP_APIENTRY *TglBufferSubDataFn)(GLenum target, GLintptr offset, GLsizeiptr size, GLvoid const * data);
 typedef void * (DP_APIENTRY *TglMapBufferFn)(GLenum target, GLenum access);
 typedef GLboolean(DP_APIENTRY *TglUnmapBufferFn)(GLenum target);
+typedef void * (DP_APIENTRY *TglMapBufferRangeFn)(GLenum target, GLintptr offset, GLsizeiptr length, GLbitfield access);
+typedef void (DP_APIENTRY *TglFlushMappedBufferRangeFn)(GLenum target, GLintptr offset, GLsizeiptr length);
 
 typedef GLuint(DP_APIENTRY *TglCreateShaderFn)(GLenum type);
 typedef void (DP_APIENTRY *TglShaderSourceFn)(GLuint shaderID, GLsizei count, GLchar const ** string, GLint const * length);
@@ -95,12 +96,17 @@ typedef void (DP_APIENTRY *TglUniform4fFn)(GLint location, GLfloat v1, GLfloat v
 typedef void (DP_APIENTRY *TglUniform1fvFn)(GLint location, GLsizei count, GLfloat const * value);
 typedef void (DP_APIENTRY *TglUniformMatrix4fvFn)(GLint location, GLsizei count, GLboolean transpose, GLfloat const * value);
 
+typedef void (DP_APIENTRY *TglGenFramebuffersFn)(GLsizei n, GLuint * framebuffers);
+typedef void (DP_APIENTRY *TglDeleteFramebuffersFn)(GLsizei n, GLuint const * framebuffers);
+typedef void (DP_APIENTRY *TglBindFramebufferFn)(GLenum target, GLuint id);
+typedef void (DP_APIENTRY *TglFramebufferTexture2DFn)(GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
+typedef GLenum(DP_APIENTRY *TglCheckFramebufferStatusFn)(GLenum target);
+
 TglClearColorFn glClearColorFn = nullptr;
 TglClearFn glClearFn = nullptr;
 TglViewportFn glViewportFn = nullptr;
 TglFlushFn glFlushFn = nullptr;
 
-TglBindFramebufferFn glBindFramebufferFn = nullptr;
 TglActiveTextureFn glActiveTextureFn = nullptr;
 TglBlendEquationFn glBlendEquationFn = nullptr;
 
@@ -118,6 +124,8 @@ TglBufferDataFn glBufferDataFn = nullptr;
 TglBufferSubDataFn glBufferSubDataFn = nullptr;
 TglMapBufferFn glMapBufferFn = nullptr;
 TglUnmapBufferFn glUnmapBufferFn = nullptr;
+TglMapBufferRangeFn glMapBufferRangeFn = nullptr;
+TglFlushMappedBufferRangeFn glFlushMappedBufferRangeFn = nullptr;
 
 /// Shaders
 TglCreateShaderFn glCreateShaderFn = nullptr;
@@ -154,6 +162,13 @@ TglUniform3fFn glUniform3fFn = nullptr;
 TglUniform4fFn glUniform4fFn = nullptr;
 TglUniform1fvFn glUniform1fvFn = nullptr;
 TglUniformMatrix4fvFn glUniformMatrix4fvFn = nullptr;
+
+/// FBO
+TglGenFramebuffersFn glGenFramebuffersFn = nullptr;
+TglDeleteFramebuffersFn glDeleteFramebuffersFn = nullptr;
+TglBindFramebufferFn glBindFramebufferFn = nullptr;
+TglFramebufferTexture2DFn glFramebufferTexture2DFn = nullptr;
+TglCheckFramebufferStatusFn glCheckFramebufferStatusFn = nullptr;
 
 int const GLCompileStatus = GL_COMPILE_STATUS;
 int const GLLinkStatus = GL_LINK_STATUS;
@@ -372,6 +387,8 @@ void GLFunctions::Init()
   glDeleteVertexArrayFn = &glDeleteVertexArraysOES;
   glMapBufferFn = &::glMapBufferOES;
   glUnmapBufferFn = &::glUnmapBufferOES;
+  glMapBufferRangeFn = &::glMapBufferRangeEXT;
+  glFlushMappedBufferRangeFn = &::glFlushMappedBufferRangeEXT;
 #elif defined(OMIM_OS_WINDOWS)
   if (dp::GLExtensionsList::Instance().IsSupported(dp::GLExtensionsList::VertexArrayObject))
   {
@@ -389,7 +406,6 @@ void GLFunctions::Init()
   glViewportFn = &::glViewport;
   glFlushFn = &::glFlush;
 
-  glBindFramebufferFn = LOAD_GL_FUNC(TglBindFramebufferFn, glBindFramebuffer);
   glActiveTextureFn = LOAD_GL_FUNC(TglActiveTextureFn, glActiveTexture);
   glBlendEquationFn = LOAD_GL_FUNC(TglBlendEquationFn, glBlendEquation);
 
@@ -444,6 +460,13 @@ void GLFunctions::Init()
   glUniform1fvFn = LOAD_GL_FUNC(TglUniform1fvFn, glUniform1fv);
 
   glUniformMatrix4fvFn = LOAD_GL_FUNC(TglUniformMatrix4fvFn, glUniformMatrix4fv);
+
+  /// FBO
+  glGenFramebuffersFn = LOAD_GL_FUNC(TglGenFramebuffersFn, glGenFramebuffers);
+  glDeleteFramebuffersFn = LOAD_GL_FUNC(TglDeleteFramebuffersFn, glDeleteFramebuffers);
+  glBindFramebufferFn = LOAD_GL_FUNC(TglBindFramebufferFn, glBindFramebuffer);
+  glFramebufferTexture2DFn = LOAD_GL_FUNC(TglFramebufferTexture2DFn, glFramebufferTexture2D);
+  glCheckFramebufferStatusFn = LOAD_GL_FUNC(TglCheckFramebufferStatusFn, glCheckFramebufferStatus);
 }
 
 void GLFunctions::AttachCache(thread::id const & threadId)
@@ -587,12 +610,6 @@ void GLFunctions::glBlendFunc(glConst srcFactor, glConst dstFactor)
   GLCHECK(::glBlendFunc(srcFactor, dstFactor));
 }
 
-void GLFunctions::glBindFramebuffer(glConst target, uint32_t id)
-{
-  ASSERT(glBindFramebufferFn != nullptr, ());
-  GLCHECK(glBindFramebufferFn(target, id));
-}
-
 uint32_t GLFunctions::glGenVertexArray()
 {
   ASSERT(glGenVertexArraysFn != nullptr, ());
@@ -656,10 +673,10 @@ void GLFunctions::glBufferSubData(glConst target, uint32_t size, void const * da
   GLCHECK(glBufferSubDataFn(target, offset, size, data));
 }
 
-void * GLFunctions::glMapBuffer(glConst target)
+void * GLFunctions::glMapBuffer(glConst target, glConst access)
 {
   ASSERT(glMapBufferFn != nullptr, ());
-  void * result = glMapBufferFn(target, gl_const::GLWriteOnly);
+  void * result = glMapBufferFn(target, access);
   GLCHECKCALL();
   return result;
 }
@@ -669,6 +686,20 @@ void GLFunctions::glUnmapBuffer(glConst target)
   ASSERT(glUnmapBufferFn != nullptr, ());
   VERIFY(glUnmapBufferFn(target) == GL_TRUE, ());
   GLCHECKCALL();
+}
+
+void * GLFunctions::glMapBufferRange(glConst target, uint32_t offset, uint32_t length, glConst access)
+{
+  ASSERT(glMapBufferRangeFn != nullptr, ());
+  void * result = glMapBufferRangeFn(target, offset, length, access);
+  GLCHECKCALL();
+  return result;
+}
+
+void GLFunctions::glFlushMappedBufferRange(glConst target, uint32_t offset, uint32_t length)
+{
+  ASSERT(glFlushMappedBufferRangeFn != nullptr, ());
+  GLCHECK(glFlushMappedBufferRangeFn(target, offset, length));
 }
 
 uint32_t GLFunctions::glCreateShader(glConst type)
@@ -961,6 +992,38 @@ void GLFunctions::glDrawElements(uint32_t sizeOfIndex, uint32_t indexCount, uint
 void GLFunctions::glDrawArrays(glConst mode, int32_t first, uint32_t count)
 {
   GLCHECK(::glDrawArrays(mode, first, count));
+}
+
+void GLFunctions::glGenFramebuffer(uint32_t * fbo)
+{
+  ASSERT(glGenFramebuffersFn != nullptr, ());
+  GLCHECK(glGenFramebuffersFn(1, fbo));
+}
+
+void GLFunctions::glDeleteFramebuffer(uint32_t * fbo)
+{
+  ASSERT(glDeleteFramebuffersFn != nullptr, ());
+  GLCHECK(glDeleteFramebuffersFn(1, fbo));
+}
+
+void GLFunctions::glFramebufferTexture2D(glConst attachment, glConst texture)
+{
+  ASSERT(glFramebufferTexture2DFn != nullptr, ());
+  GLCHECK(glFramebufferTexture2DFn(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, texture, 0));
+}
+
+void GLFunctions::glBindFramebuffer(uint32_t fbo)
+{
+  ASSERT(glBindFramebufferFn != nullptr, ());
+  GLCHECK(glBindFramebufferFn(GL_FRAMEBUFFER, fbo));
+}
+
+uint32_t GLFunctions::glCheckFramebufferStatus()
+{
+  ASSERT(glCheckFramebufferStatusFn != nullptr, ());
+  uint32_t const result = glCheckFramebufferStatusFn(GL_FRAMEBUFFER);
+  GLCHECKCALL();
+  return result;
 }
 
 namespace

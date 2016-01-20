@@ -467,6 +467,9 @@
 /* Prints version number in About dialog */
 "version" = "Versio: %@";
 
+/* Data version in «About» screen */
+"data_version" = "Data version: %d";
+
 /* Confirmation in downloading countries dialog */
 "are_you_sure" = "Oletko varma että haluat jatkaa?";
 
@@ -506,6 +509,15 @@
 
 /* «Map style» entry value */
 "pref_map_style_modern_light" = "Modern light";
+
+/* Settings «Map» category: «Perspective view» title */
+"pref_map_3d_title" = "Perspektiivinäkymä";
+
+/* Settings «Map» category: «3D buildings» title */
+"pref_map_3d_buildings_title" = "3D-rakennukset";
+
+/* Settings «Map» category: «3D buildings» summary */
+"pref_map_3d_buildings_subtitle" = "Vaikuttaa akun kestoon";
 
 /* Settings «Route» category: «Tts enabled» title */
 "pref_tts_enable_title" = "Ääniohjeistukset";
@@ -1158,6 +1170,8 @@
 
 "dialog_routing_disclaimer_recommendations" = "— Ehdotettuja reittejä tulee pitää vain suosituksina;";
 
+"dialog_routing_disclaimer_borders" = "— Ole varovainen reittien suhteen raja-alueilla: sovelluksemme luomat reitit voivat toisinaan ylittää maiden rajoja luvattomissa paikoissa;";
+
 "dialog_routing_disclaimer_beware" = "Pysy tarkkana ja aja turvallisesti!";
 
 "dialog_routing_check_gps" = "Tarkista GPS-signaali";
@@ -1286,7 +1300,7 @@
 "clear_search" = "Poista hakuhistoria";
 
 /* Title for settings to enable/disable showcase menu button */
-"showcase_settings_title" = "Näytä mainokset";
+"showcase_settings_title" = "Näytä tarjoukset";
 
 "showcase_more_apps" = "Lisää My.com sovelluksia";
 
@@ -1313,12 +1327,18 @@
 
 "p2p_reroute_from_current" = "Haluatko valita vaihtoehtoisen reitin?";
 
-"whats_new_where_to_turn" = "MAPS.ME kertoo sinulle, minne kääntyä";
+"whats_new_3d_title" = "Suosikkikarttasi uudella perspektiivillä";
 
-"whats_new_voice_instructions" = "Hyvät ystävät, olette pyytäneet ääniopastusta navigoinnin avuksi jo pitkän aikaa - toiveenne on kuultu! Nyt navigaattorimme varoittaa sinua hyvissä ajoin, ennen kuin sinun pitää kääntyä.";
+"whats_new_3d_subtitle" = "Olemme lisänneet perspektiivinäkymän navigointitilaan.";
 
-"whats_new_between_any_points" = "Luo reittejä minkä tahansa kohteiden välille";
+"whats_new_3d_buildings_title" = "Uusi ulottuvuus MAPS.ME-sovellukseen";
 
-"whats_new_happy_day" = "Elämä hymyilee! Suunnittele matkasi etukäteen MAPS.ME -sovelluksen avulla.";
+"whats_new_3d_buildings_subtitle" = "Karttamme ovat entistä informatiivisempia ja kauniimpia 3D-rakennusten avulla.";
 
-"whats_new_next" = "Seuraava";
+"whats_new_3d_update_maps" = "Päivitä karttatietosi voidaksesi käyttää tätä toimintoa täysimääräisesti.";
+
+"whats_new_3d_on" = "Aktivoi perspektiivinäkymä";
+
+"whats_new_3d_buildings_on" = "Aktivoi 3D-rakennukset";
+
+"whats_new_next_button" = "Seuraava";

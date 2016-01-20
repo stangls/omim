@@ -3,6 +3,8 @@
 
 #include "base/logging.hpp"
 
+#include "3party/Alohalytics/src/alohalytics.h"
+
 namespace dp
 {
 
@@ -11,6 +13,14 @@ void SupportManager::Init()
   string const renderer = GLFunctions::glGetString(gl_const::GLRenderer);
   string const version = GLFunctions::glGetString(gl_const::GLVersion);
   LOG(LINFO, ("Renderer =", renderer, "Version =", version));
+
+  // On Android the engine may be recreated. Here we guarantee that GPU info is sent once per session.
+  static bool gpuInfoSent = false;
+  if (!gpuInfoSent)
+  {
+    alohalytics::Stats::Instance().LogEvent("GPU", renderer);
+    gpuInfoSent = true;
+  }
 
   m_isSamsungGoogleNexus = (renderer == "PowerVR SGX 540" && version.find("GOOGLENEXUS.ED945322") != string::npos);
   if (m_isSamsungGoogleNexus)
@@ -29,6 +39,10 @@ void SupportManager::Init()
       }
     }
   }
+
+  m_isTegra = (renderer.find("Tegra") != string::npos);
+  if (m_isTegra)
+    LOG(LINFO, ("NVidia Tegra device detected."));
 }
 
 bool SupportManager::IsSamsungGoogleNexus() const
@@ -39,6 +53,11 @@ bool SupportManager::IsSamsungGoogleNexus() const
 bool SupportManager::IsAdreno200Device() const
 {
   return m_isAdreno200;
+}
+
+bool SupportManager::IsTegraDevice() const
+{
+  return m_isTegra;
 }
 
 SupportManager & SupportManager::Instance()
