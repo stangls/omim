@@ -203,6 +203,24 @@ bool Tour::UpdateCurrentPosition( size_t index ){
     return true;
 }
 
+void Tour::AddPoint(double lat, double lon)
+{
+    // minimal distance between points
+    // if the last point is further away, additional points are added in-between (to minimize errors of route-following)
+    const double minDist = 5; // meters
+    PointD newPoint = PointD(MercatorBounds::LonToX(lat),MercatorBounds::LatToY(lon));
+    if (m_points.size()>0){
+        PointD lastPoint = m_points.back();
+        int steps = (int)ceil(MercatorBounds::DistanceOnEarth(lastPoint,newPoint)/minDist)-1;
+        auto vec = ( newPoint-lastPoint )/(steps+1);
+        for (int i=0; i<steps; i++){
+            lastPoint += vec;
+            m_points.push_back(lastPoint);
+        }
+    }
+    m_points.emplace_back(newPoint);
+}
+
 
 void Tour::CalculateTimes()
 {

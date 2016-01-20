@@ -43,9 +43,7 @@ public:
     pvec::iterator GetEndIt() {
         return m_points.end();
     }
-    void AddPoint( double lat, double lon ){
-        m_points.emplace_back(MercatorBounds::LonToX(lat),MercatorBounds::LatToY(lon));
-    }
+    void AddPoint( double lat, double lon );
 
     vector<double>::iterator GetTimesCurrentIt(){
         return m_times.begin()+m_currentIndex;
