@@ -3,7 +3,6 @@ package com.mapswithme.maps;
 import com.mapswithme.maps.MapStorage.Index;
 import com.mapswithme.maps.bookmarks.data.DistanceAndAzimut;
 import com.mapswithme.maps.bookmarks.data.MapObject;
-import com.mapswithme.maps.bookmarks.data.MapObject.SearchResult;
 import com.mapswithme.maps.routing.RoutingInfo;
 import com.mapswithme.util.Constants;
 
@@ -100,7 +99,7 @@ public class Framework
 
   public native static void nativeClearApiPoints();
 
-  public native static void injectData(SearchResult searchResult, long index);
+  public native static void injectData(MapObject.SearchResult searchResult, long index);
 
   public native static void deactivatePopup();
 
@@ -160,9 +159,14 @@ public class Framework
 
   public native static double[] predictLocation(double lat, double lon, double accuracy, double bearing, double speed, double elapsedSeconds);
 
-  public native static void setMapStyle(int mapStyle);
+  public native static void nativeSetMapStyle(int mapStyle);
 
-  public native static int getMapStyle();
+  /**
+   * This method allows to set new map style without immediate applying. It can be used before
+   * engine recreation instead of nativeSetMapStyle to avoid huge flow of OpenGL invocations.
+   * @param mapStyle style index
+   */
+  public native static void nativeMarkMapStyle(int mapStyle);
 
   public native static void nativeSetRouter(int routerType);
 
@@ -185,6 +189,15 @@ public class Framework
   public native static void nativeRegisterMaps();
 
   public native static void nativeDeregisterMaps();
+
+  /**
+   * Determines if currently is day or night at the given location. Used to switch day/night styles.
+   * @param utcTimeSeconds Unix time in seconds.
+   * @param lat latitude of the current location.
+   * @param lon longitude of the current location.
+   * @return {@code true} if it is day now or {@code false} otherwise.
+   */
+  public static native boolean nativeIsDayTime(long utcTimeSeconds, double lat, double lon);
 
   public native static void nativeGet3dMode(Params3dMode result);
 

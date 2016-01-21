@@ -4,8 +4,9 @@ import android.app.Dialog;
 import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.SwitchCompat;
@@ -22,6 +23,7 @@ import android.widget.TextView;
 
 import com.mapswithme.maps.base.BaseMwmDialogFragment;
 import com.mapswithme.util.Config;
+import com.mapswithme.util.ThemeUtils;
 import com.mapswithme.util.UiUtils;
 
 public class NewsFragment extends BaseMwmDialogFragment
@@ -48,9 +50,6 @@ public class NewsFragment extends BaseMwmDialogFragment
         mImages[i] = images.getResourceId(i, 0);
 
       images.recycle();
-
-      // TODO: Temporary solution. Remove for the next WhatsNews
-      mSubtitles[1] += "\n\n" + MwmApplication.get().getString(R.string.whats_new_3d_update_maps);
     }
 
     @Override
@@ -96,21 +95,13 @@ public class NewsFragment extends BaseMwmDialogFragment
 
         final SwitchCompat checkBox = (SwitchCompat)switchBlock.findViewById(R.id.switch_box);
         checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener()
+        {
+          @Override
+          public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
           {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked)
-            {
-              Framework.Params3dMode _3d = new Framework.Params3dMode();
-              Framework.nativeGet3dMode(_3d);
-
-              if (position == 0)
-                _3d.enabled = isChecked;
-              else
-                _3d.buildings = isChecked;
-
-              Framework.nativeSet3dMode(_3d.enabled, _3d.buildings);
-            }
-          });
+            // Unused now
+          }
+        });
 
         switchBlock.setOnClickListener(new View.OnClickListener()
         {
@@ -120,7 +111,6 @@ public class NewsFragment extends BaseMwmDialogFragment
             checkBox.performClick();
           }
         });
-
       }
 
       container.addView(res);
@@ -139,8 +129,10 @@ public class NewsFragment extends BaseMwmDialogFragment
     int cur = mPager.getCurrentItem();
     for (int i = 0; i < mDots.length; i++)
     {
-      mDots[i].setImageResource(i == cur ? R.drawable.news_marker_active
-                                         : R.drawable.news_marker_inactive);
+      mDots[i].setImageResource(ThemeUtils.isNightTheme() ? i == cur ? R.drawable.news_marker_active_night
+                                                                     : R.drawable.news_marker_inactive_night
+                                                          : i == cur ? R.drawable.news_marker_active
+                                                                     : R.drawable.news_marker_inactive);
     }
 
     UiUtils.showIf(cur > 0, mPrevButton);
@@ -171,15 +163,15 @@ public class NewsFragment extends BaseMwmDialogFragment
   }
 
   @Override
-  public void onCreate(@Nullable Bundle savedInstanceState)
+  protected int getCustomTheme()
   {
-    super.onCreate(savedInstanceState);
-    setStyle(STYLE_NORMAL, UiUtils.isTablet() ? R.style.MwmMain_DialogFragment
-                                              : R.style.MwmMain_DialogFragment_Fullscreen);
+    return (UiUtils.isTablet() ? super.getCustomTheme()
+                               : getFullscreenTheme());
   }
 
   @Override
-  public @NonNull Dialog onCreateDialog(Bundle savedInstanceState)
+  public @NonNull
+  Dialog onCreateDialog(Bundle savedInstanceState)
   {
     Dialog res = super.onCreateDialog(savedInstanceState);
     res.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -250,13 +242,24 @@ public class NewsFragment extends BaseMwmDialogFragment
       return false;
 
     String tag = NewsFragment.class.getName();
+    FragmentManager fm = activity.getSupportFragmentManager();
+    if (fm.isDestroyed())
+      return false;
+
     if (Config.getLastWhatsNewVersion() >= BuildConfig.VERSION_CODE)
-      return (activity.getSupportFragmentManager().findFragmentByTag(tag) != null);
+    {
+      Fragment f = fm.findFragmentByTag(tag);
+      if (f == null)
+        return false;
+
+      // If we're here, it means that the user has rotated the screen.
+      // We use different dialog themes for landscape and portrait modes on tablets,
+      // so the fragment should be recreated to be displayed correctly.
+      fm.beginTransaction().remove(f).commitAllowingStateLoss();
+      fm.executePendingTransactions();
+    }
 
     Config.setWhatsNewShown();
-
-    // Enable 3D by default
-    Framework.nativeSet3dMode(true, true);
 
     try
     {

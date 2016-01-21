@@ -1,6 +1,7 @@
 #pragma once
 
 #include "drape_frontend/backend_renderer.hpp"
+#include "drape_frontend/color_constants.hpp"
 #include "drape_frontend/frontend_renderer.hpp"
 #include "drape_frontend/threads_commutator.hpp"
 #include "drape_frontend/selection_shape.hpp"
@@ -39,7 +40,8 @@ public:
            MapDataProvider const & model,
            double vs,
            gui::TWidgetsInitInfo && info,
-           pair<location::EMyPositionMode, bool> const & initialMyPositionMode)
+           pair<location::EMyPositionMode, bool> const & initialMyPositionMode,
+           bool allow3dBuildings)
       : m_factory(factory)
       , m_stringsBundle(stringBundle)
       , m_viewport(viewport)
@@ -47,6 +49,7 @@ public:
       , m_vs(vs)
       , m_info(move(info))
       , m_initialMyPositionMode(initialMyPositionMode)
+      , m_allow3dBuildings(allow3dBuildings)
     {}
 
     ref_ptr<dp::OGLContextFactory> m_factory;
@@ -56,6 +59,7 @@ public:
     double m_vs;
     gui::TWidgetsInitInfo m_info;
     pair<location::EMyPositionMode, bool> m_initialMyPositionMode;
+    bool m_allow3dBuildings;
   };
 
   DrapeEngine(Params && params);
@@ -105,7 +109,8 @@ public:
   bool GetMyPosition(m2::PointD & myPosition);
   SelectionShape::ESelectedObject GetSelectedObject();
 
-  void AddRoute(m2::PolylineD const & routePolyline, vector<double> const & turns, dp::Color const & color);
+  void AddRoute(m2::PolylineD const & routePolyline, vector<double> const & turns,
+                df::ColorConstant color);
   void RemoveRoute(bool deactivateFollowing);
   void FollowRoute(int preferredZoomLevel, int preferredZoomLevel3d, double rotationAngle, double angleFOV);
   void DeactivateRouteFollowing();
@@ -116,6 +121,9 @@ public:
 
   void Allow3dMode(bool allowPerspectiveInNavigation, bool allow3dBuildings, double rotationAngle, double angleFOV);
   void EnablePerspective(double rotationAngle, double angleFOV);
+
+  void UpdateGpsTrackPoints(vector<df::GpsTrackPoint> && toAdd, vector<uint32_t> && toRemove);
+  void ClearGpsTrackPoints();
 
 private:
   void AddUserEvent(UserEvent const & e);

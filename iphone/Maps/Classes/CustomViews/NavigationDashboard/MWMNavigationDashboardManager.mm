@@ -373,6 +373,13 @@ extern NSString * const kTTSStatusWasChangedNotification;
   [self.routePreview selectProgress:self.activeRouteTypeButton];
 }
 
+- (void)refresh
+{
+  [self.navigationDashboardLandscape refresh];
+  [self.navigationDashboardPortrait refresh];
+  [self.routePreview refresh];
+}
+
 #pragma mark - Properties
 
 - (MWMRouteHelperPanelsDrawer *)drawer

@@ -33,11 +33,18 @@ typedef NS_ENUM(NSUInteger, MWMRoutingPlaneMode)
 
 - (void)enableStandby;
 - (void)disableStandby;
++ (void)customizeAppearance;
 
 - (void)disableDownloadIndicator;
 - (void)enableDownloadIndicator;
 
 - (void)showMap;
+- (void)startMapStyleChecker;
+- (void)stopMapStyleChecker;
++ (void)setAutoNightModeOn:(BOOL)on;
++ (BOOL)isAutoNightMode;
++ (void)resetToDefaultMapStyle;
++ (void)changeMapStyleIfNedeed;
 
 - (void)setMapStyle:(MapStyle)mapStyle;
 

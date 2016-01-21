@@ -495,20 +495,17 @@
 
 "pref_zoom_summary" = "画面上に表示";
 
-/* Settings «Map» category: «Map style» title */
-"pref_map_style_title" = "Map style";
-
-/* Settings «Map» category: «Map style» summary */
-"pref_map_style_summary" = "Change map presentation";
+/* Settings «Map» category: «Night style» title */
+"pref_map_style_title" = "夜間モード";
 
 /* «Map style» entry value */
-"pref_map_style_classic_light" = "Classic light";
+"pref_map_style_default" = "オフ";
 
 /* «Map style» entry value */
-"pref_map_style_classic_dark" = "Classic dark";
+"pref_map_style_night" = "オン";
 
 /* «Map style» entry value */
-"pref_map_style_modern_light" = "Modern light";
+"pref_map_style_auto" = "自動";
 
 /* Settings «Map» category: «Perspective view» title */
 "pref_map_3d_title" = "パースペクティブ表示";
@@ -532,6 +529,27 @@
 "pref_tts_other_section_title" = "その他";
 
 "pref_tts_how_to_set_up_voice" = "音声設定の仕方";
+
+/* Settings «Map» category: «Record track» title */
+"pref_track_record_title" = "最近のルート";
+
+"duration_disabled" = "オフ";
+
+"duration_1_hour" = "1時間";
+
+"duration_2_hours" = "2時間";
+
+"duration_6_hours" = "6時間";
+
+"duration_12_hours" = "12時間";
+
+"duration_1_day" = "1日";
+
+"recent_track_help_text" = "ご注意：この機能を有効にすると電池の使用量が増加します。";
+
+"pref_track_ios_caption" = "最近ルートは、使用した道のりを表示する機能です。";
+
+"pref_track_ios_subcaption" = "ルートを保存する期間を選択してください。";
 
 "placepage_distance" = "距離";
 
@@ -1327,18 +1345,8 @@
 
 "p2p_reroute_from_current" = "現在位置からのルートを作成しますか？";
 
-"whats_new_3d_title" = "お気に入りの地図を新たな視点で";
-
-"whats_new_3d_subtitle" = "ナビゲーションモードに視点表示が追加されました。";
-
-"whats_new_3d_buildings_title" = "MAPS.MEに新たな次元を追加";
-
-"whats_new_3d_buildings_subtitle" = "建物を3Dで表示することで、地図がより詳細で美しくなりました。";
-
-"whats_new_3d_update_maps" = "この機能をフル活用するために、マップデータを更新してください。";
-
-"whats_new_3d_on" = "パースペクティブ表示を有効化";
-
-"whats_new_3d_buildings_on" = "3Dビルディングを有効化";
-
 "whats_new_next_button" = "次へ";
+
+"whats_new_night_caption" = "夜間モードナビゲーション";
+
+"whats_new_night_body" = "MAPS.MEを夜間の運転中に使いやすくするため、夜間モードを追加しました。日の入り後に自動的に切り替わります。";
