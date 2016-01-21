@@ -315,12 +315,14 @@ public class MainMenu
 
   private void updateMarker()
   {
+    /*
     int count = ActiveCountryTree.getOutOfDateCount();
     UiUtils.showIf((!mCollapsed || mCollapseViews.isEmpty()) && (count > 0) && !isOpen(), mNewsMarker);
     UiUtils.showIf(count > 0, mNewsCounter);
 
     if (count > 0)
       mNewsCounter.setText(String.valueOf(count));
+    */
   }
 
   public void onResume()
