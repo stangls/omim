@@ -495,20 +495,17 @@
 
 "pref_zoom_summary" = "Mutassa a kijelzőn";
 
-/* Settings «Map» category: «Map style» title */
-"pref_map_style_title" = "Map style";
-
-/* Settings «Map» category: «Map style» summary */
-"pref_map_style_summary" = "Change map presentation";
+/* Settings «Map» category: «Night style» title */
+"pref_map_style_title" = "Éjszakai üzemmód";
 
 /* «Map style» entry value */
-"pref_map_style_classic_light" = "Classic light";
+"pref_map_style_default" = "Ki";
 
 /* «Map style» entry value */
-"pref_map_style_classic_dark" = "Classic dark";
+"pref_map_style_night" = "Be";
 
 /* «Map style» entry value */
-"pref_map_style_modern_light" = "Modern light";
+"pref_map_style_auto" = "Automatikus";
 
 /* Settings «Map» category: «Perspective view» title */
 "pref_map_3d_title" = "Távlati kép";
@@ -532,6 +529,27 @@
 "pref_tts_other_section_title" = "Egyéb";
 
 "pref_tts_how_to_set_up_voice" = "Így állítsd be a hangot";
+
+/* Settings «Map» category: «Record track» title */
+"pref_track_record_title" = "Legutolsó útvonal";
+
+"duration_disabled" = "Kikapcsolva";
+
+"duration_1_hour" = "1 óra";
+
+"duration_2_hours" = "2 óra";
+
+"duration_6_hours" = "6 óra";
+
+"duration_12_hours" = "12 óra";
+
+"duration_1_day" = "1 nap";
+
+"recent_track_help_text" = "Fontos: a funkció bekapcsolásával megnövekedhet az akkumulátorhasználat.";
+
+"pref_track_ios_caption" = "A legutolsó útvonal megmutatja, hogy milyen útvonalon haladtál.";
+
+"pref_track_ios_subcaption" = "Válaszd ki az útvonalak elmentésének időtartamát!";
 
 "placepage_distance" = "Távolság";
 
@@ -1327,18 +1345,8 @@
 
 "p2p_reroute_from_current" = "Szeretne útvonaltervet készíttetni a jelenlegi pozíciójától?";
 
-"whats_new_3d_title" = "Kedvenc térképei új perspektívából";
-
-"whats_new_3d_subtitle" = "A navigációs módban már perspektívikus nézet is választható.";
-
-"whats_new_3d_buildings_title" = "Új dimenzió a MAPS.ME-ben";
-
-"whats_new_3d_buildings_subtitle" = "A 3D-s épületeknek köszönhetően a térképeink még több információval szolgálnak, és még szebbek lettek.";
-
-"whats_new_3d_update_maps" = "Ezen tulajdonság teljes körű kihasználásához, kérjük, frissítse térképének az adatát.";
-
-"whats_new_3d_on" = "Távlati kép engedélyezése";
-
-"whats_new_3d_buildings_on" = "3D Épületek engedélyezése";
-
 "whats_new_next_button" = "Következő";
+
+"whats_new_night_caption" = "Navigáció éjszakai módban";
+
+"whats_new_night_body" = "A MAPS.ME használatának sötétben való vezetés közbeni elősegítése érdekében hozzáadtuk a funkciókhoz az éjszakai módot. Naplemente után automatikusan bekapcsol.";

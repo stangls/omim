@@ -308,6 +308,14 @@
 	<string name="prefs_group_route">Navigazione</string>
 	<string name="pref_zoom_title">Pulsanti per lo zoom</string>
 	<string name="pref_zoom_summary">Condividi la mia location</string>
+	<!-- Settings «Map» category: «Night style» title -->
+	<string name="pref_map_style_title">Modalità notturna</string>
+	<!-- «Map style» entry value -->
+	<string name="pref_map_style_default">Sì</string>
+	<!-- «Map style» entry value -->
+	<string name="pref_map_style_night">No</string>
+	<!-- «Map style» entry value -->
+	<string name="pref_map_style_auto">Auto</string>
 	<!-- Settings «Map» category: «Perspective view» title -->
 	<string name="pref_map_3d_title">Vista in prospettiva</string>
 	<!-- Settings «Map» category: «3D buildings» title -->
@@ -323,6 +331,17 @@
 	<!-- Title for "Other" section in TTS settings. -->
 	<string name="pref_tts_other_section_title">Altro</string>
 	<string name="pref_tts_how_to_set_up_voice">Come impostare la voce</string>
+	<!-- Settings «Map» category: «Record track» title -->
+	<string name="pref_track_record_title">Percorso recente</string>
+	<string name="duration_disabled">Disabilitato</string>
+	<string name="duration_1_hour">1 ora</string>
+	<string name="duration_2_hours">2 ore</string>
+	<string name="duration_6_hours">6 ore</string>
+	<string name="duration_12_hours">12 ore</string>
+	<string name="duration_1_day">1 giorno</string>
+	<string name="recent_track_help_text">Nota bene: l\&#39;attivazione di questa funziona comporta un maggior consumo di batteria.</string>
+	<string name="pref_track_ios_caption">Il percorso recente mostra il tragitto effettuato.</string>
+	<string name="pref_track_ios_subcaption">Seleziona un intervallo temporale per la registrazione del percorso.</string>
 	<string name="placepage_distance">Distanza</string>
 	<string name="placepage_coordinates">Coordinate</string>
 	<string name="placepage_unsorted">Non classificato</string>
@@ -804,12 +823,7 @@
 	<string name="p2p_to_here">A</string>
 	<string name="p2p_only_from_current">La navigazione è disponibile solo dalla tua posizione attuale.</string>
 	<string name="p2p_reroute_from_current">Vuoi che impostiamo il percorso dalla tua posizione corrente?</string>
-	<string name="whats_new_3d_title">Le tue mappe preferite in una nuova prospettiva</string>
-	<string name="whats_new_3d_subtitle">Abbiamo aggiunto la visualizzazione prospettica alla modalità di navigazione.</string>
-	<string name="whats_new_3d_buildings_title">MAPS.ME ha una nuova dimensione</string>
-	<string name="whats_new_3d_buildings_subtitle">Le nostre mappe ora sono ancora più efficaci e ricche di contenuti, grazie agli edifici in 3D.</string>
-	<string name="whats_new_3d_update_maps">Per sfruttare al massimo questa funzione, aggiorna i dati della tua mappa.</string>
-	<string name="whats_new_3d_on">Attiva vista in prospettiva</string>
-	<string name="whats_new_3d_buildings_on">Attiva Edifici in 3D</string>
 	<string name="whats_new_next_button">Avanti</string>
+	<string name="whats_new_night_caption">Navigazione in modalità notturna</string>
+	<string name="whats_new_night_body">Per poter utilizzare al meglio MAPS.ME di sera o di notte, abbiamo aggiunto la modalità notturna. L\&#39;applicazione passerà automaticamente a questa modalità dopo il tramonto.</string>
 </resources>

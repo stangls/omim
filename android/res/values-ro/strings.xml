@@ -311,6 +311,14 @@
 	<string name="prefs_group_route">Navigație</string>
 	<string name="pref_zoom_title">Butoane zoom</string>
 	<string name="pref_zoom_summary">Afișare pe ecran</string>
+	<!-- Settings «Map» category: «Night style» title -->
+	<string name="pref_map_style_title">Mod nocturn</string>
+	<!-- «Map style» entry value -->
+	<string name="pref_map_style_default">Oprit</string>
+	<!-- «Map style» entry value -->
+	<string name="pref_map_style_night">Pornit</string>
+	<!-- «Map style» entry value -->
+	<string name="pref_map_style_auto">Automat</string>
 	<!-- Settings «Map» category: «Perspective view» title -->
 	<string name="pref_map_3d_title">Vizualizare în perspectivă</string>
 	<!-- Settings «Map» category: «3D buildings» title -->
@@ -326,6 +334,17 @@
 	<!-- Title for "Other" section in TTS settings. -->
 	<string name="pref_tts_other_section_title">Alta</string>
 	<string name="pref_tts_how_to_set_up_voice">Modalitatea de configurare a vocii</string>
+	<!-- Settings «Map» category: «Record track» title -->
+	<string name="pref_track_record_title">Rute recente</string>
+	<string name="duration_disabled">Oprit</string>
+	<string name="duration_1_hour">1 oră</string>
+	<string name="duration_2_hours">2 ore</string>
+	<string name="duration_6_hours">6 ore</string>
+	<string name="duration_12_hours">12 ore</string>
+	<string name="duration_1_day">1 zi</string>
+	<string name="recent_track_help_text">Vă rugăm să rețineți: activarea acestei funcții determină un consum accelerat al bateriei.</string>
+	<string name="pref_track_ios_caption">Opțiunea Rută recentă vă afișează ruta folosită anterior.</string>
+	<string name="pref_track_ios_subcaption">Vă rugăm să selectați intervalul orar corespunzător salvării rutei.</string>
 	<string name="placepage_distance">Distanță</string>
 	<string name="placepage_coordinates">Coordonate</string>
 	<string name="placepage_unsorted">Nesortate</string>
@@ -804,12 +823,7 @@
 	<string name="p2p_to_here">În</string>
 	<string name="p2p_only_from_current">Navigația este disponibilă doar având ca punct de pornire locațiacctuală.</string>
 	<string name="p2p_reroute_from_current">Doriți să vă planificăm o rută având ca punct de pornire locația actuală?</string>
-	<string name="whats_new_3d_title">Hărțile dvs. preferate dintr-o nouă perspectivă</string>
-	<string name="whats_new_3d_subtitle">Am adăugat modul de vizualizare în perspectivă la modul de navigație.</string>
-	<string name="whats_new_3d_buildings_title">O nouă dimensiune în MAPS.ME</string>
-	<string name="whats_new_3d_buildings_subtitle">Cu ajutorul clădirilor 3D, hărțile noastre conțin mai multe informații și sunt mai frumoase.</string>
-	<string name="whats_new_3d_update_maps">Pentru a beneficia integral de această funcție, vă rugăm să actualizați datele hărții dvs.</string>
-	<string name="whats_new_3d_on">Activare vizualizare în perspectivă</string>
-	<string name="whats_new_3d_buildings_on">Activare Clădiri 3D</string>
 	<string name="whats_new_next_button">Următoarea</string>
+	<string name="whats_new_night_caption">Navigație mod nocturn</string>
+	<string name="whats_new_night_body">Pentru a facilita utilizarea MAPS.ME atunci când conduceți noaptea, am adăugat modul nocturn. Acesta pornește automat după apusul soarelui.</string>
 </resources>

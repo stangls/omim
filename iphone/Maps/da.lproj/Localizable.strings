@@ -414,7 +414,7 @@
 "bookmark_share_email_subject" = "Hey, tjek min knappenål på MAPS.ME kortet ud!";
 
 /* Share one specific bookmark using EMail, %1$@ is bookmark's name, %2$@ is ge0:// link and %3$@ http://ge0.me */
-"bookmark_share_email" = "Hey,\n\nI har lagt en knappenål: %1$@ på MAPS.ME, offline kort over hele Verden. Tryk pådettelink: %2$@ellerdette%3$@foratseknappenåletpåkortet.\n\nTak.";
+"bookmark_share_email" = "Hey,\n\nI har lagt en knappenål: %1$@ på MAPS.ME, offline kort over hele Verden. Tryk pådettelink: %2$@ ellerdette %3$@ foratseknappenåletpåkortet.\n\nTak.";
 
 /* Subject for emailed position */
 "my_position_share_email_subject" = "Hey, tjek min nuværende lokation ud på MAPS.ME kortet!";
@@ -495,20 +495,17 @@
 
 "pref_zoom_summary" = "Vis på skærmen";
 
-/* Settings «Map» category: «Map style» title */
-"pref_map_style_title" = "Map style";
-
-/* Settings «Map» category: «Map style» summary */
-"pref_map_style_summary" = "Change map presentation";
+/* Settings «Map» category: «Night style» title */
+"pref_map_style_title" = "Nattilstand";
 
 /* «Map style» entry value */
-"pref_map_style_classic_light" = "Classic light";
+"pref_map_style_default" = "Fra";
 
 /* «Map style» entry value */
-"pref_map_style_classic_dark" = "Classic dark";
+"pref_map_style_night" = "Til";
 
 /* «Map style» entry value */
-"pref_map_style_modern_light" = "Modern light";
+"pref_map_style_auto" = "Auto";
 
 /* Settings «Map» category: «Perspective view» title */
 "pref_map_3d_title" = "Perspektivvisning";
@@ -532,6 +529,27 @@
 "pref_tts_other_section_title" = "Andet";
 
 "pref_tts_how_to_set_up_voice" = "Sådan indstiller du tale";
+
+/* Settings «Map» category: «Record track» title */
+"pref_track_record_title" = "Seneste sti";
+
+"duration_disabled" = "Fra";
+
+"duration_1_hour" = "1 time";
+
+"duration_2_hours" = "2 timer";
+
+"duration_6_hours" = "6 timer";
+
+"duration_12_hours" = "12 timer";
+
+"duration_1_day" = "1 dag";
+
+"recent_track_help_text" = "Bemærk: aktivering af denne funktion medfører øget batteriforbrug.";
+
+"pref_track_ios_caption" = "Seneste spor viser din rejste vej.";
+
+"pref_track_ios_subcaption" = "Vælg tidsinterval for at gemme sporet.";
 
 "placepage_distance" = "Afstand";
 
@@ -1327,18 +1345,8 @@
 
 "p2p_reroute_from_current" = "Ønsker du, at vi planlægger en rute fra din nuværende placering?";
 
-"whats_new_3d_title" = "Dine foretrukne kort fra et nyt perspektiv";
-
-"whats_new_3d_subtitle" = "Vi har tilføjet perspektivvisning til navigeringstilstanden.";
-
-"whats_new_3d_buildings_title" = "En ny dimension i MAPS.ME";
-
-"whats_new_3d_buildings_subtitle" = "Med 3D-bygninger er vores kort blevet smukkere og mere informative.";
-
-"whats_new_3d_update_maps" = "For at udnytte denne funktion fuldt ud skal du opdatere dine kortdata.";
-
-"whats_new_3d_on" = "Aktivér perspektivvisning";
-
-"whats_new_3d_buildings_on" = "Aktivér 3D-bygninger";
-
 "whats_new_next_button" = "Næste";
+
+"whats_new_night_caption" = "Navigering i nattilstand";
+
+"whats_new_night_body" = "For at hjælpe med brugen af MAPS.ME ved kørsel om natten har vi tilføjet nattilstand. Den slår automatisk til efter solnedgang.";

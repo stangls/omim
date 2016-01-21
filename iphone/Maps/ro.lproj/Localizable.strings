@@ -495,20 +495,17 @@
 
 "pref_zoom_summary" = "Afișare pe ecran";
 
-/* Settings «Map» category: «Map style» title */
-"pref_map_style_title" = "Map style";
-
-/* Settings «Map» category: «Map style» summary */
-"pref_map_style_summary" = "Change map presentation";
+/* Settings «Map» category: «Night style» title */
+"pref_map_style_title" = "Mod nocturn";
 
 /* «Map style» entry value */
-"pref_map_style_classic_light" = "Classic light";
+"pref_map_style_default" = "Oprit";
 
 /* «Map style» entry value */
-"pref_map_style_classic_dark" = "Classic dark";
+"pref_map_style_night" = "Pornit";
 
 /* «Map style» entry value */
-"pref_map_style_modern_light" = "Modern light";
+"pref_map_style_auto" = "Automat";
 
 /* Settings «Map» category: «Perspective view» title */
 "pref_map_3d_title" = "Vizualizare în perspectivă";
@@ -532,6 +529,27 @@
 "pref_tts_other_section_title" = "Alta";
 
 "pref_tts_how_to_set_up_voice" = "Modalitatea de configurare a vocii";
+
+/* Settings «Map» category: «Record track» title */
+"pref_track_record_title" = "Rute recente";
+
+"duration_disabled" = "Oprit";
+
+"duration_1_hour" = "1 oră";
+
+"duration_2_hours" = "2 ore";
+
+"duration_6_hours" = "6 ore";
+
+"duration_12_hours" = "12 ore";
+
+"duration_1_day" = "1 zi";
+
+"recent_track_help_text" = "Vă rugăm să rețineți: activarea acestei funcții determină un consum accelerat al bateriei.";
+
+"pref_track_ios_caption" = "Opțiunea Rută recentă vă afișează ruta folosită anterior.";
+
+"pref_track_ios_subcaption" = "Vă rugăm să selectați intervalul orar corespunzător salvării rutei.";
 
 "placepage_distance" = "Distanță";
 
@@ -1327,18 +1345,8 @@
 
 "p2p_reroute_from_current" = "Doriți să vă planificăm o rută având ca punct de pornire locația actuală?";
 
-"whats_new_3d_title" = "Hărțile dvs. preferate dintr-o nouă perspectivă";
-
-"whats_new_3d_subtitle" = "Am adăugat modul de vizualizare în perspectivă la modul de navigație.";
-
-"whats_new_3d_buildings_title" = "O nouă dimensiune în MAPS.ME";
-
-"whats_new_3d_buildings_subtitle" = "Cu ajutorul clădirilor 3D, hărțile noastre conțin mai multe informații și sunt mai frumoase.";
-
-"whats_new_3d_update_maps" = "Pentru a beneficia integral de această funcție, vă rugăm să actualizați datele hărții dvs.";
-
-"whats_new_3d_on" = "Activare vizualizare în perspectivă";
-
-"whats_new_3d_buildings_on" = "Activare Clădiri 3D";
-
 "whats_new_next_button" = "Următoarea";
+
+"whats_new_night_caption" = "Navigație mod nocturn";
+
+"whats_new_night_body" = "Pentru a facilita utilizarea MAPS.ME atunci când conduceți noaptea, am adăugat modul nocturn. Acesta pornește automat după apusul soarelui.";

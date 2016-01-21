@@ -180,14 +180,21 @@ public class MapFragment extends BaseMwmFragment
       return;
 
     if (getActivity() == null || !getActivity().isChangingConfigurations())
-    {
-      // We're in the main thread here. So nothing from the queue will be run between these two calls.
-      // Destroy engine first, then clear the queue that theoretically can be filled by nativeDestroyEngine().
-      nativeDestroyEngine();
-      MwmApplication.get().clearFunctorsOnUiThread();
-    }
+      destroyEngine();
     else
       nativeDetachSurface();
+  }
+
+  public void destroyEngine()
+  {
+    if (!mEngineCreated)
+      return;
+
+    // We're in the main thread here. So nothing from the queue will be run between these two calls.
+    // Destroy engine first, then clear the queue that theoretically can be filled by nativeDestroyEngine().
+    nativeDestroyEngine();
+    MwmApplication.get().clearFunctorsOnUiThread();
+    mEngineCreated = false;
   }
 
   @Override
@@ -290,8 +297,6 @@ public class MapFragment extends BaseMwmFragment
 
   private native void nativeConnectDownloadButton();
   private static native void nativeDownloadCountry(MapStorage.Index index, int options);
-  static native void nativeOnLocationError(int errorCode);
-  static native void nativeLocationUpdated(long time, double lat, double lon, float accuracy, double altitude, float speed, float bearing);
   static native void nativeCompassUpdated(double magneticNorth, double trueNorth, boolean forceRedraw);
   static native void nativeScalePlus();
   static native void nativeScaleMinus();

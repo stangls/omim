@@ -316,7 +316,11 @@ public:
   ref_ptr<df::DrapeEngine> GetDrapeEngine();
   void DestroyDrapeEngine();
 
+  void ConnectToGpsTracker();
+  void DisconnectFromGpsTracker();
+
   void SetMapStyle(MapStyle mapStyle);
+  void MarkMapStyle(MapStyle mapStyle);
   MapStyle GetMapStyle() const;
 
   void SetupMeasurementSystem();
@@ -333,6 +337,8 @@ private:
   search::SearchParams m_lastSearch;
   uint8_t m_fixedSearchResults;
 
+  bool m_connectToGpsTrack; // need to connect to tracker when Drape is being constructed
+
   void FillSearchResultsMarks(search::Results const & results);
 
   void OnDownloadMapCallback(storage::TIndex const & countryIndex);
@@ -341,6 +347,9 @@ private:
 
   void OnUpdateCountryIndex(storage::TIndex const & currentIndex, m2::PointF const & pt);
   void UpdateCountryInfo(storage::TIndex const & countryIndex, bool isCurrentCountry);
+
+  void OnUpdateGpsTrackPointsCallback(vector<pair<size_t, location::GpsTrackInfo>> && toAdd,
+                                      pair<size_t, size_t> const & toRemove);
 
 public:
   using TSearchRequest = search::QuerySaver::TSearchRequest;
@@ -490,7 +499,7 @@ public:
   //@}
 
 public:
-  using TRouteBuildingCallback = function<void(routing::IRouter::ResultCode, 
+  using TRouteBuildingCallback = function<void(routing::IRouter::ResultCode,
                                                vector<storage::TIndex> const &,
                                                vector<storage::TIndex> const &)>;
   using TRouteProgressCallback = function<void(float)>;

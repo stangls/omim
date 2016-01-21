@@ -27,8 +27,9 @@ static NSString * const kStatisticsEvent = @"Routing Disclaimer Alert";
                         L(@"dialog_routing_disclaimer_priority"),
                         L(@"dialog_routing_disclaimer_precision"),
                         L(@"dialog_routing_disclaimer_recommendations"),
-                        L(@"dialog_routing_disclaimer_beware"),
-                        L(@"dialog_routing_disclaimer_borders")];
+                        L(@"dialog_routing_disclaimer_borders"),
+                        L(@"dialog_routing_disclaimer_beware")];
+
   alert.textView.attributedText = [[NSAttributedString alloc] initWithString:message
                                                       attributes:@{NSFontAttributeName : UIFont.regular14,
                                                         NSForegroundColorAttributeName : UIColor.blackSecondaryText}];
@@ -66,7 +67,7 @@ static NSString * const kStatisticsEvent = @"Routing Disclaimer Alert";
 - (CGFloat)bounded:(CGFloat)f withHeight:(CGFloat)h
 {
   CGFloat const currentHeight = [self.subviews.firstObject height];
-  CGFloat const maximumHeight = h - 2. * kMinimumOffset;
+  CGFloat const maximumHeight = h - (isIOSVersionLessThan(8) ? 4. : 2.) * kMinimumOffset;
   CGFloat const availableHeight = maximumHeight - currentHeight;
   return MIN(f, availableHeight + self.textViewHeight.constant);
 }

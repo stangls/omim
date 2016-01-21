@@ -311,6 +311,14 @@
 	<string name="prefs_group_route">Navigasi</string>
 	<string name="pref_zoom_title">Tombol perbesaran</string>
 	<string name="pref_zoom_summary">Tampilkan pada layar</string>
+	<!-- Settings «Map» category: «Night style» title -->
+	<string name="pref_map_style_title">Mode Malam</string>
+	<!-- «Map style» entry value -->
+	<string name="pref_map_style_default">Tidak Aktif</string>
+	<!-- «Map style» entry value -->
+	<string name="pref_map_style_night">Aktif</string>
+	<!-- «Map style» entry value -->
+	<string name="pref_map_style_auto">Otomatis</string>
 	<!-- Settings «Map» category: «Perspective view» title -->
 	<string name="pref_map_3d_title">Pandangan perspektif</string>
 	<!-- Settings «Map» category: «3D buildings» title -->
@@ -326,6 +334,17 @@
 	<!-- Title for "Other" section in TTS settings. -->
 	<string name="pref_tts_other_section_title">Lainnya</string>
 	<string name="pref_tts_how_to_set_up_voice">Cara mengatur suara</string>
+	<!-- Settings «Map» category: «Record track» title -->
+	<string name="pref_track_record_title">Jalur terkini</string>
+	<string name="duration_disabled">Nonaktif</string>
+	<string name="duration_1_hour">1 jam</string>
+	<string name="duration_2_hours">2 jam</string>
+	<string name="duration_6_hours">6 jam</string>
+	<string name="duration_12_hours">12 jam</string>
+	<string name="duration_1_day">1 hari</string>
+	<string name="recent_track_help_text">Harap perhatikan: mengaktifkan fungsi ini menyebabkan pemakaian baterai meningkat.</string>
+	<string name="pref_track_ios_caption">Jalur terakhir menunjukkan jalur yang sudah Anda lalui.</string>
+	<string name="pref_track_ios_subcaption">Silakan pilih jangka waktu penyimpanan jalur.</string>
 	<string name="placepage_distance">Jarak</string>
 	<string name="placepage_coordinates">Koordinat</string>
 	<string name="placepage_unsorted">Tidak diurutkan</string>
@@ -806,12 +825,7 @@
 	<string name="p2p_to_here">Ke</string>
 	<string name="p2p_only_from_current">Navigasi tersedia hanya dari lokasi Anda saat ini.</string>
 	<string name="p2p_reroute_from_current">Apakah Anda ingin kami merencanakan sebuah rute dari lokasi Anda saat ini?</string>
-	<string name="whats_new_3d_title">Peta favorit Anda dari perspektif yang baru</string>
-	<string name="whats_new_3d_subtitle">Kami telah menambahkan tampilan perspektif ke mode navigasi.</string>
-	<string name="whats_new_3d_buildings_title">Dimensi yang baru di MAPS.ME</string>
-	<string name="whats_new_3d_buildings_subtitle">Dengan bangunan 3D, peta kami telah menjadi lebih indah dan informatif.</string>
-	<string name="whats_new_3d_update_maps">Untuk memaksimalkan pemanfaatan fitur ini, harap perbarui data peta Anda.</string>
-	<string name="whats_new_3d_on">Aktifkan pandangan perspektif</string>
-	<string name="whats_new_3d_buildings_on">Aktifkan Bangunan 3D</string>
 	<string name="whats_new_next_button">Berikut</string>
+	<string name="whats_new_night_caption">Navigasi mode malam</string>
+	<string name="whats_new_night_body">Untuk memfasilitasi penggunaan MAPS.ME saat berkendara dalam gelap, kami telah menambahkan mode malam. Mode ini diaktifkan secara otomatis setelah matahari terbenam.</string>
 </resources>

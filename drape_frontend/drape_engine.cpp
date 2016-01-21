@@ -62,12 +62,13 @@ DrapeEngine::DrapeEngine(Params && params)
                                     bind(&DrapeEngine::TapEvent, this, _1, _2, _3, _4),
                                     bind(&DrapeEngine::UserPositionChanged, this, _1),
                                     bind(&DrapeEngine::MyPositionModeChanged, this, _1),
-                                    mode, make_ref(m_requestedTiles));
+                                    mode, make_ref(m_requestedTiles), params.m_allow3dBuildings);
 
   m_frontend = make_unique_dp<FrontendRenderer>(frParams);
 
   BackendRenderer::Params brParams(frParams.m_commutator, frParams.m_oglContextFactory,
-                                   frParams.m_texMng, params.m_model, make_ref(m_requestedTiles));
+                                   frParams.m_texMng, params.m_model, make_ref(m_requestedTiles),
+                                   params.m_allow3dBuildings);
   m_backend = make_unique_dp<BackendRenderer>(brParams);
 
   m_widgetsInfo = move(params.m_info);
@@ -388,7 +389,8 @@ bool DrapeEngine::GetMyPosition(m2::PointD & myPosition)
   return hasPosition;
 }
 
-void DrapeEngine::AddRoute(m2::PolylineD const & routePolyline, vector<double> const & turns, dp::Color const & color)
+void DrapeEngine::AddRoute(m2::PolylineD const & routePolyline, vector<double> const & turns,
+                           df::ColorConstant color)
 {
   m_threadCommutator->PostMessage(ThreadsCommutator::ResourceUploadThread,
                                   make_unique_dp<AddRouteMessage>(routePolyline, turns, color),
@@ -445,6 +447,20 @@ void DrapeEngine::EnablePerspective(double rotationAngle, double angleFOV)
 {
   m_threadCommutator->PostMessage(ThreadsCommutator::RenderThread,
                                   make_unique_dp<EnablePerspectiveMessage>(rotationAngle, angleFOV),
+                                  MessagePriority::Normal);
+}
+
+void DrapeEngine::UpdateGpsTrackPoints(vector<df::GpsTrackPoint> && toAdd, vector<uint32_t> && toRemove)
+{
+  m_threadCommutator->PostMessage(ThreadsCommutator::RenderThread,
+                                  make_unique_dp<UpdateGpsTrackPointsMessage>(move(toAdd), move(toRemove)),
+                                  MessagePriority::Normal);
+}
+
+void DrapeEngine::ClearGpsTrackPoints()
+{
+  m_threadCommutator->PostMessage(ThreadsCommutator::RenderThread,
+                                  make_unique_dp<ClearGpsTrackPointsMessage>(),
                                   MessagePriority::Normal);
 }
 

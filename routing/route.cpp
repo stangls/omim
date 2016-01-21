@@ -77,6 +77,11 @@ void Route::AppendTimes(vector<double>::iterator beg, vector<double>::iterator e
     }
 }
 
+void Route::AddAbsentCountry(string const & name)
+{
+  if (!name.empty()) m_absentCountries.insert(name);
+}
+
 double Route::GetTotalDistanceMeters() const
 {
   return m_poly.GetTotalDistanceM();

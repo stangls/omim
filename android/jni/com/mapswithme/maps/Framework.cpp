@@ -32,6 +32,7 @@
 
 #include "base/math.hpp"
 #include "base/logging.hpp"
+#include "base/sunrise_sunset.hpp"
 
 android::Framework * g_framework = 0;
 
@@ -180,6 +181,11 @@ void Framework::AttachSurface(JNIEnv * env, jobject jSurface)
 void Framework::SetMapStyle(MapStyle mapStyle)
 {
   m_work.SetMapStyle(mapStyle);
+}
+
+void Framework::MarkMapStyle(MapStyle mapStyle)
+{
+  m_work.MarkMapStyle(mapStyle);
 }
 
 MapStyle Framework::GetMapStyle() const
@@ -1273,16 +1279,19 @@ extern "C"
   }
 
   JNIEXPORT void JNICALL
-  Java_com_mapswithme_maps_Framework_setMapStyle(JNIEnv * env, jclass thiz, jint mapStyle)
+  Java_com_mapswithme_maps_Framework_nativeSetMapStyle(JNIEnv * env, jclass thiz, jint mapStyle)
   {
     MapStyle const val = static_cast<MapStyle>(mapStyle);
-    g_framework->SetMapStyle(val);
+    if (val != g_framework->GetMapStyle())
+      g_framework->SetMapStyle(val);
   }
 
-  JNIEXPORT jint JNICALL
-  Java_com_mapswithme_maps_Framework_getMapStyle(JNIEnv * env, jclass thiz)
+  JNIEXPORT void JNICALL
+  Java_com_mapswithme_maps_Framework_nativeMarkMapStyle(JNIEnv * env, jclass thiz, jint mapStyle)
   {
-    return static_cast<jint>(g_framework->GetMapStyle());
+    MapStyle const val = static_cast<MapStyle>(mapStyle);
+    if (val != g_framework->GetMapStyle())
+      g_framework->MarkMapStyle(val);
   }
 
   JNIEXPORT void JNICALL
@@ -1331,6 +1340,13 @@ extern "C"
   Java_com_mapswithme_maps_Framework_nativeDeregisterMaps(JNIEnv * env, jclass thiz)
   {
     frm()->DeregisterAllMaps();
+  }
+
+  JNIEXPORT jboolean JNICALL
+  Java_com_mapswithme_maps_Framework_nativeIsDayTime(JNIEnv * env, jclass thiz, jlong utcTimeSeconds, jdouble lat, jdouble lon)
+  {
+    DayTimeType const dt = GetDayTime(static_cast<time_t>(utcTimeSeconds), lat, lon);
+    return (dt == DayTimeType::Day || dt == DayTimeType::PolarDay);
   }
 
   JNIEXPORT void JNICALL

@@ -263,7 +263,7 @@
 	<!-- Subject for emailed bookmark -->
 	<string name="bookmark_share_email_subject">Hey, tjek min knappenål på MAPS.ME kortet ud!</string>
 	<!-- Share one specific bookmark using EMail, %1$@ is bookmark's name, %2$@ is ge0:// link and %3$@ http://ge0.me -->
-	<string name="bookmark_share_email">Hey,\n\nI har lagt en knappenål: %1$s på MAPS.ME, offline kort over hele Verden. Tryk pådettelink: %2$sellerdette%3$sforatseknappenåletpåkortet.\n\nTak.</string>
+	<string name="bookmark_share_email">Hey,\n\nI har lagt en knappenål: %1$s på MAPS.ME, offline kort over hele Verden. Tryk pådettelink: %2$s ellerdette %3$s foratseknappenåletpåkortet.\n\nTak.</string>
 	<!-- Subject for emailed position -->
 	<string name="my_position_share_email_subject">Hey, tjek min nuværende lokation ud på MAPS.ME kortet!</string>
 	<!-- Share my position using EMail, %1$@ is ge0:// and %2$@ is http://ge0.me link WITHOUT NAME -->
@@ -313,6 +313,14 @@
 	<string name="prefs_group_route">Navigation</string>
 	<string name="pref_zoom_title">Zoom knapper</string>
 	<string name="pref_zoom_summary">Vis på skærmen</string>
+	<!-- Settings «Map» category: «Night style» title -->
+	<string name="pref_map_style_title">Nattilstand</string>
+	<!-- «Map style» entry value -->
+	<string name="pref_map_style_default">Fra</string>
+	<!-- «Map style» entry value -->
+	<string name="pref_map_style_night">Til</string>
+	<!-- «Map style» entry value -->
+	<string name="pref_map_style_auto">Auto</string>
 	<!-- Settings «Map» category: «Perspective view» title -->
 	<string name="pref_map_3d_title">Perspektivvisning</string>
 	<!-- Settings «Map» category: «3D buildings» title -->
@@ -328,6 +336,17 @@
 	<!-- Title for "Other" section in TTS settings. -->
 	<string name="pref_tts_other_section_title">Andet</string>
 	<string name="pref_tts_how_to_set_up_voice">Sådan indstiller du tale</string>
+	<!-- Settings «Map» category: «Record track» title -->
+	<string name="pref_track_record_title">Seneste sti</string>
+	<string name="duration_disabled">Fra</string>
+	<string name="duration_1_hour">1 time</string>
+	<string name="duration_2_hours">2 timer</string>
+	<string name="duration_6_hours">6 timer</string>
+	<string name="duration_12_hours">12 timer</string>
+	<string name="duration_1_day">1 dag</string>
+	<string name="recent_track_help_text">Bemærk: aktivering af denne funktion medfører øget batteriforbrug.</string>
+	<string name="pref_track_ios_caption">Seneste spor viser din rejste vej.</string>
+	<string name="pref_track_ios_subcaption">Vælg tidsinterval for at gemme sporet.</string>
 	<string name="placepage_distance">Afstand</string>
 	<string name="placepage_coordinates">Koordinater</string>
 	<string name="placepage_unsorted">Usorteret</string>
@@ -807,12 +826,7 @@
 	<string name="p2p_to_here">Til</string>
 	<string name="p2p_only_from_current">Navigation er kun tilgængelig fra din nuværende lokalitet.</string>
 	<string name="p2p_reroute_from_current">Ønsker du, at vi planlægger en rute fra din nuværende placering?</string>
-	<string name="whats_new_3d_title">Dine foretrukne kort fra et nyt perspektiv</string>
-	<string name="whats_new_3d_subtitle">Vi har tilføjet perspektivvisning til navigeringstilstanden.</string>
-	<string name="whats_new_3d_buildings_title">En ny dimension i MAPS.ME</string>
-	<string name="whats_new_3d_buildings_subtitle">Med 3D-bygninger er vores kort blevet smukkere og mere informative.</string>
-	<string name="whats_new_3d_update_maps">For at udnytte denne funktion fuldt ud skal du opdatere dine kortdata.</string>
-	<string name="whats_new_3d_on">Aktivér perspektivvisning</string>
-	<string name="whats_new_3d_buildings_on">Aktivér 3D-bygninger</string>
 	<string name="whats_new_next_button">Næste</string>
+	<string name="whats_new_night_caption">Navigering i nattilstand</string>
+	<string name="whats_new_night_body">For at hjælpe med brugen af MAPS.ME ved kørsel om natten har vi tilføjet nattilstand. Den slår automatisk til efter solnedgang.</string>
 </resources>

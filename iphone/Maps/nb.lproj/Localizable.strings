@@ -495,20 +495,17 @@
 
 "pref_zoom_summary" = "Vis på skjermen";
 
-/* Settings «Map» category: «Map style» title */
-"pref_map_style_title" = "Map style";
-
-/* Settings «Map» category: «Map style» summary */
-"pref_map_style_summary" = "Change map presentation";
+/* Settings «Map» category: «Night style» title */
+"pref_map_style_title" = "Nattmodus";
 
 /* «Map style» entry value */
-"pref_map_style_classic_light" = "Classic light";
+"pref_map_style_default" = "Av";
 
 /* «Map style» entry value */
-"pref_map_style_classic_dark" = "Classic dark";
+"pref_map_style_night" = "På";
 
 /* «Map style» entry value */
-"pref_map_style_modern_light" = "Modern light";
+"pref_map_style_auto" = "Auto";
 
 /* Settings «Map» category: «Perspective view» title */
 "pref_map_3d_title" = "Perspektivvisning";
@@ -532,6 +529,27 @@
 "pref_tts_other_section_title" = "Andre";
 
 "pref_tts_how_to_set_up_voice" = "Slik installerer du stemme";
+
+/* Settings «Map» category: «Record track» title */
+"pref_track_record_title" = "Siste rute";
+
+"duration_disabled" = "Av";
+
+"duration_1_hour" = "1 time";
+
+"duration_2_hours" = "2 timer";
+
+"duration_6_hours" = "6 timer";
+
+"duration_12_hours" = "12 timer";
+
+"duration_1_day" = "1 dag";
+
+"recent_track_help_text" = "Merk følgende: Aktivering av denne funksjonen forårsaker økt batteribruk.";
+
+"pref_track_ios_caption" = "Nylig rute viser ruten du har fulgt.";
+
+"pref_track_ios_subcaption" = "Velg en tidsperiode for rutelagring.";
 
 "placepage_distance" = "Avstand";
 
@@ -1327,18 +1345,8 @@
 
 "p2p_reroute_from_current" = "Vil du vi skal planlegge en rute fra din nåværende posisjon?";
 
-"whats_new_3d_title" = "Favorittkartene dine fra et nytt perspektiv";
-
-"whats_new_3d_subtitle" = "Vi har lagt til perspektivvisning i navigeringsmodusen.";
-
-"whats_new_3d_buildings_title" = "En ny dimensjon av MAPS.ME";
-
-"whats_new_3d_buildings_subtitle" = "Med bygninger i 3D, blir kartene våre enda mer informative og vakre.";
-
-"whats_new_3d_update_maps" = "Oppdater kartdata for å kunne bruke denne funksjonen fullt ut.";
-
-"whats_new_3d_on" = "Aktiver perspektivvisning";
-
-"whats_new_3d_buildings_on" = "Aktiver 3D-bygninger";
-
 "whats_new_next_button" = "Neste";
+
+"whats_new_night_caption" = "Nattmodus-navigering";
+
+"whats_new_night_body" = "For å tilrettelegge bruk av MAPS.ME under mørkekjøring har vi lagt til funksjonen nattmodus. Funksjonen skrues automatisk på etter solnedgang.";

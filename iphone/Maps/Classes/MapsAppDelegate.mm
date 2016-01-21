@@ -22,9 +22,11 @@
 
 #include <sys/xattr.h>
 
+#include "map/gps_tracker.hpp"
+#include "base/sunrise_sunset.hpp"
 #include "storage/storage_defines.hpp"
 
-#import "platform/http_thread_apple.h"
+#include "platform/http_thread_apple.h"
 #include "platform/settings.hpp"
 #include "platform/platform_ios.hpp"
 #include "platform/preferred_languages.hpp"
@@ -41,6 +43,7 @@ static NSString * const kUDFirstVersionKey = @"FirstVersion";
 static NSString * const kUDLastRateRequestDate = @"LastRateRequestDate";
 extern NSString * const kUDAlreadySharedKey = @"UserAlreadyShared";
 static NSString * const kUDLastShareRequstDate = @"LastShareRequestDate";
+extern NSString * const kUDAutoNightMode = @"AutoNightMode";
 static NSString * const kNewWatchUserEventKey = @"NewWatchUser";
 static NSString * const kOldWatchUserEventKey = @"OldWatchUser";
 static NSString * const kUDWatchEventAlreadyTracked = @"WatchEventAlreadyTracked";
@@ -88,6 +91,7 @@ void InitLocalizedStrings()
 @property (nonatomic) NSInteger standbyCounter;
 
 @property (weak, nonatomic) NSTimer * checkAdServerForbiddenTimer;
+@property (weak, nonatomic) NSTimer * mapStyleSwitchTimer;
 
 @end
 
@@ -219,10 +223,125 @@ void InitLocalizedStrings()
   m_fileURL = nil;
 }
 
+- (void)incrementSessionsCountAndCheckForAlert
+{
+  [self incrementSessionCount];
+  [self showAlertIfRequired];
+}
+
+- (void)commonInit
+{
+  [HttpThread setDownloadIndicatorProtocol:self];
+  [self trackWatchUser];
+  InitLocalizedStrings();
+  [Preferences setup];
+  [self subscribeToStorage];
+  [MapsAppDelegate customizeAppearance];
+
+  self.standbyCounter = 0;
+  NSTimeInterval const minimumBackgroundFetchIntervalInSeconds = 6 * 60 * 60;
+  [[UIApplication sharedApplication] setMinimumBackgroundFetchInterval:minimumBackgroundFetchIntervalInSeconds];
+  [self startAdServerForbiddenCheckTimer];
+  Framework & f = GetFramework();
+  [UIApplication sharedApplication].applicationIconBadgeNumber = f.GetCountryTree().GetActiveMapLayout().GetOutOfDateCount();
+  f.InvalidateMyPosition();
+}
+
+- (void)determineMapStyle
+{
+  GetFramework().SetMapStyle(MapStyleClear);
+  [UIColor setNightMode:NO];
+  if ([MapsAppDelegate isAutoNightMode])
+    [self startMapStyleChecker];
+}
+
++ (void)setAutoNightModeOn:(BOOL)on
+{
+  NSUserDefaults * ud = [NSUserDefaults standardUserDefaults];
+  [ud setBool:on forKey:kUDAutoNightMode];
+  [ud synchronize];
+  if (!on)
+    [MapsAppDelegate.theApp stopMapStyleChecker];
+}
+
++ (BOOL)isAutoNightMode
+{
+  return [[NSUserDefaults standardUserDefaults] boolForKey:kUDAutoNightMode];
+}
+
+- (void)startMapStyleChecker
+{
+  NSAssert([MapsAppDelegate isAutoNightMode], @"Invalid auto switcher's state");
+  self.mapStyleSwitchTimer = [NSTimer scheduledTimerWithTimeInterval:(30 * 60) target:[MapsAppDelegate class]
+                                                            selector:@selector(changeMapStyleIfNedeed) userInfo:nil
+                                                             repeats:YES];
+}
+
+- (void)stopMapStyleChecker
+{
+  [self.mapStyleSwitchTimer invalidate];
+}
+
++ (void)resetToDefaultMapStyle
+{
+  MapsAppDelegate * app = MapsAppDelegate.theApp;
+  auto & f = GetFramework();
+  auto style = f.GetMapStyle();
+  if (style == MapStyleClear || style == MapStyleLight)
+    return;
+  f.SetMapStyle(MapStyleClear);
+  [UIColor setNightMode:NO];
+  [static_cast<ViewController *>(app.mapViewController.navigationController.topViewController) refresh];
+  [app stopMapStyleChecker];
+}
+
++ (void)changeMapStyleIfNedeed
+{
+  NSAssert([MapsAppDelegate isAutoNightMode], @"Invalid auto switcher's state");
+  auto & f = GetFramework();
+  MapsAppDelegate * app = MapsAppDelegate.theApp;
+  CLLocation * l = app.m_locationManager.lastLocation;
+  if (!l || !f.IsRoutingActive())
+    return;
+  dispatch_async(dispatch_get_main_queue(), [&f, l, self, app]
+  {
+    auto const dayTime = GetDayTime(static_cast<time_t>(NSDate.date.timeIntervalSince1970), l.coordinate.latitude, l.coordinate.longitude);
+    ViewController * vc = static_cast<ViewController *>(app.mapViewController.navigationController.topViewController);
+    auto style = f.GetMapStyle();
+    switch (dayTime)
+    {
+    case DayTimeType::Day:
+    case DayTimeType::PolarDay:
+      if (style != MapStyleClear && style != MapStyleLight)
+      {
+        f.SetMapStyle(MapStyleClear);
+        [UIColor setNightMode:NO];
+        [vc refresh];
+      }
+      break;
+    case DayTimeType::Night:
+    case DayTimeType::PolarNight:
+      if (style != MapStyleDark)
+      {
+        f.SetMapStyle(MapStyleDark);
+        [UIColor setNightMode:YES];
+        [vc refresh];
+      }
+      break;
+    }
+  });
+}
+
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
 {
   // Initialize all 3party engines.
   BOOL returnValue = [self initStatistics:application didFinishLaunchingWithOptions:launchOptions];
+  if (launchOptions[UIApplicationLaunchOptionsLocationKey])
+  {
+    _m_locationManager = [[LocationManager alloc] init];
+    [self.m_locationManager onDaemonMode];
+    return returnValue;
+  }
 
   NSURL * urlUsedToLaunchMaps = launchOptions[UIApplicationLaunchOptionsURLKey];
   if (urlUsedToLaunchMaps != nil)
@@ -235,42 +354,22 @@ void InitLocalizedStrings()
   [self trackWatchUser];
 
   InitLocalizedStrings();
-  
+  [self determineMapStyle];
+
   [self.mapViewController onEnterForeground];
-
-  [Preferences setup:self.mapViewController];
   _m_locationManager = [[LocationManager alloc] init];
-
-  [self subscribeToStorage];
-
-  [self customizeAppearance];
-  
-  self.standbyCounter = 0;
-
-  NSTimeInterval const minimumBackgroundFetchIntervalInSeconds = 6 * 60 * 60;
-  [application setMinimumBackgroundFetchInterval:minimumBackgroundFetchIntervalInSeconds];
-
+  [self.m_locationManager onForeground];
   [self registerNotifications:application launchOptions:launchOptions];
+  [self commonInit];
 
   LocalNotificationManager * notificationManager = [LocalNotificationManager sharedManager];
   if (launchOptions[UIApplicationLaunchOptionsLocalNotificationKey])
     [notificationManager processNotification:launchOptions[UIApplicationLaunchOptionsLocalNotificationKey] onLaunch:YES];
-  
+
   if ([Alohalytics isFirstSession])
-  {
     [self firstLaunchSetup];
-  }
   else
-  {
-    [self incrementSessionCount];
-    [self showAlertIfRequired];
-  }
-
-  [self startAdServerForbiddenCheckTimer];
-
-  Framework & f = GetFramework();
-  application.applicationIconBadgeNumber = f.GetCountryTree().GetActiveMapLayout().GetOutOfDateCount();
-  f.InvalidateMyPosition();
+    [self incrementSessionsCountAndCheckForAlert];
 
   [self enableTTSForTheFirstTime];
   [MWMTextToSpeech activateAudioSession];
@@ -297,11 +396,13 @@ void InitLocalizedStrings()
 
 - (void)applicationWillTerminate:(UIApplication *)application
 {
+  [self.m_locationManager beforeTerminate];
   [self.mapViewController onTerminate];
 }
 
 - (void)applicationDidEnterBackground:(UIApplication *)application
 {
+  [self.m_locationManager onBackground];
   [self.mapViewController onEnterBackground];
   if (m_activeDownloadsCounter)
   {
@@ -320,17 +421,30 @@ void InitLocalizedStrings()
 
 - (void)applicationWillEnterForeground:(UIApplication *)application
 {
-  [self.m_locationManager orientationChanged];
+  if (self.m_locationManager.isDaemonMode)
+  {
+    [self.m_locationManager onForeground];
+    [self.mapViewController initialize];
+    [(EAGLView *)self.mapViewController.view initialize];
+    [self.mapViewController.view setNeedsLayout];
+    [self.mapViewController.view layoutIfNeeded];
+    [self commonInit];
+    [self incrementSessionsCountAndCheckForAlert];
+  }
+  else
+  {
+    [self.m_locationManager onForeground];
+  }
   [self.mapViewController onEnterForeground];
   [MWMTextToSpeech activateAudioSession];
 }
 
 - (void)applicationDidBecomeActive:(UIApplication *)application
 {
+  if (application.applicationState == UIApplicationStateBackground)
+    return;
   [self handleURLs];
-
   [self restoreRouteState];
-
   [[Statistics instance] applicationDidBecomeActive];
 }
 
@@ -394,10 +508,10 @@ void InitLocalizedStrings()
   [self.mapViewController setMapStyle: mapStyle];
 }
 
-- (void)customizeAppearance
++ (void)customizeAppearance
 {
   NSDictionary * attributes = @{
-    NSForegroundColorAttributeName : [UIColor whiteColor],
+    NSForegroundColorAttributeName : [UIColor whitePrimaryText],
     NSFontAttributeName : [UIFont regular18]
   };
 
@@ -409,12 +523,12 @@ void InitLocalizedStrings()
 
   UIBarButtonItem * barBtn = [UIBarButtonItem appearance];
   [barBtn setTitleTextAttributes:attributes forState:UIControlStateNormal];
-  barBtn.tintColor = [UIColor whiteColor];
+  barBtn.tintColor = [UIColor whitePrimaryText];
 
   UIPageControl * pageControl = [UIPageControl appearance];
-  pageControl.pageIndicatorTintColor = [UIColor lightGrayColor];
-  pageControl.currentPageIndicatorTintColor = [UIColor blackColor];
-  pageControl.backgroundColor = [UIColor whiteColor];
+  pageControl.pageIndicatorTintColor = [UIColor blackSecondaryText];
+  pageControl.currentPageIndicatorTintColor = [UIColor blackPrimaryText];
+  pageControl.backgroundColor = [UIColor white];
 }
 
 - (void)application:(UIApplication *)application didReceiveLocalNotification:(UILocalNotification *)notification
@@ -579,6 +693,7 @@ void InitLocalizedStrings()
     return;
   [ud setBool:YES forKey:kUserDafaultsNeedToEnableTTS];
   [ud synchronize];
+
 }
 
 #pragma mark - Standby
@@ -618,7 +733,7 @@ void InitLocalizedStrings()
   NSUInteger const kMaximumSessionCountForShowingShareAlert = 50;
   if (sessionCount > kMaximumSessionCountForShowingShareAlert)
     return;
-  
+
   NSDate *lastLaunchDate = [standartDefaults objectForKey:kUDLastLaunchDateKey];
   NSUInteger daysFromLastLaunch = [self.class daysBetweenNowAndDate:lastLaunchDate];
   if (daysFromLastLaunch > 0)
@@ -642,7 +757,7 @@ void InitLocalizedStrings()
 {
   if (!Platform::IsConnected())
     return;
-  
+
   UIViewController * topViewController = [(UINavigationController*)self.window.rootViewController visibleViewController];
   MWMAlertViewController * alert = [[MWMAlertViewController alloc] initWithViewController:topViewController];
   if (isRate)
@@ -665,19 +780,19 @@ void InitLocalizedStrings()
   NSUserDefaults const * const standartDefaults = [NSUserDefaults standardUserDefaults];
   if ([standartDefaults boolForKey:kUDAlreadySharedKey])
     return NO;
-  
+
   NSUInteger const sessionCount = [standartDefaults integerForKey:kUDSessionsCountKey];
   if (sessionCount > kMaximumSessionCountForShowingShareAlert)
     return NO;
-  
+
   NSDate * const lastShareRequestDate = [standartDefaults objectForKey:kUDLastShareRequstDate];
   NSUInteger const daysFromLastShareRequest = [MapsAppDelegate daysBetweenNowAndDate:lastShareRequestDate];
   if (lastShareRequestDate != nil && daysFromLastShareRequest == 0)
     return NO;
-  
+
   if (sessionCount == 30 || sessionCount == kMaximumSessionCountForShowingShareAlert)
     return YES;
-  
+
   if (self.userIsNew)
   {
     if (sessionCount == 12)
@@ -704,17 +819,17 @@ void InitLocalizedStrings()
   NSUserDefaults const * const standartDefaults = [NSUserDefaults standardUserDefaults];
   if ([standartDefaults boolForKey:kUDAlreadyRatedKey])
     return NO;
-  
+
   NSUInteger const sessionCount = [standartDefaults integerForKey:kUDSessionsCountKey];
   if (sessionCount > kMaximumSessionCountForShowingAlert)
     return NO;
-  
+
   NSDate * const lastRateRequestDate = [standartDefaults objectForKey:kUDLastRateRequestDate];
   NSUInteger const daysFromLastRateRequest = [MapsAppDelegate daysBetweenNowAndDate:lastRateRequestDate];
   // Do not show more than one alert per day.
   if (lastRateRequestDate != nil && daysFromLastRateRequest == 0)
     return NO;
-  
+
   if (self.userIsNew)
   {
     // It's new user.
@@ -736,7 +851,7 @@ void InitLocalizedStrings()
   NSString *firstVersion = [[NSUserDefaults standardUserDefaults] stringForKey:kUDFirstVersionKey];
   if (!firstVersion.length || firstVersionIsLessThanSecond(firstVersion, currentVersion))
     return NO;
-  
+
   return YES;
 }
 
@@ -744,7 +859,7 @@ void InitLocalizedStrings()
 {
   if (!fromDate)
     return 0;
-  
+
   NSDate *now = NSDate.date;
   NSCalendar *calendar = [NSCalendar currentCalendar];
   [calendar rangeOfUnit:NSCalendarUnitDay startDate:&fromDate interval:NULL forDate:fromDate];

@@ -311,6 +311,14 @@
 	<string name="prefs_group_route">Navigasjon</string>
 	<string name="pref_zoom_title">Zoom-knapper</string>
 	<string name="pref_zoom_summary">Vis på skjermen</string>
+	<!-- Settings «Map» category: «Night style» title -->
+	<string name="pref_map_style_title">Nattmodus</string>
+	<!-- «Map style» entry value -->
+	<string name="pref_map_style_default">Av</string>
+	<!-- «Map style» entry value -->
+	<string name="pref_map_style_night">På</string>
+	<!-- «Map style» entry value -->
+	<string name="pref_map_style_auto">Auto</string>
 	<!-- Settings «Map» category: «Perspective view» title -->
 	<string name="pref_map_3d_title">Perspektivvisning</string>
 	<!-- Settings «Map» category: «3D buildings» title -->
@@ -326,6 +334,17 @@
 	<!-- Title for "Other" section in TTS settings. -->
 	<string name="pref_tts_other_section_title">Andre</string>
 	<string name="pref_tts_how_to_set_up_voice">Slik installerer du stemme</string>
+	<!-- Settings «Map» category: «Record track» title -->
+	<string name="pref_track_record_title">Siste rute</string>
+	<string name="duration_disabled">Av</string>
+	<string name="duration_1_hour">1 time</string>
+	<string name="duration_2_hours">2 timer</string>
+	<string name="duration_6_hours">6 timer</string>
+	<string name="duration_12_hours">12 timer</string>
+	<string name="duration_1_day">1 dag</string>
+	<string name="recent_track_help_text">Merk følgende: Aktivering av denne funksjonen forårsaker økt batteribruk.</string>
+	<string name="pref_track_ios_caption">Nylig rute viser ruten du har fulgt.</string>
+	<string name="pref_track_ios_subcaption">Velg en tidsperiode for rutelagring.</string>
 	<string name="placepage_distance">Avstand</string>
 	<string name="placepage_coordinates">Koordinater</string>
 	<string name="placepage_unsorted">Usortert</string>
@@ -807,12 +826,7 @@
 	<string name="p2p_to_here">Til</string>
 	<string name="p2p_only_from_current">Navigering er kun tilgjengelig fra din nåværende beliggenhet.</string>
 	<string name="p2p_reroute_from_current">Vil du vi skal planlegge en rute fra din nåværende posisjon?</string>
-	<string name="whats_new_3d_title">Favorittkartene dine fra et nytt perspektiv</string>
-	<string name="whats_new_3d_subtitle">Vi har lagt til perspektivvisning i navigeringsmodusen.</string>
-	<string name="whats_new_3d_buildings_title">En ny dimensjon av MAPS.ME</string>
-	<string name="whats_new_3d_buildings_subtitle">Med bygninger i 3D, blir kartene våre enda mer informative og vakre.</string>
-	<string name="whats_new_3d_update_maps">Oppdater kartdata for å kunne bruke denne funksjonen fullt ut.</string>
-	<string name="whats_new_3d_on">Aktiver perspektivvisning</string>
-	<string name="whats_new_3d_buildings_on">Aktiver 3D-bygninger</string>
 	<string name="whats_new_next_button">Neste</string>
+	<string name="whats_new_night_caption">Nattmodus-navigering</string>
+	<string name="whats_new_night_body">For å tilrettelegge bruk av MAPS.ME under mørkekjøring har vi lagt til funksjonen nattmodus. Funksjonen skrues automatisk på etter solnedgang.</string>
 </resources>

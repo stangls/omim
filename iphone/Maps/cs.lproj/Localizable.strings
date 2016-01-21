@@ -495,20 +495,17 @@
 
 "pref_zoom_summary" = "Zobrazit na obrazovce";
 
-/* Settings «Map» category: «Map style» title */
-"pref_map_style_title" = "Map style";
-
-/* Settings «Map» category: «Map style» summary */
-"pref_map_style_summary" = "Change map presentation";
+/* Settings «Map» category: «Night style» title */
+"pref_map_style_title" = "Noční režim";
 
 /* «Map style» entry value */
-"pref_map_style_classic_light" = "Classic light";
+"pref_map_style_default" = "Vypnuto";
 
 /* «Map style» entry value */
-"pref_map_style_classic_dark" = "Classic dark";
+"pref_map_style_night" = "Zapnuto";
 
 /* «Map style» entry value */
-"pref_map_style_modern_light" = "Modern light";
+"pref_map_style_auto" = "Automaticky";
 
 /* Settings «Map» category: «Perspective view» title */
 "pref_map_3d_title" = "Zobrazení perspektivy";
@@ -532,6 +529,27 @@
 "pref_tts_other_section_title" = "Ostatní";
 
 "pref_tts_how_to_set_up_voice" = "Jak nastavit hlas";
+
+/* Settings «Map» category: «Record track» title */
+"pref_track_record_title" = "Nedávné cesty";
+
+"duration_disabled" = "Vypnuto";
+
+"duration_1_hour" = "1 hodina";
+
+"duration_2_hours" = "2 hodiny";
+
+"duration_6_hours" = "6 hodin";
+
+"duration_12_hours" = "12 hodin";
+
+"duration_1_day" = "1 den";
+
+"recent_track_help_text" = "Vezměte prosím na vědomí: aktivace této funkce způsobí zvýšení využití baterie.";
+
+"pref_track_ios_caption" = "Nedávná trasa zobrazuje cestu, po které jste cestovali.";
+
+"pref_track_ios_subcaption" = "Vyberte prosím časový rozsah uložené trasy.";
 
 "placepage_distance" = "Vzdálenost";
 
@@ -1327,18 +1345,8 @@
 
 "p2p_reroute_from_current" = "Chcete, abychom naplánovali trasu z vašeho současného umístění?";
 
-"whats_new_3d_title" = "Vaše oblíbené mapy z nové perspektivy";
-
-"whats_new_3d_subtitle" = "Přidali jsme do navigačního režimu zobrazení perspektivy.";
-
-"whats_new_3d_buildings_title" = "Nová dimenze v MAPS.ME";
-
-"whats_new_3d_buildings_subtitle" = "Díky 3D budovám jsou naše mapy pěknější a více informativní.";
-
-"whats_new_3d_update_maps" = "Využijte naplno tuto funkci, aktualizujte prosím svá mapová data.";
-
-"whats_new_3d_on" = "Povolit zobrazení perspektivy";
-
-"whats_new_3d_buildings_on" = "Povolit 3D Budovy";
-
 "whats_new_next_button" = "Další";
+
+"whats_new_night_caption" = "Navigace v nočním režimu";
+
+"whats_new_night_body" = "Přidali jsme noční režim, abyste mohli MAPS.ME používat při řízení v noci. Zapíná se automaticky po západu slunce.";

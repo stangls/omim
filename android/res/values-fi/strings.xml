@@ -311,6 +311,14 @@
 	<string name="prefs_group_route">Navigaatio</string>
 	<string name="pref_zoom_title">Zoomauspainikkeet</string>
 	<string name="pref_zoom_summary">Näytä ruudulla</string>
+	<!-- Settings «Map» category: «Night style» title -->
+	<string name="pref_map_style_title">Yötila</string>
+	<!-- «Map style» entry value -->
+	<string name="pref_map_style_default">Pois päältä</string>
+	<!-- «Map style» entry value -->
+	<string name="pref_map_style_night">Päällä</string>
+	<!-- «Map style» entry value -->
+	<string name="pref_map_style_auto">Automaattinen</string>
 	<!-- Settings «Map» category: «Perspective view» title -->
 	<string name="pref_map_3d_title">Perspektiivinäkymä</string>
 	<!-- Settings «Map» category: «3D buildings» title -->
@@ -326,6 +334,17 @@
 	<!-- Title for "Other" section in TTS settings. -->
 	<string name="pref_tts_other_section_title">Egyéb</string>
 	<string name="pref_tts_how_to_set_up_voice">Így állítsd be a hangot</string>
+	<!-- Settings «Map» category: «Record track» title -->
+	<string name="pref_track_record_title">Viimeisin reitti</string>
+	<string name="duration_disabled">Pois päältä</string>
+	<string name="duration_1_hour">1 tunti</string>
+	<string name="duration_2_hours">2 tuntia</string>
+	<string name="duration_6_hours">6 tuntia</string>
+	<string name="duration_12_hours">12 tuntia</string>
+	<string name="duration_1_day">1 päivä</string>
+	<string name="recent_track_help_text">Huomaa: kun aktivoit tämän toiminnon, akun kulutus kasvaa.</string>
+	<string name="pref_track_ios_caption">Viimeisin reitti näyttää kulkemasi matkan.</string>
+	<string name="pref_track_ios_subcaption">Valitse reitin tallennuksen aikaväli.</string>
 	<string name="placepage_distance">Etäisyys</string>
 	<string name="placepage_coordinates">Koordinaatit</string>
 	<string name="placepage_unsorted">Järjestelemätön</string>
@@ -807,12 +826,7 @@
 	<string name="p2p_to_here">Määränpää</string>
 	<string name="p2p_only_from_current">Navigointi onnistuu vain nykyisestä sijainnistasi.</string>
 	<string name="p2p_reroute_from_current">Haluatko valita vaihtoehtoisen reitin?</string>
-	<string name="whats_new_3d_title">Suosikkikarttasi uudella perspektiivillä</string>
-	<string name="whats_new_3d_subtitle">Olemme lisänneet perspektiivinäkymän navigointitilaan.</string>
-	<string name="whats_new_3d_buildings_title">Uusi ulottuvuus MAPS.ME-sovellukseen</string>
-	<string name="whats_new_3d_buildings_subtitle">Karttamme ovat entistä informatiivisempia ja kauniimpia 3D-rakennusten avulla.</string>
-	<string name="whats_new_3d_update_maps">Päivitä karttatietosi voidaksesi käyttää tätä toimintoa täysimääräisesti.</string>
-	<string name="whats_new_3d_on">Aktivoi perspektiivinäkymä</string>
-	<string name="whats_new_3d_buildings_on">Aktivoi 3D-rakennukset</string>
 	<string name="whats_new_next_button">Seuraava</string>
+	<string name="whats_new_night_caption">Yötilanavigaatio</string>
+	<string name="whats_new_night_body">Olemme lisänneet yötilan helpottaaksemme MAPS.ME:n käyttöä pimeällä ajettaessa. Se menee automaattisesti päälle auringonlaskun jälkeen.</string>
 </resources>

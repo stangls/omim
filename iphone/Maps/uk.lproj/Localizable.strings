@@ -495,20 +495,17 @@
 
 "pref_zoom_summary" = "Відображення на екрані";
 
-/* Settings «Map» category: «Map style» title */
-"pref_map_style_title" = "Map style";
-
-/* Settings «Map» category: «Map style» summary */
-"pref_map_style_summary" = "Change map presentation";
+/* Settings «Map» category: «Night style» title */
+"pref_map_style_title" = "Нічний режим";
 
 /* «Map style» entry value */
-"pref_map_style_classic_light" = "Classic light";
+"pref_map_style_default" = "Вимкнуто";
 
 /* «Map style» entry value */
-"pref_map_style_classic_dark" = "Classic dark";
+"pref_map_style_night" = "Увімкнуто";
 
 /* «Map style» entry value */
-"pref_map_style_modern_light" = "Modern light";
+"pref_map_style_auto" = "Автоматично";
 
 /* Settings «Map» category: «Perspective view» title */
 "pref_map_3d_title" = "Перспективний вид";
@@ -532,6 +529,27 @@
 "pref_tts_other_section_title" = "Інша";
 
 "pref_tts_how_to_set_up_voice" = "Як налаштувати голосовий контроль";
+
+/* Settings «Map» category: «Record track» title */
+"pref_track_record_title" = "Недавній маршрут";
+
+"duration_disabled" = "Вимкнуто";
+
+"duration_1_hour" = "1 година";
+
+"duration_2_hours" = "2 години";
+
+"duration_6_hours" = "6 годин";
+
+"duration_12_hours" = "12 годин";
+
+"duration_1_day" = "1 день";
+
+"recent_track_help_text" = "Примітка: активація цієї функції спричиняє підвищене використання заряду акумулятора.";
+
+"pref_track_ios_caption" = "Останній маршрут показує пройдену відстань.";
+
+"pref_track_ios_subcaption" = "Будь ласка, виберіть проміжок часу для збереження маршруту.";
 
 "placepage_distance" = "Відстань";
 
@@ -1327,18 +1345,8 @@
 
 "p2p_reroute_from_current" = "Хочете спланувати маршрут із поточного місцезнаходження?";
 
-"whats_new_3d_title" = "Улюблені карти під новим кутом";
-
-"whats_new_3d_subtitle" = "Ми додали переспективний огляд у режим навігації.";
-
-"whats_new_3d_buildings_title" = "Новий вимір в MAPS.ME";
-
-"whats_new_3d_buildings_subtitle" = "З 3D будівлями наші карти стали більш інформативними і гарними.";
-
-"whats_new_3d_update_maps" = "Щоб повною мірою скористатися цією функцією, будь ласка, оновіть дані своєї карти.";
-
-"whats_new_3d_on" = "Включити перспективний вид";
-
-"whats_new_3d_buildings_on" = "Включити 3D-будівлі";
-
 "whats_new_next_button" = "Далі";
+
+"whats_new_night_caption" = "Нічний режим навігації";
+
+"whats_new_night_body" = "Для зручності використання MAPS.ME під час водіння автомобіля в темну пору доби ми додали нічний режим. Він запускається автоматично після заходу сонця.";

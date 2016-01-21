@@ -74,16 +74,20 @@ extern NSString * const kAlohalyticsTapEventKey;
   return self;
 }
 
-- (void)onEnterForeground
-{
-  [self.menuController onEnterForeground];
-}
-
 #pragma mark - Layout
 
 - (void)refreshLayout
 {
   [self.menuController refreshLayout];
+}
+
+- (void)refresh
+{
+  [self.zoomButtons refresh];
+  [self.navigationManager refresh];
+  [self.searchManager refresh];
+  [self.menuController refresh];
+  [self.placePageManager refresh];
 }
 
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
@@ -293,7 +297,7 @@ extern NSString * const kAlohalyticsTapEventKey;
   [self buildRoute];
 
   auto & f = GetFramework();
-  f.SetRouteStartPoint(from.Point(), true /* isValid */);
+  f.SetRouteStartPoint(from.Point(), !from.IsMyPosition());
   f.SetRouteFinishPoint(to.Point(), to != MWMRoutePoint::MWMRoutePointZero());
 }
 
@@ -307,7 +311,7 @@ extern NSString * const kAlohalyticsTapEventKey;
     self.searchManager.state = MWMSearchManagerStateHidden;
   [self buildRoute];
   
-  GetFramework().SetRouteStartPoint(from.Point(), from != MWMRoutePoint::MWMRoutePointZero());
+  GetFramework().SetRouteStartPoint(from.Point(), from != MWMRoutePoint::MWMRoutePointZero() && !from.IsMyPosition());
 }
 
 - (void)buildRouteTo:(MWMRoutePoint const &)to
@@ -459,8 +463,14 @@ extern NSString * const kAlohalyticsTapEventKey;
   GetFramework().FollowRoute();
   self.disableStandbyOnRouteFollowing = YES;
   [self.menuController setStreetName:@""];
-  MapsAppDelegate.theApp.routingPlaneMode = MWMRoutingPlaneModeNone;
+  MapsAppDelegate * app = MapsAppDelegate.theApp;
+  app.routingPlaneMode = MWMRoutingPlaneModeNone;
   [RouteState save];
+  if ([MapsAppDelegate isAutoNightMode])
+  {
+    [MapsAppDelegate changeMapStyleIfNedeed];
+    [app startMapStyleChecker];
+  }
   return YES;
 }
 
@@ -469,13 +479,14 @@ extern NSString * const kAlohalyticsTapEventKey;
   [[Statistics instance] logEvent:kStatEventName(kStatPointToPoint, kStatClose)];
   [[MapsAppDelegate theApp].m_locationManager stop:self.navigationManager];
   self.navigationManager.state = MWMNavigationDashboardStateHidden;
-  GetFramework().CloseRouting();
   self.disableStandbyOnRouteFollowing = NO;
   [MapsAppDelegate theApp].routingPlaneMode = MWMRoutingPlaneModeNone;
   [RouteState remove];
   [self.menuController setInactive];
   [self resetRoutingPoint];
   [self navigationDashBoardDidUpdate];
+  [MapsAppDelegate resetToDefaultMapStyle];
+  GetFramework().CloseRouting();
 }
 
 - (void)swapPointsAndRebuildRouteIfPossible
@@ -486,7 +497,7 @@ extern NSString * const kAlohalyticsTapEventKey;
 
   auto & f = GetFramework();
   f.SetRouteStartPoint(self.routeSource.Point(),
-                       self.routeSource != MWMRoutePoint::MWMRoutePointZero());
+                       self.routeSource != MWMRoutePoint::MWMRoutePointZero() && !self.routeSource.IsMyPosition());
 
   f.SetRouteFinishPoint(self.routeDestination.Point(),
                         self.routeDestination != MWMRoutePoint::MWMRoutePointZero());

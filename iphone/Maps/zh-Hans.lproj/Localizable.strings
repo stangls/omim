@@ -495,20 +495,17 @@
 
 "pref_zoom_summary" = "在屏幕上显示";
 
-/* Settings «Map» category: «Map style» title */
-"pref_map_style_title" = "Map style";
-
-/* Settings «Map» category: «Map style» summary */
-"pref_map_style_summary" = "Change map presentation";
+/* Settings «Map» category: «Night style» title */
+"pref_map_style_title" = "夜间模式";
 
 /* «Map style» entry value */
-"pref_map_style_classic_light" = "Classic light";
+"pref_map_style_default" = "关闭";
 
 /* «Map style» entry value */
-"pref_map_style_classic_dark" = "Classic dark";
+"pref_map_style_night" = "开启";
 
 /* «Map style» entry value */
-"pref_map_style_modern_light" = "Modern light";
+"pref_map_style_auto" = "自动";
 
 /* Settings «Map» category: «Perspective view» title */
 "pref_map_3d_title" = "透视图";
@@ -532,6 +529,27 @@
 "pref_tts_other_section_title" = "其他";
 
 "pref_tts_how_to_set_up_voice" = "如何设置语音";
+
+/* Settings «Map» category: «Record track» title */
+"pref_track_record_title" = "最近的路径";
+
+"duration_disabled" = "关闭";
+
+"duration_1_hour" = "1小时";
+
+"duration_2_hours" = "2小时";
+
+"duration_6_hours" = "6小时";
+
+"duration_12_hours" = "12小时";
+
+"duration_1_day" = "1天";
+
+"recent_track_help_text" = "请注意：激活此功能会导致用电量增加。";
+
+"pref_track_ios_caption" = "近期轨迹显示您的行进道路。";
+
+"pref_track_ios_subcaption" = "请选择保存轨迹的时间范围。";
 
 "placepage_distance" = "距离";
 
@@ -1327,18 +1345,8 @@
 
 "p2p_reroute_from_current" = "你是否想要规划当前位置的路线？";
 
-"whats_new_3d_title" = "从全新的角度看您最爱的地图";
-
-"whats_new_3d_subtitle" = "我们添加了视角视图到导航模式。";
-
-"whats_new_3d_buildings_title" = "MAPS.ME中的全新维度";
-
-"whats_new_3d_buildings_subtitle" = "有了3D大楼，我们的地图信息量更丰富也更美了。";
-
-"whats_new_3d_update_maps" = "要充分利用此功能，请更新您的地图数据。";
-
-"whats_new_3d_on" = "启用透视图";
-
-"whats_new_3d_buildings_on" = "启用3D建筑";
-
 "whats_new_next_button" = "下一页";
+
+"whats_new_night_caption" = "夜间模式导航";
+
+"whats_new_night_body" = "为了便于天黑行驶时使用MAPS.ME，我们增加了夜间模式。该模式在日落之后会自动开启。";

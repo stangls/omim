@@ -495,20 +495,17 @@
 
 "pref_zoom_summary" = "Mostrar no ecrã";
 
-/* Settings «Map» category: «Map style» title */
-"pref_map_style_title" = "Map style";
-
-/* Settings «Map» category: «Map style» summary */
-"pref_map_style_summary" = "Change map presentation";
+/* Settings «Map» category: «Night style» title */
+"pref_map_style_title" = "Modo Noturno";
 
 /* «Map style» entry value */
-"pref_map_style_classic_light" = "Classic light";
+"pref_map_style_default" = "Desligado";
 
 /* «Map style» entry value */
-"pref_map_style_classic_dark" = "Classic dark";
+"pref_map_style_night" = "Ligado";
 
 /* «Map style» entry value */
-"pref_map_style_modern_light" = "Modern light";
+"pref_map_style_auto" = "Automático";
 
 /* Settings «Map» category: «Perspective view» title */
 "pref_map_3d_title" = "Visão em Perspectiva";
@@ -532,6 +529,27 @@
 "pref_tts_other_section_title" = "Outro";
 
 "pref_tts_how_to_set_up_voice" = "Como configurar a voz";
+
+/* Settings «Map» category: «Record track» title */
+"pref_track_record_title" = "Recent track";
+
+"duration_disabled" = "Desligado";
+
+"duration_1_hour" = "1 hora";
+
+"duration_2_hours" = "2 horas";
+
+"duration_6_hours" = "6 horas";
+
+"duration_12_hours" = "12 horas";
+
+"duration_1_day" = "1 dia";
+
+"recent_track_help_text" = "Atenção: a ativação desta função aumenta o uso da bateria.";
+
+"pref_track_ios_caption" = "O percurso recente mostra o seu caminho viajado.";
+
+"pref_track_ios_subcaption" = "Por favor, selecione o intervalo de tempo da gravação do percurso.";
 
 "placepage_distance" = "Distância";
 
@@ -1327,18 +1345,8 @@
 
 "p2p_reroute_from_current" = "Deseja planejar uma rota a partir da sua localização atual?";
 
-"whats_new_3d_title" = "Seus mapas favoritos a partir de uma nova perspectiva";
-
-"whats_new_3d_subtitle" = "Nós adicionamos a visão em perspectiva ao modo de navegação.";
-
-"whats_new_3d_buildings_title" = "Uma nova dimensão no MAPS.ME";
-
-"whats_new_3d_buildings_subtitle" = "Com os prédios em 3D, nossos mapas ficaram mais informativos e bonitos.";
-
-"whats_new_3d_update_maps" = "Para aproveitar por completo este recurso, atualize os dados do seu mapa.";
-
-"whats_new_3d_on" = "Habilitar visão em perspectiva";
-
-"whats_new_3d_buildings_on" = "Habilitar Prédios em 3D";
-
 "whats_new_next_button" = "Próxima";
+
+"whats_new_night_caption" = "Navegação em modo noturno";
+
+"whats_new_night_body" = "Para facilitar o uso do MAPS.ME ao dirigir no escuro, adicionamos o modo noturno. Ele é acionado automaticamente após o pôr do sol.";

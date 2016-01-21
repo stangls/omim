@@ -27,6 +27,8 @@ import com.mapswithme.maps.R;
 import com.mapswithme.maps.bookmarks.data.MapObject;
 import com.mapswithme.maps.location.LocationHelper;
 import com.mapswithme.util.Config;
+import com.mapswithme.util.ThemeSwitcher;
+import com.mapswithme.util.ThemeUtils;
 import com.mapswithme.util.Utils;
 import com.mapswithme.util.concurrency.UiThread;
 import com.mapswithme.util.statistics.AlohaHelper;
@@ -381,6 +383,8 @@ public class RoutingController
 
     mContainer.showRoutePlan(false, null);
     mContainer.showNavigation(true);
+
+    ThemeSwitcher.restart();
   }
 
   private void suggestRebuildRoute()
@@ -437,8 +441,8 @@ public class RoutingController
       return;
 
     mStartButton.setEnabled(mState == State.PREPARE && mBuildState == BuildState.BUILT);
-    mStartButton.setTextColor(MwmApplication.get().getResources().getColor(mStartButton.isEnabled() ? R.color.routing_start_text
-            : R.color.routing_start_text_disabled));
+    mStartButton.setTextColor(ThemeUtils.getColor(mContainer.getActivity(), mStartButton.isEnabled() ? R.attr.routingStartButtonTextColor
+                                                                                                     : R.attr.routingStartButtonTextColorDisabled));
   }
 
   public void setStartButton(@Nullable Button button)
@@ -460,6 +464,7 @@ public class RoutingController
     setBuildState(BuildState.NONE);
     setState(State.NONE);
 
+    ThemeSwitcher.restart();
     Framework.nativeCloseRouting();
   }
 
@@ -550,7 +555,8 @@ public class RoutingController
     if (mStartPoint == null)
       Framework.nativeSetRouteStartPoint(0.0, 0.0, false);
     else
-      Framework.nativeSetRouteStartPoint(mStartPoint.getLat(), mStartPoint.getLon(), true);
+      Framework.nativeSetRouteStartPoint(mStartPoint.getLat(), mStartPoint.getLon(),
+                                         !(mStartPoint instanceof MapObject.MyPosition));
 
     if (mEndPoint == null)
       Framework.nativeSetRouteEndPoint(0.0, 0.0, false);

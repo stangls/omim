@@ -1,6 +1,7 @@
 #import "MWMSearchManager.h"
 #import "MWMSearchTextField.h"
 #import "MWMSearchTabbedViewProtocol.h"
+#import "ViewController.h"
 
 @protocol MWMSearchTableViewProtocol <MWMSearchTabbedViewProtocol>
 
@@ -13,7 +14,7 @@
 
 @end
 
-@interface MWMSearchTableViewController : UIViewController
+@interface MWMSearchTableViewController : ViewController
 
 @property (nonatomic) BOOL searchOnMap;
 
@@ -21,5 +22,6 @@
 - (nonnull instancetype)initWithDelegate:(nonnull id<MWMSearchTableViewProtocol>)delegate;
 
 - (void)searchText:(nonnull NSString *)text forInputLocale:(nullable NSString *)locale;
+- (search::SearchParams const &)searchParams;
 
 @end
