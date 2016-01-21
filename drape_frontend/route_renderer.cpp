@@ -193,8 +193,14 @@ void RouteRenderer::RenderRoute(ScreenBase const & screen, ref_ptr<dp::GpuProgra
     dp::ApplyUniforms(uniforms, prg);
 
     // render routes
-    for (drape_ptr<dp::RenderBucket> const & bucket : m_routeData->m_route.m_buckets)
+    //for (drape_ptr<dp::RenderBucket> const & bucket : m_routeData->m_route.m_buckets)
+    auto it = m_routeData->m_route.m_buckets.end();
+    auto begin = m_routeData->m_route.m_buckets.begin();
+    while (it!=begin) {
+      it--;
+      drape_ptr<dp::RenderBucket> const & bucket = *it;
       bucket->Render(screen);
+    }
   }
   // render arrows
   if (zoom >= kArrowAppearingZoomLevel && !m_routeData->m_arrows.empty())
