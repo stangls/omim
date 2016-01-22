@@ -185,6 +185,7 @@ private:
 
   RoutingSettings m_routingSettings;
 
+  // Statistics parameters
   // Passed distance on route including reroutes
   double m_passedDistanceOnRouteMeters;
 
@@ -194,6 +195,9 @@ private:
   size_t m_tourStartIndexInRoute;
   // Index of "point nav" in m_tour
   size_t m_tourStartIndex;
+
+  // Rerouting count
+  int m_routingRebuildCount;
 
 };
 }  // namespace routing

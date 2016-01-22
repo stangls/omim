@@ -164,6 +164,10 @@ void Framework::OnLocationUpdate(GpsInfo const & info)
 #else
   GpsInfo rInfo(info);
 #endif
+
+#ifdef OMIM_OS_ANDROID
+  m_lastGPSInfo.reset(new GpsInfo(rInfo));
+#endif
   location::RouteMatchingInfo routeMatchingInfo;
   CheckLocationForRouting(rInfo);
 
@@ -182,6 +186,9 @@ void Framework::OnCompassUpdate(CompassInfo const & info)
   CompassInfo const & rInfo = info;
 #endif
 
+#ifdef OMIM_OS_ANDROID
+  m_lastCompassInfo.reset(new CompassInfo(rInfo));
+#endif
   CallDrapeFunction(bind(&df::DrapeEngine::SetCompassInfo, _1, rInfo));
 }
 
@@ -660,7 +667,18 @@ void Framework::PrepareToShutdown()
 
 void Framework::SaveState()
 {
-  Settings::Set("ScreenClipRect", m_currentModelView.GlobalRect());
+  m2::AnyRectD rect;
+  if (m_currentModelView.isPerspective())
+  {
+    ScreenBase modelView = m_currentModelView;
+    modelView.ResetPerspective();
+    rect = modelView.GlobalRect();
+  }
+  else
+  {
+    rect = m_currentModelView.GlobalRect();
+  }
+  Settings::Set("ScreenClipRect", rect);
 }
 
 void Framework::LoadState()
@@ -1320,6 +1338,15 @@ void Framework::CreateDrapeEngine(ref_ptr<dp::OGLContextFactory> contextFactory,
     if (mark != nullptr)
       ActivateUserMark(mark, true);
   }
+
+#ifdef OMIM_OS_ANDROID
+  // In case of the engine reinitialization recover compass and location data
+  // for correct my position state.
+  if (m_lastCompassInfo != nullptr)
+    OnCompassUpdate(*m_lastCompassInfo.release());
+  if (m_lastGPSInfo != nullptr)
+    OnLocationUpdate(*m_lastGPSInfo.release());
+#endif
 
   Allow3dMode(allow3d, allow3dBuildings);
 
