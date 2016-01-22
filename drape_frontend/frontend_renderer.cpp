@@ -366,6 +366,14 @@ void FrontendRenderer::AcceptMessage(ref_ptr<Message> message)
       }
 
       m_myPositionController->ActivateRouting();
+#ifdef OMIM_OS_ANDROID
+      if (m_pendingFollowRoute != nullptr)
+      {
+        FollowRoute(m_pendingFollowRoute->m_preferredZoomLevel, m_pendingFollowRoute->m_preferredZoomLevelIn3d,
+                    m_pendingFollowRoute->m_rotationAngle, m_pendingFollowRoute->m_angleFOV);
+        m_pendingFollowRoute.reset();
+      }
+#endif
       break;
     }
 
@@ -394,15 +402,21 @@ void FrontendRenderer::AcceptMessage(ref_ptr<Message> message)
   case Message::FollowRoute:
     {
       ref_ptr<FollowRouteMessage> const msg = message;
-      m_myPositionController->NextMode(!m_enablePerspectiveInNavigation ? msg->GetPreferredZoomLevel()
-                                                               : msg->GetPreferredZoomLevelIn3d());
-      m_overlayTree->SetFollowingMode(true);
-      if (m_enablePerspectiveInNavigation)
+#ifdef OMIM_OS_ANDROID
+      // After night style switching on android and drape engine reinitialization FrontendRenderer
+      // receive FollowRoute message before FlushRoute message, so we need to postpone its processing.
+      if (!m_myPositionController->IsInRouting())
       {
-        bool immediatelyStart = !m_myPositionController->IsRotationActive();
-        AddUserEvent(EnablePerspectiveEvent(msg->GetRotationAngle(), msg->GetAngleFOV(),
-                                            true /* animated */, immediatelyStart));
+        m_pendingFollowRoute.reset(
+              new FollowRouteData(msg->GetPreferredZoomLevel(), msg->GetPreferredZoomLevelIn3d(),
+                                  msg->GetRotationAngle(), msg->GetAngleFOV()));
+        break;
       }
+#else
+      ASSERT(m_myPositionController->IsInRouting(), ());
+#endif
+      FollowRoute(msg->GetPreferredZoomLevel(), msg->GetPreferredZoomLevelIn3d(),
+                  msg->GetRotationAngle(), msg->GetAngleFOV());
       break;
     }
 
@@ -420,11 +434,6 @@ void FrontendRenderer::AcceptMessage(ref_ptr<Message> message)
       // Clear tile tree.
       m_tileTree->Invalidate();
 
-      // Get new tiles.
-      TTilesCollection tiles;
-      ScreenBase screen = m_userEventStream.GetCurrentScreen();
-      ResolveTileKeys(screen.ClipRect(), tiles);
-
       // Clear all graphics.
       m_renderGroups.clear();
       m_deferredRenderGroups.clear();
@@ -433,7 +442,7 @@ void FrontendRenderer::AcceptMessage(ref_ptr<Message> message)
       {
         BaseBlockingMessage::Blocker blocker;
         m_commutator->PostMessage(ThreadsCommutator::ResourceUploadThread,
-                                  make_unique_dp<InvalidateReadManagerRectMessage>(blocker, tiles),
+                                  make_unique_dp<InvalidateReadManagerRectMessage>(blocker),
                                   MessagePriority::High);
         blocker.Wait();
       }
@@ -477,6 +486,10 @@ void FrontendRenderer::AcceptMessage(ref_ptr<Message> message)
       }
 
       // Request new tiles.
+      TTilesCollection tiles;
+      ScreenBase screen = m_userEventStream.GetCurrentScreen();
+      ResolveTileKeys(screen.ClipRect(), tiles);
+
       m_requestedTiles->Set(screen, m_isIsometry || screen.isPerspective(), move(tiles));
       m_commutator->PostMessage(ThreadsCommutator::ResourceUploadThread,
                                 make_unique_dp<UpdateReadManagerMessage>(),
@@ -572,6 +585,22 @@ void FrontendRenderer::AcceptMessage(ref_ptr<Message> message)
 unique_ptr<threads::IRoutine> FrontendRenderer::CreateRoutine()
 {
   return make_unique<Routine>(*this);
+}
+
+void FrontendRenderer::FollowRoute(int preferredZoomLevel, int preferredZoomLevelIn3d,
+                                   double rotationAngle, double angleFOV)
+{
+  if (m_enablePerspectiveInNavigation)
+  {
+    bool immediatelyStart = !m_myPositionController->IsRotationActive();
+    AddUserEvent(EnablePerspectiveEvent(rotationAngle, angleFOV,
+                                        true /* animated */, immediatelyStart));
+  }
+
+  m_myPositionController->NextMode(!m_enablePerspectiveInNavigation ? preferredZoomLevel
+                                                                    : preferredZoomLevelIn3d);
+  m_overlayTree->SetFollowingMode(true);
+
 }
 
 void FrontendRenderer::InvalidateRect(m2::RectD const & gRect)

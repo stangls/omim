@@ -11,7 +11,7 @@
   return NSStringFromClass(self);
 }
 
-- (void)performAfterDelay:(NSTimeInterval)delayInSec block:(void (^)(void))block
+- (void)performAfterDelay:(NSTimeInterval)delayInSec block:(TMWMVoidBlock)block
 {
   dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(delayInSec * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
     block();
@@ -122,7 +122,7 @@
   self.frame = CGRectMake(self.frame.origin.x, self.frame.origin.y, size.width, size.height);
 }
 
-+ (void)animateWithDuration:(NSTimeInterval)duration delay:(NSTimeInterval)delay damping:(double)dampingRatio initialVelocity:(double)springVelocity options:(UIViewAnimationOptions)options animations:(void (^)(void))animations completion:(void (^)(BOOL))completion
++ (void)animateWithDuration:(NSTimeInterval)duration delay:(NSTimeInterval)delay damping:(double)dampingRatio initialVelocity:(double)springVelocity options:(UIViewAnimationOptions)options animations:(TMWMVoidBlock)animations completion:(void (^)(BOOL))completion
 {
   [UIView animateWithDuration:duration delay:delay usingSpringWithDamping:dampingRatio initialSpringVelocity:springVelocity options:options animations:animations completion:completion];
 }
@@ -179,6 +179,7 @@
     if ([v respondsToSelector:@selector(refresh)])
       [v refresh];
   }
+  [self setNeedsDisplay];
 }
 
 @end
@@ -187,7 +188,29 @@
 
 - (void)refresh
 {
-  [super refresh];
+  if (isIOSVersionLessThan(8))
+  {
+    UIColor * opposite = self.backgroundColor.opposite;
+    if (opposite)
+      self.backgroundColor = opposite;
+
+      for (UIView * v in self.subviews)
+      {
+        // There is workaroung for iOS7 only.
+        if ([v isKindOfClass:NSClassFromString(@"UITableViewCellScrollView")])
+        {
+          for (UIView * subview in v.subviews)
+           [subview refresh];
+        }
+
+        if ([v respondsToSelector:@selector(refresh)])
+          [v refresh];
+      }
+  }
+  else
+  {
+    [super refresh];
+  }
   [self.selectedBackgroundView refresh];
 }
 
@@ -297,7 +320,18 @@
 
 - (void)refresh
 {
+  [super refresh];
   [self changeColoringToOpposite];
+}
+
+@end
+
+@implementation UIImageView (IOS7Workaround)
+
+- (void)makeImageAlwaysTemplate
+{
+  if (isIOSVersionLessThan(8))
+    self.image = [self.image imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
 }
 
 @end

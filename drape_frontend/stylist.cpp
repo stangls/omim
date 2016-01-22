@@ -184,12 +184,9 @@ void CaptionDescription::Init(FeatureType const & f,
   m_roadNumber = f.GetRoadNumber();
   m_houseNumber = f.GetHouseNumber();
 
-  if (ftypes::IsBuildingChecker::Instance()(f))
-  {
-    // Mark houses without names/numbers so user can select them by single tap.
-    if (m_houseNumber.empty() && m_mainText.empty())
-      m_houseNumber = "·";
-  }
+  // Mark houses without names/numbers so user can select them by single tap.
+  if (m_houseNumber.empty() && m_mainText.empty() && ftypes::IsBuildingChecker::Instance()(f))
+    m_houseNumber = "·";
 
   SwapCaptions(zoomLevel);
   DiscardLongCaption(zoomLevel);
@@ -338,12 +335,14 @@ CaptionDescription & Stylist::GetCaptionDescriptionImpl()
 
 bool InitStylist(FeatureType const & f, int const zoomLevel, bool buildings3d, Stylist & s)
 {
-  if (!buildings3d && ftypes::IsBuildingPartChecker::Instance()(f) &&
-      !ftypes::IsBuildingChecker::Instance()(f))
+  feature::TypesHolder const types(f);
+
+  if (!buildings3d && ftypes::IsBuildingPartChecker::Instance()(types) &&
+      !ftypes::IsBuildingChecker::Instance()(types))
     return false;
 
   drule::KeysT keys;
-  pair<int, bool> geomType = feature::GetDrawRule(f, zoomLevel, keys);
+  pair<int, bool> geomType = feature::GetDrawRule(types, zoomLevel, keys);
 
   FilterRulesByRuntimeSelector(f, zoomLevel, keys);
 
