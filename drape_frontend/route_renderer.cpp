@@ -183,8 +183,12 @@ void RouteRenderer::RenderRoute(ScreenBase const & screen, ref_ptr<dp::GpuProgra
     glsl::vec4 const color = glsl::ToVec4(df::GetColorConstant(GetStyleReader().GetCurrentStyle(),
                                                                m_routeData->m_color));
     uniforms.SetFloatValue("u_color", color.r, color.g, color.b, alpha);
-    uniforms.SetFloatValue("u_color_light", color.g, color.b, color.r, alpha);
+    uniforms.SetFloatValue("u_color_tour", color.g, color.b, color.r, alpha);
     uniforms.SetFloatValue("u_routeParams", halfWidth, halfWidth * screen.GetScale(), m_distanceFromBegin, m_lastNonCrossingDistanceFromBegin);
+
+    LOG(my::LDEBUG,("tour start meters: ",m_routeData->m_tourStartMeters,"while position is",m_distanceFromBegin));
+    uniforms.SetFloatValue("u_tourParams", m_routeData->m_tourStartMeters);
+
 
     // set up shaders and apply uniforms
     ref_ptr<dp::GpuProgram> prg = mng->GetProgram(gpu::ROUTE_PROGRAM);

@@ -13,8 +13,8 @@ struct GeometryInterval{
         ASSERT_LESS(min,max,());
     }
     size_t min, max;
-    size_t internalFastForward=10;
-    size_t externalFastForward=2;
+    size_t internalFastForward=10; // ≤50m
+    size_t externalFastForward=5;  // ≤25m
 };
 using GeometryIntervals = vector<GeometryInterval>;
 

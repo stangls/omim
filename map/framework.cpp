@@ -2076,7 +2076,7 @@ void Framework::InsertRoute(Route const & route)
 
   df::ColorConstant const routeColor = (m_currentRouterType == RouterType::Pedestrian) ?
                                         df::RoutePedestrian : df::Route;
-  m_drapeEngine->AddRoute(route.GetPoly(), turns, routeColor);
+  m_drapeEngine->AddRoute(route.GetPoly(), turns, routeColor, route.GetTourStart());
 }
 
 void Framework::CheckLocationForRouting(GpsInfo const & info)

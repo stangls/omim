@@ -338,6 +338,7 @@ void RoutingSession::AssignRoute(Route & route, IRouter::ResultCode e)
   if (e != IRouter::Cancelled)
   {
     if (m_tour!=nullptr){
+        route.SetTourStart();
         auto route_previous_size = route.GetPoly().GetSize();
         {
             auto end = m_tour->GetEndIt();

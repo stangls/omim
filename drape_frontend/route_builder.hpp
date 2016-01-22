@@ -23,7 +23,7 @@ public:
                TFlushRouteSignFn const & flushRouteSignFn);
 
   void Build(m2::PolylineD const & routePolyline, vector<double> const & turns,
-             df::ColorConstant color, ref_ptr<dp::TextureManager> textures);
+             df::ColorConstant color, ref_ptr<dp::TextureManager> textures, double tourStartMeters);
 
   void BuildSign(m2::PointD const & pos, bool isStart, bool isValid,
                  ref_ptr<dp::TextureManager> textures);

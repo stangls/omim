@@ -12,6 +12,7 @@
 
 #include "base/logging.hpp"
 
+#include <limits>
 
 namespace location
 {
@@ -35,7 +36,8 @@ public:
   template <class TIter>
   Route(string const & router, TIter beg, TIter end)
     : m_router(router), m_routingSettings(GetCarRoutingSettings()), m_poly(beg, end),
-      m_nonFastForward()
+      m_nonFastForward(),
+      m_tourStart(std::numeric_limits<double>::infinity())
   {
     Update();
   }
@@ -142,6 +144,15 @@ public:
     Update();
   }
 
+  void SetTourStart()
+  {
+      m_tourStart = GetTotalDistanceMeters();
+      LOG(my::LDEBUG,("tour starts at ",m_tourStart,"meters"));
+  }
+  double GetTourStart() const {
+      return m_tourStart;
+  }
+
 private:
   /// Call this fucnction when geometry have changed.
   void Update();
@@ -166,6 +177,8 @@ private:
   mutable double m_currentTime;
 
   GeometryIntervals m_nonFastForward;
+
+  mutable double m_tourStart;
 };
 
 } // namespace routing

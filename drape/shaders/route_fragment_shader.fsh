@@ -5,7 +5,8 @@ uniform sampler2D u_colorTex;
 #endif
 
 uniform vec4 u_color;
-uniform vec4 u_color_light;
+uniform vec4 u_color_tour;
+uniform float u_tourParams;
 
 const float kAntialiasingThreshold = 0.92;
 
@@ -20,9 +21,14 @@ void main(void)
   // default color
   vec4 color = u_color;
 
+  // MX-addition: this allows a different color for the tour
+  if (v_length.x > u_tourParams){
+      color = u_color_tour;
+  }
+
   // MX-addition: this allows blending out the route/tour in case it crosses itself
   if (v_length.x > v_length.w){
-    color = u_color_light;
+    color.a*=0.5;
   }
 
   // before user-position: no rendering of route/tour
