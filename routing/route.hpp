@@ -144,10 +144,8 @@ public:
   void SetTourStart()
   {
       m_tourStart = m_poly.GetPolyline().GetLength();
-      LOG(my::LDEBUG,("tour starts at ",m_tourStart));
   }
   double GetTourStart() const {
-      LOG(my::LDEBUG,("tour starts at ",m_tourStart));
       return m_tourStart;
   }
 

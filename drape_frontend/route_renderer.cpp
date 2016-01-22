@@ -185,8 +185,6 @@ void RouteRenderer::RenderRoute(ScreenBase const & screen, ref_ptr<dp::GpuProgra
     uniforms.SetFloatValue("u_color", color.r, color.g, color.b, alpha);
     uniforms.SetFloatValue("u_color_tour", color.g, color.b, color.r, alpha);
     uniforms.SetFloatValue("u_routeParams", halfWidth, halfWidth * screen.GetScale(), m_distanceFromBegin, m_lastNonCrossingDistanceFromBegin);
-
-    LOG(my::LDEBUG,("tour start meters: ",m_routeData->m_tourStartFromBegin,"while position is",m_distanceFromBegin));
     uniforms.SetFloatValue("u_tourParams", m_routeData->m_tourStartFromBegin);
 
 

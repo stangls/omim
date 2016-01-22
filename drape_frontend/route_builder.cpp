@@ -26,7 +26,6 @@ void RouteBuilder::Build(m2::PolylineD const & routePolyline, vector<double> con
   routeData->m_color = color;
   routeData->m_sourcePolyline = routePolyline;
   routeData->m_sourceTurns = turns;
-  LOG(my::LDEBUG,("tour starts at ",tourStartDistance));
   routeData->m_tourStartFromBegin = tourStartDistance;
   RouteShape(params).Draw(textures, *routeData.get());
 
