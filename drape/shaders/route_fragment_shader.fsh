@@ -22,7 +22,7 @@ void main(void)
   vec4 color = u_color;
 
   // MX-addition: this allows a different color for the tour
-  if (v_length.x > u_tourParams){
+  if (v_length.x >= u_tourParams){
       color = u_color_tour;
   }
 

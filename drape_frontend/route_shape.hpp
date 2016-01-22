@@ -48,7 +48,7 @@ struct RouteData
   df::ColorConstant m_color;
   m2::RectF m_arrowTextureRect;
   double m_length;
-  double m_tourStartMeters;
+  double m_tourStartFromBegin;
   RouteRenderProperty m_route;
   vector<drape_ptr<ArrowRenderProperty>> m_arrows;
 };

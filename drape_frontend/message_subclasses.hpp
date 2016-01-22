@@ -515,11 +515,11 @@ private:
 class AddRouteMessage : public Message
 {
 public:
-  AddRouteMessage(m2::PolylineD const & routePolyline, vector<double> const & turns, df::ColorConstant color, double tourStartMeters)
+  AddRouteMessage(m2::PolylineD const & routePolyline, vector<double> const & turns, df::ColorConstant color, double GetTourStartDistance)
     : m_routePolyline(routePolyline)
     , m_color(color)
     , m_turns(turns)
-    , m_tourStartMeters(tourStartMeters)
+    , m_GetTourStartDistance(GetTourStartDistance)
   {}
 
   Type GetType() const override { return Message::AddRoute; }
@@ -527,13 +527,13 @@ public:
   m2::PolylineD const & GetRoutePolyline() { return m_routePolyline; }
   df::ColorConstant GetColor() const { return m_color; }
   vector<double> const & GetTurns() const { return m_turns; }
-  double const GetTourStartMeters() const { return m_tourStartMeters; }
+  double GetTourStartDistance() const { return m_GetTourStartDistance; }
 
 private:
   m2::PolylineD m_routePolyline;
   df::ColorConstant m_color;
   vector<double> m_turns;
-  double m_tourStartMeters;
+  double m_GetTourStartDistance;
 };
 
 class CacheRouteSignMessage : public Message

@@ -2,6 +2,8 @@
 
 #include "drape_frontend/route_shape.hpp"
 
+#include "base/logging.hpp"
+
 namespace df
 {
 
@@ -13,7 +15,7 @@ RouteBuilder::RouteBuilder(TFlushRouteFn const & flushRouteFn,
 
 void RouteBuilder::Build(m2::PolylineD const & routePolyline, vector<double> const & turns,
                          df::ColorConstant color, ref_ptr<dp::TextureManager> textures,
-                         double tourStartMeters)
+                         double tourStartDistance)
 {
   CommonViewParams params;
   params.m_minVisibleScale = 1;
@@ -24,7 +26,8 @@ void RouteBuilder::Build(m2::PolylineD const & routePolyline, vector<double> con
   routeData->m_color = color;
   routeData->m_sourcePolyline = routePolyline;
   routeData->m_sourceTurns = turns;
-  routeData->m_tourStartMeters = tourStartMeters;
+  LOG(my::LDEBUG,("tour starts at ",tourStartDistance));
+  routeData->m_tourStartFromBegin = tourStartDistance;
   RouteShape(params).Draw(textures, *routeData.get());
 
   // Flush route geometry.

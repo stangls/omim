@@ -335,10 +335,13 @@ void RoutingSession::GenerateTurnNotifications(vector<string> & turnNotification
 
 void RoutingSession::AssignRoute(Route & route, IRouter::ResultCode e)
 {
+  LOG(my::LDEBUG,("begin"));
   if (e != IRouter::Cancelled)
   {
     if (m_tour!=nullptr){
+        LOG(my::LDEBUG,("setting tour start"));
         route.SetTourStart();
+        LOG(my::LDEBUG,("adding tour stuff"));
         auto route_previous_size = route.GetPoly().GetSize();
         {
             auto end = m_tour->GetEndIt();

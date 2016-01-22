@@ -24,7 +24,8 @@ double constexpr kOnEndToleranceM = 10.0;
 
 Route::Route(string const & router, vector<m2::PointD> const & points, string const & name)
   : m_router(router), m_routingSettings(GetCarRoutingSettings()),
-    m_name(name), m_poly(points.begin(), points.end())
+    m_name(name), m_poly(points.begin(), points.end()),
+    m_nonFastForward(), m_tourStart(DBL_MAX)
 {
   Update();
 }
@@ -41,6 +42,7 @@ void Route::Swap(Route & rhs)
   swap(m_times, rhs.m_times);
   m_absentCountries.swap(rhs.m_absentCountries);
   m_nonFastForward.swap(rhs.m_nonFastForward);
+  swap(m_tourStart, rhs.m_tourStart);
 }
 
 void Route::AppendTurns(vector<turns::TurnItem>::iterator beg, vector<turns::TurnItem>::iterator end, uint32_t index_offset, uint32_t index_start)

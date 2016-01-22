@@ -12,8 +12,6 @@
 
 #include "base/logging.hpp"
 
-#include <limits>
-
 namespace location
 {
   class GpsInfo;
@@ -36,8 +34,7 @@ public:
   template <class TIter>
   Route(string const & router, TIter beg, TIter end)
     : m_router(router), m_routingSettings(GetCarRoutingSettings()), m_poly(beg, end),
-      m_nonFastForward(),
-      m_tourStart(std::numeric_limits<double>::infinity())
+      m_nonFastForward(), m_tourStart(DBL_MAX)
   {
     Update();
   }
@@ -146,10 +143,11 @@ public:
 
   void SetTourStart()
   {
-      m_tourStart = GetTotalDistanceMeters();
-      LOG(my::LDEBUG,("tour starts at ",m_tourStart,"meters"));
+      m_tourStart = m_poly.GetPolyline().GetLength();
+      LOG(my::LDEBUG,("tour starts at ",m_tourStart));
   }
   double GetTourStart() const {
+      LOG(my::LDEBUG,("tour starts at ",m_tourStart));
       return m_tourStart;
   }
 
@@ -178,7 +176,7 @@ private:
 
   GeometryIntervals m_nonFastForward;
 
-  mutable double m_tourStart;
+  double m_tourStart;
 };
 
 } // namespace routing
