@@ -5,6 +5,7 @@
 #endif
 
 #include <exception>
+#include <stdexcept>
 using std::exception;
 using std::logic_error;
 using std::runtime_error;
