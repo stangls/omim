@@ -67,6 +67,7 @@ MAC_RESOURCES="$RELEASE_PATH/MAPS.ME.Designer.app/Contents/Resources"
 cp -r "$RELEASE_PATH/style_tests.app" "$MAC_RESOURCES/style_tests.app"
 cp -r "$RELEASE_PATH/skin_generator.app" "$MAC_RESOURCES/skin_generator.app"
 cp -r "$OMIM_PATH/tools/kothic" "$MAC_RESOURCES/kothic"
+cp "$OMIM_PATH/tools/python/stylesheet/drules_info.py" "$MAC_RESOURCES/kothic/src/drules_info.py"
 cp "$OMIM_PATH/protobuf/protobuf-2.6.1-py2.7.egg" "$MAC_RESOURCES/kothic"
 
 # Copy all drules and  resources (required for test environment)

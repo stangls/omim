@@ -47,7 +47,8 @@ void BuildDrawingRulesImpl(QString const & mapcssFile, QString const & outputDir
   params << "python" <<
             GetScriptPath() <<
             "-s" << mapcssFile <<
-            "-o" << outputTemplate;
+            "-o" << outputTemplate <<
+            "-x" << "True";
   QString const cmd = params.join(' ');
 
   // Add path to the protobuf EGG in the PROTOBUF_EGG_PATH environment variable
