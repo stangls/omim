@@ -155,6 +155,7 @@ public enum TtsPlayer
   {
     // It's necessary to call Framework.nativeGenerateTurnNotifications() even if TtsPlayer is invalid.
     final String[] turnNotifications = Framework.nativeGenerateTurnNotifications();
+    Log.d(this.getClass().getSimpleName(), "playTurnNotifications: "+turnNotifications);
 
     if (turnNotifications != null && isReady())
       for (String textToSpeak : turnNotifications)
