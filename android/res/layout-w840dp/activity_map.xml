@@ -34,7 +34,7 @@
 
     <include
       layout="@layout/layout_routing_full"
-      android:layout_width="@dimen/panel_width_half"
+      android:layout_width="@dimen/panel_width_small"
       android:layout_height="wrap_content"
       android:layout_marginBottom="@dimen/margin_half"
       android:visibility="gone"

@@ -30,14 +30,26 @@
         android:src="@drawable/ic_cancel"/>
 
     <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Verbleibende Tour: "
+        android:id="@+id/textView"
+        android:textAppearance="@style/MwmTextAppearance.RoutingNumber"
+        android:layout_marginRight="@dimen/margin_base"
+        android:singleLine="true"
+        android:password="false"
+        android:layout_weight="1"
+        android:gravity="right"/>
+
+    <TextView
         android:id="@+id/tv__total_distance"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginRight="@dimen/margin_base"
         android:layout_weight="1"
-        android:gravity="center"
         android:textAppearance="@style/MwmTextAppearance.RoutingNumber"
-        tools:text="1.4 km"/>
+        tools:text="1.4 km"
+        android:gravity="left"/>
 
     <TextView
         android:id="@+id/tv__total_time"
