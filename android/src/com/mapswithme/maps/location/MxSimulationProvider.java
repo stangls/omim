@@ -65,7 +65,7 @@ public class MxSimulationProvider extends BaseLocationProvider
         try {
           Date datetime = df.parse(date + " " + time, new ParsePosition(0));
           //Log.v("MxSimulationProvider", "Parsed date-time: " + datetime);
-          Location l = new Location(this.providerName);
+          Location l = new Location(providerName);
           l.setLongitude(Double.parseDouble(longitude));
           l.setLatitude(Double.parseDouble(latitude));
           l.setAccuracy(10); // meters with 68% confidence

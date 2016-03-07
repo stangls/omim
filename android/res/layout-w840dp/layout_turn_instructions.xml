@@ -47,7 +47,8 @@
         android:layout_weight="1"
         android:gravity="center"
         android:textAppearance="@style/MwmTextAppearance.RoutingNumber"
-        tools:text="1,5 min"/>
+        tools:text="1,5 min"
+        android:visibility="gone"/>
 
     <TextView
         android:id="@+id/tv__arrival_time"
@@ -56,7 +57,8 @@
         android:layout_weight="1"
         android:gravity="center"
         android:textAppearance="@style/MwmTextAppearance.RoutingNumber"
-        tools:text="1:00"/>
+        tools:text="1:00"
+        android:visibility="gone"/>
 
   </LinearLayout>
 
