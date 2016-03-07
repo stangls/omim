@@ -32,7 +32,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Verbleibende Tour: "
+        android:text="Verbleibende Strecke: "
         android:id="@+id/textView"
         android:textAppearance="@style/MwmTextAppearance.RoutingNumber"
         android:layout_marginRight="@dimen/margin_base"
