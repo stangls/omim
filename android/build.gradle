@@ -12,6 +12,7 @@ allprojects {
   repositories {
     jcenter()
     mavenCentral()
+    maven{ url "http://repo.knut.mobiworx.de/archiva/repository/internal/" }
   }
 }
 
@@ -39,6 +40,9 @@ dependencies {
   // LinearLayoutManager allowing wrap_content of RecyclerView-s
   // TODO remove this library when default LinearLayoutManager will be fixed.
   compile 'org.solovyev.android.views:linear-layout-manager:0.5@aar'
+
+  // mobiworx gps provider
+  compile 'com.mobidat.wp2:gpsprovider:1.2.3@aar'
 }
 
 def getDate() {

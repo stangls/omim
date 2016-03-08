@@ -140,30 +140,37 @@ public enum LocationHelper implements SensorEventListener
       }
     }
 
-    // try to create provider from simulation-file (if exists)
-    File simulationFile = new File("/storage/emulated/legacy/MapsWithMe/simulation.log");
-    Log.e("LocationHelper","searching for file "+simulationFile);
-    if (simulationFile.exists()){
-      Log.d("LocationHelper","Using MxSimulationProvider for GPS-position since simulation.log exists.");
-      try {
-        mLocationProvider = new MxSimulationProvider(simulationFile);
-      }catch(Exception e){
-        e.printStackTrace();
-      }
-    }
-    // create provider
+    // create provider from MOBIWORX GPS-Simulation-Provider-Service
+    try{
+      mLocationProvider = new MxGpsProvider();
+    }catch(Error _){}
+
     if (mLocationProvider==null) {
-      if (
-        isLocationTurnedOn &&
-        !forceNativeProvider &&
-        GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(application) == ConnectionResult.SUCCESS &&
-        PreferenceManager.getDefaultSharedPreferences(application).getBoolean(application.getString(R.string.pref_play_services), false)
-      ) {
-        mLogger.d("Use fused provider.");
-        mLocationProvider = new GoogleFusedLocationProvider();
-      } else {
-        mLogger.d("Use native provider.");
-        mLocationProvider = new AndroidNativeProvider();
+      // try to create provider from simulation-file (if exists)
+      File simulationFile = new File("/storage/emulated/legacy/MapsWithMe/simulation.log");
+      Log.e("LocationHelper", "searching for file " + simulationFile);
+      if (simulationFile.exists()) {
+        Log.d("LocationHelper", "Using MxSimulationProvider for GPS-position since simulation.log exists.");
+        try {
+          mLocationProvider = new MxSimulationProvider(simulationFile);
+        } catch (Exception e) {
+          e.printStackTrace();
+        }
+      }
+      // create provider the original OMIM-way
+      if (mLocationProvider == null) {
+        if (
+                isLocationTurnedOn &&
+                        !forceNativeProvider &&
+                        GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(application) == ConnectionResult.SUCCESS &&
+                        PreferenceManager.getDefaultSharedPreferences(application).getBoolean(application.getString(R.string.pref_play_services), false)
+                ) {
+          mLogger.d("Use fused provider.");
+          mLocationProvider = new GoogleFusedLocationProvider();
+        } else {
+          mLogger.d("Use native provider.");
+          mLocationProvider = new AndroidNativeProvider();
+        }
       }
     }
 
