@@ -2,6 +2,8 @@ package com.mapswithme.maps.location;
 
 import android.app.Application;
 import android.location.Location;
+import android.os.Handler;
+import android.os.Message;
 import android.widget.Toast;
 
 import com.mapswithme.maps.MwmActivity;
@@ -15,7 +17,13 @@ import com.mobidat.wp2.gpsProvider.IGpsReceiver;
  */
 public class MxGpsProvider extends BaseLocationProvider implements IGpsReceiver {
 
+    private final Handler mHandler;
     private GPS gps = null;
+
+    public MxGpsProvider(){
+        // get a handler for asynchronous thread
+        mHandler=new Handler();
+    }
 
     private boolean initGps() {
         if (gps==null) {
@@ -47,7 +55,15 @@ public class MxGpsProvider extends BaseLocationProvider implements IGpsReceiver 
     }
 
     @Override
-    public void onLocationChanged(Location location) {
+    public void onLocationChanged(final Location location) {
+        // ensure we run on the original thread to avoid synchronization issues and CalledFromWrongThreadException
+        mHandler.sendMessage( Message.obtain( mHandler, new Runnable() {
+            @Override
+            public void run() {
+                LocationHelper.INSTANCE.initMagneticField(location); // maydo
+                LocationHelper.INSTANCE.setLastLocation(location);
+            }
+        }));/*
         if (isLocationBetterThanLast(location))
             LocationHelper.INSTANCE.setLastLocation(location);
         else
@@ -57,6 +73,6 @@ public class MxGpsProvider extends BaseLocationProvider implements IGpsReceiver 
             if (lastLocation != null && !LocationUtils.isExpired(lastLocation, LocationHelper.INSTANCE.getLastLocationTime(),
                     LocationUtils.LOCATION_EXPIRATION_TIME_MILLIS_SHORT))
                 LocationHelper.INSTANCE.setLastLocation(lastLocation);
-        }
+        }*/
     }
 }
