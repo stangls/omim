@@ -117,11 +117,13 @@ public:
   // Sound notifications for turn instructions.
   void EnableTurnNotifications(bool enable);
   bool AreTurnNotificationsEnabled() const;
-  void SetTurnNotificationsUnits(Settings::Units const units);
+  void SetTurnNotificationsUnits(settings::Units const units);
   void SetTurnNotificationsLocale(string const & locale);
   string GetTurnNotificationsLocale() const;
   void GenerateTurnNotifications(vector<string> & turnNotifications);
   double GetCompletionPercent() const;
+
+  void EmitCloseRoutingEvent() const;
 
 private:
   struct DoReadyCallback

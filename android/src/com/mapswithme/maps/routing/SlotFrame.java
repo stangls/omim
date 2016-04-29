@@ -7,6 +7,7 @@ import android.graphics.Rect;
 import android.os.Build;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -96,10 +97,10 @@ public class SlotFrame extends LinearLayout
         return;
       }
 
-      if (mMapObject instanceof MapObject.MyPosition)
+      if (MapObject.isOfType(MapObject.MY_POSITION, mMapObject))
         mText.setText(R.string.p2p_your_location);
       else
-        mText.setText(mMapObject.getName());
+        mText.setText(!TextUtils.isEmpty(mMapObject.getTitle()) ? mMapObject.getTitle() : mMapObject.getSubtitle());
 
       mText.setTextColor(mTextColor);
     }
@@ -107,9 +108,6 @@ public class SlotFrame extends LinearLayout
     void setMapObject(MapObject mapObject)
     {
       mMapObject = mapObject;
-      if (mMapObject != null)
-        mMapObject.setDefaultIfEmpty();
-
       updateText();
     }
 

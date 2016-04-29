@@ -1,6 +1,7 @@
 #import "Common.h"
 #import "MWMAlertViewController.h"
 #import "MWMDownloadTransitMapAlert.h"
+#import "MapsAppDelegate.h"
 
 static NSString * const kAlertControllerNibIdentifier = @"MWMAlertViewController";
 
@@ -35,35 +36,12 @@ static NSString * const kAlertControllerNibIdentifier = @"MWMAlertViewController
 
 - (void)presentLocationAlert
 {
-  NSString * title = L(@"location_is_disabled_long_text");
-  NSString * cancel = L(@"cancel");
-  NSString * openSettings = L(@"settings");
-  if (isIOSVersionLessThan(8))
-  {
-    UIAlertView * alertView = [[UIAlertView alloc] initWithTitle:title message:nil delegate:nil cancelButtonTitle:cancel otherButtonTitles:nil];
-    [alertView show];
-    return;
-  }
-  UIAlertController * alertController = [UIAlertController alertControllerWithTitle:title message:nil preferredStyle:UIAlertControllerStyleAlert];
-  UIAlertAction * cancelAction = [UIAlertAction actionWithTitle:cancel style:UIAlertActionStyleCancel handler:nil];
-  UIAlertAction * openSettingsAction = [UIAlertAction actionWithTitle:openSettings style:UIAlertActionStyleDefault handler:^(UIAlertAction * action)
-  {
-    [self openSettings];
-  }];
-  [alertController addAction:cancelAction];
-  [alertController addAction:openSettingsAction];
-  [self.ownerViewController presentViewController:alertController animated:YES completion:nil];
-//  dispatch_async(dispatch_get_main_queue(), ^
-//  {
-//    // @TODO Remove dispatch on LocationManager -> MWMLocationManager
-//    // Test case when location is denied by user on app launch/relaunch
-//    [self displayAlert:MWMAlert.locationAlert];
-//  });
+  [self displayAlert:[MWMAlert locationAlert]];
 }
 
-- (void)presentPoint2PointAlertWithOkBlock:(nonnull TMWMVoidBlock)block needToRebuild:(BOOL)needToRebuild
+- (void)presentPoint2PointAlertWithOkBlock:(nonnull TMWMVoidBlock)okBlock needToRebuild:(BOOL)needToRebuild
 {
-  [self displayAlert:[MWMAlert point2PointAlertWithOkBlock:block needToRebuild:needToRebuild]];
+  [self displayAlert:[MWMAlert point2PointAlertWithOkBlock:okBlock needToRebuild:needToRebuild]];
 }
 
 - (void)presentFacebookAlert
@@ -76,14 +54,29 @@ static NSString * const kAlertControllerNibIdentifier = @"MWMAlertViewController
   [self displayAlert:MWMAlert.locationServiceNotSupportedAlert];
 }
 
-- (void)presentNoConnectionAlert
+- (void)presentLocationNotFoundAlertWithOkBlock:(nonnull TMWMVoidBlock)okBlock cancelBlock:(nonnull TMWMVoidBlock)cancelBlock
 {
-  [self displayAlert:MWMAlert.noConnectionAlert];
+  [self displayAlert:[MWMAlert locationNotFoundAlertWithOkBlock:okBlock cancelBlock:cancelBlock]];
 }
 
-- (void)presentnoWiFiAlertWithName:(nonnull NSString *)name downloadBlock:(nullable TMWMVoidBlock)block
+- (void)presentNoConnectionAlert
 {
-  [self displayAlert:[MWMAlert noWiFiAlertWithName:name downloadBlock:block]];
+  [self displayAlert:[MWMAlert noConnectionAlert]];
+}
+
+- (void)presentMigrationProhibitedAlert
+{
+  [self displayAlert:[MWMAlert migrationProhibitedAlert]];
+}
+
+- (void)presentUnsavedEditsAlertWithOkBlock:(nonnull TMWMVoidBlock)okBlock
+{
+  [self displayAlert:[MWMAlert unsavedEditsAlertWithOkBlock:okBlock]];
+}
+
+- (void)presentNoWiFiAlertWithOkBlock:(nullable TMWMVoidBlock)okBlock
+{
+  [self displayAlert:[MWMAlert noWiFiAlertWithOkBlock:okBlock]];
 }
 
 - (void)presentPedestrianToastAlert:(BOOL)isFirstLaunch
@@ -91,11 +84,42 @@ static NSString * const kAlertControllerNibIdentifier = @"MWMAlertViewController
   [self displayAlert:[MWMAlert pedestrianToastShareAlert:isFirstLaunch]];
 }
 
-- (void)presentDownloaderAlertWithCountries:(vector<storage::TIndex> const &)countries
-                                     routes:(vector<storage::TIndex> const &)routes
-                                       code:(routing::IRouter::ResultCode)code
+- (void)presentIncorrectFeauturePositionAlert
 {
-  [self displayAlert:[MWMAlert downloaderAlertWithAbsentCountries:countries routes:routes code:code]];
+  [self displayAlert:[MWMAlert incorrectFeauturePositionAlert]];
+}
+
+- (void)presentInternalErrorAlert
+{
+  [self displayAlert:[MWMAlert internalErrorAlert]];
+}
+
+- (void)presentNotEnoughSpaceAlert
+{
+  [self displayAlert:[MWMAlert notEnoughSpaceAlert]];
+}
+
+- (void)presentInvalidUserNameOrPasswordAlert
+{
+  [self displayAlert:[MWMAlert invalidUserNameOrPasswordAlert]];
+}
+
+- (void)presentRoutingMigrationAlertWithOkBlock:(TMWMVoidBlock)okBlock
+{
+  [self displayAlert:[MWMAlert routingMigrationAlertWithOkBlock:okBlock]];
+}
+
+- (void)presentDownloaderAlertWithCountries:(storage::TCountriesVec const &)countries
+                                       code:(routing::IRouter::ResultCode)code
+                                cancelBlock:(TMWMVoidBlock)cancelBlock
+                              downloadBlock:(TMWMDownloadBlock)downloadBlock
+                      downloadCompleteBlock:(TMWMVoidBlock)downloadCompleteBlock
+{
+  [self displayAlert:[MWMAlert downloaderAlertWithAbsentCountries:countries
+                                                             code:code
+                                                      cancelBlock:cancelBlock
+                                                    downloadBlock:downloadBlock
+                                            downloadCompleteBlock:downloadCompleteBlock]];
 }
 
 - (void)presentRoutingDisclaimerAlert
@@ -115,12 +139,12 @@ static NSString * const kAlertControllerNibIdentifier = @"MWMAlertViewController
 
 - (void)displayAlert:(MWMAlert *)alert
 {
-  BOOL const iOS7 = isIOSVersionLessThan(8);
+  [self removeFromParentViewController];
   alert.alertController = self;
   [self.ownerViewController addChildViewController:self];
   self.view.alpha = 0.;
   alert.alpha = 0.;
-  if (!iOS7)
+  if (!isIOS7)
   {
     CGFloat const scale = 1.1;
     alert.transform = CGAffineTransformMakeScale(scale, scale);
@@ -129,34 +153,82 @@ static NSString * const kAlertControllerNibIdentifier = @"MWMAlertViewController
   {
     self.view.alpha = 1.;
     alert.alpha = 1.;
-    if (!iOS7)
+    if (!isIOS7)
       alert.transform = CGAffineTransformIdentity;
   }];
+  [MapsAppDelegate.theApp.window endEditing:YES];
 }
 
-- (void)closeAlertWithCompletion:(nullable TMWMVoidBlock)completion
+- (void)presentDisableAutoDownloadAlertWithOkBlock:(nonnull TMWMVoidBlock)okBlock
 {
-  MWMAlert * alert = self.view.subviews.firstObject;
+  [self displayAlert:[MWMAlert disableAutoDownloadAlertWithOkBlock:okBlock]];
+}
+
+- (void)presentDownloaderNoConnectionAlertWithOkBlock:(nonnull TMWMVoidBlock)okBlock cancelBlock:(nonnull TMWMVoidBlock)cancelBlock
+{
+  [self displayAlert:[MWMAlert downloaderNoConnectionAlertWithOkBlock:okBlock cancelBlock:cancelBlock]];
+}
+
+- (void)presentDownloaderNotEnoughSpaceAlert
+{
+  [self displayAlert:[MWMAlert downloaderNotEnoughSpaceAlert]];
+}
+
+- (void)presentDownloaderInternalErrorAlertWithOkBlock:(nonnull TMWMVoidBlock)okBlock cancelBlock:(nonnull TMWMVoidBlock)cancelBlock
+{
+  [self displayAlert:[MWMAlert downloaderInternalErrorAlertWithOkBlock:okBlock cancelBlock:cancelBlock]];
+}
+
+- (void)presentDownloaderNeedUpdateAlertWithOkBlock:(nonnull TMWMVoidBlock)okBlock
+{
+  [self displayAlert:[MWMAlert downloaderNeedUpdateAlertWithOkBlock:okBlock]];
+}
+
+- (void)presentPlaceDoesntExistAlertWithBlock:(MWMStringBlock)block
+{
+  [self displayAlert:[MWMAlert placeDoesntExistAlertWithBlock:block]];
+}
+
+- (void)presentResetChangesAlertWithBlock:(TMWMVoidBlock)block
+{
+  [self displayAlert:[MWMAlert resetChangesAlertWithBlock:block]];
+}
+
+- (void)presentDeleteFeatureAlertWithBlock:(TMWMVoidBlock)block
+{
+  [self displayAlert:[MWMAlert deleteFeatureAlertWithBlock:block]];
+}
+
+- (void)presentEditorViralAlert
+{
+  [self displayAlert:[MWMAlert editorViralAlert]];
+}
+
+- (void)presentOsmAuthAlert
+{
+  [self displayAlert:[MWMAlert osmAuthAlert]];
+}
+
+- (void)closeAlert
+{
+  NSArray * subviews = self.view.subviews;
+  MWMAlert * alert = subviews.firstObject;
+  BOOL const isLastAlert = (subviews.count == 1);
   [UIView animateWithDuration:kDefaultAnimationDuration animations:^
   {
     alert.alpha = 0.;
-    self.view.alpha = 0.;
+    if (isLastAlert)
+      self.view.alpha = 0.;
   }
   completion:^(BOOL finished)
   {
-    if (completion)
-      completion();
-    [self.view removeFromSuperview];
-    [self removeFromParentViewController];
+    [alert removeFromSuperview];
+    if (isLastAlert)
+    {
+      [self.view removeFromSuperview];
+      [self removeFromParentViewController];
+    }
   }];
-}
-
-- (void)openSettings
-{
-  NSURL * url = [NSURL URLWithString:UIApplicationOpenSettingsURLString];
-  UIApplication * a = [UIApplication sharedApplication];
-  if ([a canOpenURL:url])
-    [a openURL:url];
 }
 
 @end

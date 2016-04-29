@@ -85,7 +85,7 @@ public class LocationUtils
         // Do compare current and previous system times in case when
         // we have incorrect time settings on a device.
         time = System.currentTimeMillis();
-        lastTime = LocationHelper.INSTANCE.getLastLocationTime();
+        lastTime = LocationHelper.INSTANCE.getSavedLocationTime();
       }
 
       return (time - lastTime) * 1.0E-3;
@@ -105,6 +105,6 @@ public class LocationUtils
   public static boolean areLatLonEqual(MapObject first, MapObject second)
   {
     return Math.abs(first.getLat() - second.getLat()) < LocationUtils.LAT_LON_EPSILON &&
-        Math.abs(first.getLon() - second.getLon()) < LocationUtils.LAT_LON_EPSILON;
+           Math.abs(first.getLon() - second.getLon()) < LocationUtils.LAT_LON_EPSILON;
   }
 }

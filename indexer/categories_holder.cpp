@@ -1,7 +1,7 @@
 #include "indexer/categories_holder.hpp"
+#include "indexer/classificator.hpp"
 #include "indexer/search_delimiters.hpp"
 #include "indexer/search_string_utils.hpp"
-#include "indexer/classificator.hpp"
 
 #include "coding/reader.hpp"
 #include "coding/reader_streambuf.hpp"
@@ -21,10 +21,12 @@ enum State
 
 }  // unnamed namespace
 
+// static
+size_t const CategoriesHolder::kNumLanguages = 30;
 
-CategoriesHolder::CategoriesHolder(Reader * reader)
+CategoriesHolder::CategoriesHolder(unique_ptr<Reader> && reader)
 {
-  ReaderStreamBuf buffer(reader);
+  ReaderStreamBuf buffer(move(reader));
   istream s(&buffer);
   LoadFromStream(s);
 }
@@ -41,7 +43,7 @@ void CategoriesHolder::AddCategory(Category & cat, vector<uint32_t> & types)
 
     for (size_t i = 0; i < p->m_synonyms.size(); ++i)
     {
-      ASSERT(p->m_synonyms[i].m_locale != UNSUPPORTED_LOCALE_CODE, ());
+      ASSERT(p->m_synonyms[i].m_locale != kUnsupportedLocaleCode, ());
 
       StringT const uniName = search::NormalizeAndSimplifyString(p->m_synonyms[i].m_name);
 
@@ -128,7 +130,7 @@ void CategoriesHolder::LoadFromStream(istream & s)
         }
 
         int8_t const langCode = MapLocaleToInteger(*iter);
-        CHECK(langCode != UNSUPPORTED_LOCALE_CODE, ("Invalid language code:", *iter, "at line:", lineNumber));
+        CHECK(langCode != kUnsupportedLocaleCode, ("Invalid language code:", *iter, "at line:", lineNumber));
 
         while (++iter)
         {
@@ -148,20 +150,27 @@ void CategoriesHolder::LoadFromStream(istream & s)
             name.m_name = name.m_name.substr(1);
           }
           else
-            name.m_prefixLengthToSuggest = Category::EMPTY_PREFIX_LENGTH;
+            name.m_prefixLengthToSuggest = Category::kEmptyPrefixLength;
 
           // Process emoji symbols.
           using namespace strings;
           if (StartsWith(name.m_name, "U+"))
           {
+            auto const code = name.m_name;
             int c;
             if (!to_int(name.m_name.c_str() + 2, c, 16))
             {
-              LOG(LWARNING, ("Bad emoji code:", name.m_name));
+              LOG(LWARNING, ("Bad emoji code:", code));
               continue;
             }
 
             name.m_name = ToUtf8(UniString(1, static_cast<UniChar>(c)));
+
+            if (IsASCIIString(ToUtf8(search::NormalizeAndSimplifyString(name.m_name))))
+            {
+              LOG(LWARNING, ("Bad emoji code:", code));
+              continue;
+            }
           }
 
           cat.m_synonyms.push_back(name);
@@ -197,6 +206,28 @@ bool CategoriesHolder::GetNameByType(uint32_t type, int8_t locale, string & name
   }
 
   return false;
+}
+
+string CategoriesHolder::GetReadableFeatureType(uint32_t type, int8_t locale) const
+{
+  ASSERT_NOT_EQUAL(type, 0, ());
+  uint8_t level = ftype::GetLevel(type);
+  ASSERT_GREATER(level, 0, ());
+
+  uint32_t originalType = type;
+  string name;
+  while (true)
+  {
+    if (GetNameByType(type, locale, name))
+      return name;
+
+    if (--level == 0)
+      break;
+
+    ftype::TruncValue(type, level);
+  }
+
+  return classif().GetReadableObjectName(originalType);
 }
 
 bool CategoriesHolder::IsTypeExist(uint32_t type) const
@@ -246,9 +277,12 @@ int8_t CategoriesHolder::MapLocaleToInteger(string const & locale)
     {"he", 29 },
     {"sw", 30 }
   };
-  for (size_t i = 0; i < ARRAY_SIZE(mapping); ++i)
+  static_assert(ARRAY_SIZE(mapping) == kNumLanguages, "");
+  for (size_t i = 0; i < kNumLanguages; ++i)
+  {
     if (locale.find(mapping[i].m_name) == 0)
       return mapping[i].m_code;
+  }
 
   // Special cases for different Chinese variations
   if (locale.find("zh") == 0)
@@ -263,5 +297,5 @@ int8_t CategoriesHolder::MapLocaleToInteger(string const & locale)
     return 17; // Simplified Chinese by default for all other cases
   }
 
-  return UNSUPPORTED_LOCALE_CODE;
+  return kUnsupportedLocaleCode;
 }
