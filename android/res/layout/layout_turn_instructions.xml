@@ -41,7 +41,8 @@
         android:layout_weight="1"
         android:gravity="center"
         android:textAppearance="@style/MwmTextAppearance.RoutingNumber"
-        tools:text="10h 40min"/>
+        tools:text="10h 40min"
+        android:visibility="gone"/>
 
     <TextView
         android:id="@+id/tv__arrival_time"
@@ -52,7 +53,8 @@
         android:textAppearance="@style/MwmTextAppearance.RoutingNumber"
         android:textSize="@dimen/text_size_routing_number"
         tools:text="23:59"
-        android:background="#c100ff2a" />
+        android:background="#c100ff2a"
+        android:visibility="gone"/>
   </LinearLayout>
 
   <com.mapswithme.maps.widget.FlatProgressView
