@@ -42,7 +42,7 @@ dependencies {
   compile 'org.solovyev.android.views:linear-layout-manager:0.5@aar'
 
   // mobiworx gps provider
-  compile 'com.mobidat.wp2:gpsprovider:1.2.3@aar'
+  compile 'com.mobidat.wp2:gpsprovider:1.7.1@aar'
 }
 
 def getDate() {

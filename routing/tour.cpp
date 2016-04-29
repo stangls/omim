@@ -104,21 +104,21 @@ public:
             if (m_roadIndex!=0){
                 turnDirection=turns::TurnDirection::LeaveRoundAbout;
             }else{
-                if (m_roadAngle>=170)
+                if (m_roadAngle>=175)
                     turnDirection=TD::UTurnLeft;
-                else if (m_roadAngle>=90)
+                else if (m_roadAngle>=120)
                     turnDirection=TD::TurnSharpRight;
-                else if (m_roadAngle>=15)
+                else if (m_roadAngle>=45)
                     turnDirection=TD::TurnRight;
-                else if (m_roadAngle>=4)
+                else if (m_roadAngle>=5)
                     turnDirection=TD::TurnSlightRight;
-                else if (m_roadAngle<=-170)
+                else if (m_roadAngle<=-175)
                     turnDirection=TD::UTurnLeft;
-                else if (m_roadAngle<=-90)
+                else if (m_roadAngle<=-120)
                     turnDirection=TD::TurnSharpLeft;
-                else if (m_roadAngle<=-15)
+                else if (m_roadAngle<=-45)
                     turnDirection=TD::TurnLeft;
-                else if (m_roadAngle<=-4)
+                else if (m_roadAngle<=-5)
                     turnDirection=TD::TurnSlightLeft;
                 else
                     turnDirection=TD::GoStraight;

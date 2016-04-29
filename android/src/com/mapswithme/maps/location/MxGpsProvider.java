@@ -10,12 +10,14 @@ import com.mapswithme.maps.MwmActivity;
 import com.mapswithme.maps.MwmApplication;
 import com.mapswithme.util.LocationUtils;
 import com.mobidat.wp2.gpsProvider.GPS;
+import com.mobidat.wp2.gpsProvider.GPSInfo;
 import com.mobidat.wp2.gpsProvider.IGpsReceiver;
+import com.mobidat.wp2.gpsProvider.ILocationReceiver;
 
 /**
  * Created by sd on 08.03.16.
  */
-public class MxGpsProvider extends BaseLocationProvider implements IGpsReceiver {
+public class MxGpsProvider extends BaseLocationProvider implements ILocationReceiver {
 
     private final Handler mHandler;
     private GPS gps = null;
@@ -50,12 +52,13 @@ public class MxGpsProvider extends BaseLocationProvider implements IGpsReceiver 
     }
 
     @Override
-    public void onStatusChanged(String s) {
-        Toast.makeText(MwmApplication.get(), "GPS-Provider-Service: "+s, Toast.LENGTH_SHORT);
+    public void onStatusChanged(GPSInfo info) {
+        Toast.makeText(MwmApplication.get(), "GPS-Provider-Service: "+info.getMessage(), Toast.LENGTH_LONG).show();
     }
 
     @Override
     public void onLocationChanged(final Location location) {
+        if (location==null) return;
         // ensure we run on the original thread to avoid synchronization issues and CalledFromWrongThreadException
         mHandler.sendMessage( Message.obtain( mHandler, new Runnable() {
             @Override

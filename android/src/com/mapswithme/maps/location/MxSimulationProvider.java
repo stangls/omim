@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.Locale;
 
+@Deprecated
 public class MxSimulationProvider extends BaseLocationProvider
 {
 
