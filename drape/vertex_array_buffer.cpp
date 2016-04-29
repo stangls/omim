@@ -16,6 +16,7 @@ VertexArrayBuffer::VertexArrayBuffer(uint32_t indexBufferSize, uint32_t dataBuff
   , m_program()
   , m_isPreflushed(false)
   , m_moveToGpuOnBuild(false)
+  , m_isChanged(false)
 {
   m_indexBuffer = make_unique_dp<IndexBuffer>(indexBufferSize);
 
@@ -77,7 +78,7 @@ void VertexArrayBuffer::RenderRange(IndicesRange const & range)
   {
     ASSERT(m_program != nullptr, ("Somebody not call Build. It's very bad. Very very bad"));
     /// if OES_vertex_array_object is supported than all bindings already saved in VAO
-    /// and we need only bind VAO. In Bind method have ASSERT("bind already called")
+    /// and we need only bind VAO.
     if (GLExtensionsList::Instance().IsSupported(GLExtensionsList::VertexArrayObject))
       Bind();
     else
@@ -120,6 +121,8 @@ void VertexArrayBuffer::UploadData(BindingInfo const & bindingInfo, void const *
   else
     buffer = GetOrCreateDynamicBuffer(bindingInfo);
 
+  if (count > 0)
+    m_isChanged = true;
   buffer->GetBuffer()->UploadData(data, count);
 }
 
@@ -227,6 +230,11 @@ void VertexArrayBuffer::UploadIndexes(void const * data, uint32_t count)
 void VertexArrayBuffer::ApplyMutation(ref_ptr<IndexBufferMutator> indexMutator,
                                       ref_ptr<AttributeBufferMutator> attrMutator)
 {
+  /// We need to bind current VAO before calling glBindBuffer if OES_vertex_array_object is supported.
+  /// Otherwise we risk affecting a previously binded VAO.
+  if (GLExtensionsList::Instance().IsSupported(GLExtensionsList::VertexArrayObject))
+    Bind();
+
   if (indexMutator != nullptr)
   {
     ASSERT(m_indexBuffer != nullptr, ());

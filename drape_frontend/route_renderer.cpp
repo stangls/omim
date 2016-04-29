@@ -196,12 +196,13 @@ void RouteRenderer::RenderRoute(ScreenBase const & screen, ref_ptr<dp::GpuProgra
 
     // render routes
     //for (drape_ptr<dp::RenderBucket> const & bucket : m_routeData->m_route.m_buckets)
+    //  bucket->Render();
     auto it = m_routeData->m_route.m_buckets.end();
     auto begin = m_routeData->m_route.m_buckets.begin();
     while (it!=begin) {
       it--;
       drape_ptr<dp::RenderBucket> const & bucket = *it;
-      bucket->Render(screen);
+      bucket->Render();
     }
   }
   // render arrows
@@ -261,7 +262,7 @@ void RouteRenderer::RenderRouteSign(drape_ptr<RouteSignData> const & sign, Scree
   for (auto const & bucket : sign->m_sign.m_buckets)
   {
     bucket->GetBuffer()->Build(program);
-    bucket->Render(screen);
+    bucket->Render();
   }
 }
 
@@ -300,7 +301,7 @@ void RouteRenderer::RenderArrow(ref_ptr<dp::GpuProgram> prg, drape_ptr<ArrowRend
 
       dp::ApplyUniforms(uniformStorage, prg);
       for (drape_ptr<dp::RenderBucket> const & bucket : property->m_arrow.m_buckets)
-        bucket->Render(screen);
+        bucket->Render();
     }
   }
 }

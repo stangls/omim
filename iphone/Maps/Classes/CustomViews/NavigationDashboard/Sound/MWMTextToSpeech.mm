@@ -84,7 +84,7 @@ static NSString * const DEFAULT_LANG = @"en-US";
 
 - (void)setNotificationsLocale:(NSString *)locale
 {
-  [[Statistics instance] logEvent:kStatEventName(kStatTTSSettings, kStatChangeLanguage)
+  [Statistics logEvent:kStatEventName(kStatTTSSettings, kStatChangeLanguage)
                    withParameters:@{kStatValue : locale}];
   NSUserDefaults * ud = [NSUserDefaults standardUserDefaults];
   [ud setObject:locale forKey:kUserDefaultsTTSLanguageBcp47];
@@ -146,40 +146,46 @@ static NSString * const DEFAULT_LANG = @"en-US";
 
 - (void)createVoice:(NSString *)locale
 {
-  if (!locale)
+  NSMutableArray<NSString *> * candidateLocales = [@[DEFAULT_LANG, @"en-GB"] mutableCopy];
+
+  if (locale)
+    [candidateLocales insertObject:locale atIndex:0];
+  else
+    LOG(LWARNING, ("locale is nil. Trying default locale."));
+
+  NSArray<AVSpeechSynthesisVoice *> * availTTSVoices = [AVSpeechSynthesisVoice speechVoices];
+  AVSpeechSynthesisVoice * voice = nil;
+  for (NSString * loc in candidateLocales)
   {
-    LOG(LERROR, ("locale is nil. Trying default locale."));
-    locale = DEFAULT_LANG;
-  }
-  
-  NSArray * availTTSLangs = [AVSpeechSynthesisVoice speechVoices];
-  
-  if (!availTTSLangs)
-  {
-    LOG(LERROR, ("No languages for TTS. MWMTextFoSpeech is invalid."));
-    return; // self is not valid.
-  }
-  
-  AVSpeechSynthesisVoice * voice = [AVSpeechSynthesisVoice voiceWithLanguage:locale];
-  if (!voice || ![availTTSLangs containsObject:voice])
-  {
-    locale = DEFAULT_LANG;
-    AVSpeechSynthesisVoice * voice = [AVSpeechSynthesisVoice voiceWithLanguage:locale];
-    if (!voice || ![availTTSLangs containsObject:voice])
+    if ([loc isEqualToString:@"en-US"])
+      voice = [AVSpeechSynthesisVoice voiceWithLanguage:AVSpeechSynthesisVoiceIdentifierAlex];
+    if (voice)
+      break;
+    for (AVSpeechSynthesisVoice * ttsVoice in availTTSVoices)
     {
-      LOG(LERROR, ("The UI language and English are not available for TTS. MWMTestToSpeech is invalid."));
-      return; // self is not valid.
+      if ([ttsVoice.language isEqualToString:loc])
+      {
+        voice = [AVSpeechSynthesisVoice voiceWithLanguage:loc];
+        break;
+      }
     }
+    if (voice)
+      break;
   }
-  
-  self.speechVoice = [AVSpeechSynthesisVoice voiceWithLanguage:locale];
-  string const twineLang = tts::bcp47ToTwineLanguage(locale);
-  if (twineLang.empty())
+
+  self.speechVoice = voice;
+  if (voice)
   {
-    LOG(LERROR, ("Cannot convert UI locale or default locale to twine language. MWMTestToSpeech is invalid."));
-    return; // self is not valid.
+    string const twineLang = tts::bcp47ToTwineLanguage(voice.language);
+    if (twineLang.empty())
+      LOG(LERROR, ("Cannot convert UI locale or default locale to twine language. MWMTextToSpeech is invalid."));
+    else
+      GetFramework().SetTurnNotificationsLocale(twineLang);
   }
-  GetFramework().SetTurnNotificationsLocale(twineLang);
+  else
+  {
+    LOG(LERROR, ("The UI language and English are not available for TTS. MWMTextToSpeech is invalid."));
+  }
 }
 
 - (void)speakOneString:(NSString *)textToSpeak
