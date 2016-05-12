@@ -59,7 +59,7 @@ dependencies {
   compile 'com.timehop.stickyheadersrecyclerview:library:0.4.3@aar'
 
   // mobiworx gps provider
-  compile 'com.mobidat.wp2:gpsprovider:1.7.1@aar'
+  compile 'com.mobidat.wp2:gpsprovider:1.7.6@aar'
 }
 
 def getDate() {
