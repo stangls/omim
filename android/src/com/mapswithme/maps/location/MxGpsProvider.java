@@ -11,7 +11,6 @@ import com.mapswithme.maps.MwmApplication;
 import com.mapswithme.util.LocationUtils;
 import com.mobidat.wp2.gpsProvider.GPS;
 import com.mobidat.wp2.gpsProvider.GPSInfo;
-import com.mobidat.wp2.gpsProvider.IGpsReceiver;
 import com.mobidat.wp2.gpsProvider.ILocationReceiver;
 
 /**
@@ -64,7 +63,7 @@ public class MxGpsProvider extends BaseLocationProvider implements ILocationRece
             @Override
             public void run() {
                 LocationHelper.INSTANCE.initMagneticField(location); // maydo
-                LocationHelper.INSTANCE.setLastLocation(location);
+                LocationHelper.INSTANCE.saveLocation(location);
             }
         }));/*
         if (isLocationBetterThanLast(location))

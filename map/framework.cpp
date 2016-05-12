@@ -2149,7 +2149,7 @@ void Framework::LoadTour( string const & filePath ){
     m2::PointD start;
     if (!m_drapeEngine->GetMyPosition(start))
     {
-      CallRouteBuilded(IRouter::NoCurrentPosition, vector<storage::TIndex>(), vector<storage::TIndex>());
+      CallRouteBuilded(IRouter::NoCurrentPosition, storage::TCountriesVec());
       return;
     }
     SetRouter(routing::RouterType::Vehicle);

@@ -137,7 +137,7 @@ public class MxSimulationProvider extends BaseLocationProvider
             @Override
             public void run() {
               LocationHelper.INSTANCE.initMagneticField(l); // maydo
-              LocationHelper.INSTANCE.setLastLocation(l);
+              LocationHelper.INSTANCE.saveLocation(l);
             }
           }));
           int time = simulationDataWaitTimeMS[currentSimulationStep];
@@ -164,14 +164,14 @@ public class MxSimulationProvider extends BaseLocationProvider
 
     final Location newLocation = retrieveCurrentLocation();
     if (isLocationBetterThanLast(newLocation))
-      LocationHelper.INSTANCE.setLastLocation(newLocation);
+      LocationHelper.INSTANCE.saveLocation(newLocation);
     else
     {
       // strange. why is this neccessary? (copied from AndroidNativeProvider)
-      final Location lastLocation = LocationHelper.INSTANCE.getLastLocation();
-      if (lastLocation != null && !LocationUtils.isExpired(lastLocation, LocationHelper.INSTANCE.getLastLocationTime(),
+      final Location lastLocation = LocationHelper.INSTANCE.getSavedLocation();
+      if (lastLocation != null && !LocationUtils.isExpired(lastLocation, LocationHelper.INSTANCE.getSavedLocationTime(),
                                                            LocationUtils.LOCATION_EXPIRATION_TIME_MILLIS_SHORT))
-        LocationHelper.INSTANCE.setLastLocation(lastLocation);
+        LocationHelper.INSTANCE.saveLocation(lastLocation);
     }
   }
 
