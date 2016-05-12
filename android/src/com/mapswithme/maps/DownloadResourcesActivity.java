@@ -91,13 +91,7 @@ public class DownloadResourcesActivity extends BaseMwmFragmentActivity
   }
 
   private final IntentProcessor[] mIntentProcessors = {
-      new GeoIntentProcessor(),
-      new HttpGe0IntentProcessor(),
-      new Ge0IntentProcessor(),
-      new MapsWithMeIntentProcessor(),
-      new GoogleMapsIntentProcessor(),
-      new OpenCountryTaskProcessor(),
-      new KmzKmlProcessor()
+      new OpenCountryTaskProcessor()
   };
 
   private final LocationHelper.LocationListener mLocationListener = new LocationHelper.SimpleLocationListener()
