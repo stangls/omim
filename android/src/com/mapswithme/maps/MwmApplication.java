@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
 import android.support.annotation.UiThread;
+import android.support.multidex.MultiDexApplication;
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -38,7 +39,7 @@ import com.parse.SaveCallback;
 import io.fabric.sdk.android.Fabric;
 import net.hockeyapp.android.CrashManager;
 
-public class MwmApplication extends Application
+public class MwmApplication extends MultiDexApplication
 {
   private final static String TAG = "MwmApplication";
 
