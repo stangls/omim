@@ -66,11 +66,10 @@ dependencies {
 
   // mobiworx
   compile 'com.mobidat.wp2:gpsprovider:1.7.6@aar'
-  /*
   compile('com.mobidat.wp2:missionservice:1.5.8@aar') {
     transitive = true
     exclude group: 'com.android.support'
-  }*/
+  }
 }
 
 buildscript {
@@ -131,11 +130,12 @@ android {
   }
 
   productFlavors {
+    /*
     google {
       versionName = android.defaultConfig.versionName + '-Google'
       buildConfigField 'String', 'SUPPORT_MAIL', '"googleplay@maps.me"'
     }
-/*
+
     samsung {
       versionName = android.defaultConfig.versionName + '-Samsung'
       buildConfigField 'String', 'REVIEW_URL', '"samsungapps://ProductDetail/com.mapswithme.maps.pro"'
@@ -156,12 +156,12 @@ android {
       buildConfigField 'String', 'REVIEW_URL', '"yastore://details?id=com.mapswithme.maps.pro"'
       android.sourceSets.yandex.assets.srcDirs = ['flavors/mwm-ttf-assets']
     }
-*/
+
     preinstall {
       versionName = android.defaultConfig.versionName + '-Preinstall'
       buildConfigField 'String', 'SUPPORT_MAIL', '"googleplay@maps.me"'
     }
-/*
+
     cipherlab {
       versionName = android.defaultConfig.versionName + '-CipherLab'
       android.sourceSets.cipherlab.assets.srcDirs = ['flavors/mwm-ttf-assets']
@@ -180,7 +180,7 @@ android {
 */
     web {
       versionName = android.defaultConfig.versionName + '-Web'
-      buildConfigField 'String', 'SUPPORT_MAIL', '"googleplay@maps.me"'
+      buildConfigField 'String', 'SUPPORT_MAIL', '"entwicklung@mobiworx.de"'
       android.sourceSets.web.assets.srcDirs = ['flavors/mwm-ttf-assets']
     }
 /*

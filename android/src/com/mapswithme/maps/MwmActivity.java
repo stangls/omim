@@ -623,7 +623,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
             }
           });
           break;
-
+/*
         case SEARCH:
           RoutingController.get().cancelPlanning();
           closeMenu(Statistics.EventName.TOOLBAR_SEARCH, AlohaHelper.TOOLBAR_SEARCH, new Runnable()
@@ -639,11 +639,11 @@ public class MwmActivity extends BaseMwmFragmentActivity
         case P2P:
           startLocationToPoint(Statistics.EventName.MENU_P2P, AlohaHelper.MENU_POINT2POINT, null);
           break;
-
+*/
         case TOUR:
           startTour(Statistics.EventName.MENU_TOUR, AlohaHelper.MENU_TOUR);
           break;
-
+/*
         case BOOKMARKS:
           closeMenu(Statistics.EventName.TOOLBAR_BOOKMARKS, AlohaHelper.TOOLBAR_BOOKMARKS, new Runnable()
           {
@@ -677,7 +677,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
             }
           });
           break;
-
+*/
         case SETTINGS:
           closeMenu(Statistics.EventName.MENU_SETTINGS, AlohaHelper.MENU_SETTINGS, new Runnable()
           {
@@ -688,7 +688,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
             }
           });
           break;
-
+/*
         case SHOWCASE:
           closeMenu(Statistics.EventName.MENU_SHOWCASE, AlohaHelper.MENU_SHOWCASE, new Runnable()
           {
@@ -698,7 +698,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
               mMytargetHelper.displayShowcase();
             }
           });
-          break;
+          break;*/
         }
       }
     });
@@ -963,19 +963,19 @@ public class MwmActivity extends BaseMwmFragmentActivity
       {
         if (nativeAppwallAd.getBanners().isEmpty())
         {
-          mMainMenu.setVisible(MainMenu.Item.SHOWCASE, false);
+          //mMainMenu.setVisible(MainMenu.Item.SHOWCASE, false);
           return;
         }
 
         final NativeAppwallBanner menuBanner = nativeAppwallAd.getBanners().get(0);
         mMainMenu.setShowcaseText(menuBanner.getTitle());
-        mMainMenu.setVisible(MainMenu.Item.SHOWCASE, true);
+        //mMainMenu.setVisible(MainMenu.Item.SHOWCASE, true);
       }
 
       @Override
       public void onNoAd(String reason, NativeAppwallAd nativeAppwallAd)
       {
-        mMainMenu.setVisible(MainMenu.Item.SHOWCASE, false);
+        //mMainMenu.setVisible(MainMenu.Item.SHOWCASE, false);
       }
 
       @Override
@@ -1466,9 +1466,9 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
     if (mIsFragmentContainer)
     {
-      mMainMenu.setEnabled(MainMenu.Item.P2P, !RoutingController.get().isPlanning());
+      //mMainMenu.setEnabled(MainMenu.Item.P2P, !RoutingController.get().isPlanning());
       mMainMenu.setEnabled(MainMenu.Item.TOUR, !RoutingController.get().isPlanning());
-      mMainMenu.setEnabled(MainMenu.Item.SEARCH, !RoutingController.get().isWaitingPoiPick());
+      //mMainMenu.setEnabled(MainMenu.Item.SEARCH, !RoutingController.get().isWaitingPoiPick());
     }
     else if (RoutingController.get().isPlanning())
     {

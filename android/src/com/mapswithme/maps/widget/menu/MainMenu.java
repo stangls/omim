@@ -139,14 +139,15 @@ public class MainMenu
   {
     TOGGLE(R.id.toggle),
     ADD_PLACE(R.id.add_place),
-    SEARCH(R.id.search),
+    //SEARCH(R.id.search),
     TOUR(R.id.tour),
-    P2P(R.id.p2p),
+    /*P2P(R.id.p2p),
     BOOKMARKS(R.id.bookmarks),
     SHARE(R.id.share),
     DOWNLOADER(R.id.download_maps),
-    SETTINGS(R.id.settings),
-    SHOWCASE(R.id.showcase);
+    SHOWCASE(R.id.showcase)*/
+    SETTINGS(R.id.settings)
+    ;
 
     private final int mViewId;
 
@@ -351,15 +352,15 @@ public class MainMenu
 
   private void init()
   {
-    mapItem(Item.ADD_PLACE);
-    mapItem(Item.SEARCH);
+    //mapItem(Item.ADD_PLACE);
+    //mapItem(Item.SEARCH);
     mapItem(Item.TOUR);
-    mapItem(Item.P2P);
-    mapItem(Item.BOOKMARKS);
-    mapItem(Item.SHARE);
-    mapItem(Item.DOWNLOADER);
+    //mapItem(Item.P2P);
+    //mapItem(Item.BOOKMARKS);
+    //mapItem(Item.SHARE);
+    //mapItem(Item.DOWNLOADER);
     mapItem(Item.SETTINGS);
-    mapItem(Item.SHOWCASE);
+    //mapItem(Item.SHOWCASE);
 
     adjustCollapsedItems();
     adjustTransparency();
@@ -414,9 +415,11 @@ public class MainMenu
     }
 
     UiUtils.showIf(state == State.NAVIGATION, mNavigationFrame);
+    /*
     UiUtils.showIf(expandContent,
                    mItemViews.get(Item.SEARCH),
                    mItemViews.get(Item.BOOKMARKS));
+                   */
     setVisible(Item.ADD_PLACE, !isRouting && !MapManager.nativeIsLegacyMode());
 
     if (isLayoutCorrected())
@@ -570,7 +573,7 @@ public class MainMenu
 
   public void setShowcaseText(String text)
   {
-    ((TextView) mItemViews.get(Item.SHOWCASE)).setText(text);
+    //((TextView) mItemViews.get(Item.SHOWCASE)).setText(text);
   }
 
   public Button getRouteStartButton()
