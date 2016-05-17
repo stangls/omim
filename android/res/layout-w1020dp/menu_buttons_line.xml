@@ -9,6 +9,10 @@
     android:layout_height="match_parent"/>
 
   <!-- Fake view to make layout symmetrical -->
+  <Space
+    android:id="@+id/symmetrical_gap"
+    android:layout_width="160dp"
+    android:layout_height="match_parent"/>
 
   <!-- Anchor ID. Disables menu toggle button if present. -->
   <Space
@@ -32,7 +36,7 @@
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:visibility="gone"
-  >
+    >
     <ImageView
       android:id="@+id/download_maps"
       style="@style/MwmTheme.Menu.Line.Button"
