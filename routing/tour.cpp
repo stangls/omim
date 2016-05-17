@@ -157,8 +157,8 @@ Tour::Tour(const string &filePath)
 {
     // parse the XML file
     LOG( my::LINFO, ("reading tour file ",filePath) );
-    ReaderPtr<Reader> const & reader = new FileReader(filePath);
-    ReaderSource<ReaderPtr<Reader> > src(reader);
+    FileReader reader(filePath);
+    ReaderSource<FileReader> src(reader);
     TourParser parser(*this);
     ParseXML(src, parser, true);
     LOG( my::LINFO, ("done parsing tour file",filePath) );

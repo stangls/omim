@@ -23,8 +23,8 @@
 
   <ImageView
     android:id="@+id/btn__close"
-    android:layout_width="@dimen/base_block_size"
-    android:layout_height="@dimen/base_block_size"
+    android:layout_width="@dimen/height_block_base"
+    android:layout_height="@dimen/height_block_base"
     android:layout_centerVertical="true"
     android:layout_marginBottom="@dimen/margin_base_plus"
     android:layout_marginLeft="@dimen/margin_quarter"
@@ -111,14 +111,34 @@
       tools:text="1:00"
       android:visibility="gone"/>
 
-  <TextView
-      android:id="@+id/tv__total_distance"
+  <LinearLayout
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:gravity="center_vertical"
-      android:textAppearance="@style/MwmTextAppearance.RoutingNumber"
-      tools:text="1.4 km"
       android:layout_centerVertical="true"
       android:layout_alignParentRight="true"
-      android:layout_alignParentEnd="true"/>
+      android:layout_alignParentEnd="true"
+      android:orientation="vertical"
+    >
+
+    <TextView
+        android:id="@+id/tv__total_distance"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:textAppearance="@style/MwmTextAppearance.RoutingNumber"
+        tools:text="1.4 km"
+        android:layout_gravity="right"/>
+
+    <TextView
+        android:id="@+id/textMissionTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:textAppearance="@style/MwmTextAppearance.RoutingNumber"
+        tools:text="00:00:00"
+        android:layout_gravity="right"/>
+    />
+
+  </LinearLayout>
+
 </RelativeLayout>

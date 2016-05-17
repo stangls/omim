@@ -69,6 +69,10 @@
         android:name="com.parse.push.notification_icon"
         android:resource="@drawable/ic_notification"/>
 
+    <meta-data
+        android:name="io.fabric.ApiKey"
+        android:value="${FABRIC_API_KEY}"/>
+
     <activity
         android:name="com.mapswithme.maps.DownloadResourcesActivity"
         android:configChanges="orientation|screenLayout|screenSize"
@@ -79,90 +83,10 @@
         <category android:name="android.intent.category.LAUNCHER"/>
       </intent-filter>
 
-      <!-- standard "geo" scheme -->
+      <!-- start tour from external app -->
       <intent-filter>
-        <action android:name="android.intent.action.VIEW"/>
-
+        <action android:name="com.mapswithme.maps.TOUR"/>
         <category android:name="android.intent.category.DEFAULT"/>
-        <category android:name="android.intent.category.BROWSABLE"/>
-
-        <data android:scheme="geo"/>
-      </intent-filter>
-
-      <intent-filter>
-        <action android:name="android.intent.action.VIEW"/>
-
-        <category android:name="android.intent.category.DEFAULT"/>
-        <category android:name="android.intent.category.BROWSABLE"/>
-
-        <data android:scheme="ge0"/>
-      </intent-filter>
-
-      <intent-filter>
-        <action android:name="android.intent.action.VIEW"/>
-
-        <category android:name="android.intent.category.DEFAULT"/>
-        <category android:name="android.intent.category.BROWSABLE"/>
-
-        <data
-            android:host="ge0.me"
-            android:scheme="http"/>
-      </intent-filter>
-
-      <intent-filter>
-        <action android:name="android.intent.action.VIEW"/>
-
-        <category android:name="android.intent.category.DEFAULT"/>
-        <category android:name="android.intent.category.BROWSABLE"/>
-
-        <data
-            android:host="maps.google.com"
-            android:scheme="https"/>
-        <data
-            android:host="maps.google.com"
-            android:scheme="http"/>
-      </intent-filter>
-
-      <!-- API CALL -->
-      <intent-filter>
-        <action android:name="com.mapswithme.maps.api.request"/>
-        <category android:name="android.intent.category.DEFAULT"/>
-      </intent-filter>
-
-      <intent-filter>
-        <action android:name="android.intent.action.VIEW"/>
-        <category android:name="android.intent.category.DEFAULT"/>
-        <data
-            android:host="*"
-            android:mimeType="application/vnd.google-earth.kmz"/>
-      </intent-filter>
-
-      <intent-filter>
-        <action android:name="android.intent.action.VIEW"/>
-        <category android:name="android.intent.category.DEFAULT"/>
-        <data
-            android:host="*"
-            android:mimeType="application/vnd.google-earth.kml+xml"/>
-      </intent-filter>
-
-      <intent-filter>
-        <action android:name="android.intent.action.VIEW"/>
-        <category android:name="android.intent.category.DEFAULT"/>
-        <data
-            android:host="*"
-            android:mimeType="*/*"
-            android:pathPattern=".*\\.kmz"
-            android:scheme="file"/>
-      </intent-filter>
-
-      <intent-filter>
-        <action android:name="android.intent.action.VIEW"/>
-        <category android:name="android.intent.category.DEFAULT"/>
-        <data
-            android:host="*"
-            android:mimeType="*/*"
-            android:pathPattern=".*\\.kml"
-            android:scheme="file"/>
       </intent-filter>
 
     </activity>
@@ -173,7 +97,7 @@
         android:windowSoftInputMode="stateAlwaysHidden|adjustPan"/>
 
     <activity
-        android:name="com.mapswithme.country.DownloadActivity"
+        android:name="com.mapswithme.maps.downloader.DownloaderActivity"
         android:configChanges="orientation|screenLayout|screenSize"
         android:label="@string/download_maps"
         android:parentActivityName="com.mapswithme.maps.MwmActivity">
@@ -188,7 +112,7 @@
         android:configChanges="orientation|screenLayout|screenSize"
         android:label="@string/search_map"
         android:parentActivityName="com.mapswithme.maps.MwmActivity"
-        android:windowSoftInputMode="stateVisible">
+        android:windowSoftInputMode="stateVisible|adjustNothing">
       <!-- The meta-data element is needed for versions lower than 4.1 -->
       <meta-data
           android:name="android.support.PARENT_ACTIVITY"
@@ -226,6 +150,54 @@
       <meta-data
           android:name="android.support.PARENT_ACTIVITY"
           android:value="com.mapswithme.maps.bookmarks.BookmarkCategoriesActivity"/>
+    </activity>
+
+    <activity
+      android:name="com.mapswithme.maps.editor.EditorActivity"
+      android:configChanges="orientation|screenLayout|screenSize"
+      android:label="@string/edit_place"
+      android:theme="@style/MwmTheme.EditorActivity"
+      android:parentActivityName="com.mapswithme.maps.MwmActivity">
+      <!-- The meta-data element is needed for versions lower than 4.1 -->
+      <meta-data
+        android:name="android.support.PARENT_ACTIVITY"
+        android:value="com.mapswithme.maps.MwmActivity"/>
+    </activity>
+
+    <activity
+      android:name="com.mapswithme.maps.editor.ProfileActivity"
+      android:parentActivityName="com.mapswithme.maps.settings.SettingsActivity">
+      <!-- The meta-data element is needed for versions lower than 4.1 -->
+      <meta-data
+        android:name="android.support.PARENT_ACTIVITY"
+        android:value="com.mapswithme.maps.settings.SettingsActivity"/>
+    </activity>
+
+    <activity
+      android:name="com.mapswithme.maps.editor.FeatureCategoryActivity"
+      android:parentActivityName="com.mapswithme.maps.MwmActivity">
+      <!-- The meta-data element is needed for versions lower than 4.1 -->
+      <meta-data
+        android:name="android.support.PARENT_ACTIVITY"
+        android:value="com.mapswithme.maps.MwmActivity"/>
+    </activity>
+
+    <activity
+      android:name="com.mapswithme.maps.editor.ReportActivity"
+      android:parentActivityName="com.mapswithme.maps.MwmActivity">
+      <!-- The meta-data element is needed for versions lower than 4.1 -->
+      <meta-data
+        android:name="android.support.PARENT_ACTIVITY"
+        android:value="com.mapswithme.maps.MwmActivity"/>
+    </activity>
+
+    <activity
+      android:name="com.mapswithme.maps.editor.OsmAuthActivity"
+      android:parentActivityName="com.mapswithme.maps.MwmActivity">
+      <!-- The meta-data element is needed for versions lower than 4.1 -->
+      <meta-data
+        android:name="android.support.PARENT_ACTIVITY"
+        android:value="com.mapswithme.maps.MwmActivity"/>
     </activity>
 
     <!-- facebook -->

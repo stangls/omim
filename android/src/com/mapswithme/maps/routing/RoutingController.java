@@ -1,6 +1,9 @@
 package com.mapswithme.maps.routing;
 
+import android.app.Activity;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.location.Location;
 import android.support.annotation.DimenRes;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
@@ -15,20 +18,18 @@ import android.widget.TextView;
 
 import java.io.File;
 import java.util.Calendar;
-import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
-import com.mapswithme.country.ActiveCountryTree;
-import com.mapswithme.country.StorageOptions;
 import com.mapswithme.maps.Framework;
-import com.mapswithme.maps.MapStorage;
 import com.mapswithme.maps.MwmApplication;
 import com.mapswithme.maps.R;
 import com.mapswithme.maps.bookmarks.data.MapObject;
+import com.mapswithme.maps.downloader.MapManager;
 import com.mapswithme.maps.location.LocationHelper;
 import com.mapswithme.util.Config;
+import com.mapswithme.util.StringUtils;
 import com.mapswithme.util.ThemeSwitcher;
-import com.mapswithme.util.ThemeUtils;
+import com.mapswithme.util.UiUtils;
 import com.mapswithme.util.Utils;
 import com.mapswithme.util.concurrency.UiThread;
 import com.mapswithme.util.statistics.AlohaHelper;
@@ -37,9 +38,11 @@ import com.mapswithme.util.statistics.Statistics;
 @android.support.annotation.UiThread
 public class RoutingController
 {
-  public static final int NO_SLOT = 0;
+  private static final int NO_SLOT = 0;
 
   private static final String TAG = "RCSTATE";
+  public static final String TOUR_FILE_NAME = "tour_fileName";
+  public static final String TOUR_POSITION = "tour_position";
 
   private enum State
   {
@@ -62,7 +65,7 @@ public class RoutingController
     void showSearch();
     void showRoutePlan(boolean show, @Nullable Runnable completionListener);
     void showNavigation(boolean show);
-    void showDownloader(boolean openDownloadedList);
+    void showDownloader(boolean openDownloaded);
     void updateMenu();
     void updatePoints();
 
@@ -92,15 +95,14 @@ public class RoutingController
   private boolean mHasContainerSavedState;
   private boolean mContainsCachedResult;
   private int mLastResultCode;
-  private MapStorage.Index[] mLastMissingCountries;
-  private MapStorage.Index[] mLastMissingRoutes;
+  private String[] mLastMissingMaps;
   private RoutingInfo mCachedRoutingInfo;
 
   @SuppressWarnings("FieldCanBeLocal")
   private final Framework.RoutingListener mRoutingListener = new Framework.RoutingListener()
   {
     @Override
-    public void onRoutingEvent(final int resultCode, final MapStorage.Index[] missingCountries, final MapStorage.Index[] missingRoutes)
+    public void onRoutingEvent(final int resultCode, @Nullable final String[] missingMaps)
     {
       Log.d(TAG, "onRoutingEvent(resultCode: " + resultCode + ")");
 
@@ -110,8 +112,7 @@ public class RoutingController
         public void run()
         {
           mLastResultCode = resultCode;
-          mLastMissingCountries = missingCountries;
-          mLastMissingRoutes = missingRoutes;
+          mLastMissingMaps = missingMaps;
           mContainsCachedResult = true;
 
           if (mLastResultCode == ResultCodesHelper.NO_ERROR)
@@ -145,6 +146,20 @@ public class RoutingController
     }
   };
 
+  private final Framework.TourChangeListener mTourChangedListener = new Framework.TourChangeListener() {
+    @Override
+    public void onTourChanged(boolean finished, int idx) {
+      SharedPreferences.Editor editor = MwmApplication.prefs().edit();
+      if (finished){
+        editor.remove(TOUR_FILE_NAME);
+        editor.remove(TOUR_POSITION);
+      }else{
+        saveTourInfo(null,idx);
+      }
+      editor.apply();
+    }
+  };
+
   private void processRoutingEvent()
   {
     if (!mContainsCachedResult ||
@@ -170,41 +185,15 @@ public class RoutingController
     mLastBuildProgress = 0;
     updateProgress();
 
-    RoutingErrorDialogFragment fragment = RoutingErrorDialogFragment.create(mLastResultCode, mLastMissingCountries, mLastMissingRoutes);
-    fragment.setListener(new RoutingErrorDialogFragment.Listener()
-    {
-      @Override
-      public void onDownload()
-      {
-        cancel();
-
-        ActiveCountryTree.downloadMapsForIndices(mLastMissingCountries, StorageOptions.MAP_OPTION_MAP_AND_CAR_ROUTING);
-        ActiveCountryTree.downloadMapsForIndices(mLastMissingRoutes, StorageOptions.MAP_OPTION_CAR_ROUTING);
-
-        if (mContainer != null)
-          mContainer.showDownloader(true);
-      }
-
-      @Override
-      public void onOk()
-      {
-        if (ResultCodesHelper.isDownloadable(mLastResultCode))
-        {
-          cancel();
-
-          if (mContainer != null)
-            mContainer.showDownloader(false);
-        }
-      }
-    });
-
-    fragment.show(mContainer.getActivity().getSupportFragmentManager(), fragment.getClass().getSimpleName());
+    RoutingErrorDialogFragment fragment = RoutingErrorDialogFragment.create(mLastResultCode, mLastMissingMaps);
+    fragment.show(mContainer.getActivity().getSupportFragmentManager(), RoutingErrorDialogFragment.class.getSimpleName());
   }
 
   private RoutingController()
   {
     Framework.nativeSetRoutingListener(mRoutingListener);
     Framework.nativeSetRouteProgressListener(mRoutingProgressListener);
+    Framework.nativeSetTourChangeListener(mTourChangedListener);
   }
 
   public static RoutingController get()
@@ -226,7 +215,7 @@ public class RoutingController
     Log.d(TAG, "[B] State: " + mState + ", BuildState: " + mBuildState + " -> " + newState);
     mBuildState = newState;
 
-    if (mBuildState == BuildState.BUILT && !(mStartPoint instanceof MapObject.MyPosition)) {
+    if (mBuildState == BuildState.BUILT && !MapObject.isOfType(MapObject.MY_POSITION, mStartPoint)) {
       Framework.nativeDisableFollowing();
     }
   }
@@ -250,18 +239,11 @@ public class RoutingController
 
   public void attach(@NonNull Container container)
   {
-    Log.d(TAG, "attach");
-
-    if (mContainer != null)
-      throw new IllegalStateException("Must be detached before attach()");
-
     mContainer = container;
   }
 
   public void detach()
   {
-    Log.d(TAG, "detach");
-
     mContainer = null;
     mStartButton = null;
   }
@@ -274,7 +256,9 @@ public class RoutingController
 
     mContainer.showNavigation(isNavigating());
     mContainer.updateMenu();
+    mContainer.updatePoints();
     processRoutingEvent();
+
   }
 
   public void onSaveState()
@@ -359,7 +343,7 @@ public class RoutingController
   {
     Log.d(TAG, "start");
 
-    if (!(mStartPoint instanceof MapObject.MyPosition))
+    if (!MapObject.isOfType(MapObject.MY_POSITION, mStartPoint))
     {
       Statistics.INSTANCE.trackEvent(Statistics.EventName.ROUTING_START_SUGGEST_REBUILD);
       AlohaHelper.logClick(AlohaHelper.ROUTING_START_SUGGEST_REBUILD);
@@ -367,10 +351,10 @@ public class RoutingController
       return;
     }
 
-    MapObject.MyPosition my = LocationHelper.INSTANCE.getMyPosition();
+    MapObject my = LocationHelper.INSTANCE.getMyPosition();
     if (my == null)
     {
-      mRoutingListener.onRoutingEvent(ResultCodesHelper.NO_POSITION, null, null);
+      mRoutingListener.onRoutingEvent(ResultCodesHelper.NO_POSITION, null);
       return;
     }
 
@@ -385,20 +369,21 @@ public class RoutingController
     ThemeSwitcher.restart();
 
     Framework.nativeFollowRoute();
+    LocationHelper.INSTANCE.restart();
   }
 
   private void suggestRebuildRoute()
   {
     final AlertDialog.Builder builder = new AlertDialog.Builder(mContainer.getActivity())
-                                            .setMessage(R.string.p2p_reroute_from_current)
-                                            .setCancelable(false)
-                                            .setNegativeButton(R.string.cancel, null);
+                                                       .setMessage(R.string.p2p_reroute_from_current)
+                                                       .setCancelable(false)
+                                                       .setNegativeButton(R.string.cancel, null);
 
     TextView titleView = (TextView)View.inflate(mContainer.getActivity(), R.layout.dialog_suggest_reroute_title, null);
     titleView.setText(R.string.p2p_only_from_current);
     builder.setCustomTitle(titleView);
 
-    if (mEndPoint instanceof MapObject.MyPosition)
+    if (MapObject.isOfType(MapObject.MY_POSITION, mEndPoint))
     {
       builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener()
       {
@@ -441,8 +426,7 @@ public class RoutingController
       return;
 
     mStartButton.setEnabled(mState == State.PREPARE && mBuildState == BuildState.BUILT);
-    mStartButton.setTextColor(ThemeUtils.getColor(mContainer.getActivity(), mStartButton.isEnabled() ? R.attr.routingStartButtonTextColor
-                                                                                                     : R.attr.routingStartButtonTextColorDisabled));
+    UiUtils.updateAccentButton(mStartButton);
   }
 
   public void setStartButton(@Nullable Button button)
@@ -466,6 +450,7 @@ public class RoutingController
 
     ThemeSwitcher.restart();
     Framework.nativeCloseRouting();
+    LocationHelper.INSTANCE.restart();
   }
 
   public boolean cancel()
@@ -556,7 +541,7 @@ public class RoutingController
       Framework.nativeSetRouteStartPoint(0.0, 0.0, false);
     else
       Framework.nativeSetRouteStartPoint(mStartPoint.getLat(), mStartPoint.getLon(),
-                                         !(mStartPoint instanceof MapObject.MyPosition));
+                                         !MapObject.isOfType(MapObject.MY_POSITION, mStartPoint));
 
     if (mEndPoint == null)
       Framework.nativeSetRouteEndPoint(0.0, 0.0, false);
@@ -564,7 +549,7 @@ public class RoutingController
       Framework.nativeSetRouteEndPoint(mEndPoint.getLat(), mEndPoint.getLon(), true);
   }
 
-  private void checkAndBuildRoute()
+  void checkAndBuildRoute()
   {
     if (mContainer != null)
     {
@@ -752,9 +737,6 @@ public class RoutingController
   {
     long minutes = TimeUnit.SECONDS.toMinutes(seconds) % 60;
     long hours = TimeUnit.SECONDS.toHours(seconds);
-    if (hours == 0 && minutes == 0)
-      // One minute is added to estimated time to destination point to prevent displaying zero minutes left
-      minutes++;
 
     return hours == 0 ? Utils.formatUnitsText(R.dimen.text_size_routing_number, unitsSize,
                                               String.valueOf(minutes), "min")
@@ -764,26 +746,89 @@ public class RoutingController
                                                                String.valueOf(minutes), "min"));
   }
 
-  public static String formatArrivalTime(int seconds)
+  static String formatArrivalTime(int seconds)
   {
     Calendar current = Calendar.getInstance();
+    current.set(Calendar.SECOND, 0);
     current.add(Calendar.SECOND, seconds);
-    return String.format(Locale.US, "%d:%02d", current.get(Calendar.HOUR_OF_DAY), current.get(Calendar.MINUTE));
+    return StringUtils.formatUsingUsLocale("%d:%02d", current.get(Calendar.HOUR_OF_DAY), current.get(Calendar.MINUTE));
   }
 
-  public void startTour() {
-    File tourFile = new File("/storage/emulated/legacy/MapsWithMe/tour.xml");
+  public boolean checkMigration(Activity activity)
+  {
+    if (!MapManager.nativeIsLegacyMode())
+      return false;
+
+    if (!isNavigating() && !isPlanning())
+      return false;
+
+    new AlertDialog.Builder(activity)
+        .setTitle(R.string.migrate_title)
+        .setMessage(R.string.no_migration_during_navigation)
+        .setPositiveButton(android.R.string.ok, null)
+        .show();
+
+    return true;
+  }
+
+  public boolean startTour(String tourFileName, final int activeTourPosition) {
+    final File tourFile = new File(tourFileName);
     Log.d("RoutingController", "searching for file " + tourFile);
     if (tourFile.exists()) {
+      saveTourInfo(tourFileName, activeTourPosition);
+      // tour-start
       Log.d(TAG, "startTour: initializing RoutingController");
       setState(State.PREPARE);
       setBuildState(BuildState.BUILDING);
       setStartFromMyPosition();
       setEndPoint(null);
-      Log.d(TAG, "startTour: native load tour");
-      Framework.nativeLoadTour(tourFile.getAbsolutePath());
-      Log.d(TAG, "startTour: ok");
+      Log.d(TAG, "startTour: native load tour (after location is well known)");
+      LocationHelper.INSTANCE.addLocationListener(new LocationHelper.LocationListener() {
+        public int counter = 5;
+
+        @Override
+        public void onLocationUpdated(Location l) {
+          if (counter--<=0){
+            Log.d(TAG, "startTour: location known. native load tour");
+            Framework.nativeLoadTour(tourFile.getAbsolutePath(), activeTourPosition);
+            LocationHelper.INSTANCE.removeLocationListener(this);
+          }
+        }
+        @Override
+        public void onCompassUpdated(long time, double magneticNorth, double trueNorth, double accuracy) {}
+        @Override
+        public void onLocationError(int errorCode) {}
+      },true);
+      return true;
+    }else{
+      Log.e(TAG, "startTour: tour does not exist" );
     }
+    return false;
+  }
+
+  /**
+   * saves given tour-nformation to persistent storage.
+   * <p>The tour will not be started.</p>
+   **/
+  public static void saveTourInfo(@Nullable String tourFileName, int tourPosition) {
+    SharedPreferences prefs = MwmApplication.prefs();
+    SharedPreferences.Editor edit = prefs.edit();
+    if (tourFileName!=null){
+      edit.putString(TOUR_FILE_NAME,tourFileName);
+      Log.d(TAG, "saveTourInfo: "+tourFileName+" @ "+tourPosition);
+    }
+    edit.putInt(TOUR_POSITION,tourPosition);
+    edit.apply();
+  }
+
+  public static boolean continueSavedTour() {
+    SharedPreferences prefs = MwmApplication.prefs();
+    String tourFileName = prefs.getString(TOUR_FILE_NAME, null);
+    if (tourFileName!=null){
+      int tourPosition = prefs.getInt(TOUR_POSITION, 0);
+      return RoutingController.get().startTour(tourFileName,tourPosition);
+    }
+    return false;
   }
 
 }

@@ -14,28 +14,28 @@
 
 namespace
 {
-  void ReadCommon(Reader * classificator,
-                  Reader * types)
+void ReadCommon(unique_ptr<Reader> classificator,
+                unique_ptr<Reader> types)
+{
+  Classificator & c = classif();
+  c.Clear();
+
   {
-    Classificator & c = classif();
-    c.Clear();
+    //LOG(LINFO, ("Reading classificator"));
+    ReaderStreamBuf buffer(move(classificator));
 
-    {
-      //LOG(LINFO, ("Reading classificator"));
-      ReaderStreamBuf buffer(classificator);
-
-      istream s(&buffer);
-      c.ReadClassificator(s);
-    }
-
-    {
-      //LOG(LINFO, ("Reading types mapping"));
-      ReaderStreamBuf buffer(types);
-
-      istream s(&buffer);
-      c.ReadTypesMapping(s);
-    }
+    istream s(&buffer);
+    c.ReadClassificator(s);
   }
+
+  {
+    //LOG(LINFO, ("Reading types mapping"));
+    ReaderStreamBuf buffer(move(types));
+
+    istream s(&buffer);
+    c.ReadTypesMapping(s);
+  }
+}
 }
 
 namespace classificator
@@ -45,25 +45,16 @@ namespace classificator
     LOG(LDEBUG, ("Reading of classificator started"));
 
     Platform & p = GetPlatform();
+    StyleReader & reader = GetStyleReader();
 
-    MapStyle const originMapStyle = GetStyleReader().GetCurrentStyle();
-
-    for (size_t i = 0; i < MapStyleCount; ++i)
+    for (auto style : { MapStyleLight, MapStyleDark, MapStyleClear })
     {
-      MapStyle const mapStyle = static_cast<MapStyle>(i);
-      // Read the merged style only if it was requested.
-      if (mapStyle != MapStyleMerged || originMapStyle == MapStyleMerged)
-      {
-        GetStyleReader().SetCurrentStyle(mapStyle);
+      reader.SetCurrentStyle(style);
 
-        ReadCommon(p.GetReader("classificator.txt"),
-                   p.GetReader("types.txt"));
+      ReadCommon(p.GetReader("classificator.txt"), p.GetReader("types.txt"));
 
-        drule::LoadRules();
-      }
+      drule::LoadRules();
     }
-
-    GetStyleReader().SetCurrentStyle(originMapStyle);
 
     LOG(LDEBUG, ("Reading of classificator finished"));
   }

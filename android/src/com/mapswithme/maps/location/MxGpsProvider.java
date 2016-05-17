@@ -11,7 +11,6 @@ import com.mapswithme.maps.MwmApplication;
 import com.mapswithme.util.LocationUtils;
 import com.mobidat.wp2.gpsProvider.GPS;
 import com.mobidat.wp2.gpsProvider.GPSInfo;
-import com.mobidat.wp2.gpsProvider.IGpsReceiver;
 import com.mobidat.wp2.gpsProvider.ILocationReceiver;
 
 /**
@@ -60,13 +59,10 @@ public class MxGpsProvider extends BaseLocationProvider implements ILocationRece
     public void onLocationChanged(final Location location) {
         if (location==null) return;
         // ensure we run on the original thread to avoid synchronization issues and CalledFromWrongThreadException
-        mHandler.sendMessage( Message.obtain( mHandler, new Runnable() {
-            @Override
-            public void run() {
+        mHandler.post(new Runnable() {public void run() {
                 LocationHelper.INSTANCE.initMagneticField(location); // maydo
-                LocationHelper.INSTANCE.setLastLocation(location);
-            }
-        }));/*
+                LocationHelper.INSTANCE.saveLocation(location);
+        }});/*
         if (isLocationBetterThanLast(location))
             LocationHelper.INSTANCE.setLastLocation(location);
         else

@@ -57,7 +57,7 @@ public:
                     int minVisibleScale, uint8_t rank, CaptionDescription const & captions,
                     float posZ);
 
-  void operator()(m2::PointD const & point);
+  void operator()(m2::PointD const & point, bool hasArea);
   void ProcessRule(Stylist::TRuleWrapper const & rule);
   void Finish();
 
@@ -66,6 +66,8 @@ protected:
 
 private:
   bool m_hasPoint;
+  bool m_hasArea;
+  bool m_createdByEditor;
   double m_symbolDepth;
   double m_circleDepth;
   SymbolRuleProto const * m_symbolRule;
@@ -78,8 +80,8 @@ class ApplyAreaFeature : public ApplyPointFeature
   using TBase = ApplyPointFeature;
 
 public:
-  ApplyAreaFeature(TInsertShapeFn const & insertShape, FeatureID const & id, float minPosZ, float posZ,
-                   int minVisibleScale, uint8_t rank, CaptionDescription const & captions);
+  ApplyAreaFeature(TInsertShapeFn const & insertShape, FeatureID const & id, m2::RectD tileRect, float minPosZ,
+                   float posZ, int minVisibleScale, uint8_t rank, CaptionDescription const & captions);
 
   using TBase::operator ();
 
@@ -103,6 +105,7 @@ private:
   vector<pair<TEdge, int>> m_edges;
   float const m_minPosZ;
   bool const m_isBuilding;
+  m2::RectD m_tileRect;
 };
 
 class ApplyLineFeature : public BaseApplyFeature
@@ -110,7 +113,7 @@ class ApplyLineFeature : public BaseApplyFeature
   using TBase = BaseApplyFeature;
 
 public:
-  ApplyLineFeature(TInsertShapeFn const & insertShape, FeatureID const & id,
+  ApplyLineFeature(TInsertShapeFn const & insertShape, FeatureID const & id, m2::RectD tileRect,
                    int minVisibleScale, uint8_t rank, CaptionDescription const & captions,
                    double currentScaleGtoP, bool simplify, size_t pointsCount);
 
@@ -121,6 +124,7 @@ public:
 
 private:
   m2::SharedSpline m_spline;
+  vector<m2::SharedSpline> m_clippedSplines;
   double m_currentScaleGtoP;
   double m_sqrScale;
   m2::PointD m_lastAddedPoint;
@@ -128,6 +132,7 @@ private:
   size_t m_initialPointsCount;
   double m_shieldDepth;
   ShieldRuleProto const * m_shieldRule;
+  m2::RectD m_tileRect;
 
 #ifdef CALC_FILTERED_POINTS
   int m_readedCount;

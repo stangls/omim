@@ -236,16 +236,15 @@ namespace location
     double GetDistanceToLastNonCrossingFromBegin() const { return m_distanceToLastNonCrossingFromBegin; }
   };
 
-  // Do not change the order and values
   enum EMyPositionMode
   {
-    MODE_UNKNOWN_POSITION = 0x0,
-    MODE_PENDING_POSITION = 0x1,
-    MODE_NOT_FOLLOW = 0x2,
-    MODE_FOLLOW = 0x3,
-    MODE_ROTATE_AND_FOLLOW = 0x4,
+    PendingPosition = 0,
+    NotFollowNoPosition,
+    NotFollow,
+    Follow,
+    FollowAndRotate
   };
 
-  using TMyPositionModeChanged = function<void (location::EMyPositionMode)>;
+  using TMyPositionModeChanged = function<void (location::EMyPositionMode, bool)>;
 
 } // namespace location
