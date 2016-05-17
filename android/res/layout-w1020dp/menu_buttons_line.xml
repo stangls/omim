@@ -27,44 +27,16 @@
       android:layout_height="match_parent"
       android:src="@android:drawable/ic_menu_rotate" />
 
-  <ImageView
-    android:id="@+id/p2p"
-    style="@style/MwmTheme.Menu.Line.Button"
-    android:src="@drawable/ic_menu_point_to_point"/>
-
-  <ImageView
-    android:id="@+id/search"
-    style="@style/MwmTheme.Menu.Line.Button"
-    android:src="@drawable/ic_menu_search"/>
-
-  <ImageView
-    android:id="@+id/bookmarks"
-    style="@style/MwmTheme.Menu.Line.Button"
-    android:src="@drawable/ic_menu_bookmarks"/>
-
-  <ImageView
-    android:id="@+id/share"
-    style="@style/MwmTheme.Menu.Line.Button"
-    android:src="@drawable/ic_menu_share"/>
-
-  <ImageView
-    android:id="@+id/showcase"
-    style="@style/MwmTheme.Menu.Line.Button"
-    android:src="@drawable/ic_menu_showcase"/>
-
   <Space
     android:layout_width="0dp"
     android:layout_height="match_parent"
     android:layout_weight="1"/>
 
-  <ImageView
-    android:id="@+id/add_place"
-    style="@style/MwmTheme.Menu.Line.Button"
-    android:src="@drawable/ic_plus"/>
-
   <FrameLayout
     android:layout_width="wrap_content"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:visibility="gone"
+  >
     <ImageView
       android:id="@+id/download_maps"
       style="@style/MwmTheme.Menu.Line.Button"

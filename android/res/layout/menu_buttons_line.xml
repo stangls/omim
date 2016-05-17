@@ -29,39 +29,6 @@
         android:layout_weight="0.31" />
 
     <Space
-        android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_weight="1" />
-
-    <ImageView
-      android:id="@+id/p2p"
-      style="@style/MwmTheme.Menu.Line.Button"
-      android:src="@drawable/ic_menu_point_to_point"
-      android:tag="@string/tag_menu_collapse"/>
-
-    <Space
-      android:layout_width="0dp"
-      android:layout_height="match_parent"
-      android:layout_weight="1"/>
-
-    <ImageView
-      android:id="@+id/search"
-      style="@style/MwmTheme.Menu.Line.Button"
-      android:src="@drawable/ic_menu_search"
-      android:tag="@string/tag_menu_collapse"/>
-
-    <Space
-      android:layout_width="0dp"
-      android:layout_height="match_parent"
-      android:layout_weight="1"/>
-
-    <ImageView
-      android:id="@+id/bookmarks"
-      style="@style/MwmTheme.Menu.Line.Button"
-      android:src="@drawable/ic_menu_bookmarks"
-      android:tag="@string/tag_menu_collapse"/>
-
-    <Space
       android:layout_width="0dp"
       android:layout_height="match_parent"
       android:layout_weight="1"/>
@@ -75,7 +42,8 @@
   <FrameLayout
     android:layout_width="@dimen/menu_line_button_width_edge"
     android:layout_height="match_parent"
-    android:layout_gravity="end">
+    android:layout_gravity="end"
+    android:visibility="gone">
     <include layout="@layout/menu_news_marker"/>
   </FrameLayout>
 </FrameLayout>

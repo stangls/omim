@@ -942,6 +942,8 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
     mMainMenu.onResume();
     mOnmapDownloader.onResume();
+
+    timerThread.update();
   }
 
   @Override
@@ -1098,7 +1100,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     if (!mIsFragmentContainer)
       mRoutingPlanInplaceController.setStartButton();
     activityIsVisible.set(true);
-    timerThread.notify();
+    timerThread.update();
   }
 
   @Override
