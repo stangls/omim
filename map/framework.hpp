@@ -574,6 +574,8 @@ public:
   using TRouteBuildingCallback = function<void(routing::IRouter::ResultCode,
                                                storage::TCountriesVec const &)>;
   using TRouteProgressCallback = function<void(float)>;
+  // parameters: finished, position_index
+  typedef function<void(bool, size_t)> TTourChangeCallback;
 
   /// @name Routing mode
   //@{
@@ -589,7 +591,7 @@ public:
   // FollowRoute has a bug where the router follows the route even if the method hads't been called.
   // This method was added because we do not want to break the behaviour that is familiar to our users.
   bool DisableFollowMode();
-  /// @TODO(AlexZ): Warning! These two routing callbacks are the only callbacks which are not called in the main thread context.
+  /// @TODO(AlexZ): Warning! These three routing callbacks are the only callbacks which are not called in the main thread context.
   /// UI code should take it into an account. This is a result of current implementation, that can be improved:
   /// Drape core calls some RunOnGuiThread with "this" pointers, and it causes crashes on Android, when Drape engine is destroyed
   /// while switching between activities. Current workaround cleans all callbacks when destroying Drape engine
@@ -598,6 +600,8 @@ public:
   void SetRouteBuildingListener(TRouteBuildingCallback const & buildingCallback) { m_routingCallback = buildingCallback; }
   /// See warning above.
   void SetRouteProgressListener(TRouteProgressCallback const & progressCallback) { m_progressCallback = progressCallback; }
+  /// See warning above.
+  void SetTourChangeListener(TTourChangeCallback const & tourChangeListener) { m_tourChangeListener = tourChangeListener; }
   void FollowRoute();
   void CloseRouting();
   void GetRouteFollowingInfo(location::FollowingInfo & info) const { m_routingSession.GetRouteFollowingInfo(info); }
@@ -634,7 +638,7 @@ public:
   void SetRouteStartPoint(m2::PointD const & pt, bool isValid);
   void SetRouteFinishPoint(m2::PointD const & pt, bool isValid);
 
-  void LoadTour( string const & filePath );
+  void LoadTour( string const & filePath, int position );
   bool IsTourRouting(){
       return m_routingSession.hasTour();
   }
@@ -669,6 +673,7 @@ private:
 
   TRouteBuildingCallback m_routingCallback;
   TRouteProgressCallback m_progressCallback;
+  TTourChangeCallback m_tourChangeListener = 0;
   routing::RouterType m_currentRouterType;
   //@}
 

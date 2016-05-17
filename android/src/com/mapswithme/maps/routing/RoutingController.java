@@ -2,6 +2,8 @@ package com.mapswithme.maps.routing;
 
 import android.app.Activity;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.location.Location;
 import android.support.annotation.DimenRes;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
@@ -39,6 +41,8 @@ public class RoutingController
   private static final int NO_SLOT = 0;
 
   private static final String TAG = "RCSTATE";
+  public static final String TOUR_FILE_NAME = "tour_fileName";
+  public static final String TOUR_POSITION = "tour_position";
 
   private enum State
   {
@@ -142,6 +146,20 @@ public class RoutingController
     }
   };
 
+  private final Framework.TourChangeListener mTourChangedListener = new Framework.TourChangeListener() {
+    @Override
+    public void onTourChanged(boolean finished, int idx) {
+      SharedPreferences.Editor editor = MwmApplication.prefs().edit();
+      if (finished){
+        editor.remove(TOUR_FILE_NAME);
+        editor.remove(TOUR_POSITION);
+      }else{
+        saveTourInfo(null,idx);
+      }
+      editor.apply();
+    }
+  };
+
   private void processRoutingEvent()
   {
     if (!mContainsCachedResult ||
@@ -175,6 +193,7 @@ public class RoutingController
   {
     Framework.nativeSetRoutingListener(mRoutingListener);
     Framework.nativeSetRouteProgressListener(mRoutingProgressListener);
+    Framework.nativeSetTourChangeListener(mTourChangedListener);
   }
 
   public static RoutingController get()
@@ -239,6 +258,7 @@ public class RoutingController
     mContainer.updateMenu();
     mContainer.updatePoints();
     processRoutingEvent();
+
   }
 
   public void onSaveState()
@@ -751,19 +771,64 @@ public class RoutingController
     return true;
   }
 
-  public void startTour() {
-    File tourFile = new File("/storage/emulated/legacy/MapsWithMe/tour.xml");
+  public boolean startTour(String tourFileName, final int activeTourPosition) {
+    final File tourFile = new File(tourFileName);
     Log.d("RoutingController", "searching for file " + tourFile);
     if (tourFile.exists()) {
+      saveTourInfo(tourFileName, activeTourPosition);
+      // tour-start
       Log.d(TAG, "startTour: initializing RoutingController");
       setState(State.PREPARE);
       setBuildState(BuildState.BUILDING);
       setStartFromMyPosition();
       setEndPoint(null);
-      Log.d(TAG, "startTour: native load tour");
-      Framework.nativeLoadTour(tourFile.getAbsolutePath());
-      Log.d(TAG, "startTour: ok");
+      Log.d(TAG, "startTour: native load tour (after location is well known)");
+      LocationHelper.INSTANCE.addLocationListener(new LocationHelper.LocationListener() {
+        public int counter = 5;
+
+        @Override
+        public void onLocationUpdated(Location l) {
+          if (counter--<=0){
+            Log.d(TAG, "startTour: location known. native load tour");
+            Framework.nativeLoadTour(tourFile.getAbsolutePath(), activeTourPosition);
+            LocationHelper.INSTANCE.removeLocationListener(this);
+          }
+        }
+        @Override
+        public void onCompassUpdated(long time, double magneticNorth, double trueNorth, double accuracy) {}
+        @Override
+        public void onLocationError(int errorCode) {}
+      },true);
+      return true;
+    }else{
+      Log.e(TAG, "startTour: tour does not exist" );
     }
+    return false;
+  }
+
+  /**
+   * saves given tour-nformation to persistent storage.
+   * <p>The tour will not be started.</p>
+   **/
+  public static void saveTourInfo(@Nullable String tourFileName, int tourPosition) {
+    SharedPreferences prefs = MwmApplication.prefs();
+    SharedPreferences.Editor edit = prefs.edit();
+    if (tourFileName!=null){
+      edit.putString(TOUR_FILE_NAME,tourFileName);
+      Log.d(TAG, "saveTourInfo: "+tourFileName+" @ "+tourPosition);
+    }
+    edit.putInt(TOUR_POSITION,tourPosition);
+    edit.apply();
+  }
+
+  public static boolean continueSavedTour() {
+    SharedPreferences prefs = MwmApplication.prefs();
+    String tourFileName = prefs.getString(TOUR_FILE_NAME, null);
+    if (tourFileName!=null){
+      int tourPosition = prefs.getInt(TOUR_POSITION, 0);
+      return RoutingController.get().startTour(tourFileName,tourPosition);
+    }
+    return false;
   }
 
 }

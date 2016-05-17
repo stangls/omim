@@ -30,6 +30,9 @@ apply plugin: 'com.android.application'
 apply from: 'secure.properties'
 apply plugin: 'io.fabric'
 
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+
 dependencies {
   // android support libs
   compile 'com.android.support:support-v4:22.2.1'
@@ -41,6 +44,9 @@ dependencies {
   compile 'com.google.android.gms:play-services-location:8.4.0'
   compile 'com.google.android.gms:play-services-analytics:8.4.0'
   compile 'com.google.android.gms:play-services-plus:8.4.0'
+  // kotlin
+  compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+  compile 'com.pawegio.kandroid:kandroid:0.5.0@aar'
   // crash reporting
   compile 'net.hockeyapp.android:HockeySDK:3.7.1'
   compile('com.crashlytics.sdk.android:crashlytics:2.5.5@aar') { transitive = true }
@@ -58,8 +64,19 @@ dependencies {
   compile 'org.solovyev.android.views:linear-layout-manager:0.5@aar'
   compile 'com.timehop.stickyheadersrecyclerview:library:0.4.3@aar'
 
-  // mobiworx gps provider
+  // mobiworx
   compile 'com.mobidat.wp2:gpsprovider:1.7.6@aar'
+  compile('com.mobidat.wp2:missionservice:1.5.8@aar') { transitive = true }
+}
+
+buildscript {
+    ext.kotlin_version = '1.0.1-2'
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+    }
 }
 
 def getDate() {
@@ -114,7 +131,7 @@ android {
       versionName = android.defaultConfig.versionName + '-Google'
       buildConfigField 'String', 'SUPPORT_MAIL', '"googleplay@maps.me"'
     }
-
+/*
     samsung {
       versionName = android.defaultConfig.versionName + '-Samsung'
       buildConfigField 'String', 'REVIEW_URL', '"samsungapps://ProductDetail/com.mapswithme.maps.pro"'
@@ -135,12 +152,12 @@ android {
       buildConfigField 'String', 'REVIEW_URL', '"yastore://details?id=com.mapswithme.maps.pro"'
       android.sourceSets.yandex.assets.srcDirs = ['flavors/mwm-ttf-assets']
     }
-
+*/
     preinstall {
       versionName = android.defaultConfig.versionName + '-Preinstall'
       buildConfigField 'String', 'SUPPORT_MAIL', '"googleplay@maps.me"'
     }
-
+/*
     cipherlab {
       versionName = android.defaultConfig.versionName + '-CipherLab'
       android.sourceSets.cipherlab.assets.srcDirs = ['flavors/mwm-ttf-assets']
@@ -156,13 +173,13 @@ android {
       versionName = android.defaultConfig.versionName + '-Lenovo'
       android.sourceSets.lenovo.assets.srcDirs = ['flavors/mwm-ttf-assets']
     }
-
+*/
     web {
       versionName = android.defaultConfig.versionName + '-Web'
       buildConfigField 'String', 'SUPPORT_MAIL', '"googleplay@maps.me"'
       android.sourceSets.web.assets.srcDirs = ['flavors/mwm-ttf-assets']
     }
-
+/*
     nineApp {
       versionName = android.defaultConfig.versionName + '-9app'
       buildConfigField 'String', 'REVIEW_URL', '"http://www.9apps.com/android-apps/mapswithme-maps-pro/"'
@@ -205,7 +222,7 @@ android {
       versionName = android.defaultConfig.versionName + '-Blackberry'
       android.sourceSets.blackberry.assets.srcDirs = ['flavors/mwm-ttf-assets']
       buildConfigField 'String', 'REVIEW_URL', '"https://appworld.blackberry.com/webstore/content/51013892"'
-    }
+    }*/
   }
 
   // Currently (as of 1.2.3 gradle plugin) ABI filters aren't supported inside of product flavors, so we cannot generate splitted builds only for Google build.

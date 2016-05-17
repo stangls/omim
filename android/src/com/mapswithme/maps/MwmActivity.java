@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
@@ -25,10 +26,12 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.Serializable;
 import java.util.Stack;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.mapswithme.maps.Framework.MapObjectListener;
 import com.mapswithme.maps.activity.CustomNavigateUpListener;
@@ -89,6 +92,10 @@ import com.mapswithme.util.sharing.SharingHelper;
 import com.mapswithme.util.statistics.AlohaHelper;
 import com.mapswithme.util.statistics.MytargetHelper;
 import com.mapswithme.util.statistics.Statistics;
+import com.mobidat.wp2.missionrecording.TimerThread;
+
+import org.jetbrains.annotations.NotNull;
+
 import ru.mail.android.mytarget.nativeads.NativeAppwallAd;
 import ru.mail.android.mytarget.nativeads.banners.NativeAppwallBanner;
 
@@ -105,6 +112,8 @@ public class MwmActivity extends BaseMwmFragmentActivity
 {
 
   private static final String TAG = MwmActivity.class.getName();
+
+  public final AtomicBoolean activityIsVisible = new AtomicBoolean(false);
 
   public static final String EXTRA_TASK = "map_task";
   private static final String EXTRA_CONSUMED = "mwm.extra.intent.processed";
@@ -157,6 +166,17 @@ public class MwmActivity extends BaseMwmFragmentActivity
   // The first launch after process started. Used to skip "Not follow, no position" state and to run locator.
   private static boolean sColdStart = true;
   private static boolean sLocationStopped;
+  private TimerThread timerThread = new TimerThread(this);
+
+  @NotNull
+  public TextView getTextMissionTime() {
+    View v = mMapFragment.getView();
+    if (v!=null){
+      return (TextView) v.findViewById(R.id.textMissionTime);
+    }else{
+      return null;
+    }
+  }
 
   public interface LeftAnimationTrackListener
   {
@@ -201,6 +221,8 @@ public class MwmActivity extends BaseMwmFragmentActivity
     checkKitkatMigrationMove();
 
     runTasks();
+
+    RoutingController.continueSavedTour();
   }
 
   private void runTasks()
@@ -339,6 +361,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
   public void onCreate(@Nullable Bundle savedInstanceState)
   {
     super.onCreate(savedInstanceState);
+    activityIsVisible.set(false);
 
     mIsFragmentContainer = getResources().getBoolean(R.bool.tabletLayout);
 
@@ -533,7 +556,8 @@ public class MwmActivity extends BaseMwmFragmentActivity
       @Override
       public void run() {
         //RoutingController.get().prepare(endPoint);
-        RoutingController.get().startTour();
+
+        RoutingController.get().startTour("/storage/emulated/legacy/mobidat/tour.xml", 0);
 
         if (mPlacePage.isDocked() || !mPlacePage.isFloating())
           closePlacePage();
@@ -968,6 +992,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
     if (!RoutingController.get().isNavigating())
     {
+      /*
       mFirstStart = FirstStartFragment.showOn(this);
       if (mFirstStart)
       {
@@ -990,6 +1015,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
         else
           LikesManager.INSTANCE.showDialogs(this);
       }
+      */
     }
 
     RoutingController.get().restore();
@@ -1071,12 +1097,15 @@ public class MwmActivity extends BaseMwmFragmentActivity
     RoutingController.get().attach(this);
     if (!mIsFragmentContainer)
       mRoutingPlanInplaceController.setStartButton();
+    activityIsVisible.set(true);
+    timerThread.notify();
   }
 
   @Override
   protected void onStop()
   {
     super.onStop();
+    activityIsVisible.set(false);
     mMytargetHelper.cancel();
     RoutingController.get().detach();
   }

@@ -43,6 +43,12 @@ public class Framework
     void onRouteBuildingProgress(float progress);
   }
 
+  @SuppressWarnings("unused")
+  public interface TourChangeListener
+  {
+    void onTourChanged(boolean finished, int idx);
+  }
+
   public static class Params3dMode
   {
     public boolean enabled;
@@ -140,6 +146,7 @@ public class Framework
   public static native void nativeSetRoutingListener(RoutingListener listener);
 
   public static native void nativeSetRouteProgressListener(RoutingProgressListener listener);
+  public static native void nativeSetTourChangeListener(TourChangeListener listener);
 
   public static native void nativeShowCountry(String countryId, boolean zoomToDownloadButton);
 
@@ -178,7 +185,7 @@ public class Framework
 
   /////////////////// TOUR routing
 
-  public native static void nativeLoadTour(String filePath);
+  public native static void nativeLoadTour(String filePath, int activeTourPosition);
   public native static boolean nativeIsTourRouting();
 
   /////////////////// end TOUR routing

@@ -3,6 +3,7 @@ package com.mapswithme.maps;
 import android.annotation.SuppressLint;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.location.Location;
 import android.net.Uri;
@@ -22,6 +23,7 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.List;
+import java.util.Objects;
 
 import com.mapswithme.maps.MwmActivity.MapTask;
 import com.mapswithme.maps.MwmActivity.OpenUrlTask;
@@ -32,6 +34,7 @@ import com.mapswithme.maps.bookmarks.data.BookmarkManager;
 import com.mapswithme.maps.downloader.CountryItem;
 import com.mapswithme.maps.downloader.MapManager;
 import com.mapswithme.maps.location.LocationHelper;
+import com.mapswithme.maps.routing.RoutingController;
 import com.mapswithme.maps.search.SearchEngine;
 import com.mapswithme.util.ConnectionState;
 import com.mapswithme.util.Constants;
@@ -48,6 +51,8 @@ public class DownloadResourcesActivity extends BaseMwmFragmentActivity
   private static final String TAG = DownloadResourcesActivity.class.getName();
 
   static final String EXTRA_COUNTRY = "country";
+  static final String EXTRA_TOUR = "tourFilename";
+  static final String EXTRA_TOUR_FROM_START = "tourFirstStart";
   static final String EXTRA_AUTODOWNLOAD = "autodownload";
 
   // Error codes, should match the same codes in JNI
@@ -471,6 +476,24 @@ public class DownloadResourcesActivity extends BaseMwmFragmentActivity
     if (intent == null)
       return false;
 
+    // check if we have an active tour
+
+    // process tour-information from intent (if available)
+    if (intent.hasExtra(EXTRA_TOUR)){
+      String activeTourFileName = MwmApplication.prefs().getString("tour_fileName", null);
+      String tourFileName = intent.getStringExtra(EXTRA_TOUR);
+      if (!Objects.equals(tourFileName, activeTourFileName)){
+        // when the tour changes we start  from scratch
+        RoutingController.saveTourInfo(tourFileName,0);
+      }else{
+        // when the tour did not change, we still might want to start from scratch
+        if (intent.getBooleanExtra(EXTRA_TOUR_FROM_START,false)){
+          RoutingController.saveTourInfo(null,0);
+        }
+      }
+    }
+
+    // process other information (orginal maps.me intent processors)
     for (final IntentProcessor ip : mIntentProcessors)
       if (ip.isSupported(intent))
       {

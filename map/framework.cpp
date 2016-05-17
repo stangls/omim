@@ -357,7 +357,17 @@ Framework::Framework()
 #else
   routing::RouterDelegate::TPointCheckCallback const routingVisualizerFn = nullptr;
 #endif
-  m_routingSession.Init(routingStatisticsFn, routingVisualizerFn);
+
+  auto const tourChangeCallbackFn = [this](bool finished,size_t idx)
+  {
+    if (m_tourChangeListener!=0){
+        m_tourChangeListener(finished,idx);
+    }else{
+        LOG(LWARNING, ("Tour change can not be sent to app: No callback function set!"));
+    }
+  };
+
+  m_routingSession.Init(routingStatisticsFn, routingVisualizerFn, tourChangeCallbackFn);
 
   SetRouterImpl(RouterType::Vehicle);
 
@@ -2139,7 +2149,7 @@ void Framework::BuildRoute(m2::PointD const & finish, uint32_t timeoutSec)
   BuildRoute(start, finish, timeoutSec);
 }
 
-void Framework::LoadTour( string const & filePath ){
+void Framework::LoadTour(string const & filePath , int position){
     ASSERT_THREAD_CHECKER(m_threadChecker, ("LoadTour",filePath));
     ASSERT(m_drapeEngine != nullptr, ());
 
@@ -2153,7 +2163,9 @@ void Framework::LoadTour( string const & filePath ){
       return;
     }
     SetRouter(routing::RouterType::Vehicle);
-    BuildRoute(start,m2::PointD::Zero(),move(make_unique<Tour>(filePath)),5);
+    drape_ptr<Tour> tour = make_unique<Tour>(filePath);
+    tour->UpdateCurrentPosition(position);
+    BuildRoute(start,m2::PointD::Zero(),move(tour),5);
 }
 
 void Framework::BuildRoute(m2::PointD const & start, m2::PointD const & finish, uint32_t timeoutSec)

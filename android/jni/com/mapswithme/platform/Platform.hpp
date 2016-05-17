@@ -28,6 +28,9 @@ namespace android
     bool HasAvailableSpaceForWriting(uint64_t size) const;
     void RunOnGuiThread(TFunctor const & fn);
 
+    void TourChanged(bool finished, size_t index);
+
+
     static Platform & Instance();
 
   private:

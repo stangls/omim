@@ -68,10 +68,14 @@ public:
   typedef function<void(Route const &, IRouter::ResultCode)> TReadyCallback;
   typedef function<void(float)> TProgressCallback;
 
+  // parameters: finished, position_index
+  typedef function<void(bool, size_t)> TTourChangeCallback;
+
   RoutingSession();
 
   void Init(TRoutingStatisticsCallback const & routingStatisticsFn,
-            RouterDelegate::TPointCheckCallback const & pointCheckCallback);
+            RouterDelegate::TPointCheckCallback const & pointCheckCallback,
+            const TTourChangeCallback &tourChangeCallback);
 
   void SetRouter(unique_ptr<IRouter> && router, unique_ptr<OnlineAbsentCountriesFetcher> && fetcher);
 
@@ -198,6 +202,8 @@ private:
   size_t m_tourStartIndexInRoute;
   // Index of "point nav" in m_tour
   size_t m_tourStartIndex;
+  // callback for changes on the tour
+  TTourChangeCallback m_tourChangeCallback;
 
   // Rerouting count
   int m_routingRebuildCount;

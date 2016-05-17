@@ -62,10 +62,12 @@ RoutingSession::RoutingSession()
 }
 
 void RoutingSession::Init(TRoutingStatisticsCallback const & routingStatisticsFn,
-                          RouterDelegate::TPointCheckCallback const & pointCheckCallback)
+                          RouterDelegate::TPointCheckCallback const & pointCheckCallback,
+                          TTourChangeCallback const & tourChangeCallback)
 {
   ASSERT(m_router == nullptr, ());
   m_router.reset(new AsyncRouter(routingStatisticsFn, pointCheckCallback));
+  m_tourChangeCallback = tourChangeCallback;
 }
 
 void RoutingSession::BuildRoute(m2::PointD const & startPoint, m2::PointD const & endPoint,
@@ -439,8 +441,13 @@ void RoutingSession::MatchLocationToRoute(location::GpsInfo & location,
           if (idx>=m_tourStartIndexInRoute){
               // the index on the route relative to the startpoint of the (remaining) tour on the route.
               // has to be translated to a tour-index (regarding the already processed points of the tour).
-              size_t newIndex=m_tourStartIndex+(idx-m_tourStartIndexInRoute);
-              m_tour->UpdateCurrentPosition(newIndex+1);
+              size_t newIndex=m_tourStartIndex+(idx-m_tourStartIndexInRoute)+1;
+              if (m_tour->UpdateCurrentPosition(newIndex)){
+                  // the new index is propagated to the app-frontend to store it somewehere
+                  m_tourChangeCallback(false,newIndex);
+              }else{
+                  m_tourChangeCallback(true,0);
+              }
           }
       }
   }

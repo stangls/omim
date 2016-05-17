@@ -472,7 +472,6 @@ void CallRoutingListener(shared_ptr<jobject> listener, int errorCode, vector<sto
   JNIEnv * env = jni::GetEnv();
   jmethodID const method = jni::GetMethodID(env, *listener, "onRoutingEvent", "(I[Ljava/lang/String;)V");
   ASSERT(method, ());
-
   env->CallVoidMethod(*listener, method, errorCode, jni::TScopedLocalObjectArrayRef(env, jni::ToJavaStringArray(env, absentMaps)).get());
 }
 
@@ -481,6 +480,13 @@ void CallRouteProgressListener(shared_ptr<jobject> listener, float progress)
   JNIEnv * env = jni::GetEnv();
   jmethodID const methodId = jni::GetMethodID(env, *listener, "onRouteBuildingProgress", "(F)V");
   env->CallVoidMethod(*listener, methodId, progress);
+}
+
+void CallTourChangeListener(shared_ptr<jobject> listener, bool finished, size_t idx)
+{
+  JNIEnv * env = jni::GetEnv();
+  jmethodID const methodId = jni::GetMethodID(env, *listener, "onTourChanged", "(ZI)V");
+  env->CallVoidMethod(*listener, methodId, finished, idx);
 }
 
 /// @name JNI EXPORTS
@@ -836,6 +842,14 @@ Java_com_mapswithme_maps_Framework_nativeSetRouteProgressListener(JNIEnv * env, 
 }
 
 JNIEXPORT void JNICALL
+Java_com_mapswithme_maps_Framework_nativeSetTourChangeListener(JNIEnv * env, jclass, jobject listener)
+{
+  frm()->SetTourChangeListener(
+    bind(&CallTourChangeListener, jni::make_global_ref(listener), _1, _2)
+  );
+}
+
+JNIEXPORT void JNICALL
 Java_com_mapswithme_maps_Framework_nativeDeactivatePopup(JNIEnv * env, jclass)
 {
   return g_framework->DeactivatePopup();
@@ -963,9 +977,9 @@ Java_com_mapswithme_maps_Framework_nativeZoomToPoint(JNIEnv * env, jclass, jdoub
 }
 
   JNIEXPORT void JNICALL
-  Java_com_mapswithme_maps_Framework_nativeLoadTour(JNIEnv * env, jclass thiz, jstring filePath)
+  Java_com_mapswithme_maps_Framework_nativeLoadTour(JNIEnv * env, jclass thiz, jstring filePath, jint position)
   {
-    frm()->LoadTour(jni::ToNativeString(env, filePath));
+    frm()->LoadTour(jni::ToNativeString(env, filePath), position);
   }
 
   JNIEXPORT jboolean JNICALL

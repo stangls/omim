@@ -190,6 +190,14 @@ namespace android
     TFunctor * functor = new TFunctor(fn);
     jni::GetEnv()->CallVoidMethod(m_functorProcessObject, m_functorProcessMethod, reinterpret_cast<jlong>(functor));
   }
+
+
+  void Platform::TourChanged(bool finished, size_t idx)
+  {
+    LOG(LDEBUG, ("Tour changed (android): ",finished,idx));
+    //g_framework->
+  }
+
 }
 
 Platform & GetPlatform()
