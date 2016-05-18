@@ -206,7 +206,8 @@ bool Tour::UpdateCurrentPosition( size_t index )
             PointD point = m_points[idx];
             // TODO: actually check POI position and inform GUI
             double dist = MercatorBounds::DistanceOnEarth((*poi).GetPos(),point);
-            if (dist<=MIN_POINT_DIST) {
+            LOG( my::LDEBUG, ("checking POI ",m_nextPoiIndex," with distance ",dist," : ",(*poi).GetMessage()));
+            if (dist<=MAX_POI_DIST) {
                 LOG( my::LDEBUG, ("visiting POI : ",(*poi).GetMessage()));
                 if (m_poiVisitedCallback!=0){
                     m_poiVisitedCallback(*poi);
