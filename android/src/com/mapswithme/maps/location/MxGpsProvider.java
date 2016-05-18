@@ -52,7 +52,7 @@ public class MxGpsProvider extends BaseLocationProvider implements ILocationRece
 
     @Override
     public void onStatusChanged(GPSInfo info) {
-        Toast.makeText(MwmApplication.get(), "GPS-Provider-Service: "+info.getMessage(), Toast.LENGTH_LONG).show();
+        //Toast.makeText(MwmApplication.get(), "GPS-Provider-Service: "+info.getMessage(), Toast.LENGTH_LONG).show();
     }
 
     @Override
