@@ -492,7 +492,7 @@ void CallTourChangeListener(shared_ptr<jobject> listener, bool finished, size_t 
 void CallPoiVisitedListener(shared_ptr<jobject> listener, string message)
 {
   JNIEnv * env = jni::GetEnv();
-  jmethodID const methodId = jni::GetMethodID(env, *listener, "onPoiVisited", "(Ljava.lang.String)V");
+  jmethodID const methodId = jni::GetMethodID(env, *listener, "onPoiVisited", "(Ljava/lang/String)V");
   env->CallVoidMethod(*listener, methodId, jni::ToJavaString(env, message));
 }
 
