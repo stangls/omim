@@ -29,6 +29,7 @@ class TourParser
     double m_x=0;
     double m_y=0;
     bool m_tracePosition=false;
+    string m_poiText;
 
     void Reset()
     { }
@@ -126,6 +127,11 @@ public:
             m_tour.AddTurn(TI(m_tour.GetAllPoints().size()-1,turnDirection,m_roadIndex));
             m_roadIndex = 0;
         }
+        if (tag=="poi"){
+            LOG( my::LINFO, ("adding POI") );
+            m_tour.AddPoi(m_poiText,m_x,m_y);
+            m_poiText="";
+        }
         m_tags.pop_back();
     }
 
@@ -142,6 +148,9 @@ public:
             if (prevTag=="tour" && currTag=="name"){
                 m_tour.SetName(value);
             }
+            if (prevTag=="poi" && currTag=="message"){
+                m_poiText=value;
+            }
         }
     }
 };
@@ -153,7 +162,8 @@ Tour::Tour(const string &filePath)
       m_currentIndex(0),
       m_points(),
       m_times(),
-      m_turns()
+      m_turns(),
+      m_pois()
 {
     // parse the XML file
     LOG( my::LINFO, ("reading tour file ",filePath) );
@@ -162,22 +172,7 @@ Tour::Tour(const string &filePath)
     TourParser parser(*this);
     ParseXML(src, parser, true);
     LOG( my::LINFO, ("done parsing tour file",filePath) );
-/*
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.123192), MercatorBounds::LatToY(47.796597) ) ); // Angerer Kurve (NO) / Einfahrt Mondi Inncoat
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.121801), MercatorBounds::LatToY(47.797094) ) ); // Angerer (N)
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.120500), MercatorBounds::LatToY(47.797566) ) ); // Kreuzung Angerer / B15
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.120908), MercatorBounds::LatToY(47.798967) ) ); // B15 Richtung Norden
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.121029), MercatorBounds::LatToY(47.799725) ) ); // B15 Richtung Norden
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.120902), MercatorBounds::LatToY(47.800527) ) ); // B15 Richtung Norden
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.120513), MercatorBounds::LatToY(47.801354) ) ); // Kreuzung Eichenweg / B15
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.121119), MercatorBounds::LatToY(47.801512) ) ); // Eichenweg Richtung O
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.121227), MercatorBounds::LatToY(47.801654) ) ); // Eichenweg Kurve
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.121151), MercatorBounds::LatToY(47.802211) ) ); // Eichenweg Richtung N
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.120991), MercatorBounds::LatToY(47.802656) ) ); // Kreuzung Eichenweg / Eschenweg
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.120404), MercatorBounds::LatToY(47.802446) ) ); // Eschenweg Richtung W
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.119868), MercatorBounds::LatToY(47.802172) ) ); // Kreuzung Eschenweg / B15
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.120449), MercatorBounds::LatToY(47.801371) ) ); // Kreuzung Eichenweg / B15
-*/
+
     LOG( my::LINFO, ("calculating times.") );
     CalculateTimes();
     if (m_turns.size()>0) {
@@ -196,6 +191,16 @@ Tour::~Tour()
 }
 
 bool Tour::UpdateCurrentPosition( size_t index ){
+    size_t start = m_currentIndex;
+    bool ret = JumpCurrentPosition( index );
+    for (size_t idx=start; idx<m_currentIndex; idx++){
+        PointD point = m_points[idx];
+        // TODO: check POIs
+    }
+    return ret;
+}
+
+bool Tour::JumpCurrentPosition( size_t index ){
     if (index>=m_points.size()) {
         return false;
     }
@@ -219,6 +224,10 @@ void Tour::AddPoint(double lat, double lon)
         }
     }
     m_points.emplace_back(newPoint);
+}
+void Tour::AddPoi(const string & message, double lat, double lon)
+{
+    m_pois.emplace_back(message,lat,lon,m_points.size());
 }
 
 
