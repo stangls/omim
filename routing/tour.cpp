@@ -157,7 +157,7 @@ public:
 } // end anonymous namespace (parser)
 
 
-Tour::Tour(const string &filePath)
+Tour::Tour(const string &filePath, TPoiCallback const & poiVisited)
     : m_name("unnamed dummy tour"),
       m_currentIndex(0),
       m_points(),
@@ -165,6 +165,9 @@ Tour::Tour(const string &filePath)
       m_turns(),
       m_pois()
 {
+
+    m_poiVisitedCallback = poiVisited;
+
     // parse the XML file
     LOG( my::LINFO, ("reading tour file ",filePath) );
     FileReader reader(filePath);
@@ -190,17 +193,36 @@ Tour::~Tour()
 {
 }
 
-bool Tour::UpdateCurrentPosition( size_t index ){
+bool Tour::UpdateCurrentPosition( size_t index )
+{
     size_t start = m_currentIndex;
     bool ret = JumpCurrentPosition( index );
-    for (size_t idx=start; idx<m_currentIndex; idx++){
-        PointD point = m_points[idx];
-        // TODO: check POIs
+
+    // iterate over skipped points and check if POIs exist.
+    auto poi = m_pois.cbegin()+m_nextPoiIndex;
+    for (size_t idx=start; idx<m_currentIndex; idx++) {
+        // check all next POIs of this section
+        while (poi != m_pois.cend() && (*poi).GetEarliestIndex()<idx) {
+            PointD point = m_points[idx];
+            // TODO: actually check POI position and inform GUI
+            double dist = MercatorBounds::DistanceOnEarth((*poi).GetPos(),point);
+            if (dist<=MIN_POINT_DIST) {
+                LOG( my::LDEBUG, ("visiting POI : ",(*poi).GetMessage()));
+                if (m_poiVisitedCallback!=0){
+                    m_poiVisitedCallback(*poi);
+                }
+                m_nextPoiIndex++;
+            }
+            poi++;
+        }
     }
+
+    // return actual value
     return ret;
 }
 
-bool Tour::JumpCurrentPosition( size_t index ){
+bool Tour::JumpCurrentPosition( size_t index )
+{
     if (index>=m_points.size()) {
         return false;
     }
@@ -212,11 +234,10 @@ void Tour::AddPoint(double lat, double lon)
 {
     // minimal distance between points
     // if the last point is further away, additional points are added in-between (to minimize errors of route-following)
-    const double minDist = 5; // meters
     PointD newPoint = PointD(MercatorBounds::LonToX(lat),MercatorBounds::LatToY(lon));
     if (m_points.size()>0){
         PointD lastPoint = m_points.back();
-        int steps = (int)ceil(MercatorBounds::DistanceOnEarth(lastPoint,newPoint)/minDist)-1;
+        int steps = (int)ceil(MercatorBounds::DistanceOnEarth(lastPoint,newPoint)/MIN_POINT_DIST)-1;
         auto vec = ( newPoint-lastPoint )/(steps+1);
         for (int i=0; i<steps; i++){
             lastPoint += vec;

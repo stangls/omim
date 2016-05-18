@@ -489,6 +489,13 @@ void CallTourChangeListener(shared_ptr<jobject> listener, bool finished, size_t 
   env->CallVoidMethod(*listener, methodId, finished, idx);
 }
 
+void CallPoiVisitedListener(shared_ptr<jobject> listener, string message)
+{
+  JNIEnv * env = jni::GetEnv();
+  jmethodID const methodId = jni::GetMethodID(env, *listener, "onPoiVisited", "(Ljava.lang.String)V");
+  env->CallVoidMethod(*listener, methodId, jni::ToJavaString(env, message));
+}
+
 /// @name JNI EXPORTS
 //@{
 JNIEXPORT jstring JNICALL
@@ -846,6 +853,14 @@ Java_com_mapswithme_maps_Framework_nativeSetTourChangeListener(JNIEnv * env, jcl
 {
   frm()->SetTourChangeListener(
     bind(&CallTourChangeListener, jni::make_global_ref(listener), _1, _2)
+  );
+}
+
+JNIEXPORT void JNICALL
+Java_com_mapswithme_maps_Framework_nativeSetPoiVisitedListener(JNIEnv * env, jclass, jobject listener)
+{
+  frm()->SetPoiVisitedListener(
+    bind(&CallPoiVisitedListener, jni::make_global_ref(listener), _1)
   );
 }
 

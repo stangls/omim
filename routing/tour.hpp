@@ -22,13 +22,13 @@ class Poi
         {
             m_earliestIndex = earliestIndex;
         }
-        PointD GetPos(){
+        PointD GetPos() const {
             return m_pos;
         }
-        string GetMessage(){
+        string GetMessage() const {
             return m_message;
         }
-        size_t GetEarliestIndex(){
+        size_t GetEarliestIndex() const {
             return m_earliestIndex;
         }
 
@@ -45,8 +45,9 @@ class Tour
     using TD = turns::TurnDirection;
     using TI = turns::TurnItem;
 public:
+    using TPoiCallback = function<void(Poi const &)>;
     Tour();
-    Tour( string const & filePath );
+    Tour( string const & filePath, TPoiCallback const & poiVisited );
     ~Tour();
     string GetName(){
         return m_name;
@@ -112,6 +113,10 @@ protected:
     vector<double> m_times;
     vector<TI> m_turns;
     vector<Poi> m_pois;
+    size_t m_nextPoiIndex = 0;
+    TPoiCallback m_poiVisitedCallback;
+
+    const double MIN_POINT_DIST = 5; // meters
 };
 
 }  // end namespace routing

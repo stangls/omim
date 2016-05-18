@@ -2163,7 +2163,15 @@ void Framework::LoadTour(string const & filePath , int position){
       return;
     }
     SetRouter(routing::RouterType::Vehicle);
-    drape_ptr<Tour> tour = make_unique<Tour>(filePath);
+    routing::Tour::TPoiCallback const poiVisitedCallbackFn = [this](Poi const& poi)
+    {
+      if (m_poiVisitedCallback!=0){
+          m_poiVisitedCallback(poi.GetMessage());
+      }else{
+          LOG(LWARNING, ("Poi visited but no callback: ",poi.GetMessage()));
+      }
+    };
+    drape_ptr<Tour> tour = make_unique<Tour>(filePath,poiVisitedCallbackFn);
     tour->UpdateCurrentPosition(position);
     BuildRoute(start,m2::PointD::Zero(),move(tour),5);
 }

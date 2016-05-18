@@ -33,6 +33,7 @@
         tools:src="@drawable/anim_myposition_pending"
         tools:layout_marginTop="60dp"/>
 
+      <!--
       <ImageView
         android:id="@+id/toggle"
         style="@style/MwmTheme.Menu.Line.Button"
@@ -47,6 +48,7 @@
         tools:layout_marginTop="60dp"
         android:visibility="gone"
       />
+      -->
 
       <include
         android:id="@+id/buttons_frame"

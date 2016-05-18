@@ -30,6 +30,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.Serializable;
+import java.util.LinkedList;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -108,8 +109,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
                                  MapFragment.MapRenderingListener,
                                  CustomNavigateUpListener,
                                  ChooseBookmarkCategoryFragment.Listener,
-                                 RoutingController.Container
-{
+                                 RoutingController.Container, Framework.PoiVisitedListener {
 
   private static final String TAG = MwmActivity.class.getName();
 
@@ -167,6 +167,8 @@ public class MwmActivity extends BaseMwmFragmentActivity
   private static boolean sColdStart = true;
   private static boolean sLocationStopped;
   private TimerThread timerThread = new TimerThread(this);
+  private LinkedList<String> poiMessages = new LinkedList<>();
+  private AlertDialog poiDialog;
 
   @NotNull
   public TextView getTextMissionTime() {
@@ -176,6 +178,18 @@ public class MwmActivity extends BaseMwmFragmentActivity
     }else{
       return null;
     }
+  }
+
+  @Override
+  public void onPoiVisited(final String message) {
+    runOnUiThread(new Runnable() {public void run() {
+      // show dialog if not yet visible otherwise save to list of poi-messages
+      if (poiDialog.isShowing()){
+        poiMessages.add(message);
+      }else{
+        showPoiDialogNow(message);
+      }
+    }});
   }
 
   public interface LeftAnimationTrackListener
@@ -379,6 +393,27 @@ public class MwmActivity extends BaseMwmFragmentActivity
     mLocationPredictor = new LocationPredictor(new Handler(), this);
     processIntent(getIntent());
     SharingHelper.prepare();
+
+    AlertDialog.Builder b = new AlertDialog.Builder(MwmActivity.this);
+    b.setTitle("Point of Interest");
+    b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+      @Override
+      public void onClick(DialogInterface dialog, int which) {
+        String nextMessage = poiMessages.poll();
+        if (nextMessage!=null){
+          showPoiDialogNow(nextMessage);
+        }else{
+          dialog.dismiss();
+        }
+      }
+    });
+    poiDialog = b.create();
+    Framework.nativeSetPoiVisitedListener(this);
+  }
+
+  private void showPoiDialogNow(String message) {
+    poiDialog.setMessage(message);
+    poiDialog.show();
   }
 
   private void initViews()
@@ -593,6 +628,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
         switch (item)
         {
+/*
         case TOGGLE:
           if (!mMainMenu.isOpen())
           {
@@ -607,6 +643,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
           AlohaHelper.logClick(AlohaHelper.TOOLBAR_MENU);
           toggleMenu();
           break;
+*/
 
         case ADD_PLACE:
           closePlacePage();

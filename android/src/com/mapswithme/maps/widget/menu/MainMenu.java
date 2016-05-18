@@ -75,7 +75,7 @@ public class MainMenu
   private final List<View> mCollapseViews = new ArrayList<>();
 
   private final MyPositionButton mMyPositionButton;
-  private final Toggle mToggle;
+  //private final Toggle mToggle;
   private Button mRouteStartButton;
 
   private int mContentHeight;
@@ -103,7 +103,7 @@ public class MainMenu
          .start();
       }
 
-      mToggle.setCollapsed(!collapsed, true);
+      //mToggle.setCollapsed(!collapsed, true);
 
       mSymmetricalGapScale = (float) mButtonsWidth / mPanelWidth;
     }
@@ -137,7 +137,7 @@ public class MainMenu
 
   public enum Item
   {
-    TOGGLE(R.id.toggle),
+    //TOGGLE(R.id.toggle),
     ADD_PLACE(R.id.add_place),
     //SEARCH(R.id.search),
     TOUR(R.id.tour),
@@ -177,7 +177,7 @@ public class MainMenu
       mAnimating = false;
     }
   }
-
+/*
   private class Toggle
   {
     final ImageView mButton;
@@ -239,7 +239,7 @@ public class MainMenu
     {
       transitImage(mCollapseImage, collapse, animate);
     }
-  }
+  }*/
 
   private View mapItem(final Item item, View frame)
   {
@@ -384,7 +384,7 @@ public class MainMenu
     mCurrentPlace = (TextView) mNavigationFrame.findViewById(R.id.current_place);
 
     mMyPositionButton = new MyPositionButton(lineFrame.findViewById(R.id.my_position));
-    mToggle = new Toggle(lineFrame);
+    //mToggle = new Toggle(lineFrame);
 
     mNewsMarker = mButtonsFrame.findViewById(R.id.marker);
     mNewsCounter = (TextView) mContentFrame.findViewById(R.id.counter);
@@ -397,7 +397,7 @@ public class MainMenu
 
   public void setState(State state, boolean animateToggle)
   {
-    mToggle.setState(state, animateToggle);
+    //mToggle.setState(state, animateToggle);
 
     boolean expandContent;
     boolean isRouting = state == State.NAVIGATION ||
@@ -448,7 +448,7 @@ public class MainMenu
     adjustTransparency();
     updateMarker();
 
-    mToggle.setOpen(true, animate);
+    //mToggle.setOpen(true, animate);
     if (!animate)
       return true;
 
@@ -485,7 +485,7 @@ public class MainMenu
       adjustTransparency();
       updateMarker();
 
-      mToggle.setOpen(false, false);
+      //mToggle.setOpen(false, false);
 
       if (onCloseListener != null)
         onCloseListener.run();
@@ -493,7 +493,7 @@ public class MainMenu
       return true;
     }
 
-    mToggle.setOpen(false, true);
+    //mToggle.setOpen(false, true);
 
     mFrame.animate()
           .setDuration(ANIMATION_DURATION)

@@ -49,6 +49,12 @@ public class Framework
     void onTourChanged(boolean finished, int idx);
   }
 
+  @SuppressWarnings("unused")
+  public interface PoiVisitedListener
+  {
+    void onPoiVisited(String message);
+  }
+
   public static class Params3dMode
   {
     public boolean enabled;
@@ -147,6 +153,7 @@ public class Framework
 
   public static native void nativeSetRouteProgressListener(RoutingProgressListener listener);
   public static native void nativeSetTourChangeListener(TourChangeListener listener);
+  public static native void nativeSetPoiVisitedListener(PoiVisitedListener listener);
 
   public static native void nativeShowCountry(String countryId, boolean zoomToDownloadButton);
 
