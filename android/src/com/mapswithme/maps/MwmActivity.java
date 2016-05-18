@@ -166,7 +166,9 @@ public class MwmActivity extends BaseMwmFragmentActivity
   // The first launch after process started. Used to skip "Not follow, no position" state and to run locator.
   private static boolean sColdStart = true;
   private static boolean sLocationStopped;
+
   private TimerThread timerThread = new TimerThread(this);
+
   private LinkedList<String> poiMessages = new LinkedList<>();
   private AlertDialog poiDialog;
 
@@ -190,6 +192,11 @@ public class MwmActivity extends BaseMwmFragmentActivity
         showPoiDialogNow(message);
       }
     }});
+  }
+
+  private void showPoiDialogNow(String message) {
+    poiDialog.setMessage(message);
+    poiDialog.show();
   }
 
   public interface LeftAnimationTrackListener
@@ -409,11 +416,9 @@ public class MwmActivity extends BaseMwmFragmentActivity
     });
     poiDialog = b.create();
     Framework.nativeSetPoiVisitedListener(this);
-  }
 
-  private void showPoiDialogNow(String message) {
-    poiDialog.setMessage(message);
-    poiDialog.show();
+    getWindow().getDecorView().setSystemUiVisibility (View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+
   }
 
   private void initViews()
@@ -981,6 +986,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     mOnmapDownloader.onResume();
 
     timerThread.update();
+    getWindow().getDecorView().setSystemUiVisibility (View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
   }
 
   @Override
@@ -1137,7 +1143,9 @@ public class MwmActivity extends BaseMwmFragmentActivity
     if (!mIsFragmentContainer)
       mRoutingPlanInplaceController.setStartButton();
     activityIsVisible.set(true);
+
     timerThread.update();
+    getWindow().getDecorView().setSystemUiVisibility (View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
   }
 
   @Override
