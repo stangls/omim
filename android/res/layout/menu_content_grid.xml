@@ -7,6 +7,7 @@
   android:orientation="horizontal"
   tools:background="#200000F0">
 
+  <!--
   <TextView
     android:id="@+id/add_place"
     style="@style/MwmTheme.Menu.Content.GridItem.Text"
@@ -26,8 +27,8 @@
     style="@style/MwmTheme.Menu.Content.GridItem.Text"
     android:drawableTop="@drawable/ic_menu_bookmarks"
     android:text="@string/bookmarks"
-    tools:background="#200000FF"/>
-
+    tools:background="#200000FF"/>-->
+<!--
   <FrameLayout
     style="@style/MwmTheme.Menu.Content.GridItem">
     <TextView
@@ -49,7 +50,7 @@
       android:visibility="gone"
       tools:text="1000"
       tools:visibility="visible"/>
-  </FrameLayout>
+  </FrameLayout>-->
 
   <TextView
     android:id="@+id/settings"
@@ -57,7 +58,7 @@
     android:drawableTop="@drawable/ic_menu_settings"
     android:text="@string/settings"
     tools:background="#200000FF"/>
-
+<!--
   <TextView
     android:id="@+id/share"
     style="@style/MwmTheme.Menu.Content.GridItem.Text"
@@ -72,5 +73,5 @@
     android:visibility="gone"
     android:text="@string/showcase_more_apps"
     tools:background="#200000FF"
-    tools:visibility="visible"/>
+    tools:visibility="visible"/>-->
 </LinearLayout>

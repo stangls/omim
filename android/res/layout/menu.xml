@@ -44,7 +44,9 @@
         android:paddingRight="@dimen/margin_half"
         android:src="@drawable/ic_menu_open"
         android:background="@drawable/menu_button_right"
-        tools:layout_marginTop="60dp"/>
+        tools:layout_marginTop="60dp"
+        android:visibility="gone"
+      />
 
       <include
         android:id="@+id/buttons_frame"
@@ -71,7 +73,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:visibility="invisible"
-    tools:visibility="visible">
+    tools:visibility="gone">
     <View
       android:layout_width="match_parent"
       android:layout_height="1dp"
