@@ -899,4 +899,7 @@
 	<string name="editor_remove_place_button">Löschen</string>
 	<string name="editor_status_sending">Senden…</string>
 	<string name="editor_place_doesnt_exist">Dieser Ort existiert nicht</string>
+	<string name="mission_activity_break">Unterbrechung</string>
+	<string name="activityNotFound_missionRecording">Einsatzaufzeichnung nicht installiert!?</string>
+	<string name="title_missionrecording">Einsatzfahrt:</string>
 </resources>

@@ -32,6 +32,7 @@ import com.mapswithme.util.UiUtils;
 import com.mapswithme.util.Yota;
 import com.mapswithme.util.statistics.AlohaHelper;
 import com.mapswithme.util.statistics.Statistics;
+import com.mobidat.wp2.missionservice.MissionListener;
 import com.parse.Parse;
 import com.parse.ParseException;
 import com.parse.ParseInstallation;

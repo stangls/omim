@@ -2,23 +2,17 @@ package com.mobidat.wp2.missionrecording
 
 import android.view.View
 import com.mapswithme.maps.MwmActivity
-/*
+import com.mapswithme.maps.MwmApplication
+
 import com.mobidat.wp2.missionservice.MissionListener
 import com.mobidat.wp2.missionservice.MissionService
 import com.mobidat.wp2.missionservice.MissionStatus
-*/
+
 
 /**
  * Created by sd on 12.04.16.
  */
-internal class TimerThread(private val activity: MwmActivity) : Thread()/*, MissionListener*/ {
-/*
-    private val missionService = MissionService(activity)
-    private var missionStatus: MissionStatus? = null;
-
-    override fun onMissionStatusChanged(state: MissionStatus) {
-        missionStatus = state
-    }*/
+internal class TimerThread(private val activity: MwmActivity) : Thread() {
 
     override fun run() {
         //missionService.setMissionListener(this)
@@ -41,21 +35,21 @@ internal class TimerThread(private val activity: MwmActivity) : Thread()/*, Miss
         }
     }
 
-    private fun updateTime() {/*
-        val misState = missionStatus
-        if (misState==null){
+    private fun updateTime() {
+        val missionStatus = MissionAccess.missionStatus
+        if (missionStatus==null){
             return;
         }
         // calculate time
         val recordDuration =
-            if (missionStatus != null && misState.isActive) {
-                System.currentTimeMillis() - misState.startTime!!
+            if (missionStatus != null && missionStatus.isActive) {
+                System.currentTimeMillis() - missionStatus.startTime!!
             }else null
         // show time
         activity.runOnUiThread {
             try {
                 if (recordDuration == null) {
-                    activity.getTextMissionTime()?.visibility= View.GONE
+                    activity.getTextMissionTime()?.setText("???")
                 } else {
                     var seconds = recordDuration / 1000
                     var minutes = seconds / 60
@@ -71,9 +65,8 @@ internal class TimerThread(private val activity: MwmActivity) : Thread()/*, Miss
                     activity.getTextMissionTime()?.setText(text)
                     activity.getTextMissionTime()?.visibility= View.VISIBLE
                 }
-            } catch (_: NullPointerException) {
-            }
-        }*/
+            } catch (_: NullPointerException) {}
+        }
     }
 
     @Synchronized fun update() {
