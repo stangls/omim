@@ -43,6 +43,7 @@ public class RoutingController
   private static final String TAG = "RCSTATE";
   public static final String TOUR_FILE_NAME = "tour_fileName";
   public static final String TOUR_POSITION = "tour_position";
+  private int triesContinueTour = 0;
 
   private enum State
   {
@@ -179,6 +180,21 @@ public class RoutingController
         updatePlan();
       }
       return;
+    }
+
+    // check if the tour routing should start but can't because native code does not have a fix yet
+    if (triesContinueTour-->0){
+      if (
+        mLastResultCode == ResultCodesHelper.NO_POSITION ||
+        mLastResultCode == ResultCodesHelper.START_POINT_NOT_FOUND
+      ) {
+        new Thread(){public void run(){
+          try { Thread.sleep(1000); } catch (InterruptedException e) {}
+          Log.d(TAG, "trying to continue tour");
+          continueSavedTour();
+        }}.start();
+        return;
+      }
     }
 
     setBuildState(BuildState.ERROR);
@@ -468,14 +484,14 @@ public class RoutingController
     if (isNavigating())
     {
       Log.d(TAG, "cancel: navigating");
-
+      boolean wasTourRouting = Framework.nativeIsTourRouting();
       cancelInternal();
       if (mContainer != null)
       {
         mContainer.showNavigation(false);
         mContainer.updateMenu();
       }
-      return true;
+      return !wasTourRouting;
     }
 
     Log.d(TAG, "cancel: none");
@@ -784,12 +800,13 @@ public class RoutingController
       setEndPoint(null);
       Log.d(TAG, "startTour: native load tour (after location is well known)");
       LocationHelper.INSTANCE.addLocationListener(new LocationHelper.LocationListener() {
-        public int counter = 5;
+        public int counter = 3;
 
         @Override
         public void onLocationUpdated(Location l) {
           if (counter--<=0){
             Log.d(TAG, "startTour: location known. native load tour");
+            triesContinueTour = 10;
             Framework.nativeLoadTour(tourFile.getAbsolutePath(), activeTourPosition);
             LocationHelper.INSTANCE.removeLocationListener(this);
           }

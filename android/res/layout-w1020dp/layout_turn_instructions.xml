@@ -27,6 +27,7 @@
         android:background="?attr/selectableItemBackgroundBorderless"
         android:scaleType="center"
         android:tint="?iconTint"
+        android:visibility="gone"
         android:src="@drawable/ic_cancel"/>
 
     <TextView
