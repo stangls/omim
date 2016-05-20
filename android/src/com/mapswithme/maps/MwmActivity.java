@@ -23,6 +23,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -378,19 +379,17 @@ public class MwmActivity extends BaseMwmFragmentActivity
     processIntent(getIntent());
     SharingHelper.prepare();
 
-    AlertDialog.Builder b = new AlertDialog.Builder(MwmActivity.this);
-    b.setTitle("Meldung");
-    b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-      @Override
-      public void onClick(DialogInterface dialog, int which) {
+    poiDialog = new AlertDialog.Builder(MwmActivity.this)
+      .setTitle("Meldung")
+      .setPositiveButton("OK", new DialogInterface.OnClickListener() { public void onClick(DialogInterface dialog, int which) {
         dialog.dismiss();
         String nextMessage = poiMessages.poll();
         if (nextMessage!=null){
           showPoiDialogNow(nextMessage);
         }
-      }
-    });
-    poiDialog = b.create();
+      }})
+      .create();
+    poiDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
     Framework.nativeSetPoiVisitedListener(this);
     Framework.nativeSetPossibleTourResumptionListener(this);
 

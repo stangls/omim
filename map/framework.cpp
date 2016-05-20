@@ -2344,11 +2344,11 @@ void Framework::CheckLocationForRouting(GpsInfo const & info)
 
 
   bool isPossible=false;
-  auto possibleTourResumptionCallback = [this,&isPossible]() mutable -> void
-  {
-    isPossible=true;
-  };
-  RoutingSession::State state = m_routingSession.OnLocationPositionChanged(info, m_model.GetIndex(), possibleTourResumptionCallback, m_doContinueTourHere);
+  auto possibleTourResumptionCallback = [this,&isPossible]() mutable -> void { isPossible=true; };
+  RoutingSession::State state = m_routingSession.OnLocationPositionChanged(
+    info, m_model.GetIndex(),
+    possibleTourResumptionCallback, m_doContinueTourHere
+  );
   m_doContinueTourHere = false;
   if (isPossible!=m_possibleTourResumptionWasPossible){
       LOG( my::LINFO, ("tour resumption possibility changed:",isPossible) );

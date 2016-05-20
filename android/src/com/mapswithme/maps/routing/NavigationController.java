@@ -2,6 +2,7 @@ package com.mapswithme.maps.routing;
 
 import android.app.Activity;
 import android.location.Location;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -18,6 +19,7 @@ import com.mapswithme.util.statistics.Statistics;
 
 public class NavigationController
 {
+  private static final String TAG = NavigationController.class.getSimpleName();
   private final View mFrame;
 
   private final TextView mDistanceTotal;

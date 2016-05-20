@@ -122,7 +122,7 @@ Iter FollowedPolyline::GetClosestProjection(
   m2::PointD const currPos = posRect.Center();
   size_t cur = m_current.m_ind;
   size_t const count = m_poly.GetSize() - 1;
-  bool preventedFastForward = false;
+  bool jumpableFastForward = false;
   for (size_t i = cur; i < count; ++i)
   {
 
@@ -140,11 +140,11 @@ Iter FollowedPolyline::GetClosestProjection(
     for ( const GeometryInterval &nonFF : nonFastForward ) {
         // are we iterating through the interval?
         if ( i>=nonFF.min && i<nonFF.max ){
-            size_t maxFastForward=nonFF.externalFastForward;
+            size_t maxFastForward=nonFF.maxExternalFastForward;
             // are we already in the interval? then we are internally fast-forwarding
             if ( cur>=nonFF.min && cur<nonFF.max ){
                 //LOG(my::LINFO,("in ",nonFF.min,"<=",i,"<",nonFF.max));
-                maxFastForward=nonFF.internalFastForward;
+                maxFastForward=nonFF.maxInternalFastForward;
             }
             // see if we are fast-forwarding (instead of just forwarding), then skip.
             if ( (i-cur)>maxFastForward ){
@@ -157,7 +157,10 @@ Iter FollowedPolyline::GetClosestProjection(
                 }else{
                     //LOG(my::LINFO,("not fast-forwarding ",(i-cur)," steps (>"+maxFastForward+") since ",nonFF.min,"<=",i,"<",nonFF.max));
                     skipTo=nonFF.max;
-                    preventedFastForward = cur<nonFF.min;
+                    // this is a prevented FF which can be jumped into (continued here) if
+                    // we are currently not in the interval (otherwise why should we jump?) and more precisely
+                    // if we are far enough away from the start of the interval (=tour)
+                    jumpableFastForward = cur+nonFF.minJumpFastForward<nonFF.min;
                 }
                 break;
             }
@@ -179,7 +182,7 @@ Iter FollowedPolyline::GetClosestProjection(
   }
   //LOG(my::LINFO,("GetClosestProjection done"));
   // if we could have fast-forwarded but it was prevented due to nonFastForward-intervals, we inform the user about it
-  if (preventedFastForward){
+  if (jumpableFastForward){
       if (ptrc!=0){
           //LOG( my::LINFO, ("tour resumption is possible!") );
           ptrc();

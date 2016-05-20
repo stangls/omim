@@ -13,8 +13,9 @@ struct GeometryInterval{
         ASSERT_LESS(min,max,());
     }
     size_t min, max;
-    size_t internalFastForward=10; // ≤50m
-    size_t externalFastForward=5;  // ≤25m
+    size_t maxInternalFastForward=10; // ≤50m
+    size_t maxExternalFastForward=5;  // ≤25m
+    size_t minJumpFastForward=2;   // ≥10m
 };
 using GeometryIntervals = vector<GeometryInterval>;
 using TPossibleTourResumptionCallback = function<void()>;
