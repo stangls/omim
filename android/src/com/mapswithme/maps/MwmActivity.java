@@ -172,6 +172,8 @@ public class MwmActivity extends BaseMwmFragmentActivity
   private LinkedList<String> poiMessages = new LinkedList<>();
   private AlertDialog poiDialog;
   private Button mBreakButton;
+  private View mRowMissionActivity;
+  private TextView mTextMissionActivity;
 
   public interface LeftAnimationTrackListener
   {
@@ -395,6 +397,10 @@ public class MwmActivity extends BaseMwmFragmentActivity
     missionAccess = new MissionAccess(this);
     missionAccess.setListeningActivity(this);
     mBreakButton = (Button)findViewById(R.id.breakButton);
+    mRowMissionActivity = findViewById(R.id.rowMissionActivity);
+    mRowMissionActivity.setVisibility(View.GONE);
+    mTextMissionActivity = (TextView)findViewById(R.id.textMissionActivity);
+    timerThread.start();
 
   }
 
@@ -1608,7 +1614,23 @@ public class MwmActivity extends BaseMwmFragmentActivity
   @Override
   public void onMissionStatusChanged(@NonNull MissionStatus missionStatus) {
     updateButtons();
+    updateActivityDisplay(missionStatus);
     timerThread.update();
+  }
+
+  private void updateActivityDisplay(final MissionStatus missionStatus) {
+    runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        com.mobidat.persistence.Activity act = missionStatus.getActivity();
+        if (act!=null){
+          mTextMissionActivity.setText(act.getName());
+          mRowMissionActivity.setVisibility(View.VISIBLE);
+        }else{
+          mRowMissionActivity.setVisibility(View.GONE);
+        }
+      }
+    });
   }
 
   private void updateButtons() {

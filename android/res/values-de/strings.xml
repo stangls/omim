@@ -902,4 +902,5 @@
 	<string name="mission_activity_break">Unterbrechung</string>
 	<string name="activityNotFound_missionRecording">Einsatzaufzeichnung nicht installiert!?</string>
 	<string name="title_missionrecording">Einsatzfahrt:</string>
+	<string name="title_missionActivity">Aktivität:</string>
 </resources>
