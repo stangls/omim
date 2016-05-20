@@ -1371,6 +1371,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
       break;
     case R.id.buttonContinueTourHere:
       Log.d(TAG, "continuing tour at this position");
+      Framework.nativeDoContinueTourHere();
       break;
     }
   }

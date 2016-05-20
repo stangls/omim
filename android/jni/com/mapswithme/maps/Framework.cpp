@@ -880,6 +880,12 @@ Java_com_mapswithme_maps_Framework_nativeSetPossibleTourResumptionListener(JNIEn
 }
 
 JNIEXPORT void JNICALL
+Java_com_mapswithme_maps_Framework_nativeDoContinueTourHere(JNIEnv * env, jclass)
+{
+  frm()->DoContinueTourHere();
+}
+
+JNIEXPORT void JNICALL
 Java_com_mapswithme_maps_Framework_nativeDeactivatePopup(JNIEnv * env, jclass)
 {
   return g_framework->DeactivatePopup();

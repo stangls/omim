@@ -63,13 +63,12 @@ public:
 
   double GetDistanceM(Iter const & it1, Iter const & it2) const;
 
-  Iter UpdateProjectionByPrediction(
-    m2::RectD const & posRect, double predictDistance, const GeometryIntervals &nonFastForward,
-    TPossibleTourResumptionCallback const & possibleTourResumptionCallback
+  Iter UpdateProjectionByPrediction(m2::RectD const & posRect, double predictDistance, const GeometryIntervals &nonFastForward,
+    TPossibleTourResumptionCallback const & possibleTourResumptionCallback, bool doContinueTourHere
   ) const;
   Iter UpdateProjection(
     m2::RectD const & posRect, const GeometryIntervals &nonFastForward,
-    TPossibleTourResumptionCallback const & possibleTourResumptionCallback
+    TPossibleTourResumptionCallback const & possibleTourResumptionCallback, bool doContinueTourHere
   ) const;
 
   Iter Begin() const;
@@ -78,7 +77,10 @@ public:
 
 private:
   template <class DistanceFn>
-  Iter GetClosestProjection(m2::RectD const & posRect, const GeometryIntervals & nonFastForward, DistanceFn const & distFn, TPossibleTourResumptionCallback const & ptrc) const;
+  Iter GetClosestProjection(
+    m2::RectD const & posRect, const GeometryIntervals & nonFastForward, DistanceFn const & distFn,
+    TPossibleTourResumptionCallback const & ptrc, bool doContinueTourHere
+  ) const;
   void UpdateLastNonCrossing() const;
 
   void Update();

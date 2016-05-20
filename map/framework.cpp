@@ -2346,13 +2346,12 @@ void Framework::CheckLocationForRouting(GpsInfo const & info)
   bool isPossible=false;
   auto possibleTourResumptionCallback = [this,&isPossible]() mutable -> void
   {
-    LOG( my::LINFO, ("tour resumption is possible!") );
     isPossible=true;
   };
-  RoutingSession::State state = m_routingSession.OnLocationPositionChanged(info, m_model.GetIndex(), possibleTourResumptionCallback);
+  RoutingSession::State state = m_routingSession.OnLocationPositionChanged(info, m_model.GetIndex(), possibleTourResumptionCallback, m_doContinueTourHere);
   m_doContinueTourHere = false;
   if (isPossible!=m_possibleTourResumptionWasPossible){
-      LOG( my::LINFO, ("tour resumption possibility changed!") );
+      LOG( my::LINFO, ("tour resumption possibility changed:",isPossible) );
       m_possibleTourResumptionWasPossible=isPossible;
       if (m_possibleTourResumptionCallback!=0){
         m_possibleTourResumptionCallback(isPossible);

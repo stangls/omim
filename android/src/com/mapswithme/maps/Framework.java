@@ -161,6 +161,7 @@ public class Framework
   public static native void nativeSetTourChangeListener(TourChangeListener listener);
   public static native void nativeSetPoiVisitedListener(PoiVisitedListener listener);
   public static native void nativeSetPossibleTourResumptionListener(PossibleTourResumptionListener listener);
+  public static native void nativeDoContinueTourHere();
 
   public static native void nativeShowCountry(String countryId, boolean zoomToDownloadButton);
 
