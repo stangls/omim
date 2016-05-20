@@ -66,7 +66,7 @@ drape_ptr<ShapeRenderer> CopyrightLabel::Draw(m2::PointF & size, ref_ptr<dp::Tex
 {
   StaticLabel::LabelResult result;
   // TODO: change if map data is not from open street map. maybe load dynamically from copright notice on device next to mwm file
-  StaticLabel::CacheStaticText("Map data © OpenStreetMap", "", m_position.m_anchor,
+  StaticLabel::CacheStaticText("initializing ...", "", m_position.m_anchor,
                                DrapeGui::GetGuiTextFont(), tex, result);
 
   dp::AttributeProvider provider(1 /*stream count*/, result.m_buffer.size());

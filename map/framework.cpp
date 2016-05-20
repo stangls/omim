@@ -2371,6 +2371,9 @@ void Framework::CheckLocationForRouting(GpsInfo const & info)
     m_routingSession.RebuildRoute(MercatorBounds::FromLatLon(info.m_latitude, info.m_longitude),
                                   readyCallback, m_progressCallback, 0 /* timeoutSec */);
   }
+  if (state == RoutingSession::RouteFinished){
+      LOG(my::LINFO,("routing finished"));
+  }
 }
 
 void Framework::MatchLocationToRoute(location::GpsInfo & location, location::RouteMatchingInfo & routeMatchingInfo) const

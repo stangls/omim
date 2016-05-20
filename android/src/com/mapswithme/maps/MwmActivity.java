@@ -383,17 +383,17 @@ public class MwmActivity extends BaseMwmFragmentActivity
       .setTitle("Meldung")
       .setPositiveButton("OK", new DialogInterface.OnClickListener() { public void onClick(DialogInterface dialog, int which) {
         dialog.dismiss();
+        MwmActivity.this.hideStatusBar();
         String nextMessage = poiMessages.poll();
         if (nextMessage!=null){
           showPoiDialogNow(nextMessage);
         }
       }})
       .create();
-    poiDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
     Framework.nativeSetPoiVisitedListener(this);
     Framework.nativeSetPossibleTourResumptionListener(this);
 
-    getWindow().getDecorView().setSystemUiVisibility (View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+    hideStatusBar();
 
     missionAccess = new MissionAccess(this);
     missionAccess.setListeningActivity(this);
@@ -974,7 +974,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     mOnmapDownloader.onResume();
 
     timerThread.update();
-    getWindow().getDecorView().setSystemUiVisibility (View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
+    hideStatusBar();
   }
 
   @Override
@@ -1134,6 +1134,10 @@ public class MwmActivity extends BaseMwmFragmentActivity
     activityIsVisible.set(true);
 
     timerThread.update();
+    hideStatusBar();
+  }
+
+  private void hideStatusBar() {
     getWindow().getDecorView().setSystemUiVisibility (View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
   }
 
