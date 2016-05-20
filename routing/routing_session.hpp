@@ -98,7 +98,10 @@ public:
 
   Route const & GetRoute() const { return m_route; }
 
-  State OnLocationPositionChanged(location::GpsInfo const & info, Index const & index);
+  State OnLocationPositionChanged(
+    location::GpsInfo const & info, Index const & index,
+    const TPossibleTourResumptionCallback &possibleTourResumptionCallback
+  );
   void GetRouteFollowingInfo(location::FollowingInfo & info) const;
 
   void MatchLocationToRoute(location::GpsInfo & location,

@@ -288,7 +288,7 @@ void Route::GetCurrentDirectionPoint(m2::PointD & pt) const
     m_poly.GetCurrentDirectionPoint(pt, kOnEndToleranceM);
 }
 
-bool Route::MoveIterator(location::GpsInfo const & info) const
+bool Route::MoveIterator(location::GpsInfo const & info, TPossibleTourResumptionCallback const & possibleTourResumptionCallback) const
 {
   double predictDistance = -1.0;
   if (m_currentTime > 0.0 && info.HasSpeed())
@@ -303,9 +303,9 @@ bool Route::MoveIterator(location::GpsInfo const & info) const
   m2::RectD const rect = MercatorBounds::MetresToXY(
         info.m_longitude, info.m_latitude,
         max(m_routingSettings.m_matchingThresholdM, info.m_horizontalAccuracy));
-  FollowedPolyline::Iter const res = m_poly.UpdateProjectionByPrediction(rect, predictDistance, m_nonFastForward);
+  FollowedPolyline::Iter const res = m_poly.UpdateProjectionByPrediction(rect, predictDistance, m_nonFastForward, possibleTourResumptionCallback);
   if (m_simplifiedPoly.IsValid())
-    m_simplifiedPoly.UpdateProjectionByPrediction(rect, predictDistance, m_nonFastForward);
+    m_simplifiedPoly.UpdateProjectionByPrediction(rect, predictDistance, m_nonFastForward, 0);
   return res.IsValid();
 }
 

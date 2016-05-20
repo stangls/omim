@@ -496,6 +496,13 @@ void CallPoiVisitedListener(shared_ptr<jobject> listener, string message)
   env->CallVoidMethod(*listener, methodId, jni::ToJavaString(env, message));
 }
 
+void CallPossibleTourResumptionListener(shared_ptr<jobject> listener, bool isPossible)
+{
+  JNIEnv * env = jni::GetEnv();
+  jmethodID const methodId = jni::GetMethodID(env, *listener, "onPossibleTourResumption", "(Z)V");
+  env->CallVoidMethod(*listener, methodId, isPossible);
+}
+
 /// @name JNI EXPORTS
 //@{
 JNIEXPORT jstring JNICALL
@@ -861,6 +868,14 @@ Java_com_mapswithme_maps_Framework_nativeSetPoiVisitedListener(JNIEnv * env, jcl
 {
   frm()->SetPoiVisitedListener(
     bind(&CallPoiVisitedListener, jni::make_global_ref(listener), _1)
+  );
+}
+
+JNIEXPORT void JNICALL
+Java_com_mapswithme_maps_Framework_nativeSetPossibleTourResumptionListener(JNIEnv * env, jclass, jobject listener)
+{
+  frm()->SetPossibleTourResumptionListener(
+    bind(&CallPossibleTourResumptionListener, jni::make_global_ref(listener), _1)
   );
 }
 

@@ -577,6 +577,7 @@ public:
   // parameters: finished, position_index
   typedef function<void(bool, size_t)> TTourChangeCallback;
   typedef function<void(string)> TPoiMessageCallback;
+  typedef function<void(bool)> TPossibleTourResumptionCallback;
 
   /// @name Routing mode
   //@{
@@ -592,7 +593,7 @@ public:
   // FollowRoute has a bug where the router follows the route even if the method hads't been called.
   // This method was added because we do not want to break the behaviour that is familiar to our users.
   bool DisableFollowMode();
-  /// @TODO(AlexZ): Warning! These four routing callbacks are the only callbacks which are not called in the main thread context.
+  /// @TODO(AlexZ): Warning! These five routing callbacks are the only callbacks which are not called in the main thread context.
   /// UI code should take it into an account. This is a result of current implementation, that can be improved:
   /// Drape core calls some RunOnGuiThread with "this" pointers, and it causes crashes on Android, when Drape engine is destroyed
   /// while switching between activities. Current workaround cleans all callbacks when destroying Drape engine
@@ -605,6 +606,9 @@ public:
   void SetTourChangeListener(TTourChangeCallback const & tourChangeListener) { m_tourChangeListener = tourChangeListener; }
   /// See warning above.
   void SetPoiVisitedListener(TPoiMessageCallback const & poiVisitedCallback) { m_poiVisitedCallback = poiVisitedCallback; }
+  /// See warning above.
+  void SetPossibleTourResumptionListener(TPossibleTourResumptionCallback const & possibleTourResumptionCallback) { m_possibleTourResumptionCallback = possibleTourResumptionCallback; }
+  void DoContinueTourHere(){ m_doContinueTourHere = true; }
   void FollowRoute();
   void CloseRouting();
   void GetRouteFollowingInfo(location::FollowingInfo & info) const { m_routingSession.GetRouteFollowingInfo(info); }
@@ -678,6 +682,9 @@ private:
   TRouteProgressCallback m_progressCallback;
   TTourChangeCallback m_tourChangeListener = 0;
   TPoiMessageCallback m_poiVisitedCallback = 0;
+  TPossibleTourResumptionCallback m_possibleTourResumptionCallback = 0;
+  bool m_possibleTourResumptionWasPossible = false;
+  bool m_doContinueTourHere = false;
   routing::RouterType m_currentRouterType;
   //@}
 

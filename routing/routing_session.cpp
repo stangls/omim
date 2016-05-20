@@ -164,8 +164,10 @@ void RoutingSession::Reset()
   m_lastCompletionPercent = 0;
 }
 
-RoutingSession::State RoutingSession::OnLocationPositionChanged(GpsInfo const & info, Index const & index)
- {
+RoutingSession::State RoutingSession::OnLocationPositionChanged(
+  GpsInfo const & info, Index const & index,
+  TPossibleTourResumptionCallback const & possibleTourResumptionCallback
+) {
   ASSERT(m_state != RoutingNotActive, ());
   ASSERT(m_router != nullptr, ());
 
@@ -179,7 +181,7 @@ RoutingSession::State RoutingSession::OnLocationPositionChanged(GpsInfo const & 
 
   m_turnNotificationsMgr.SetSpeedMetersPerSecond(info.m_speed);
 
-  if (m_route.MoveIterator(info))
+  if (m_route.MoveIterator(info, possibleTourResumptionCallback))
   {
     m_moveAwayCounter = 0;
     m_lastDistance = 0.0;

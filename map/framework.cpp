@@ -2342,7 +2342,22 @@ void Framework::CheckLocationForRouting(GpsInfo const & info)
   if (!IsRoutingActive())
     return;
 
-  RoutingSession::State state = m_routingSession.OnLocationPositionChanged(info, m_model.GetIndex());
+
+  bool isPossible=false;
+  auto possibleTourResumptionCallback = [this,&isPossible]() mutable -> void
+  {
+    LOG( my::LINFO, ("tour resumption is possible!") );
+    isPossible=true;
+  };
+  RoutingSession::State state = m_routingSession.OnLocationPositionChanged(info, m_model.GetIndex(), possibleTourResumptionCallback);
+  m_doContinueTourHere = false;
+  if (isPossible!=m_possibleTourResumptionWasPossible){
+      LOG( my::LINFO, ("tour resumption possibility changed!") );
+      m_possibleTourResumptionWasPossible=isPossible;
+      if (m_possibleTourResumptionCallback!=0){
+        m_possibleTourResumptionCallback(isPossible);
+      }
+  }
   if (state == RoutingSession::RouteNeedRebuild)
   {
     auto readyCallback = [this] (Route const & route, IRouter::ResultCode code)

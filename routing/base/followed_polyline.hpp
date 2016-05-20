@@ -17,6 +17,7 @@ struct GeometryInterval{
     size_t externalFastForward=5;  // ≤25m
 };
 using GeometryIntervals = vector<GeometryInterval>;
+using TPossibleTourResumptionCallback = function<void()>;
 
 class FollowedPolyline
 {
@@ -62,8 +63,14 @@ public:
 
   double GetDistanceM(Iter const & it1, Iter const & it2) const;
 
-  Iter UpdateProjectionByPrediction(m2::RectD const & posRect, double predictDistance, const GeometryIntervals &nonFastForward) const;
-  Iter UpdateProjection(m2::RectD const & posRect, const GeometryIntervals &nonFastForward) const;
+  Iter UpdateProjectionByPrediction(
+    m2::RectD const & posRect, double predictDistance, const GeometryIntervals &nonFastForward,
+    TPossibleTourResumptionCallback const & possibleTourResumptionCallback
+  ) const;
+  Iter UpdateProjection(
+    m2::RectD const & posRect, const GeometryIntervals &nonFastForward,
+    TPossibleTourResumptionCallback const & possibleTourResumptionCallback
+  ) const;
 
   Iter Begin() const;
   Iter End() const;
@@ -71,7 +78,7 @@ public:
 
 private:
   template <class DistanceFn>
-  Iter GetClosestProjection(m2::RectD const & posRect, const GeometryIntervals & nonFastForward, DistanceFn const & distFn) const;
+  Iter GetClosestProjection(m2::RectD const & posRect, const GeometryIntervals & nonFastForward, DistanceFn const & distFn, TPossibleTourResumptionCallback const & ptrc) const;
   void UpdateLastNonCrossing() const;
 
   void Update();

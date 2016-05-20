@@ -108,7 +108,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
                                  MapFragment.MapRenderingListener,
                                  CustomNavigateUpListener,
                                  ChooseBookmarkCategoryFragment.Listener,
-                                 RoutingController.Container, Framework.PoiVisitedListener, MissionListener {
+                                 RoutingController.Container, Framework.PoiVisitedListener, MissionListener, Framework.PossibleTourResumptionListener {
 
   private static final String TAG = MwmActivity.class.getName();
 
@@ -149,6 +149,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
   private ImageButton mBtnZoomIn;
   private ImageButton mBtnZoomOut;
+  private Button mButtonContinueTourHere;
 
   private View mPositionChooser;
 
@@ -391,6 +392,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     });
     poiDialog = b.create();
     Framework.nativeSetPoiVisitedListener(this);
+    Framework.nativeSetPossibleTourResumptionListener(this);
 
     getWindow().getDecorView().setSystemUiVisibility (View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
 
@@ -498,6 +500,10 @@ public class MwmActivity extends BaseMwmFragmentActivity
     mBtnZoomOut.setOnClickListener(this);
     mBtnZoomOut.setImageResource(ThemeUtils.isNightTheme() ? R.drawable.zoom_out_night
                                                            : R.drawable.zoom_out);
+
+    mButtonContinueTourHere = (Button)findViewById(R.id.buttonContinueTourHere);
+    mButtonContinueTourHere.setVisibility(View.GONE);
+    mButtonContinueTourHere.setOnClickListener(this);
   }
 
   private void initPlacePage()
@@ -595,7 +601,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     else
       mFadeView.fadeIn();
 
-    mMainMenu.toggle(true);
+    //mMainMenu.toggle(true);
   }
 
   private void initMenu()
@@ -1078,7 +1084,8 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
   private static boolean showZoomButtons()
   {
-    return RoutingController.get().isNavigating() || Config.showZoomButtons();
+    return true;
+    //return RoutingController.get().isNavigating() || Config.showZoomButtons();
   }
 
   @Override
@@ -1362,6 +1369,9 @@ public class MwmActivity extends BaseMwmFragmentActivity
       AlohaHelper.logClick(AlohaHelper.ZOOM_OUT);
       MapFragment.nativeScaleMinus();
       break;
+    case R.id.buttonContinueTourHere:
+      Log.d(TAG, "continuing tour at this position");
+      break;
     }
   }
 
@@ -1592,6 +1602,16 @@ public class MwmActivity extends BaseMwmFragmentActivity
     }else{
       return null;
     }
+  }
+
+  @Override
+  public void onPossibleTourResumption(final boolean isPossible) {
+    runOnUiThread(new Runnable() {
+      @Override
+      public void run() {
+        mButtonContinueTourHere.setVisibility(isPossible ? View.VISIBLE : View.GONE);
+      }
+    });
   }
 
   @Override

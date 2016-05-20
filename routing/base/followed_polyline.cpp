@@ -111,7 +111,7 @@ void FollowedPolyline::Update()
 
 template <class DistanceFn>
 Iter FollowedPolyline::GetClosestProjection(m2::RectD const & posRect, const GeometryIntervals &nonFastForward,
-                                            DistanceFn const & distFn) const
+                                            DistanceFn const & distFn, TPossibleTourResumptionCallback const & ptrc) const
 {
   //LOG(my::LINFO,("GetClosestProjection"));
   Iter res;
@@ -120,8 +120,15 @@ Iter FollowedPolyline::GetClosestProjection(m2::RectD const & posRect, const Geo
   m2::PointD const currPos = posRect.Center();
   size_t cur = m_current.m_ind;
   size_t const count = m_poly.GetSize() - 1;
+  bool preventedFastForward = false;
   for (size_t i = cur; i < count; ++i)
   {
+
+    // check if we are inside the rect
+    m2::PointD const pt = m_segProj[i](currPos);
+    if (!posRect.IsPointInside(pt))
+      continue;
+
     // skip if we do not fast-forward in(to) this interval
     int skipTo=0;
     // TODO: if the intervals were sorted by maximum, this could be done much more efficiently.
@@ -141,6 +148,7 @@ Iter FollowedPolyline::GetClosestProjection(m2::RectD const & posRect, const Geo
             if ( (i-cur)>maxFastForward ){
                 //LOG(my::LINFO,("not fast-forwarding ",(i-cur)," steps (>"+maxFastForward+") since ",nonFF.min,"<=",i,"<",nonFF.max));
                 skipTo=nonFF.max;
+                preventedFastForward = true;
                 break;
             }
         }
@@ -151,11 +159,6 @@ Iter FollowedPolyline::GetClosestProjection(m2::RectD const & posRect, const Geo
         continue;
     }
 
-    m2::PointD const pt = m_segProj[i](currPos);
-
-    if (!posRect.IsPointInside(pt))
-      continue;
-
     Iter it(pt, i);
     double const dp = distFn(it);
     if (dp < minDist)
@@ -165,25 +168,34 @@ Iter FollowedPolyline::GetClosestProjection(m2::RectD const & posRect, const Geo
     }
   }
   //LOG(my::LINFO,("GetClosestProjection done"));
+  // if we could have fast-forwarded but it was prevented due to nonFastForward-intervals, we inform the user about it
+  if (preventedFastForward){
+      if (ptrc!=0 && !res.IsValid()){
+          LOG( my::LINFO, ("tour resumption is possible!") );
+          ptrc();
+      }
+  }else
+      LOG( my::LINFO, ("tour resumption is not possible!") );
   return res;
 }
 
 Iter FollowedPolyline::UpdateProjectionByPrediction(
         m2::RectD const & posRect,
         double predictDistance,
-        const GeometryIntervals & nonFastForward
+        const GeometryIntervals & nonFastForward,
+        TPossibleTourResumptionCallback const & possibleTourResumptionCallback
 ) const {
   ASSERT(m_current.IsValid(), ());
   ASSERT_LESS(m_current.m_ind, m_poly.GetSize() - 1, ());
 
   if (predictDistance <= 0.0)
-    return UpdateProjection(posRect, nonFastForward);
+    return UpdateProjection(posRect, nonFastForward, possibleTourResumptionCallback);
 
   Iter res;
   res = GetClosestProjection(posRect, nonFastForward, [&](Iter const & it)
   {
     return fabs(GetDistanceM(m_current, it) - predictDistance);
-  });
+  }, possibleTourResumptionCallback);
 
   if (res.IsValid()){
     m_current = res;
@@ -192,8 +204,9 @@ Iter FollowedPolyline::UpdateProjectionByPrediction(
   return res;
 }
 
-Iter FollowedPolyline::UpdateProjection(m2::RectD const & posRect, const GeometryIntervals & nonFastForward) const
-{
+Iter FollowedPolyline::UpdateProjection(m2::RectD const & posRect, const GeometryIntervals & nonFastForward,
+                                        TPossibleTourResumptionCallback const & possibleTourResumptionCallback
+) const {
   ASSERT(m_current.IsValid(), ());
   ASSERT_LESS(m_current.m_ind, m_poly.GetSize() - 1, ());
 
@@ -202,7 +215,7 @@ Iter FollowedPolyline::UpdateProjection(m2::RectD const & posRect, const Geometr
   res = GetClosestProjection(posRect, nonFastForward, [&](Iter const & it)
   {
     return MercatorBounds::DistanceOnEarth(it.m_pt, currPos);
-  });
+  }, possibleTourResumptionCallback);
 
   if (res.IsValid()){
     m_current = res;

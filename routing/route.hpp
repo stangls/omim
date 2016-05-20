@@ -136,7 +136,7 @@ public:
    *               May return false if a projection would only be possible into a non-fast-forward geometry.
    *               See Route:AppendGeometry for more information.
    **/
-  bool MoveIterator(location::GpsInfo const & info) const;
+  bool MoveIterator(location::GpsInfo const & info, const TPossibleTourResumptionCallback &possibleTourResumptionCallback) const;
 
   void MatchLocationToRoute(location::GpsInfo & location, location::RouteMatchingInfo & routeMatchingInfo) const;
 

@@ -268,7 +268,7 @@ IRouter::ResultCode MakeTurnAnnotation(turns::IRoutingResultGraph const & result
 {
   double estimatedTime = 0;
 
-  LOG(LDEBUG, ("Shortest th length:", result.GetShortestPathLength()));
+  //LOG(LDEBUG, ("Shortest th length:", result.GetShortestPathLength()));
 
 #ifdef DEBUG
   size_t lastIdx = 0;
@@ -307,9 +307,9 @@ IRouter::ResultCode MakeTurnAnnotation(turns::IRoutingResultGraph const & result
       double distMeters = 0.0;
       for (size_t k = lastIdx + 1; k < points.size(); ++k)
         distMeters += MercatorBounds::DistanceOnEarth(points[k - 1], points[k]);
-      LOG(LDEBUG, ("Speed:", 3.6 * distMeters / nodeTimeSeconds, "kmph; Dist:", distMeters, "Time:",
+      /*LOG(LDEBUG, ("Speed:", 3.6 * distMeters / nodeTimeSeconds, "kmph; Dist:", distMeters, "Time:",
                    nodeTimeSeconds, "s", lastIdx, "e", points.size(), "source:",
-                   turnItem.m_sourceName, "target:", turnItem.m_targetName));
+                   turnItem.m_sourceName, "target:", turnItem.m_targetName));*/
       lastIdx = points.size();
 #endif
       times.push_back(Route::TTimeItem(points.size(), estimatedTime));
@@ -343,7 +343,7 @@ IRouter::ResultCode MakeTurnAnnotation(turns::IRoutingResultGraph const & result
   times.push_back(Route::TTimeItem(points.size() - 1, estimatedTime));
   turnsDir.emplace_back(turns::TurnItem(static_cast<uint32_t>(points.size()) - 1, turns::TurnDirection::ReachedYourDestination));
   turns::FixupTurns(points, turnsDir);
-
+/*
 #ifdef DEBUG
   for (auto t : turnsDir)
   {
@@ -366,8 +366,8 @@ IRouter::ResultCode MakeTurnAnnotation(turns::IRoutingResultGraph const & result
     last = t.first;
     lastTime = t.second;
   }
-#endif
-  LOG(LDEBUG, ("Estimated time:", estimatedTime, "s"));
+#endif*/
+  //LOG(LDEBUG, ("Estimated time:", estimatedTime, "s"));
   return IRouter::ResultCode::NoError;
 }
 
