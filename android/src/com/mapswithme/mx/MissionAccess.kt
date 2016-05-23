@@ -17,8 +17,6 @@ import com.pawegio.kandroid.*
  */
 class MissionAccess(val ctx: Context) : MissionListener {
 
-    var listeningActivity: MissionListener? = null
-
     init {
         i = this
         missionStatus = null
@@ -36,5 +34,6 @@ class MissionAccess(val ctx: Context) : MissionListener {
         @JvmField var i: MissionAccess? = null
         @JvmField var missionStatus: MissionStatus? = null
         lateinit var missionService : MissionService
+        @JvmField var listeningActivity: MissionListener? = null
     }
 }

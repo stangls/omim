@@ -52,6 +52,7 @@ public class MwmApplication extends MultiDexApplication
 
   private static MwmApplication sSelf;
   private static GPS gps;
+  public static boolean gpsSimulationPaused = false;
   private SharedPreferences mPrefs;
   private AppBackgroundTracker mBackgroundTracker;
 
@@ -297,7 +298,7 @@ public class MwmApplication extends MultiDexApplication
 
   public static GPS gps() {
     if (gps==null){
-      gps = new GPS();
+      gps = new GPS(get());
     }
     return gps;
   }

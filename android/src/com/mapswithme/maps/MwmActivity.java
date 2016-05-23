@@ -169,7 +169,6 @@ public class MwmActivity extends BaseMwmFragmentActivity
   private static boolean sLocationStopped;
 
   private TimerThread timerThread = new TimerThread(this);
-  private MissionAccess missionAccess;
 
   private LinkedList<String> poiMessages = new LinkedList<>();
   private AlertDialog poiDialog;
@@ -395,8 +394,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
     hideStatusBar();
 
-    missionAccess = new MissionAccess(this);
-    missionAccess.setListeningActivity(this);
+    MissionAccess.listeningActivity  = this;
     mBreakButton = (Button)findViewById(R.id.breakButton);
     mRowMissionActivity = findViewById(R.id.rowMissionActivity);
     mRowMissionActivity.setVisibility(View.GONE);
@@ -1658,7 +1656,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
   }
 
   private void updateButtons() {
-    MissionStatus ms = missionAccess.missionStatus;
+    MissionStatus ms = MissionAccess.missionStatus;
     if (ms==null){
       mBreakButton.setVisibility(View.GONE);
       return;
@@ -1673,7 +1671,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
   }
 
   public void breakButtonClicked(View button) {
-    MissionStatus ms = missionAccess.missionStatus;
+    MissionStatus ms = MissionAccess.missionStatus;
     if (ms!=null){
       if (ms.getActivity()==null){
         try{
@@ -1682,16 +1680,23 @@ public class MwmActivity extends BaseMwmFragmentActivity
           Toast.makeText(this, R.string.activityNotFound_missionRecording,Toast.LENGTH_LONG);
         }
       }else{
-        missionAccess.missionService.setActivity(null);
+        MissionAccess.missionService.setActivity(null);
       }
     }
   }
 
   public void gpsPause(View ignored){
-    //MwmApplication.gps().
+    if (MwmApplication.gpsSimulationPaused){
+      MwmApplication.gps().setEmulation(true);
+      MwmApplication.gpsSimulationPaused = false;
+    }else{
+      MwmApplication.gps().pauseEmulation();
+      MwmApplication.gpsSimulationPaused = true;
+    }
   }
   public void gpsRestart(View ignored){
-    //MwmApplication.gps().
+    MwmApplication.gps().restartEmulation();
+    MwmApplication.gpsSimulationPaused = false;
   }
 
 }
