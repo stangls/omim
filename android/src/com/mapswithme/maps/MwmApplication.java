@@ -40,6 +40,8 @@ import com.parse.SaveCallback;
 import io.fabric.sdk.android.Fabric;
 import net.hockeyapp.android.CrashManager;
 
+import com.mobidat.wp2.gpsProvider.GPS;
+
 public class MwmApplication extends MultiDexApplication
 {
   private final static String TAG = "MwmApplication";
@@ -49,6 +51,7 @@ public class MwmApplication extends MultiDexApplication
   private static final String PREF_PARSE_INSTALLATION_ID = "ParseInstallationId";
 
   private static MwmApplication sSelf;
+  private static GPS gps;
   private SharedPreferences mPrefs;
   private AppBackgroundTracker mBackgroundTracker;
 
@@ -292,6 +295,13 @@ public class MwmApplication extends MultiDexApplication
     mMainLoopHandler.sendMessage(m);
   }
 
+  public static GPS gps() {
+    if (gps==null){
+      gps = new GPS();
+    }
+    return gps;
+  }
+
   void clearFunctorsOnUiThread()
   {
     mMainLoopHandler.removeCallbacksAndMessages(mMainQueueToken);
@@ -311,4 +321,5 @@ public class MwmApplication extends MultiDexApplication
 
   @UiThread
   private static native void nativeInitCrashlytics();
+
 }

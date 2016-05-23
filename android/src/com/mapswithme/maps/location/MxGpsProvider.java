@@ -19,7 +19,7 @@ import com.mobidat.wp2.gpsProvider.ILocationReceiver;
 public class MxGpsProvider extends BaseLocationProvider implements ILocationReceiver {
 
     private final Handler mHandler;
-    private GPS gps = null;
+    private GPS gps = MwmApplication.gps();
 
     public MxGpsProvider(){
         // get a handler for asynchronous thread

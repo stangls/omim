@@ -809,6 +809,8 @@ public class RoutingController
             triesContinueTour = 10;
             Framework.nativeLoadTour(tourFile.getAbsolutePath(), activeTourPosition);
             LocationHelper.INSTANCE.removeLocationListener(this);
+            MwmApplication.gps().setEmulation(true);
+            MwmApplication.gps().restartEmulation();
           }
         }
         @Override

@@ -26,8 +26,20 @@
       style="?android:attr/buttonStyleSmall"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:text="Tour hier fortführen"
+      android:text="@string/tour_continue"
       android:id="@+id/buttonContinueTourHere"/>
+  <Button
+      style="?android:attr/buttonStyleSmall"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/gps_simulation_pause"
+      android:onClick="gpsPause"/>
+  <Button
+      style="?android:attr/buttonStyleSmall"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:text="@string/gps_simulation_restart"
+      android:onClick="gpsRestart"/>
 
   <ImageButton android:id="@+id/map_button_plus"
                style="@style/MwmWidget.MapButton"

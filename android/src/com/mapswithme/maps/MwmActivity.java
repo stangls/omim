@@ -1687,4 +1687,11 @@ public class MwmActivity extends BaseMwmFragmentActivity
     }
   }
 
+  public void gpsPause(View ignored){
+    //MwmApplication.gps().
+  }
+  public void gpsRestart(View ignored){
+    //MwmApplication.gps().
+  }
+
 }
