@@ -34,34 +34,60 @@
       android:id="@+id/buttonContinueTourHere"
       android:layout_width="@dimen/menu_line_button_width"
       android:layout_height="@dimen/menu_line_height"
-      android:layout_marginRight="@dimen/margin_quarter"
       android:contentDescription="@string/tour_continue"
       android:background="@android:color/transparent"/>
 
-  <ImageButton
-      android:src="@android:drawable/ic_media_pause"
-      android:onClick="gpsPause"
-      android:layout_width="@dimen/menu_line_button_width"
-      android:layout_height="@dimen/menu_line_height"
-      android:layout_marginRight="@dimen/margin_quarter"
-      android:contentDescription="@string/gps_simulation_pause"
-      style="@style/MwmTheme.Menu.Line.Button"/>
+  <GridLayout
+      android:layout_width="wrap_content"
+      android:layout_height="@dimen/menu_line_height">
 
-  <ImageButton
-      style="@style/MwmTheme.Menu.Line.Button"
-      android:src="@android:drawable/ic_menu_rotate"
-      android:onClick="gpsRestart"
-      android:layout_width="@dimen/menu_line_button_width"
-      android:layout_height="@dimen/menu_line_height"
-      android:layout_marginRight="@dimen/margin_quarter"
-      android:contentDescription="@string/gps_simulation_restart"
-    />
+    <ImageButton
+        android:src="@android:drawable/ic_media_pause"
+        android:onClick="gpsPause"
+        android:layout_width="@dimen/menu_line_button_width"
+        android:layout_height="@dimen/menu_line_height_minusText"
+        android:contentDescription="@string/gps_simulation_pause"
+        style="@style/MwmTheme.Menu.Line.Button"
+        android:layout_row="1"
+        android:layout_column="0"/>
+
+    <ImageButton
+        style="@style/MwmTheme.Menu.Line.Button"
+        android:src="@android:drawable/ic_menu_rotate"
+        android:onClick="gpsRestart"
+        android:layout_width="@dimen/menu_line_button_width"
+        android:layout_height="@dimen/menu_line_height_minusText"
+        android:contentDescription="@string/gps_simulation_restart"
+        android:layout_row="1"
+        android:layout_column="1"/>
+
+    <View
+        android:background="@android:color/black"
+        android:layout_height="1px"
+        android:layout_row="2"
+        android:layout_column="0"
+        android:layout_columnSpan="2"
+        android:layout_width="@dimen/menu_line_button_width_double"
+        android:layout_gravity="center_horizontal"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="@dimen/menu_line_subText_height"
+        android:text="GPS-Simulation"
+        android:id="@+id/textView2"
+        android:layout_row="3"
+        android:layout_column="0"
+        android:layout_columnSpan="2"
+        android:layout_gravity="center_horizontal"/>
+
+  </GridLayout>
 
   <ImageView
     android:onClick="onClick"
     android:id="@+id/tour_settings"
     style="@style/MwmTheme.Menu.Line.Button"
-      android:layout_width="@dimen/menu_line_button_width"
+    android:layout_width="@dimen/menu_line_button_width"
     android:layout_height="@dimen/menu_line_height"
     android:background="@drawable/menu_button_right"
     android:src="@drawable/ic_menu_settings"/>
