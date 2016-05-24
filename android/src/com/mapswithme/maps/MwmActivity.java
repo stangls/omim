@@ -1378,6 +1378,8 @@ public class MwmActivity extends BaseMwmFragmentActivity
       Log.d(TAG, "continuing tour at this position");
       Framework.nativeDoContinueTourHere();
       break;
+    case R.id.tour_settings:
+      startActivity(new Intent(getActivity(), SettingsActivity.class)) ;
     }
   }
 

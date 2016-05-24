@@ -29,7 +29,8 @@
       android:background="@drawable/menu_button_right"
       android:src="@drawable/ic_menu_settings"/>-->
   <ImageView
-    android:id="@+id/settings"
+    android:onClick="onClick"
+    android:id="@+id/tour_settings"
     style="@style/MwmTheme.Menu.Line.Button"
     android:layout_width="@dimen/menu_line_button_width_edge"
     android:layout_height="@dimen/menu_line_height"
