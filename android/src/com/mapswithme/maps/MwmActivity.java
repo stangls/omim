@@ -402,7 +402,9 @@ public class MwmActivity extends BaseMwmFragmentActivity
       while (mRowMissionActivity==null){
         runOnUiThread(new Runnable() { public void run() {
           mRowMissionActivity = findViewById(R.id.rowMissionActivity);
-          mRowMissionActivity.setVisibility(View.GONE);
+          if (mRowMissionActivity!=null){
+            mRowMissionActivity.setVisibility(View.GONE);
+          }
         }});
         try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
       }
@@ -1672,6 +1674,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     runOnUiThread(new Runnable() {
       @Override
       public void run() {
+        if (mRowMissionActivity==null || mTextMissionActivity==null) return;
         com.mobidat.persistence.Activity act = missionStatus.getActivity();
         if (act!=null){
           mTextMissionActivity.setText(act.getName());
