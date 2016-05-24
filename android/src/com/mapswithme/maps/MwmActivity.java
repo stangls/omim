@@ -583,6 +583,9 @@ public class MwmActivity extends BaseMwmFragmentActivity
       public void run() {
         //RoutingController.get().prepare(endPoint);
 
+        MwmApplication.gps().setEmulation(true);
+        MwmApplication.gps().restartEmulation();
+
         RoutingController.get().startTour("/storage/emulated/legacy/mobidat/tour.xml", 0);
 
         if (mPlacePage.isDocked() || !mPlacePage.isFloating())
