@@ -12,31 +12,6 @@
     android:layout_height="match_parent"
     tools:background="#4000F000"/>
 
-  <TextView
-      android:id="@+id/current_place"
-      style="@style/MwmTheme.Menu.Line.CurrentLocationText"
-      android:layout_width="0dp"
-      android:layout_height="match_parent"
-      tools:background="#200000FF"
-      tools:text="Some street name. Long long long long name here! Loooooong!!!111"
-      android:layout_weight="1"/>
-
-  <!-- Gap for menu open/close button -->
-  <!--<ImageView
-      style="@style/MwmTheme.Menu.Line.Button"
-      android:id="@+id/imageView"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:background="@drawable/menu_button_right"
-      android:src="@drawable/ic_menu_settings"/>-->
-  <ImageButton
-      android:src="@drawable/ic_tour_continuation"
-      android:id="@+id/buttonContinueTourHere"
-      android:layout_width="@dimen/menu_line_button_width"
-      android:layout_height="@dimen/menu_line_height"
-      android:contentDescription="@string/tour_continue"
-      android:background="@android:color/transparent"/>
-
   <GridLayout
       android:layout_width="wrap_content"
       android:layout_height="@dimen/menu_line_height">
@@ -83,6 +58,39 @@
         android:textColor="@android:color/darker_gray"/>
 
   </GridLayout>
+
+  <TextView
+      android:id="@+id/current_place"
+      style="@style/MwmTheme.Menu.Line.CurrentLocationText"
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      tools:background="#200000FF"
+      tools:text="Some street name. Long long long long name here! Loooooong!!!111"
+      android:layout_weight="1"/>
+
+  <!-- Gap for menu open/close button -->
+  <!--<ImageView
+      style="@style/MwmTheme.Menu.Line.Button"
+      android:id="@+id/imageView"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:background="@drawable/menu_button_right"
+      android:src="@drawable/ic_menu_settings"/>-->
+  <ImageButton
+      android:src="@drawable/ic_tour_continuation"
+      android:id="@+id/buttonContinueTourHere"
+      android:layout_width="@dimen/menu_line_button_width"
+      android:layout_height="@dimen/menu_line_height"
+      android:contentDescription="@string/tour_continue"
+      android:background="@android:color/transparent"/>
+
+  <ImageButton
+      android:layout_width="@dimen/menu_line_button_width"
+      android:layout_height="@dimen/menu_line_height"
+      android:text="@string/mission_activity_break"
+      android:id="@+id/breakButton"
+      android:onClick="breakButtonClicked"
+      android:src="@android:drawable/ic_media_pause"/>
 
   <ImageView
     android:onClick="onClick"

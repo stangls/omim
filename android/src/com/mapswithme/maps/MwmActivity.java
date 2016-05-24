@@ -173,7 +173,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
   private LinkedList<String> poiMessages = new LinkedList<>();
   private AlertDialog poiDialog;
-  private Button mBreakButton;
+  private ImageButton mBreakButton;
   private View mRowMissionActivity;
   private TextView mTextMissionActivity;
 
@@ -397,7 +397,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
     MissionAccess.init(this);
     MissionAccess.listeningActivity  = this;
-    mBreakButton = (Button)findViewById(R.id.breakButton);
+    mBreakButton = (ImageButton)findViewById(R.id.breakButton);
     mRowMissionActivity = findViewById(R.id.rowMissionActivity);
     mRowMissionActivity.setVisibility(View.GONE);
     mTextMissionActivity = (TextView)findViewById(R.id.textMissionActivity);
@@ -1681,9 +1681,9 @@ public class MwmActivity extends BaseMwmFragmentActivity
       mBreakButton.setVisibility(View.VISIBLE);
     }
     if (ms.getActivity()==null){
-      mBreakButton.setText(R.string.mission_activity_break);
+      mBreakButton.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_media_pause));
     }else{
-      mBreakButton.setText(R.string.mission_activity_continue);
+      mBreakButton.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_media_play));
     }
   }
 
