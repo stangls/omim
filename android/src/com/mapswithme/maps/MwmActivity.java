@@ -398,11 +398,22 @@ public class MwmActivity extends BaseMwmFragmentActivity
     MissionAccess.init(this);
     MissionAccess.listeningActivity  = this;
     mBreakButton = (ImageButton)findViewById(R.id.breakButton);
-    mRowMissionActivity = findViewById(R.id.rowMissionActivity);
-    mRowMissionActivity.setVisibility(View.GONE);
-    mTextMissionActivity = (TextView)findViewById(R.id.textMissionActivity);
-    timerThread.start();
-
+    new Thread(){ public void run(){
+      while (mRowMissionActivity==null){
+        runOnUiThread(new Runnable() { public void run() {
+          mRowMissionActivity = findViewById(R.id.rowMissionActivity);
+          mRowMissionActivity.setVisibility(View.GONE);
+        }});
+        try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
+      }
+      while (mTextMissionActivity==null){
+        runOnUiThread(new Runnable() { public void run() {
+          mTextMissionActivity = (TextView)findViewById(R.id.textMissionActivity);
+        }});
+        try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
+      }
+      timerThread.start();
+    }}.start();
   }
 
   private void initViews()
