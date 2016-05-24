@@ -28,6 +28,30 @@
       android:layout_height="wrap_content"
       android:background="@drawable/menu_button_right"
       android:src="@drawable/ic_menu_settings"/>-->
+  <ImageButton
+      style="@style/MwmWidget.MapButton"
+      tools:src="@drawable/zoom_in"
+      android:id="@+id/button2"
+      android:layout_marginRight="@dimen/margin_quarter"
+      android:contentDescription="@string/tour_continue"
+    />
+
+  <ImageButton
+      style="@style/MwmWidget.MapButton"
+      tools:src="@drawable/zoom_in"
+      android:onClick="gpsPause"
+      android:layout_marginRight="@dimen/margin_quarter"
+      android:contentDescription="@string/gps_simulation_pause"
+    />
+
+  <ImageButton
+      style="@style/MwmWidget.MapButton"
+      tools:src="@drawable/zoom_in"
+      android:onClick="gpsRestart"
+      android:layout_marginRight="@dimen/margin_quarter"
+      android:contentDescription="@string/gps_simulation_restart"
+    />
+
   <ImageView
     android:onClick="onClick"
     android:id="@+id/tour_settings"

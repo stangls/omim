@@ -906,4 +906,5 @@
 	<string name="tour_continue">Tour hier fortführen</string>
 	<string name="gps_simulation_pause">GPS-Simulation pausieren</string>
 	<string name="gps_simulation_restart">GPS-Simulation neustarten</string>
+	<string name="title_tour_remaining_length">Verbleibende Strecke:</string>
 </resources>

@@ -357,7 +357,7 @@ void Route::MatchLocationToRoute(location::GpsInfo & location, location::RouteMa
 bool Route::IsCurrentOnEnd() const
 {
   auto dist = m_poly.GetDistanceToEndM();
-  LOG(my::LINFO,("distance to end:",dist));
+  //LOG(my::LINFO,("distance to end:",dist));
   return (dist < kOnEndToleranceM);
 }
 
