@@ -35,9 +35,6 @@ internal class TimerThread(private val activity: MwmActivity) : Thread() {
         }
     }
 
-    private val textMissionTime = activity.getTextMissionTime()
-    private val rowMissionTime = activity.getRowMissionTime()
-
     private fun updateTime() {
         val missionStatus = MissionAccess.missionStatus
         if (missionStatus==null){
@@ -51,6 +48,8 @@ internal class TimerThread(private val activity: MwmActivity) : Thread() {
         // show time
         activity.runOnUiThread {
             try {
+                val textMissionTime = activity.getTextMissionTime()
+                val rowMissionTime = activity.getRowMissionTime()
                 if (recordDuration == null) {
                     textMissionTime?.setText("???")
                 } else {
