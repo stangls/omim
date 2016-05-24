@@ -1067,6 +1067,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
       public void run()
       {
         int height = mMapFrame.getMeasuredHeight();
+        /*
         int top = UiUtils.dimen(R.dimen.zoom_buttons_top_required_space);
         int bottom = UiUtils.dimen(R.dimen.zoom_buttons_bottom_max_space);
 
@@ -1074,7 +1075,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
         LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) mBtnZoomOut.getLayoutParams();
         lp.bottomMargin = space;
-        mBtnZoomOut.setLayoutParams(lp);
+        mBtnZoomOut.setLayoutParams(lp);*/
       }
     });
   }

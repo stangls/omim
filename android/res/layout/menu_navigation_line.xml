@@ -21,13 +21,20 @@
     tools:text="Some street name. Long long long long name here! Loooooong!!!111"/>
 
   <!-- Gap for menu open/close button -->
-  <ImageView
+  <!--<ImageView
       style="@style/MwmTheme.Menu.Line.Button"
       android:id="@+id/imageView"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
       android:background="@drawable/menu_button_right"
-      android:src="@drawable/ic_menu_settings"/>
+      android:src="@drawable/ic_menu_settings"/>-->
+  <ImageView
+    android:id="@+id/settings"
+    style="@style/MwmTheme.Menu.Line.Button"
+    android:layout_width="@dimen/menu_line_button_width_edge"
+    android:layout_height="@dimen/menu_line_height"
+    android:background="@drawable/menu_button_right"
+    android:src="@drawable/ic_menu_settings"/>
 
   <View
     android:layout_width="@dimen/menu_line_button_width_edge"

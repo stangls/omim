@@ -800,7 +800,7 @@ public class RoutingController
       setEndPoint(null);
       Log.d(TAG, "startTour: native load tour (after location is well known)");
       LocationHelper.INSTANCE.addLocationListener(new LocationHelper.LocationListener() {
-        public int counter = 3;
+        public int counter = 1;
 
         @Override
         public void onLocationUpdated(Location l) {

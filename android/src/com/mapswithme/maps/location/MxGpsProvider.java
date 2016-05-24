@@ -39,6 +39,7 @@ public class MxGpsProvider extends BaseLocationProvider implements ILocationRece
     @Override
     protected void startUpdates() {
         if (initGps()) {
+            gps.setReceiver(this);
             gps.start();
         }
     }
