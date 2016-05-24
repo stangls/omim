@@ -144,7 +144,7 @@
 
     </TableRow>
 
-    <TableRow>
+    <TableRow android:id="@+id/rowMissionTime">
 
       <TextView
           android:layout_width="wrap_content"
@@ -159,7 +159,7 @@
           android:id="@+id/textMissionTime"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:gravity="right"
+          android:gravity="center_vertical"
           tools:text="00:00:00"
           android:textAppearance="@style/MwmTextAppearance.RoutingNumber"
           android:layout_gravity="right"
@@ -184,7 +184,7 @@
           android:id="@+id/textMissionActivity"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:gravity="right"
+          android:gravity="center_vertical"
           tools:text="Traumkontrolle"
           android:textAppearance="@style/MwmTextAppearance.RoutingNumber"
           android:layout_gravity="right"
