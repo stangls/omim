@@ -15,14 +15,7 @@ import com.pawegio.kandroid.*
 /**
  * Created by sd on 06.04.16.
  */
-class MissionAccess(val ctx: Context) : MissionListener {
-
-    init {
-        i = this
-        missionStatus = null
-        missionService = MissionService(ctx)
-        missionService.setMissionListener(this)
-    }
+class MissionAccess : MissionListener {
 
     override fun onMissionStatusChanged(state: MissionStatus) {
         missionStatus = state
@@ -31,9 +24,16 @@ class MissionAccess(val ctx: Context) : MissionListener {
     }
 
     companion object {
-        @JvmField var i: MissionAccess? = null
-        @JvmField var missionStatus: MissionStatus? = null
-        lateinit var missionService : MissionService
+        private val instance = MissionAccess()
         @JvmField var listeningActivity: MissionListener? = null
+
+        lateinit var missionService : MissionService
+        @JvmField var missionStatus: MissionStatus? = null
+
+        @JvmStatic public fun init(ctx: Context) {
+            missionStatus = null
+            missionService = MissionService(ctx)
+            missionService.setMissionListener(instance)
+        }
     }
 }

@@ -92,6 +92,7 @@ import com.mapswithme.util.sharing.SharingHelper;
 import com.mapswithme.util.statistics.AlohaHelper;
 import com.mapswithme.util.statistics.MytargetHelper;
 import com.mapswithme.util.statistics.Statistics;
+import com.mobidat.persistence.Mission;
 import com.mobidat.wp2.missionrecording.MissionAccess;
 import com.mobidat.wp2.missionrecording.TimerThread;
 import com.mobidat.wp2.missionservice.MissionListener;
@@ -394,6 +395,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
     hideStatusBar();
 
+    MissionAccess.init(this);
     MissionAccess.listeningActivity  = this;
     mBreakButton = (Button)findViewById(R.id.breakButton);
     mRowMissionActivity = findViewById(R.id.rowMissionActivity);
