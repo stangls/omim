@@ -150,7 +150,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
   private ImageButton mBtnZoomIn;
   private ImageButton mBtnZoomOut;
-  private Button mButtonContinueTourHere;
+  private ImageButton mButtonContinueTourHere;
 
   private View mPositionChooser;
 
@@ -498,7 +498,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     mBtnZoomOut.setImageResource(ThemeUtils.isNightTheme() ? R.drawable.zoom_out_night
                                                            : R.drawable.zoom_out);
 
-    mButtonContinueTourHere = (Button)findViewById(R.id.buttonContinueTourHere);
+    mButtonContinueTourHere = (ImageButton)findViewById(R.id.buttonContinueTourHere);
     mButtonContinueTourHere.setVisibility(View.GONE);
     mButtonContinueTourHere.setOnClickListener(this);
   }
@@ -1169,7 +1169,10 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
     if (!closePlacePage() && !closeSidePanel() &&
         !RoutingController.get().cancel() && !closePositionChooser())
+    {
+      MwmApplication.gps().pauseEmulation();
       super.onBackPressed();
+    }
   }
 
   private boolean interceptBackPress()

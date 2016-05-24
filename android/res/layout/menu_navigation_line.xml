@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout
-  xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:tools="http://schemas.android.com/tools"
-  android:layout_width="match_parent"
-  android:layout_height="@dimen/menu_line_height"
-  android:orientation="horizontal">
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/menu_line_height"
+    android:orientation="horizontal"
+    >
   <!-- Gap for MyPosition button -->
   <View
     android:layout_width="@dimen/menu_line_button_width_edge"
@@ -12,13 +13,13 @@
     tools:background="#4000F000"/>
 
   <TextView
-    android:id="@+id/current_place"
-    style="@style/MwmTheme.Menu.Line.CurrentLocationText"
-    android:layout_width="0dp"
-    android:layout_height="match_parent"
-    android:layout_weight="1"
-    tools:background="#200000FF"
-    tools:text="Some street name. Long long long long name here! Loooooong!!!111"/>
+      android:id="@+id/current_place"
+      style="@style/MwmTheme.Menu.Line.CurrentLocationText"
+      android:layout_width="0dp"
+      android:layout_height="match_parent"
+      tools:background="#200000FF"
+      tools:text="Some street name. Long long long long name here! Loooooong!!!111"
+      android:layout_weight="1"/>
 
   <!-- Gap for menu open/close button -->
   <!--<ImageView
@@ -31,7 +32,9 @@
   <ImageButton
       style="@style/MwmWidget.MapButton"
       tools:src="@drawable/zoom_in"
-      android:id="@+id/button2"
+      android:id="@+id/buttonContinueTourHere"
+      android:layout_width="@dimen/menu_line_button_width"
+      android:layout_height="@dimen/menu_line_height"
       android:layout_marginRight="@dimen/margin_quarter"
       android:contentDescription="@string/tour_continue"
     />
@@ -40,6 +43,8 @@
       style="@style/MwmWidget.MapButton"
       tools:src="@drawable/zoom_in"
       android:onClick="gpsPause"
+      android:layout_width="@dimen/menu_line_button_width"
+      android:layout_height="@dimen/menu_line_height"
       android:layout_marginRight="@dimen/margin_quarter"
       android:contentDescription="@string/gps_simulation_pause"
     />
@@ -48,6 +53,8 @@
       style="@style/MwmWidget.MapButton"
       tools:src="@drawable/zoom_in"
       android:onClick="gpsRestart"
+      android:layout_width="@dimen/menu_line_button_width"
+      android:layout_height="@dimen/menu_line_height"
       android:layout_marginRight="@dimen/margin_quarter"
       android:contentDescription="@string/gps_simulation_restart"
     />
@@ -56,7 +63,7 @@
     android:onClick="onClick"
     android:id="@+id/tour_settings"
     style="@style/MwmTheme.Menu.Line.Button"
-    android:layout_width="@dimen/menu_line_button_width_edge"
+      android:layout_width="@dimen/menu_line_button_width"
     android:layout_height="@dimen/menu_line_height"
     android:background="@drawable/menu_button_right"
     android:src="@drawable/ic_menu_settings"/>
