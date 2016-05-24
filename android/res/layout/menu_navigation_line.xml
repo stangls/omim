@@ -24,7 +24,9 @@
         android:contentDescription="@string/gps_simulation_pause"
         style="@style/MwmTheme.Menu.Line.Button"
         android:layout_row="1"
-        android:layout_column="0"/>
+        android:layout_column="0"
+        android:alpha="0.6"
+      />
 
     <ImageButton
         style="@style/MwmTheme.Menu.Line.Button"
