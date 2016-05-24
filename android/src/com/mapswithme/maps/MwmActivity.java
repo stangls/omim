@@ -1609,10 +1609,18 @@ public class MwmActivity extends BaseMwmFragmentActivity
   }
 
   public TextView getTextMissionTime() {
-    return (TextView) findViewById(R.id.textMissionTime);
+    try{
+      return (TextView) findViewById(R.id.textMissionTime);
+    }catch(NullPointerException ignored){
+      return null;
+    }
   }
   public View getRowMissionTime() {
-    return findViewById(R.id.rowMissionTime);
+    try{
+      return findViewById(R.id.rowMissionTime);
+    }catch(NullPointerException ignored){
+      return null;
+    }
   }
 
   @Override

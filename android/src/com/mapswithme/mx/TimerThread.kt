@@ -59,13 +59,15 @@ internal class TimerThread(private val activity: MwmActivity) : Thread() {
                     seconds -= minutes * 60
                     val hours = minutes / 60
                     minutes -= hours * 60
-                    var text : String = hours.toString()
+                    var finalText = hours.toString()
+                    while (finalText.length < 2) finalText = "0" + finalText
+                    var text = minutes.toString()
                     while (text.length < 2) text = "0" + text
-                    text += " : "+minutes.toString()
+                    finalText += ":"+text
+                    text = seconds.toString()
                     while (text.length < 2) text = "0" + text
-                    text += " : "+seconds.toString()
-                    while (text.length < 2) text = "0" + text
-                    textMissionTime?.setText(text)
+                    finalText += ":"+text
+                    textMissionTime?.setText(finalText)
                     rowMissionTime?.visibility= View.VISIBLE
                 }
             } catch (_: NullPointerException) {}

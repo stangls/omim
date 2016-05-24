@@ -30,28 +30,26 @@
       android:background="@drawable/menu_button_right"
       android:src="@drawable/ic_menu_settings"/>-->
   <ImageButton
-      style="@style/MwmWidget.MapButton"
-      tools:src="@drawable/zoom_in"
+      android:src="@drawable/ic_tour_continuation"
       android:id="@+id/buttonContinueTourHere"
       android:layout_width="@dimen/menu_line_button_width"
       android:layout_height="@dimen/menu_line_height"
       android:layout_marginRight="@dimen/margin_quarter"
       android:contentDescription="@string/tour_continue"
-    />
+      android:background="@android:color/transparent"/>
 
   <ImageButton
-      style="@style/MwmWidget.MapButton"
-      tools:src="@drawable/zoom_in"
+      android:src="@android:drawable/ic_media_pause"
       android:onClick="gpsPause"
       android:layout_width="@dimen/menu_line_button_width"
       android:layout_height="@dimen/menu_line_height"
       android:layout_marginRight="@dimen/margin_quarter"
       android:contentDescription="@string/gps_simulation_pause"
-    />
+      style="@style/MwmTheme.Menu.Line.Button"/>
 
   <ImageButton
-      style="@style/MwmWidget.MapButton"
-      tools:src="@drawable/zoom_in"
+      style="@style/MwmTheme.Menu.Line.Button"
+      android:src="@android:drawable/ic_menu_rotate"
       android:onClick="gpsRestart"
       android:layout_width="@dimen/menu_line_button_width"
       android:layout_height="@dimen/menu_line_height"
