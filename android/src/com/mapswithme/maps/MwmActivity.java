@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.Location;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -177,6 +178,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
   private View mRowMissionActivity;
   private TextView mTextMissionActivity;
   private View mLegend;
+  private MediaPlayer mediaPlayer;
 
   public interface LeftAnimationTrackListener
   {
@@ -1154,6 +1156,12 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
     timerThread.update();
     hideStatusBar();
+
+    if (mediaPlayer==null){
+      mediaPlayer = MediaPlayer.create(this, R.raw.silence);
+    }
+    mediaPlayer.setLooping(true);
+    mediaPlayer.start(); // no need to call prepare(); create() does that for you
   }
 
   private void hideStatusBar() {
@@ -1167,6 +1175,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     activityIsVisible.set(false);
     mMytargetHelper.cancel();
     RoutingController.get().detach();
+    mediaPlayer.stop();
   }
 
   @Override
