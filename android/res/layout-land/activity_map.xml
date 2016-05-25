@@ -75,24 +75,27 @@
       android:layout_width="match_parent"
       android:layout_height="match_parent"
       android:id="@+id/legend"
-      android:onClick="legendButtonClicked">
+      android:onClick="legendButtonClicked"
+      >
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-      android:background="@android:color/black"
-      android:alpha="0.5" />
+      android:background="@color/primary_material_light"
+      android:alpha="0.6" />
 
     <TableLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="?cardFrame"
-        android:layout_centerInParent="true">
+        android:layout_centerInParent="true"
+        android:padding="25dp">
 
       <TextView
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:textAppearance="?android:attr/textAppearanceLarge"
           android:text="Tourenführung"
+          android:layout_marginBottom="10dp"
       />
 
       <TableRow
