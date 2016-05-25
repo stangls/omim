@@ -156,7 +156,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Tour fortführen"
+            android:text="Tour an dieser Stelle fortführen"
             android:singleLine="true"
             android:gravity="right"
             android:id="@+id/textView5"
