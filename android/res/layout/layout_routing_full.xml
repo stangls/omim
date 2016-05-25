@@ -5,11 +5,13 @@
     android:id="@+id/navigation_frame"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    >
 
   <RelativeLayout
       android:layout_width="match_parent"
-      android:layout_height="wrap_content">
+      android:layout_height="wrap_content"
+      android:id="@+id/relativeLayout2">
   <include
       layout="@layout/layout_turn_instructions"
       android:layout_width="match_parent"
@@ -32,9 +34,12 @@
       android:paddingTop="@dimen/margin_quarter"
       android:visibility="gone"
       tools:visibility="visible"
-      android:layout_alignParentTop="true"
-      android:layout_centerHorizontal="true"
-      android:layout_marginTop="15dp">
+      android:layout_marginTop="@dimen/margin_half"
+      android:layout_below="@+id/relativeLayout2"
+      android:layout_alignParentStart="true"
+      android:layout_marginLeft="@dimen/margin_base"
+      android:layout_alignParentEnd="false"
+      android:layout_marginStart="@dimen/margin_base">
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

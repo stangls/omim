@@ -176,6 +176,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
   private ImageButton mBreakButton;
   private View mRowMissionActivity;
   private TextView mTextMissionActivity;
+  private View mLegend;
 
   public interface LeftAnimationTrackListener
   {
@@ -398,6 +399,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     MissionAccess.init(this);
     MissionAccess.listeningActivity  = this;
     mBreakButton = (ImageButton)findViewById(R.id.breakButton);
+    mLegend = (View)findViewById(R.id.legend);
     new Thread(){ public void run(){
       while (mRowMissionActivity==null){
         runOnUiThread(new Runnable() { public void run() {
@@ -1714,6 +1716,10 @@ public class MwmActivity extends BaseMwmFragmentActivity
         MissionAccess.missionService.setActivity(null);
       }
     }
+  }
+
+  public void legendButtonClicked(View button){
+    mLegend.setVisibility( mLegend.getVisibility()==View.GONE?View.VISIBLE:View.GONE );
   }
 
   public void gpsPause(View ignored){

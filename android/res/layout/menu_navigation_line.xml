@@ -95,7 +95,16 @@
       android:text="@string/mission_activity_break"
       android:id="@+id/breakButton"
       android:onClick="breakButtonClicked"
-      android:src="@android:drawable/ic_media_pause"/>
+      android:src="@android:drawable/ic_media_pause"
+      style="@style/MwmTheme.Menu.Line.Button"/>
+
+  <ImageButton
+      android:layout_width="@dimen/menu_line_button_width"
+      android:layout_height="@dimen/menu_line_height"
+      android:id="@+id/legendButton"
+      android:onClick="legendButtonClicked"
+      android:src="@android:drawable/ic_menu_help"
+      style="@style/MwmTheme.Menu.Line.Button"/>
 
   <ImageView
     android:onClick="onClick"
