@@ -277,7 +277,7 @@
     tr = Düz ilerleyin.
     fr = Continuez tout droit.
     nl = Rij rechtdoor.
-    de = Fahren Sie geradeaus.
+    de = geradeaus.
     ar = انطلق مباشرة.
     el = Συνεχίστε ευθεία.
     it = Sempre dritto.
@@ -307,7 +307,7 @@
     tr = Varacaksınız.
     fr = Vous arriverez.
     nl = Arriveert u.
-    de = Werden Sie ankommen.
+    de = 
     ar = سوف تصل.
     el = Θα φτάσετε.
     it = Arriverai.

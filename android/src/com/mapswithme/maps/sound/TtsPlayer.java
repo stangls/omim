@@ -39,6 +39,7 @@ public enum TtsPlayer
 
   private static final Locale DEFAULT_LOCALE = Locale.US;
   private static final float SPEECH_RATE = 1.2f;
+  private static final String TAG = TtsPlayer.class.getSimpleName();
 
   private TextToSpeech mTts;
   private boolean mInitializing;
@@ -165,6 +166,7 @@ public enum TtsPlayer
 
   private void speak(String textToSpeak)
   {
+    Log.d(TAG, "speak: "+textToSpeak);
     if (Config.isTtsEnabled())
       try
       {
