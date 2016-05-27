@@ -25,7 +25,7 @@ class TourParser
 
     PointD m_curPosition;
     int m_roadAngle=0;
-    int m_roadIndex=0;
+    int m_roadIndex=-1;
     double m_x=0;
     double m_y=0;
     bool m_tracePosition=false;
@@ -102,9 +102,12 @@ public:
         if (tag=="section") {
             LOG( my::LINFO, ("adding junction") );
             turns::TurnDirection turnDirection=turns::TurnDirection::NoTurn;
-            if (m_roadIndex!=0){
+            if (m_roadIndex>=0){
+                LOG( my::LINFO, ("junction roundabout road index : ",m_roadIndex) );
+                m_tour.AddTurn(TI(m_tour.GetAllPoints().size()-1-5,turns::TurnDirection::EnterRoundAbout,m_roadIndex));
                 turnDirection=turns::TurnDirection::LeaveRoundAbout;
             }else{
+                LOG( my::LINFO, ("junction road angle : ",m_roadAngle) );
                 if (m_roadAngle>=175)
                     turnDirection=TD::UTurnLeft;
                 else if (m_roadAngle>=120)
@@ -125,7 +128,7 @@ public:
                     turnDirection=TD::GoStraight;
             }
             m_tour.AddTurn(TI(m_tour.GetAllPoints().size()-1,turnDirection,m_roadIndex));
-            m_roadIndex = 0;
+            m_roadIndex = -1;
         }
         if (tag=="poi"){
             LOG( my::LINFO, ("adding POI") );

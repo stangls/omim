@@ -24,11 +24,8 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.view.WindowManager;
-import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -78,9 +75,9 @@ import com.mapswithme.maps.widget.menu.MainMenu;
 import com.mapswithme.maps.widget.placepage.BasePlacePageAnimationController;
 import com.mapswithme.maps.widget.placepage.PlacePageView;
 import com.mapswithme.maps.widget.placepage.PlacePageView.State;
+import com.mapswithme.mx.TourFinishedListener;
 import com.mapswithme.util.Animations;
 import com.mapswithme.util.BottomSheetHelper;
-import com.mapswithme.util.Config;
 import com.mapswithme.util.InputUtils;
 import com.mapswithme.util.LocationUtils;
 import com.mapswithme.util.ThemeUtils;
@@ -93,7 +90,6 @@ import com.mapswithme.util.sharing.SharingHelper;
 import com.mapswithme.util.statistics.AlohaHelper;
 import com.mapswithme.util.statistics.MytargetHelper;
 import com.mapswithme.util.statistics.Statistics;
-import com.mobidat.persistence.Mission;
 import com.mobidat.wp2.missionrecording.MissionAccess;
 import com.mobidat.wp2.missionrecording.TimerThread;
 import com.mobidat.wp2.missionservice.MissionListener;
@@ -111,7 +107,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
                                  MapFragment.MapRenderingListener,
                                  CustomNavigateUpListener,
                                  ChooseBookmarkCategoryFragment.Listener,
-                                 RoutingController.Container, Framework.PoiVisitedListener, MissionListener, Framework.PossibleTourResumptionListener {
+                                 RoutingController.Container, Framework.PoiVisitedListener, MissionListener, Framework.PossibleTourResumptionListener, TourFinishedListener {
 
   private static final String TAG = MwmActivity.class.getName();
 
@@ -171,7 +167,6 @@ public class MwmActivity extends BaseMwmFragmentActivity
   private static boolean sLocationStopped;
 
   private TimerThread timerThread = new TimerThread(this);
-
   private LinkedList<String> poiMessages = new LinkedList<>();
   private AlertDialog poiDialog;
   private ImageButton mBreakButton;
@@ -179,6 +174,16 @@ public class MwmActivity extends BaseMwmFragmentActivity
   private TextView mTextMissionActivity;
   private View mLegend;
   private MediaPlayer mediaPlayer;
+
+  @Override
+  public void onTourFinished() {
+    new Thread(){public void run(){
+      try { Thread.sleep(3000); } catch (InterruptedException e) {}
+      runOnUiThread(new Runnable(){public void run(){
+        finish();
+      }});
+    }}.start();
+  }
 
   public interface LeftAnimationTrackListener
   {
@@ -1157,11 +1162,15 @@ public class MwmActivity extends BaseMwmFragmentActivity
     timerThread.update();
     hideStatusBar();
 
+    // play an empty sound in the background for BT-connections
     if (mediaPlayer==null){
       mediaPlayer = MediaPlayer.create(this, R.raw.silence);
     }
     mediaPlayer.setLooping(true);
     mediaPlayer.start(); // no need to call prepare(); create() does that for you
+
+    // set this activity as active in routing-controller so that when the tour finishes, the activity can be terminated
+    RoutingController.get().setTourFinishedListener(this);
   }
 
   private void hideStatusBar() {

@@ -26,6 +26,7 @@ import com.mapswithme.maps.R;
 import com.mapswithme.maps.bookmarks.data.MapObject;
 import com.mapswithme.maps.downloader.MapManager;
 import com.mapswithme.maps.location.LocationHelper;
+import com.mapswithme.mx.TourFinishedListener;
 import com.mapswithme.util.Config;
 import com.mapswithme.util.StringUtils;
 import com.mapswithme.util.ThemeSwitcher;
@@ -99,6 +100,11 @@ public class RoutingController
   private String[] mLastMissingMaps;
   private RoutingInfo mCachedRoutingInfo;
 
+  private TourFinishedListener mTourFinishedListener;
+  public void setTourFinishedListener(TourFinishedListener listener) {
+    this.mTourFinishedListener = listener;
+  }
+
   @SuppressWarnings("FieldCanBeLocal")
   private final Framework.RoutingListener mRoutingListener = new Framework.RoutingListener()
   {
@@ -152,8 +158,13 @@ public class RoutingController
     public void onTourChanged(boolean finished, int idx) {
       SharedPreferences.Editor editor = MwmApplication.prefs().edit();
       if (finished){
+        Log.d(TAG, "onTourChanged: tour finished!");
         editor.remove(TOUR_FILE_NAME);
         editor.remove(TOUR_POSITION);
+        cancel();
+        if (mTourFinishedListener !=null){
+          mTourFinishedListener.onTourFinished();
+        }
       }else{
         saveTourInfo(null,idx);
       }

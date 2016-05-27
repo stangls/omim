@@ -2372,7 +2372,9 @@ void Framework::CheckLocationForRouting(GpsInfo const & info)
                                   readyCallback, m_progressCallback, 0 /* timeoutSec */);
   }
   if (state == RoutingSession::RouteFinished){
-      LOG(my::LINFO,("routing finished"));
+      if (m_tourChangeListener!=0){
+          m_tourChangeListener(true,0);
+      }
   }
 }
 
