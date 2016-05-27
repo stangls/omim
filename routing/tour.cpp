@@ -26,6 +26,7 @@ class TourParser
     PointD m_curPosition;
     int m_roadAngle=0;
     int m_roadIndex=-1;
+    bool m_roundabout=false;
     double m_x=0;
     double m_y=0;
     bool m_tracePosition=false;
@@ -73,6 +74,11 @@ public:
         }
         if (IsValidAttribute("junction", attrInLowerCase, "road_index", value))
             m_roadIndex = atoi(value.c_str());
+        if (IsValidAttribute("junction", attrInLowerCase, "type", value)){
+            if (value=="roundabout"){
+                m_roundabout=true;
+            }
+        }
         if (IsValidAttribute("road", attrInLowerCase, "angle", value))
             m_roadAngle = atoi(value.c_str());
     }
@@ -102,9 +108,9 @@ public:
         if (tag=="section") {
             LOG( my::LINFO, ("adding junction") );
             turns::TurnDirection turnDirection=turns::TurnDirection::NoTurn;
-            if (m_roadIndex>=0){
+            if (m_roundabout){
                 LOG( my::LINFO, ("junction roundabout road index : ",m_roadIndex) );
-                m_tour.AddTurn(TI(m_tour.GetAllPoints().size()-1-5,turns::TurnDirection::EnterRoundAbout,m_roadIndex));
+                m_tour.AddTurn(TI(m_tour.GetAllPoints().size()-1-5,turns::TurnDirection::EnterRoundAbout,m_roadIndex+1));
                 turnDirection=turns::TurnDirection::LeaveRoundAbout;
             }else{
                 LOG( my::LINFO, ("junction road angle : ",m_roadAngle) );
@@ -127,8 +133,9 @@ public:
                 else
                     turnDirection=TD::GoStraight;
             }
-            m_tour.AddTurn(TI(m_tour.GetAllPoints().size()-1,turnDirection,m_roadIndex));
+            m_tour.AddTurn(TI(m_tour.GetAllPoints().size()-1,turnDirection,m_roadIndex+1));
             m_roadIndex = -1;
+            m_roundabout = false;
         }
         if (tag=="poi"){
             LOG( my::LINFO, ("adding POI") );
