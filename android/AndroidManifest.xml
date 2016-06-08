@@ -62,7 +62,7 @@
     <meta-data
         android:name="com.google.android.gms.version"
         android:value="@integer/google_play_services_version"/>
-
+<!--
     <meta-data
         android:name="com.facebook.sdk.ApplicationId"
         android:value="@string/fb_app_id"/>
@@ -74,7 +74,7 @@
     <meta-data
         android:name="io.fabric.ApiKey"
         android:value="${FABRIC_API_KEY}"/>
-
+-->
     <activity
         android:name="com.mapswithme.maps.DownloadResourcesActivity"
         android:configChanges="orientation|screenLayout|screenSize"
@@ -111,17 +111,19 @@
           android:value="com.mapswithme.maps.MwmActivity"/>
     </activity>
 
+    <!--
     <activity
         android:name="com.mapswithme.maps.search.SearchActivity"
         android:configChanges="orientation|screenLayout|screenSize"
         android:label="@string/search_map"
         android:parentActivityName="com.mapswithme.maps.MwmActivity"
         android:windowSoftInputMode="stateVisible|adjustNothing">
-      <!-- The meta-data element is needed for versions lower than 4.1 -->
+      <!-x- The meta-data element is needed for versions lower than 4.1 -x->
       <meta-data
           android:name="android.support.PARENT_ACTIVITY"
           android:value="com.mapswithme.maps.MwmActivity"/>
     </activity>
+    -->
 
     <activity
         android:name="com.mapswithme.maps.settings.SettingsActivity"
@@ -134,12 +136,13 @@
           android:value="com.mapswithme.maps.MwmActivity"/>
     </activity>
 
+    <!--
     <activity
         android:name="com.mapswithme.maps.bookmarks.BookmarkCategoriesActivity"
         android:configChanges="orientation|screenLayout|screenSize"
         android:label="@string/bookmark_sets"
         android:parentActivityName="com.mapswithme.maps.MwmActivity">
-      <!-- The meta-data element is needed for versions lower than 4.1 -->
+      <!-x- The meta-data element is needed for versions lower than 4.1 -x->
       <meta-data
           android:name="android.support.PARENT_ACTIVITY"
           android:value="com.mapswithme.maps.MwmActivity"/>
@@ -150,7 +153,7 @@
         android:configChanges="orientation|screenLayout|screenSize"
         android:label="@string/bookmarks"
         android:parentActivityName="com.mapswithme.maps.bookmarks.BookmarkCategoriesActivity">
-      <!-- The meta-data element is needed for versions lower than 4.1 -->
+      <!-x- The meta-data element is needed for versions lower than 4.1 -x->
       <meta-data
           android:name="android.support.PARENT_ACTIVITY"
           android:value="com.mapswithme.maps.bookmarks.BookmarkCategoriesActivity"/>
@@ -162,7 +165,7 @@
       android:label="@string/edit_place"
       android:theme="@style/MwmTheme.EditorActivity"
       android:parentActivityName="com.mapswithme.maps.MwmActivity">
-      <!-- The meta-data element is needed for versions lower than 4.1 -->
+      <!-x- The meta-data element is needed for versions lower than 4.1 -x->
       <meta-data
         android:name="android.support.PARENT_ACTIVITY"
         android:value="com.mapswithme.maps.MwmActivity"/>
@@ -171,7 +174,7 @@
     <activity
       android:name="com.mapswithme.maps.editor.ProfileActivity"
       android:parentActivityName="com.mapswithme.maps.settings.SettingsActivity">
-      <!-- The meta-data element is needed for versions lower than 4.1 -->
+      <!-x- The meta-data element is needed for versions lower than 4.1 -x->
       <meta-data
         android:name="android.support.PARENT_ACTIVITY"
         android:value="com.mapswithme.maps.settings.SettingsActivity"/>
@@ -180,7 +183,7 @@
     <activity
       android:name="com.mapswithme.maps.editor.FeatureCategoryActivity"
       android:parentActivityName="com.mapswithme.maps.MwmActivity">
-      <!-- The meta-data element is needed for versions lower than 4.1 -->
+      <!-x- The meta-data element is needed for versions lower than 4.1 -x->
       <meta-data
         android:name="android.support.PARENT_ACTIVITY"
         android:value="com.mapswithme.maps.MwmActivity"/>
@@ -189,7 +192,7 @@
     <activity
       android:name="com.mapswithme.maps.editor.ReportActivity"
       android:parentActivityName="com.mapswithme.maps.MwmActivity">
-      <!-- The meta-data element is needed for versions lower than 4.1 -->
+      <!-x- The meta-data element is needed for versions lower than 4.1 -x->
       <meta-data
         android:name="android.support.PARENT_ACTIVITY"
         android:value="com.mapswithme.maps.MwmActivity"/>
@@ -198,13 +201,14 @@
     <activity
       android:name="com.mapswithme.maps.editor.OsmAuthActivity"
       android:parentActivityName="com.mapswithme.maps.MwmActivity">
-      <!-- The meta-data element is needed for versions lower than 4.1 -->
+      <!-x- The meta-data element is needed for versions lower than 4.1 -x->
       <meta-data
         android:name="android.support.PARENT_ACTIVITY"
         android:value="com.mapswithme.maps.MwmActivity"/>
-    </activity>
+    </activity>-->
 
     <!-- facebook -->
+    <!--
     <activity
         android:name="com.facebook.FacebookActivity"
         android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|screenSize"
@@ -213,6 +217,7 @@
     <activity
         android:name="ru.mail.android.mytarget.ads.MyTargetActivity"
         android:configChanges="keyboard|keyboardHidden|orientation|screenLayout|uiMode|screenSize|smallestScreenSize"/>
+    -->
 
     <receiver
         android:name="com.mapswithme.maps.background.ConnectivityChangedReceiver"
@@ -226,7 +231,7 @@
     <service
         android:name="com.mapswithme.maps.background.WorkerService"
         android:exported="false"/>
-
+<!--
     <receiver android:name="com.mapswithme.maps.location.TrackRecorderWakeReceiver">
       <intent-filter>
         <action android:name="com.mapswithme.maps.TRACK_RECORDER_ALARM"/>
@@ -235,22 +240,24 @@
 
     <service android:name="com.mapswithme.maps.location.TrackRecorderWakeService"
              android:exported="false"/>
+ -->
 
     <!-- our custom receiver, that will call Aloha & other handlers -->
+    <!--
     <receiver
         android:name="com.mapswithme.util.MultipleTrackerReferrerReceiver"
         android:exported="true">
       <intent-filter>
         <action android:name="com.android.vending.INSTALL_REFERRER"/>
       </intent-filter>
-    </receiver>
+    </receiver>-->
 
     <!-- myTracker
          IMPORTANT : we DON'T declare myTracker's broadcast receiver for INSTALL_REFERRER intent, cause we catch it in our custom
          MultipleTrackerReferrerReceiver and then pass it manually to myTracker's one. -->
-    <service android:name="ru.mail.android.mytracker.campaign.CampaignService"/>
+    <!--<service android:name="ru.mail.android.mytracker.campaign.CampaignService"/>-->
 
-    <!-- Alohalytics -->
+    <!-- Alohalytics --><!--
     <receiver
         android:name="org.alohalytics.ConnectivityChangedReceiver"
         android:enabled="true"
@@ -258,7 +265,7 @@
       <intent-filter>
         <action android:name="android.net.conn.CONNECTIVITY_CHANGE"/>
       </intent-filter>
-    </receiver>
+    </receiver>-->
 
     <!-- Parse -->
     <!--

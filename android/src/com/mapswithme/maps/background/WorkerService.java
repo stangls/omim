@@ -118,7 +118,7 @@ public class WorkerService extends IntentService
 
   private static void handleActionUploadOsmChanges()
   {
-    Editor.uploadChanges();
+    //Editor.uploadChanges();
   }
 
   @android.support.annotation.UiThread

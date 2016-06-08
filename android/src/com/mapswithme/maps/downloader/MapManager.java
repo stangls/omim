@@ -8,6 +8,7 @@ import android.support.annotation.StringRes;
 import android.support.annotation.UiThread;
 import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
@@ -148,6 +149,8 @@ public final class MapManager
 
   public static void checkUpdates()
   {
+    Log.e("MapManager", "checkUpdates: disabled by MOBIWORX" );
+    /*
     if (!Framework.nativeIsDataVersionChanged())
       return;
 
@@ -156,6 +159,7 @@ public final class MapManager
       Notifier.notifyUpdateAvailable(countriesToUpdate);
 
     Framework.nativeUpdateSavedDataVersion();
+    */
   }
 
   private static void notifyNoSpaceInternal(Activity activity)
