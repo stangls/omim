@@ -1,0 +1,14 @@
+#!/bin/bash
+
+wd=build/outputs/apk/
+mkdir -p $wd 
+cd $wd
+
+for s in android-web-x86-debug android-web-universal-debug android-web-armeabi-v7a-debug; do
+    f=$(ls "$s"-*.apk 2>/dev/null | head -n 1)
+    if [ -e "$f" ]; then
+        ln -s "$f" "${s}.apk"
+    fi
+done
+
+ls -lah /sd/dev/wp2/omim/android/build/outputs/apk
