@@ -88,15 +88,15 @@ import com.mapswithme.util.concurrency.UiThread;
 import com.mapswithme.util.sharing.ShareOption;
 import com.mapswithme.util.sharing.SharingHelper;
 import com.mapswithme.util.statistics.AlohaHelper;
-import com.mapswithme.util.statistics.MytargetHelper;
+//import com.mapswithme.util.statistics.MytargetHelper;
 import com.mapswithme.util.statistics.Statistics;
 import com.mobidat.wp2.missionrecording.MissionAccess;
 import com.mobidat.wp2.missionrecording.TimerThread;
 import com.mobidat.wp2.missionservice.MissionListener;
 import com.mobidat.wp2.missionservice.MissionStatus;
 
-import ru.mail.android.mytarget.nativeads.NativeAppwallAd;
-import ru.mail.android.mytarget.nativeads.banners.NativeAppwallBanner;
+//import ru.mail.android.mytarget.nativeads.NativeAppwallAd;
+//import ru.mail.android.mytarget.nativeads.banners.NativeAppwallBanner;
 
 public class MwmActivity extends BaseMwmFragmentActivity
                       implements LocationHelper.LocationListener,
@@ -142,7 +142,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
   private MainMenu mMainMenu;
   private PanelAnimator mPanelAnimator;
   private OnmapDownloader mOnmapDownloader;
-  private MytargetHelper mMytargetHelper;
+  //private MytargetHelper mMytargetHelper;
 
   private FadeView mFadeView;
 
@@ -1012,6 +1012,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
   private void initShowcase()
   {
+    /*
     NativeAppwallAd.AppwallAdListener listener = new NativeAppwallAd.AppwallAdListener()
     {
       @Override
@@ -1041,6 +1042,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
       public void onDismissDialog(NativeAppwallAd nativeAppwallAd) {}
     };
     mMytargetHelper = new MytargetHelper(listener, this);
+    */
   }
 
   @Override
@@ -1182,7 +1184,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
   {
     super.onStop();
     activityIsVisible.set(false);
-    mMytargetHelper.cancel();
+    //mMytargetHelper.cancel();
     RoutingController.get().detach();
     mediaPlayer.stop();
   }

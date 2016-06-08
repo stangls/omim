@@ -259,8 +259,8 @@ public class MwmApplication extends MultiDexApplication
         String newToken = ParseInstallation.getCurrentInstallation().getString("deviceToken");
         if (!previousId.equals(newId) || !previousToken.equals(newToken))
         {
-          org.alohalytics.Statistics.logEvent(AlohaHelper.PARSE_INSTALLATION_ID, newId);
-          org.alohalytics.Statistics.logEvent(AlohaHelper.PARSE_DEVICE_TOKEN, newToken);
+          /*org.alohalytics.Statistics.logEvent(AlohaHelper.PARSE_INSTALLATION_ID, newId);
+          org.alohalytics.Statistics.logEvent(AlohaHelper.PARSE_DEVICE_TOKEN, newToken);*/
           prefs.edit()
                   .putString(PREF_PARSE_INSTALLATION_ID, newId)
                   .putString(PREF_PARSE_DEVICE_TOKEN, newToken).apply();

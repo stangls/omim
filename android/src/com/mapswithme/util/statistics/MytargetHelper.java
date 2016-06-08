@@ -1,4 +1,4 @@
-package com.mapswithme.util.statistics;
+/*package com.mapswithme.util.statistics;
 
 import android.app.Activity;
 import android.preference.PreferenceManager;
@@ -151,3 +151,4 @@ public final class MytargetHelper
                                  .putBoolean(PREF_CHECK, switchedOn).apply();
   }
 }
+*/

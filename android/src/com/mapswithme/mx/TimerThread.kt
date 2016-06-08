@@ -42,7 +42,7 @@ internal class TimerThread(private val activity: MwmActivity) : Thread() {
         }
         // calculate time
         val recordDuration =
-            if (missionStatus != null && missionStatus.isActive) {
+            if (missionStatus.isActive) {
                 System.currentTimeMillis() - missionStatus.startTime!!
             }else null
         // show time

@@ -7,7 +7,7 @@ import android.content.Intent;
 import com.mapswithme.maps.MwmApplication;
 import com.mapswithme.util.statistics.AlohaHelper;
 
-import ru.mail.android.mytracker.campaign.CampaignReceiver;
+//import ru.mail.android.mytracker.campaign.CampaignReceiver;
 
 /**
  * Custom broadcast receiver to send intent to MyTracker & Alohalytics at the same time
@@ -18,6 +18,7 @@ public class MultipleTrackerReferrerReceiver extends BroadcastReceiver
   public void onReceive(Context context, Intent intent)
   {
     MwmApplication.get().initCounters();
+    /*
     // parse & send referrer to Aloha
     try
     {
@@ -45,9 +46,12 @@ public class MultipleTrackerReferrerReceiver extends BroadcastReceiver
     {
       e.printStackTrace();
     }
+    */
     intent.setComponent(null);
+    /*
     // now send intent to myTracker
     CampaignReceiver receiver = new CampaignReceiver();
     receiver.onReceive(context, intent);
+    */
   }
 }

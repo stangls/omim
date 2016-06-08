@@ -518,7 +518,7 @@ public class DownloadResourcesActivity extends BaseMwmFragmentActivity
       final String url = intent.getData().toString();
       Log.i(TAG, "Query = " + url);
       mMapTaskToForward = new OpenUrlTask(url);
-      org.alohalytics.Statistics.logEvent("GeoIntentProcessor::process", url);
+      //org.alohalytics.Statistics.logEvent("GeoIntentProcessor::process", url);
       return true;
     }
   }
@@ -537,7 +537,7 @@ public class DownloadResourcesActivity extends BaseMwmFragmentActivity
       final String url = intent.getData().toString();
       Log.i(TAG, "URL = " + url);
       mMapTaskToForward = new OpenUrlTask(url);
-      org.alohalytics.Statistics.logEvent("Ge0IntentProcessor::process", url);
+      //org.alohalytics.Statistics.logEvent("Ge0IntentProcessor::process", url);
       return true;
     }
   }
@@ -565,7 +565,7 @@ public class DownloadResourcesActivity extends BaseMwmFragmentActivity
 
       final String ge0Url = "ge0:/" + data.getPath();
       mMapTaskToForward = new OpenUrlTask(ge0Url);
-      org.alohalytics.Statistics.logEvent("HttpGe0IntentProcessor::process", ge0Url);
+      //org.alohalytics.Statistics.logEvent("HttpGe0IntentProcessor::process", ge0Url);
       return true;
     }
   }
@@ -585,7 +585,7 @@ public class DownloadResourcesActivity extends BaseMwmFragmentActivity
     public boolean process(final Intent intent)
     {
       final String apiUrl = intent.getStringExtra(Const.EXTRA_URL);
-      org.alohalytics.Statistics.logEvent("MapsWithMeIntentProcessor::process", apiUrl == null ? "null" : apiUrl);
+      //org.alohalytics.Statistics.logEvent("MapsWithMeIntentProcessor::process", apiUrl == null ? "null" : apiUrl);
       if (apiUrl != null)
       {
         SearchEngine.nativeCancelInteractiveSearch();
@@ -618,7 +618,7 @@ public class DownloadResourcesActivity extends BaseMwmFragmentActivity
       final String url = intent.getData().toString();
       Log.i(TAG, "URL = " + url);
       mMapTaskToForward = new OpenUrlTask(url);
-      org.alohalytics.Statistics.logEvent("GoogleMapsIntentProcessor::process", url);
+      //org.alohalytics.Statistics.logEvent("GoogleMapsIntentProcessor::process", url);
       return true;
     }
   }
@@ -640,9 +640,9 @@ public class DownloadResourcesActivity extends BaseMwmFragmentActivity
         Statistics.INSTANCE.trackEvent(Statistics.EventName.DOWNLOAD_COUNTRY_NOTIFICATION_CLICKED);
 
       mMapTaskToForward = new MwmActivity.ShowCountryTask(countryId, autoDownload);
-      org.alohalytics.Statistics.logEvent("OpenCountryTaskProcessor::process",
+      /*org.alohalytics.Statistics.logEvent("OpenCountryTaskProcessor::process",
                                           new String[] { "autoDownload", String.valueOf(autoDownload) },
-                                          LocationHelper.INSTANCE.getSavedLocation());
+                                          LocationHelper.INSTANCE.getSavedLocation());*/
       return true;
     }
   }

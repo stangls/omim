@@ -302,8 +302,8 @@ public class RoutingController
     updatePlan();
 
     Statistics.INSTANCE.trackRouteBuild(Statistics.getPointType(mStartPoint), Statistics.getPointType(mEndPoint));
-    org.alohalytics.Statistics.logEvent(AlohaHelper.ROUTING_BUILD, new String[] {Statistics.EventParam.FROM, Statistics.getPointType(mStartPoint),
-                                                                                 Statistics.EventParam.TO, Statistics.getPointType(mEndPoint)});
+    /*org.alohalytics.Statistics.logEvent(AlohaHelper.ROUTING_BUILD, new String[] {Statistics.EventParam.FROM, Statistics.getPointType(mStartPoint),
+                                                                                 Statistics.EventParam.TO, Statistics.getPointType(mEndPoint)});*/
 
     Framework.nativeBuildRoute(mStartPoint.getLat(), mStartPoint.getLon(), mEndPoint.getLat(), mEndPoint.getLon());
   }
