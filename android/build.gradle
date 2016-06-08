@@ -72,7 +72,10 @@ dependencies {
     exclude group: 'com.android.support'
   }
   compile ('com.mobidat.wp2:databaseaccess:1.14.4@aar') { transitive=true }
-  compile('com.mobidat.wp2:remotelogging:1.0.2@aar') { transitive = true }
+  compile('com.mobidat.wp2:remotelogging:1.0.2@aar') {
+    transitive = true
+    exclude group: 'com.android.support'
+  }
 }
 
 buildscript {
