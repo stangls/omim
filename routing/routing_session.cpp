@@ -10,7 +10,7 @@
 
 #include "coding/internal/file_data.hpp"
 
-#include "3party/Alohalytics/src/alohalytics.h"
+//#include "3party/Alohalytics/src/alohalytics.h"
 
 using namespace location;
 
@@ -192,10 +192,10 @@ RoutingSession::State RoutingSession::OnLocationPositionChanged(
       m_passedDistanceOnRouteMeters += m_route.GetTotalDistanceMeters();
       m_state = RouteFinished;
 
-      alohalytics::TStringMap params = {{"router", m_route.GetRouterId()},
+      /*alohalytics::TStringMap params = {{"router", m_route.GetRouterId()},
                                         {"passedDistance", strings::to_string(m_passedDistanceOnRouteMeters)},
                                         {"rebuildCount", strings::to_string(m_routingRebuildCount)}};
-      alohalytics::LogEvent("RouteTracking_ReachedDestination", params);
+      alohalytics::LogEvent("RouteTracking_ReachedDestination", params);*/
     }
     else
     {
@@ -239,7 +239,7 @@ RoutingSession::State RoutingSession::OnLocationPositionChanged(
     {
       m_passedDistanceOnRouteMeters += m_route.GetCurrentDistanceFromBeginMeters();
       m_state = RouteNeedRebuild;
-      alohalytics::TStringMap params = {
+      /*alohalytics::TStringMap params = {
           {"router", m_route.GetRouterId()},
           {"percent", strings::to_string(GetCompletionPercent())},
           {"passedDistance", strings::to_string(m_passedDistanceOnRouteMeters)},
@@ -247,7 +247,7 @@ RoutingSession::State RoutingSession::OnLocationPositionChanged(
       alohalytics::LogEvent(
           "RouteTracking_RouteNeedRebuild", params,
           alohalytics::Location::FromLatLon(MercatorBounds::YToLat(lastGoodPoint.y),
-                                            MercatorBounds::XToLon(lastGoodPoint.x)));
+                                            MercatorBounds::XToLon(lastGoodPoint.x)));*/
     }
   }
   return m_state;
@@ -345,9 +345,9 @@ double RoutingSession::GetCompletionPercent() const
   {
     auto const lastGoodPoint =
         MercatorBounds::ToLatLon(m_route.GetFollowedPolyline().GetCurrentIter().m_pt);
-    alohalytics::Stats::Instance().LogEvent(
+    /*alohalytics::Stats::Instance().LogEvent(
         "RouteTracking_PercentUpdate", {{"percent", strings::to_string(percent)}},
-        alohalytics::Location::FromLatLon(lastGoodPoint.lat, lastGoodPoint.lon));
+        alohalytics::Location::FromLatLon(lastGoodPoint.lat, lastGoodPoint.lon));*/
     m_lastCompletionPercent = percent;
   }
   return percent;
@@ -576,14 +576,14 @@ void RoutingSession::EmitCloseRoutingEvent() const
   }
   auto const lastGoodPoint =
       MercatorBounds::ToLatLon(m_route.GetFollowedPolyline().GetCurrentIter().m_pt);
-  alohalytics::Stats::Instance().LogEvent(
+  /*alohalytics::Stats::Instance().LogEvent(
       "RouteTracking_RouteClosing",
       {{"percent", strings::to_string(GetCompletionPercent())},
        {"distance", strings::to_string(m_passedDistanceOnRouteMeters +
                                        m_route.GetCurrentDistanceToEndMeters())},
        {"router", m_route.GetRouterId()},
        {"rebuildCount", strings::to_string(m_routingRebuildCount)}},
-      alohalytics::Location::FromLatLon(lastGoodPoint.lat, lastGoodPoint.lon));
+      alohalytics::Location::FromLatLon(lastGoodPoint.lat, lastGoodPoint.lon));*/
 }
 
 }  // namespace routing

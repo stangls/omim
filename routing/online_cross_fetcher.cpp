@@ -54,7 +54,7 @@ string GenerateOnlineRequest(string const & serverURL, ms::LatLon const & startP
 
 OnlineCrossFetcher::OnlineCrossFetcher(string const & serverURL, ms::LatLon const & startPoint,
                                        ms::LatLon const & finalPoint)
-    : m_request(GenerateOnlineRequest(serverURL, startPoint, finalPoint))
+    //: m_request(GenerateOnlineRequest(serverURL, startPoint, finalPoint))
 {
   LOG(LINFO, ("Check mwms by URL: ", GenerateOnlineRequest(serverURL, startPoint, finalPoint)));
 }
@@ -62,9 +62,9 @@ OnlineCrossFetcher::OnlineCrossFetcher(string const & serverURL, ms::LatLon cons
 void OnlineCrossFetcher::Do()
 {
   m_mwmPoints.clear();
-  if (m_request.RunHTTPRequest() && m_request.error_code() == 200 && !m_request.was_redirected())
+  /*if (m_request.RunHTTPRequest() && m_request.error_code() == 200 && !m_request.was_redirected())
     ParseResponse(m_request.server_response(), m_mwmPoints);
   else
-    LOG(LWARNING, ("Can't get OSRM server response. Code: ", m_request.error_code()));
+    LOG(LWARNING, ("Can't get OSRM server response. Code: ", m_request.error_code()));*/
 }
 }  // namespace routing

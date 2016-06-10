@@ -8,7 +8,7 @@
 
 #include "std/algorithm.hpp"
 
-#include "3party/Alohalytics/src/alohalytics.h"
+//#include "3party/Alohalytics/src/alohalytics.h"
 
 namespace osm
 {
@@ -82,9 +82,9 @@ NewFeatureCategories::TNames NewFeatureCategories::Search(string const & query,
   }
   my::SortUnique(result);
 
-  alohalytics::TStringMap const stats = {
+  /*alohalytics::TStringMap const stats = {
       {"query", query}, {"queryLang", queryLang}, {"lang", lang}};
-  alohalytics::LogEvent("searchNewFeatureCategory", stats);
+  alohalytics::LogEvent("searchNewFeatureCategory", stats);*/
 
   return result;
 }

@@ -12,9 +12,9 @@
 #include "private.h"
 
 #include "3party/liboauthcpp/include/liboauthcpp/liboauthcpp.h"
-#include "3party/Alohalytics/src/http_client.h"
+//#include "3party/Alohalytics/src/http_client.h"
 
-using alohalytics::HTTPClientPlatformWrapper;
+//using alohalytics::HTTPClientPlatformWrapper;
 
 namespace osm
 {
@@ -54,7 +54,7 @@ string BuildPostRequest(map<string, string> const & params)
 }
 
 // TODO(AlexZ): DebugPrint doesn't detect this overload. Fix it.
-string DP(alohalytics::HTTPClientPlatformWrapper const & request)
+/*string DP(alohalytics::HTTPClientPlatformWrapper const & request)
 {
   string str = "HTTP " + strings::to_string(request.error_code()) + " url [" + request.url_requested() + "]";
   if (request.was_redirected())
@@ -62,7 +62,7 @@ string DP(alohalytics::HTTPClientPlatformWrapper const & request)
   if (!request.server_response().empty())
     str += " response: " + request.server_response();
   return str;
-}
+}*/
 
 }  // namespace
 
@@ -132,7 +132,7 @@ bool OsmOAuth::IsAuthorized() const noexcept{ return IsValid(m_tokenKeySecret); 
 OsmOAuth::SessionID OsmOAuth::FetchSessionId(string const & subUrl) const
 {
   string const url = m_baseUrl + subUrl + "?cookie_test=true";
-  HTTPClientPlatformWrapper request(url);
+  /*HTTPClientPlatformWrapper request(url);
   if (!request.RunHTTPRequest())
     MYTHROW(NetworkError, ("FetchSessionId Network error while connecting to", url));
   if (request.was_redirected())
@@ -141,24 +141,25 @@ OsmOAuth::SessionID OsmOAuth::FetchSessionId(string const & subUrl) const
     MYTHROW(FetchSessionIdError, (DP(request)));
 
   SessionID const sid = { request.combined_cookies(), FindAuthenticityToken(request.server_response()) };
-  if (sid.m_cookies.empty() || sid.m_token.empty())
-    MYTHROW(FetchSessionIdError, ("Cookies and/or token are empty for request", DP(request)));
-  return sid;
+  if (sid.m_cookies.empty() || sid.m_token.empty())*/
+    MYTHROW(FetchSessionIdError, ("Cookies and/or token are empty for request (disabled)"));
+  //return sid;
 }
 
 void OsmOAuth::LogoutUser(SessionID const & sid) const
 {
-  HTTPClientPlatformWrapper request(m_baseUrl + "/logout");
+  /*HTTPClientPlatformWrapper request(m_baseUrl + "/logout");
   request.set_cookies(sid.m_cookies);
   if (!request.RunHTTPRequest())
     MYTHROW(NetworkError, ("LogoutUser Network error while connecting to", request.url_requested()));
   if (request.error_code() != HTTP::OK)
-    MYTHROW(LogoutUserError, (DP(request)));
+    MYTHROW(LogoutUserError, (DP(request)));*/
+    MYTHROW(NetworkError, ("LogoutUser Network (disabled)"));
 }
 
 bool OsmOAuth::LoginUserPassword(string const & login, string const & password, SessionID const & sid) const
 {
-  map<string, string> const params =
+  /*map<string, string> const params =
   {
     {"username", login},
     {"password", password},
@@ -187,13 +188,14 @@ bool OsmOAuth::LoginUserPassword(string const & login, string const & password, 
     MYTHROW(UnexpectedRedirect, (DP(request)));
 
   // m_baseUrl + "/login" means login and/or password are invalid.
-  return request.server_response().find("/login") == string::npos;
+  return request.server_response().find("/login") == string::npos;*/
+  MYTHROW(NetworkError,("disabled"));
 }
 
 bool OsmOAuth::LoginSocial(string const & callbackPart, string const & socialToken, SessionID const & sid) const
 {
   string const url = m_baseUrl + callbackPart + socialToken;
-  HTTPClientPlatformWrapper request(url);
+  /*HTTPClientPlatformWrapper request(url);
   request.set_cookies(sid.m_cookies)
          .set_handle_redirects(false);
   if (!request.RunHTTPRequest())
@@ -210,7 +212,8 @@ bool OsmOAuth::LoginSocial(string const & callbackPart, string const & socialTok
     MYTHROW(UnexpectedRedirect, (DP(request)));
 
   // m_baseUrl + "/login" means login and/or password are invalid.
-  return request.server_response().find("/login") == string::npos;
+  return request.server_response().find("/login") == string::npos;*/
+  MYTHROW(NetworkError,("disabled"));
 }
 
 // Fakes a buttons press to automatically accept requested permissions.
@@ -227,7 +230,7 @@ string OsmOAuth::SendAuthRequest(string const & requestTokenKey, SessionID const
     {"allow_write_notes", "yes"},
     {"commit", "Save changes"}
   };
-  HTTPClientPlatformWrapper request(m_baseUrl + "/oauth/authorize");
+  /*HTTPClientPlatformWrapper request(m_baseUrl + "/oauth/authorize");
   request.set_body_data(BuildPostRequest(params), "application/x-www-form-urlencoded")
          .set_cookies(sid.m_cookies)
          .set_handle_redirects(false);
@@ -241,7 +244,8 @@ string OsmOAuth::SendAuthRequest(string const & requestTokenKey, SessionID const
     MYTHROW(SendAuthRequestError, ("oauth_verifier is not found", DP(request)));
 
   auto const end = callbackURL.find("&", pos);
-  return callbackURL.substr(pos + vKey.length(), end == string::npos ? end : end - pos - vKey.length());
+  return callbackURL.substr(pos + vKey.length(), end == string::npos ? end : end - pos - vKey.length());*/
+  MYTHROW(NetworkError,("disabled"));
 }
 
 TRequestToken OsmOAuth::FetchRequestToken() const
@@ -250,7 +254,7 @@ TRequestToken OsmOAuth::FetchRequestToken() const
   OAuth::Client oauth(&consumer);
   string const requestTokenUrl = m_baseUrl + "/oauth/request_token";
   string const requestTokenQuery = oauth.getURLQueryString(OAuth::Http::Get, requestTokenUrl + "?oauth_callback=oob");
-  HTTPClientPlatformWrapper request(requestTokenUrl + "?" + requestTokenQuery);
+  /*HTTPClientPlatformWrapper request(requestTokenUrl + "?" + requestTokenQuery);
   if (!request.RunHTTPRequest())
     MYTHROW(NetworkError, ("FetchRequestToken Network error while connecting to", request.url_requested()));
   if (request.error_code() != HTTP::OK)
@@ -260,7 +264,8 @@ TRequestToken OsmOAuth::FetchRequestToken() const
 
   // Throws std::runtime_error.
   OAuth::Token const reqToken = OAuth::Token::extract(request.server_response());
-  return { reqToken.key(), reqToken.secret() };
+  return { reqToken.key(), reqToken.secret() };*/
+  MYTHROW(NetworkError,("disabled"));
 }
 
 TKeySecret OsmOAuth::FinishAuthorization(TRequestToken const & requestToken, string const & verifier) const
@@ -270,7 +275,7 @@ TKeySecret OsmOAuth::FinishAuthorization(TRequestToken const & requestToken, str
   OAuth::Client oauth(&consumer, &reqToken);
   string const accessTokenUrl = m_baseUrl + "/oauth/access_token";
   string const queryString = oauth.getURLQueryString(OAuth::Http::Get, accessTokenUrl, "", true);
-  HTTPClientPlatformWrapper request(accessTokenUrl + "?" + queryString);
+  /*HTTPClientPlatformWrapper request(accessTokenUrl + "?" + queryString);
   if (!request.RunHTTPRequest())
     MYTHROW(NetworkError, ("FinishAuthorization Network error while connecting to", request.url_requested()));
   if (request.error_code() != HTTP::OK)
@@ -281,7 +286,9 @@ TKeySecret OsmOAuth::FinishAuthorization(TRequestToken const & requestToken, str
   OAuth::KeyValuePairs const responseData = OAuth::ParseKeyValuePairs(request.server_response());
   // Throws std::runtime_error.
   OAuth::Token const accessToken = OAuth::Token::extract(responseData);
-  return { accessToken.key(), accessToken.secret() };
+  return { accessToken.key(), accessToken.secret() };*/
+
+  MYTHROW(NetworkError,("disabled"));
 }
 
 // Given a web session id, fetches an OAuth access token.
@@ -350,7 +357,7 @@ bool OsmOAuth::ResetPassword(string const & email) const
     {"authenticity_token", sid.m_token},
     {"commit", "Reset password"}
   };
-  HTTPClientPlatformWrapper request(m_baseUrl + kForgotPasswordUrlPart);
+  /*HTTPClientPlatformWrapper request(m_baseUrl + kForgotPasswordUrlPart);
   request.set_body_data(BuildPostRequest(params), "application/x-www-form-urlencoded");
   request.set_cookies(sid.m_cookies);
 
@@ -361,7 +368,8 @@ bool OsmOAuth::ResetPassword(string const & email) const
 
   if (request.was_redirected() && request.url_received().find(m_baseUrl) != string::npos)
     return true;
-  return false;
+  return false;*/
+  MYTHROW(NetworkError,("disabled"));
 }
 
 OsmOAuth::Response OsmOAuth::Request(string const & method, string const & httpMethod, string const & body) const
@@ -391,7 +399,7 @@ OsmOAuth::Response OsmOAuth::Request(string const & method, string const & httpM
   if (qPos != string::npos)
     url = url.substr(0, qPos);
 
-  HTTPClientPlatformWrapper request(url + "?" + query);
+  /*HTTPClientPlatformWrapper request(url + "?" + query);
   if (httpMethod != "GET")
     request.set_body_data(body, "application/xml", httpMethod);
   if (!request.RunHTTPRequest())
@@ -399,19 +407,21 @@ OsmOAuth::Response OsmOAuth::Request(string const & method, string const & httpM
   if (request.was_redirected())
     MYTHROW(UnexpectedRedirect, ("Redirected to", request.url_received(), "from", url));
 
-  return Response(request.error_code(), request.server_response());
+  return Response(request.error_code(), request.server_response());*/
+  MYTHROW(NetworkError,("disabled"));
 }
 
 OsmOAuth::Response OsmOAuth::DirectRequest(string const & method, bool api) const
 {
   string const url = api ? m_apiUrl + kApiVersion + method : m_baseUrl + method;
-  HTTPClientPlatformWrapper request(url);
+  /*HTTPClientPlatformWrapper request(url);
   if (!request.RunHTTPRequest())
     MYTHROW(NetworkError, ("DirectRequest Network error while connecting to", url));
   if (request.was_redirected())
     MYTHROW(UnexpectedRedirect, ("Redirected to", request.url_received(), "from", url));
 
-  return Response(request.error_code(), request.server_response());
+  return Response(request.error_code(), request.server_response());*/
+  MYTHROW(NetworkError,("disabled"));
 }
 
 string DebugPrint(OsmOAuth::Response const & code)

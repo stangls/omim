@@ -15,7 +15,7 @@
 #include "base/logging.hpp"
 #include "base/string_utils.hpp"
 
-#include "3party/Alohalytics/src/alohalytics.h"
+//#include "3party/Alohalytics/src/alohalytics.h"
 
 #include "std/bind.hpp"
 #include "std/function.hpp"
@@ -171,9 +171,9 @@ CountryInfoGetter::TRegionId CountryInfoGetter::FindFirstCountry(m2::PointD cons
   }
 
   ms::LatLon const latLon = MercatorBounds::ToLatLon(pt);
-  alohalytics::LogEvent(m_isSingleMwm ? "Small mwm case. CountryInfoGetter could not find any mwm by point."
+  /*alohalytics::LogEvent(m_isSingleMwm ? "Small mwm case. CountryInfoGetter could not find any mwm by point."
                                       : "Big mwm case. CountryInfoGetter could not find any mwm by point.",
-                        alohalytics::Location::FromLatLon(latLon.lat, latLon.lon));
+                        alohalytics::Location::FromLatLon(latLon.lat, latLon.lon));*/
   return kInvalidId;
 }
 

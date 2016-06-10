@@ -17,7 +17,7 @@
 
 #include "std/unique_ptr.hpp"
 
-#include "3party/Alohalytics/src/alohalytics.h"
+//#include "3party/Alohalytics/src/alohalytics.h"
 
 #ifdef OMIM_OS_IPHONE
 
@@ -106,9 +106,9 @@ class MemoryHttpRequest : public HttpRequest, public IHttpThreadCallback
     else
     {
       LOG(LWARNING, ("HttpRequest error:", httpCode));
-      alohalytics::LogEvent(
+      /*alohalytics::LogEvent(
           "$httpRequestError",
-          {{"url", m_requestUrl}, {"code", strings::to_string(httpCode)}, {"servers", "1"}});
+          {{"url", m_requestUrl}, {"code", strings::to_string(httpCode)}, {"servers", "1"}});*/
       m_status = EFailed;
     }
 
@@ -254,10 +254,10 @@ class FileHttpRequest : public HttpRequest, public IHttpThreadCallback
     else
     {
       LOG(LWARNING, (m_filePath, "HttpRequest error:", httpCode));
-      alohalytics::LogEvent("$httpRequestError",
+      /*alohalytics::LogEvent("$httpRequestError",
                             {{"url", urlError},
                              {"code", strings::to_string(httpCode)},
-                             {"servers", strings::to_string(m_strategy.ActiveServersCount())}});
+                             {"servers", strings::to_string(m_strategy.ActiveServersCount())}});*/
     }
 
     ChunksDownloadStrategy::ResultT const result = StartThreads();

@@ -26,7 +26,7 @@
 #include "std/sstream.hpp"
 #include "std/target_os.hpp"
 
-#include "3party/Alohalytics/src/alohalytics.h"
+//#include "3party/Alohalytics/src/alohalytics.h"
 
 using namespace downloader;
 using namespace platform;
@@ -822,11 +822,11 @@ void Storage::OnMapDownloadFinished(TCountryId const & countryId, bool success, 
   ASSERT_NOT_EQUAL(MapOptions::Nothing, files,
                    ("This method should not be called for empty files set."));
   {
-    alohalytics::LogEvent("$OnMapDownloadFinished",
+    /*alohalytics::LogEvent("$OnMapDownloadFinished",
         alohalytics::TStringMap({{"name", countryId},
                                  {"status", success ? "ok" : "failed"},
                                  {"version", strings::to_string(GetCurrentDataVersion())},
-                                 {"option", DebugPrint(files)}}));
+                                 {"option", DebugPrint(files)}}));*/
   }
 
   success = success && RegisterDownloadedFiles(countryId, files);

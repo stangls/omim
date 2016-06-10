@@ -75,7 +75,7 @@
 #include "api/internal/c/api-client-internals.h"
 #include "api/src/c/api-client.h"
 
-#include "3party/Alohalytics/src/alohalytics.h"
+//#include "3party/Alohalytics/src/alohalytics.h"
 
 #define KMZ_EXTENSION ".kmz"
 
@@ -343,7 +343,7 @@ Framework::Framework()
 
   auto const routingStatisticsFn = [](map<string, string> const & statistics)
   {
-    alohalytics::LogEvent("Routing_CalculatingRoute", statistics);
+    //alohalytics::LogEvent("Routing_CalculatingRoute", statistics);
   };
 #ifdef DEBUG
   auto const routingVisualizerFn = [this](m2::PointD const & pt)
@@ -607,9 +607,9 @@ void Framework::RegisterAllMaps()
 
   if (needStatisticsUpdate)
   {
-    alohalytics::Stats::Instance().LogEvent("Downloader_Map_list",
+    /*alohalytics::Stats::Instance().LogEvent("Downloader_Map_list",
     {{"AvailableStorageSpace", strings::to_string(GetPlatform().GetWritableStorageSpace())},
-      {"DownloadedMaps", listRegisteredMaps.str()}});
+      {"DownloadedMaps", listRegisteredMaps.str()}});*/
     settings::Set(kLastDownloadedMapsCheck,
                   static_cast<uint64_t>(duration_cast<seconds>(
                                           system_clock::now().time_since_epoch()).count()));
@@ -1192,10 +1192,10 @@ void Framework::EnterBackground()
   SaveViewport();
 
   ms::LatLon const ll = MercatorBounds::ToLatLon(GetViewportCenter());
-  alohalytics::Stats::Instance().LogEvent("Framework::EnterBackground", {{"zoom", strings::to_string(GetDrawScale())},
+  /*alohalytics::Stats::Instance().LogEvent("Framework::EnterBackground", {{"zoom", strings::to_string(GetDrawScale())},
                                           {"foregroundSeconds", strings::to_string(
                                            static_cast<int>(m_startBackgroundTime - m_startForegroundTime))}},
-                                          alohalytics::Location::FromLatLon(ll.lat, ll.lon));
+                                          alohalytics::Location::FromLatLon(ll.lat, ll.lon));*/
   // Do not clear caches for Android. This function is called when main activity is paused,
   // but at the same time search activity (for example) is enabled.
   // TODO(AlexZ): Use onStart/onStop on Android to correctly detect app background and remove #ifndef.
@@ -1302,8 +1302,8 @@ void Framework::ShowSearchResult(search::Result const & res)
   CancelInteractiveSearch();
   StopLocationFollow();
 
-  alohalytics::LogEvent("searchShowResult", {{"pos", strings::to_string(res.GetPositionInResults())},
-                                             {"result", res.ToStringForStats()}});
+  /*alohalytics::LogEvent("searchShowResult", {{"pos", strings::to_string(res.GetPositionInResults())},
+                                             {"result", res.ToStringForStats()}});*/
   place_page::Info info;
   using namespace search;
   int scale;
@@ -1620,8 +1620,8 @@ void Framework::MarkMapStyle(MapStyle mapStyle)
   settings::Set(kMapStyleKey, static_cast<uint32_t>(mapStyle));
   GetStyleReader().SetCurrentStyle(mapStyle);
 
-  alohalytics::TStringMap details {{"mapStyle", strings::to_string(static_cast<int>(mapStyle))}};
-  alohalytics::Stats::Instance().LogEvent("MapStyle_Changed", details);
+  /*alohalytics::TStringMap details {{"mapStyle", strings::to_string(static_cast<int>(mapStyle))}};
+  alohalytics::Stats::Instance().LogEvent("MapStyle_Changed", details);*/
 }
 
 void Framework::SetMapStyle(MapStyle mapStyle)
@@ -1931,21 +1931,21 @@ void Framework::OnTapEvent(df::TapInfo const & tapInfo)
       else if (GetCurrentPosition(myLat, myLon))
         metersToTap = ms::DistanceOnEarth(myLat, myLon, ll.lat, ll.lon);
 
-      alohalytics::TStringMap kv = {{"longTap", tapInfo.m_isLong ? "1" : "0"},
+      /*alohalytics::TStringMap kv = {{"longTap", tapInfo.m_isLong ? "1" : "0"},
                                     {"title", info.GetTitle()},
                                     {"bookmark", info.IsBookmark() ? "1" : "0"},
                                     {"meters", strings::to_string_dac(metersToTap, 0)}};
       if (info.IsFeature())
         kv["types"] = DebugPrint(info.GetTypes());
       // Older version of statistics used "$GetUserMark" event.
-      alohalytics::Stats::Instance().LogEvent("$SelectMapObject", kv, alohalytics::Location::FromLatLon(ll.lat, ll.lon));
+      alohalytics::Stats::Instance().LogEvent("$SelectMapObject", kv, alohalytics::Location::FromLatLon(ll.lat, ll.lon));*/
     }
 
     ActivateMapSelection(true, selection, info);
   }
   else
   {
-    alohalytics::Stats::Instance().LogEvent(somethingWasAlreadySelected ? "$DelectMapObject" : "$EmptyTapOnMap");
+    //alohalytics::Stats::Instance().LogEvent(somethingWasAlreadySelected ? "$DelectMapObject" : "$EmptyTapOnMap");
     // UI is always notified even if empty map is tapped,
     // because empty tap event switches on/off full screen map view mode.
     DeactivateMapSelection(true);

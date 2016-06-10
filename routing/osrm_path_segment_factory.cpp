@@ -4,7 +4,7 @@
 #include "indexer/feature.hpp"
 #include "indexer/ftypes_matcher.hpp"
 
-#include "3party/Alohalytics/src/alohalytics.h"
+//#include "3party/Alohalytics/src/alohalytics.h"
 
 #include "base/buffer_vector.hpp"
 
@@ -100,11 +100,11 @@ void OsrmPathSegmentFactory(RoutingMapping & mapping, Index const & index,
   {
     LOG(LERROR, ("Can't unpack geometry for map:", mapping.GetCountryName(), " node: ",
                  osrmPathSegment.node));
-    alohalytics::Stats::Instance().LogEvent(
+    /*alohalytics::Stats::Instance().LogEvent(
         "RouteTracking_UnpackingError",
         {{"node", strings::to_string(osrmPathSegment.node)},
          {"map", mapping.GetCountryName()},
-         {"version", strings::to_string(mapping.GetMwmId().GetInfo()->GetVersion())}});
+         {"version", strings::to_string(mapping.GetMwmId().GetInfo()->GetVersion())}});*/
     return;
   }
   LoadPathGeometry(buffer, 0, buffer.size(), index, mapping, FeatureGraphNode(), FeatureGraphNode(),

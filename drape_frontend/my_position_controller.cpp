@@ -9,7 +9,7 @@
 
 #include "base/math.hpp"
 
-#include "3party/Alohalytics/src/alohalytics.h"
+//#include "3party/Alohalytics/src/alohalytics.h"
 
 namespace df
 {
@@ -233,12 +233,12 @@ void MyPositionController::NextMode()
   // Skip switching to next mode while we are waiting for position.
   if (IsWaitingForLocation())
   {
-    alohalytics::LogEvent(kAlohalyticsClickEvent,
-                          LocationModeStatisticsName(location::PendingPosition));
+    /*alohalytics::LogEvent(kAlohalyticsClickEvent,
+                          LocationModeStatisticsName(location::PendingPosition));*/
     return;
   }
 
-  alohalytics::LogEvent(kAlohalyticsClickEvent, LocationModeStatisticsName(m_mode));
+  //alohalytics::LogEvent(kAlohalyticsClickEvent, LocationModeStatisticsName(m_mode));
 
   // Start looking for location.
   if (m_mode == location::NotFollowNoPosition)
@@ -510,8 +510,8 @@ void MyPositionController::SetTimeInBackground(double time)
 
 void MyPositionController::OnCompassTapped()
 {
-  alohalytics::LogEvent("$compassClicked", {{"mode", LocationModeStatisticsName(m_mode)},
-                                            {"routing", strings::to_string(IsInRouting())}});
+  /*alohalytics::LogEvent("$compassClicked", {{"mode", LocationModeStatisticsName(m_mode)},
+                                            {"routing", strings::to_string(IsInRouting())}});*/
   ChangeModelView(0.0);
   if (m_mode == location::FollowAndRotate)
   {

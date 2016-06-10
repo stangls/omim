@@ -24,7 +24,7 @@
 #include "std/map.hpp"
 #include "std/vector.hpp"
 
-#include "3party/Alohalytics/src/alohalytics.h"
+//#include "3party/Alohalytics/src/alohalytics.h"
 
 namespace search
 {
@@ -74,7 +74,7 @@ void SendStatistics(SearchParams const & params, m2::RectD const & viewport, Res
     posY = strings::to_string(MercatorBounds::LatToY(params.m_lat));
   }
 
-  alohalytics::TStringMap const stats = {
+  /*alohalytics::TStringMap const stats = {
       {"posX", posX},
       {"posY", posY},
       {"viewportMinX", strings::to_string(viewport.minX())},
@@ -85,7 +85,7 @@ void SendStatistics(SearchParams const & params, m2::RectD const & viewport, Res
       {"locale", params.m_inputLocale},
       {"results", resultString},
   };
-  alohalytics::LogEvent("searchEmitResultsAndCoords", stats);
+  alohalytics::LogEvent("searchEmitResultsAndCoords", stats);*/
 }
 }  // namespace
 
