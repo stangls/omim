@@ -901,7 +901,7 @@
 	<string name="editor_place_doesnt_exist">Dieser Ort existiert nicht</string>
 	<string name="mission_activity_break">Unterbrechung</string>
 	<string name="activityNotFound_missionRecording">Einsatzaufzeichnung nicht installiert!?</string>
-	<string name="title_missionrecording">Einsatzfahrt:</string>
+	<string name="title_missionrecording">Einsatzdauer:</string>
 	<string name="title_missionActivity">Aktivität:</string>
 	<string name="tour_continue">Tour hier fortführen</string>
 	<string name="gps_simulation_pause">GPS-Simulation pausieren</string>
