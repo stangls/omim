@@ -66,7 +66,7 @@ dependencies {
   compile 'com.timehop.stickyheadersrecyclerview:library:0.4.3@aar'
 
   // mobiworx
-  compile 'com.mobidat.wp2:gpsprovider:1.8.1@aar'
+  compile 'com.mobidat.wp2:gpsprovider:1.9@aar'
   compile('com.mobidat.wp2:missionservice:1.5.8@aar') {
     transitive = true
     exclude group: 'com.android.support'

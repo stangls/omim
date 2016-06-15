@@ -29,6 +29,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.Stack;
@@ -91,6 +92,10 @@ import com.mapswithme.util.sharing.SharingHelper;
 import com.mapswithme.util.statistics.AlohaHelper;
 //import com.mapswithme.util.statistics.MytargetHelper;
 import com.mapswithme.util.statistics.Statistics;
+import com.mobidat.dao.impl.DaoTour;
+import com.mobidat.persistence.Tour;
+import com.mobidat.wp2.configuration.Parameter;
+import com.mobidat.wp2.databaseaccess.DbHelper;
 import com.mobidat.wp2.missionrecording.MissionAccess;
 import com.mobidat.wp2.missionrecording.TimerThread;
 import com.mobidat.wp2.missionservice.MissionListener;
@@ -614,9 +619,6 @@ public class MwmActivity extends BaseMwmFragmentActivity
       @Override
       public void run() {
         //RoutingController.get().prepare(endPoint);
-
-        MwmApplication.gps().setEmulation(true);
-        MwmApplication.gps().restartEmulation();
 
         RoutingController.get().startTour("/storage/emulated/legacy/mobidat/tour.xml", 0, MwmActivity.this);
 
@@ -1753,6 +1755,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
   }
 
   public void gpsPause(View ignored){
+    // TODO: this boolean is nonsense, we need real information about gps-simulation activeness...
     if (MwmApplication.gpsSimulationPaused){
       MwmApplication.gps().setEmulation(true);
       MwmApplication.gpsSimulationPaused = false;
@@ -1761,8 +1764,43 @@ public class MwmActivity extends BaseMwmFragmentActivity
       MwmApplication.gpsSimulationPaused = true;
     }
   }
-  public void gpsRestart(View ignored){
-    MwmApplication.gps().restartEmulation();
+
+  public void gpsRestart(View ignored) {
+    String baseDir = Parameter.getGlobalDirectory();
+    final LinkedList<File> simuFiles = new LinkedList<>();
+    final LinkedList<String> simuNames = new LinkedList<>();
+    File simuLog = new File(baseDir + "/simulation.log");
+    if (simuLog.exists()) {
+      simuFiles.add(simuLog);
+      simuNames.add("simulation.log");
+    }
+    final String tourPrefix = "Tour: ";
+    DbHelper.block(new Runnable() {
+      @Override
+      public void run() {
+        for (Tour t : DaoTour.getInstance().getAll()) {
+          simuFiles.add(new File(t.getFile()));
+          simuNames.add(tourPrefix+t.getName());
+        }
+      }
+    });
+    final String[] simulationNames = simuNames.toArray(new String[simuNames.size()]);
+    new AlertDialog.Builder(this)
+      .setTitle("Simulationsdaten wählen")
+      .setItems(simulationNames, new DialogInterface.OnClickListener() {
+        @Override
+        public void onClick(DialogInterface dialog, int which) {
+          if (simuNames.get(which).startsWith(tourPrefix)){
+            MwmApplication.gps().useSimulationTour(simuFiles.get(which).getAbsolutePath());
+          }else{
+            MwmApplication.gps().useSimulationLog();
+          }
+          MwmApplication.gps().restartEmulation();
+          dialog.dismiss();
+        }
+      })
+      .show();
+
     MwmApplication.gpsSimulationPaused = false;
   }
 

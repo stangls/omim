@@ -843,10 +843,6 @@ public class RoutingController
    * <p>The tour will not be started.</p>
    **/
   public static void saveTourInfo(@Nullable String tourFileName, int tourPosition) {
-    if (tourPosition==0){
-      MwmApplication.gps().setEmulation(true);
-      MwmApplication.gps().restartEmulation();
-    }
     SharedPreferences prefs = MwmApplication.prefs();
     SharedPreferences.Editor edit = prefs.edit();
     if (tourFileName!=null){
