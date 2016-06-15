@@ -578,6 +578,7 @@ public:
   typedef function<void(bool, size_t)> TTourChangeCallback;
   typedef function<void(string)> TPoiMessageCallback;
   typedef function<void(bool)> TPossibleTourResumptionCallback;
+  typedef function<void(string)> TTourLoadedCallback;
 
   /// @name Routing mode
   //@{
@@ -645,7 +646,7 @@ public:
   void SetRouteStartPoint(m2::PointD const & pt, bool isValid);
   void SetRouteFinishPoint(m2::PointD const & pt, bool isValid);
 
-  void LoadTour( string const & filePath, int position );
+  void LoadTour( string const & filePath, int position, TTourLoadedCallback const & tourLoadedCallback );
   bool IsTourRouting(){
       return m_routingSession.hasTour();
   }

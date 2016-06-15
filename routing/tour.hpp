@@ -49,12 +49,8 @@ public:
     Tour();
     Tour( string const & filePath, TPoiCallback const & poiVisited );
     ~Tour();
-    string GetName(){
-        return m_name;
-    }
-    void SetName(string name){
-        m_name=name;
-    }
+    string GetName() const;
+    void SetName(string name);
 
     // updates the current position by scrolling to it
     bool UpdateCurrentPosition(size_t index);

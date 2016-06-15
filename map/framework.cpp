@@ -2149,7 +2149,7 @@ void Framework::BuildRoute(m2::PointD const & finish, uint32_t timeoutSec)
   BuildRoute(start, finish, timeoutSec);
 }
 
-void Framework::LoadTour(string const & filePath , int position){
+void Framework::LoadTour(string const & filePath , int position, const TTourLoadedCallback &tourLoadedCallback){
     ASSERT_THREAD_CHECKER(m_threadChecker, ("LoadTour",filePath));
     ASSERT(m_drapeEngine != nullptr, ());
 
@@ -2173,7 +2173,12 @@ void Framework::LoadTour(string const & filePath , int position){
     };
     drape_ptr<Tour> tour = make_unique<Tour>(filePath,poiVisitedCallbackFn);
     tour->UpdateCurrentPosition(position);
+    auto name = tour->GetName();
     BuildRoute(start,m2::PointD::Zero(),move(tour),5);
+    if (tourLoadedCallback!=0){
+        LOG(my::LINFO,("tour name: ",name));
+        tourLoadedCallback(name);
+    }
 }
 
 void Framework::BuildRoute(m2::PointD const & start, m2::PointD const & finish, uint32_t timeoutSec)

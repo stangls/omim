@@ -8,6 +8,7 @@ import android.support.annotation.UiThread;
 import com.mapswithme.maps.bookmarks.data.DistanceAndAzimut;
 import com.mapswithme.maps.bookmarks.data.MapObject;
 import com.mapswithme.maps.routing.RoutingInfo;
+import com.mapswithme.mx.TourLoadedListener;
 import com.mapswithme.util.Constants;
 
 /**
@@ -200,7 +201,7 @@ public class Framework
 
   /////////////////// TOUR routing
 
-  public native static void nativeLoadTour(String filePath, int activeTourPosition);
+  public native static void nativeLoadTour(String filePath, int activeTourPosition, TourLoadedListener tll);
   public native static boolean nativeIsTourRouting();
 
   /////////////////// end TOUR routing

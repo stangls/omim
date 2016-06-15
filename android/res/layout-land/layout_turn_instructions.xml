@@ -121,6 +121,25 @@
       android:layout_marginTop="@dimen/margin_half"
       android:layout_marginRight="@dimen/margin_half"
       android:id="@+id/relativeLayout">
+    <TableRow>
+
+      <TextView
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:text="@string/title_tour_name"
+          android:layout_marginRight="10dp"
+          android:singleLine="true"
+          android:gravity="right"
+          android:layout_gravity="bottom"/>
+      <TextView
+          android:id="@+id/textTourName"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:gravity="center_vertical"
+          android:textAppearance="@style/MwmTextAppearance.RoutingNumber"
+          android:text="Meine geniale Tour"
+          android:layout_gravity="right"/>
+    </TableRow>
 
     <TableRow>
 

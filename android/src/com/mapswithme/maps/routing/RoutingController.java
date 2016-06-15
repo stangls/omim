@@ -27,6 +27,7 @@ import com.mapswithme.maps.bookmarks.data.MapObject;
 import com.mapswithme.maps.downloader.MapManager;
 import com.mapswithme.maps.location.LocationHelper;
 import com.mapswithme.mx.TourFinishedListener;
+import com.mapswithme.mx.TourLoadedListener;
 import com.mapswithme.util.Config;
 import com.mapswithme.util.StringUtils;
 import com.mapswithme.util.ThemeSwitcher;
@@ -45,6 +46,7 @@ public class RoutingController
   public static final String TOUR_FILE_NAME = "tour_fileName";
   public static final String TOUR_POSITION = "tour_position";
   private int triesContinueTour = 0;
+  private TourLoadedListener tourLoadedListener = null;
 
   private enum State
   {
@@ -202,7 +204,7 @@ public class RoutingController
         new Thread(){public void run(){
           try { Thread.sleep(1000); } catch (InterruptedException e) {}
           Log.d(TAG, "trying to continue tour");
-          continueSavedTour();
+          continueSavedTour(tourLoadedListener);
         }}.start();
         return;
       }
@@ -798,7 +800,8 @@ public class RoutingController
     return true;
   }
 
-  public boolean startTour(String tourFileName, final int activeTourPosition) {
+  public boolean startTour(String tourFileName, final int activeTourPosition, final TourLoadedListener tll) {
+    this.tourLoadedListener=tll;
     final File tourFile = new File(tourFileName);
     Log.d("RoutingController", "searching for file " + tourFile);
     if (tourFile.exists()) {
@@ -818,7 +821,7 @@ public class RoutingController
           if (counter--<=0){
             Log.d(TAG, "startTour: location known. native load tour");
             triesContinueTour = 10;
-            Framework.nativeLoadTour(tourFile.getAbsolutePath(), activeTourPosition);
+            Framework.nativeLoadTour(tourFile.getAbsolutePath(), activeTourPosition, tll);
             LocationHelper.INSTANCE.removeLocationListener(this);
             setStartFromMyPosition();
           }
@@ -854,12 +857,12 @@ public class RoutingController
     edit.apply();
   }
 
-  public static boolean continueSavedTour() {
+  public static boolean continueSavedTour(TourLoadedListener tourLoadedListener) {
     SharedPreferences prefs = MwmApplication.prefs();
     String tourFileName = prefs.getString(TOUR_FILE_NAME, null);
     if (tourFileName!=null){
       int tourPosition = prefs.getInt(TOUR_POSITION, 0);
-      return RoutingController.get().startTour(tourFileName,tourPosition);
+      return RoutingController.get().startTour(tourFileName,tourPosition,tourLoadedListener);
     }
     return false;
   }

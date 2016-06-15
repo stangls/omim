@@ -912,6 +912,7 @@
 	<string name="activityNotFound_missionRecording">Mission recording not installed!?</string>
 	<string name="title_missionrecording">Mission:</string>
 	<string name="title_tour_remaining_length">Remaining tour:</string>
+	<string name="title_tour_name">Tour:</string>
 	<string name="title_missionActivity">Activity:</string>
 	<string name="tour_continue">Continue here</string>
 	<string name="gps_simulation_pause">Pause GPS-Simulation</string>

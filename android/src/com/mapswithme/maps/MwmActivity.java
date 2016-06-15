@@ -76,6 +76,7 @@ import com.mapswithme.maps.widget.placepage.BasePlacePageAnimationController;
 import com.mapswithme.maps.widget.placepage.PlacePageView;
 import com.mapswithme.maps.widget.placepage.PlacePageView.State;
 import com.mapswithme.mx.TourFinishedListener;
+import com.mapswithme.mx.TourLoadedListener;
 import com.mapswithme.util.Animations;
 import com.mapswithme.util.BottomSheetHelper;
 import com.mapswithme.util.InputUtils;
@@ -107,7 +108,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
                                  MapFragment.MapRenderingListener,
                                  CustomNavigateUpListener,
                                  ChooseBookmarkCategoryFragment.Listener,
-                                 RoutingController.Container, Framework.PoiVisitedListener, MissionListener, Framework.PossibleTourResumptionListener, TourFinishedListener {
+                                 RoutingController.Container, Framework.PoiVisitedListener, MissionListener, Framework.PossibleTourResumptionListener, TourFinishedListener, TourLoadedListener {
 
   private static final String TAG = MwmActivity.class.getName();
 
@@ -178,11 +179,18 @@ public class MwmActivity extends BaseMwmFragmentActivity
   @Override
   public void onTourFinished() {
     new Thread(){public void run(){
-      try { Thread.sleep(3000); } catch (InterruptedException e) {}
+      try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
       runOnUiThread(new Runnable(){public void run(){
         finish();
       }});
     }}.start();
+  }
+
+  @Override
+  public void onTourLoaded(final String name) {
+    runOnUiThread(new Runnable(){public void run(){
+      ((TextView)findViewById(R.id.textTourName)).setText(name);
+    }});
   }
 
   public interface LeftAnimationTrackListener
@@ -229,7 +237,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
     runTasks();
 
-    RoutingController.continueSavedTour();
+    RoutingController.continueSavedTour(MwmActivity.this);
   }
 
   private void runTasks()
@@ -610,7 +618,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
         MwmApplication.gps().setEmulation(true);
         MwmApplication.gps().restartEmulation();
 
-        RoutingController.get().startTour("/storage/emulated/legacy/mobidat/tour.xml", 0);
+        RoutingController.get().startTour("/storage/emulated/legacy/mobidat/tour.xml", 0, MwmActivity.this);
 
         if (mPlacePage.isDocked() || !mPlacePage.isFloating())
           closePlacePage();

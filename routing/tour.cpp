@@ -156,6 +156,7 @@ public:
             string const & prevTag = m_tags[count - 2];
             string const ppTag = count > 3 ? m_tags[count - 3] : string();
             if (prevTag=="tour" && currTag=="name"){
+                LOG( my::LINFO, ("tour name : ",value) );
                 m_tour.SetName(value);
             }
             if (prevTag=="poi" && currTag=="message"){
@@ -184,7 +185,7 @@ Tour::Tour(const string &filePath, TPoiCallback const & poiVisited)
     ReaderSource<FileReader> src(reader);
     TourParser parser(*this);
     ParseXML(src, parser, true);
-    LOG( my::LINFO, ("done parsing tour file",filePath) );
+    LOG( my::LINFO, ("done parsing tour file",filePath,"with tour named",GetName()) );
 
     LOG( my::LINFO, ("calculating times.") );
     CalculateTimes();
@@ -201,6 +202,14 @@ Tour::Tour(const string &filePath, TPoiCallback const & poiVisited)
 
 Tour::~Tour()
 {
+}
+
+string Tour::GetName() const {
+    return string(m_name);
+}
+
+void Tour::SetName(string name){
+    m_name = string(name);
 }
 
 bool Tour::UpdateCurrentPosition( size_t index )

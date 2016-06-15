@@ -496,6 +496,14 @@ void CallPoiVisitedListener(shared_ptr<jobject> listener, string message)
   env->CallVoidMethod(*listener, methodId, jni::ToJavaString(env, message));
 }
 
+void CallTourLoadedListener(shared_ptr<jobject> listener, string name)
+{
+  JNIEnv * env = jni::GetEnv();
+  jmethodID const methodId = jni::GetMethodID(env, *listener, "onTourLoaded", "(Ljava/lang/String;)V");
+  env->CallVoidMethod(*listener, methodId, jni::ToJavaString(env, name));
+}
+
+
 void CallPossibleTourResumptionListener(shared_ptr<jobject> listener, bool isPossible)
 {
   JNIEnv * env = jni::GetEnv();
@@ -1013,9 +1021,14 @@ Java_com_mapswithme_maps_Framework_nativeZoomToPoint(JNIEnv * env, jclass, jdoub
 }
 
   JNIEXPORT void JNICALL
-  Java_com_mapswithme_maps_Framework_nativeLoadTour(JNIEnv * env, jclass thiz, jstring filePath, jint position)
+  Java_com_mapswithme_maps_Framework_nativeLoadTour(JNIEnv * env, jclass thiz, jstring filePath, jint position, jobject listener)
   {
-    frm()->LoadTour(jni::ToNativeString(env, filePath), position);
+    auto nativeFilePath = jni::ToNativeString(env, filePath);
+    if (listener!=0){
+        frm()->LoadTour( nativeFilePath, position, bind(&CallTourLoadedListener, jni::make_global_ref(listener), _1) );
+    }else{
+        frm()->LoadTour( nativeFilePath, position, 0 );
+    }
   }
 
   JNIEXPORT jboolean JNICALL
