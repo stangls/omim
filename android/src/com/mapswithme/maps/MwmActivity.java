@@ -429,12 +429,15 @@ public class MwmActivity extends BaseMwmFragmentActivity
       }})
       .setOnDismissListener(new DialogInterface.OnDismissListener() { public void onDismiss(DialogInterface dialog) {
         MwmActivity.this.hideStatusBar();
-        final String nextMessage = poiMessages.poll();
         new Thread(){public void run(){
           try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
           runOnUiThread(new Runnable() { public void run() {
-            if (nextMessage!=null){
-              showPoiDialogNow(nextMessage);
+            synchronized (poiMessages){
+              if (poiMessages.size()>0){
+                if (!poiDialog.isShowing()){
+                  showPoiDialogNow(poiMessages.poll());
+                }
+              }
             }
           }});
         }}.start();
@@ -1730,17 +1733,21 @@ public class MwmActivity extends BaseMwmFragmentActivity
   public void onPoiVisited(final String message) {
     runOnUiThread(new Runnable() {public void run() {
       // show dialog if not yet visible otherwise save to list of poi-messages
-      if (poiDialog.isShowing()){
-        poiMessages.add(message);
-      }else{
-        showPoiDialogNow(message);
+      synchronized (poiMessages){
+        if (poiDialog.isShowing() || poiMessages.size()>0){
+          poiMessages.add(message);
+        }else{
+          showPoiDialogNow(message);
+        }
       }
     }});
   }
 
   private void showPoiDialogNow(String message) {
-    poiDialog.setMessage(message);
-    poiDialog.show();
+    synchronized (poiMessages){
+      poiDialog.setMessage(message);
+      poiDialog.show();
+    }
   }
 
   @Override
