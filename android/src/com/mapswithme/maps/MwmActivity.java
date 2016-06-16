@@ -184,7 +184,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
   @Override
   public void onTourFinished() {
     new Thread(){public void run(){
-      MwmApplication.gps().setSimulation(false);
+      MwmApplication.gps().pauseEmulation();
       try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
       runOnUiThread(new Runnable(){public void run(){
         finish();
@@ -1196,6 +1196,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
   {
     super.onStop();
     activityIsVisible.set(false);
+    MwmApplication.gps().setSimulation(false);
     //mMytargetHelper.cancel();
     RoutingController.get().detach();
     mediaPlayer.stop();
