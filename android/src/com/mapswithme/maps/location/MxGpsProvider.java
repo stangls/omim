@@ -1,5 +1,6 @@
 package com.mapswithme.maps.location;
 
+import android.app.Activity;
 import android.app.Application;
 import android.location.Location;
 import android.os.Handler;
@@ -53,7 +54,10 @@ public class MxGpsProvider extends BaseLocationProvider implements ILocationRece
 
     @Override
     public void onStatusChanged(GPSInfo info) {
-        //Toast.makeText(MwmApplication.get(), "GPS-Provider-Service: "+info.getMessage(), Toast.LENGTH_LONG).show();
+        MwmActivity receiver = MwmActivity.getInstance();
+        if (receiver!=null){
+            receiver.onStatusChanged(info);
+        }
     }
 
     @Override

@@ -96,6 +96,9 @@ import com.mobidat.dao.impl.DaoTour;
 import com.mobidat.persistence.Tour;
 import com.mobidat.wp2.configuration.Parameter;
 import com.mobidat.wp2.databaseaccess.DbHelper;
+import com.mobidat.wp2.gpsProvider.GPS;
+import com.mobidat.wp2.gpsProvider.GPSInfo;
+import com.mobidat.wp2.gpsProvider.ILocationReceiver;
 import com.mobidat.wp2.missionrecording.MissionAccess;
 import com.mobidat.wp2.missionrecording.TimerThread;
 import com.mobidat.wp2.missionservice.MissionListener;
@@ -113,7 +116,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
                                  MapFragment.MapRenderingListener,
                                  CustomNavigateUpListener,
                                  ChooseBookmarkCategoryFragment.Listener,
-                                 RoutingController.Container, Framework.PoiVisitedListener, MissionListener, Framework.PossibleTourResumptionListener, TourFinishedListener, TourLoadedListener {
+                                 RoutingController.Container, Framework.PoiVisitedListener, MissionListener, Framework.PossibleTourResumptionListener, TourFinishedListener, TourLoadedListener, ILocationReceiver {
 
   private static final String TAG = MwmActivity.class.getName();
 
@@ -180,6 +183,13 @@ public class MwmActivity extends BaseMwmFragmentActivity
   private TextView mTextMissionActivity;
   private View mLegend;
   private MediaPlayer mediaPlayer;
+  private boolean gpsSimulationActive = false;
+  private ImageButton mSimulationPauseButton;
+  private static MwmActivity instance = null;
+
+  public static MwmActivity getInstance() {
+    return instance;
+  }
 
   @Override
   public void onTourFinished() {
@@ -197,6 +207,17 @@ public class MwmActivity extends BaseMwmFragmentActivity
     runOnUiThread(new Runnable(){public void run(){
       ((TextView)findViewById(R.id.textTourName)).setText(name);
     }});
+  }
+
+  @Override
+  public void onLocationChanged(@Nullable Location location) {}
+
+  @Override
+  public void onStatusChanged(@NonNull GPSInfo gpsInfo) {
+    Boolean simuActive = gpsInfo.simulationActive;
+    if (simuActive!=null){
+      updateGpsSimulationActive(simuActive);
+    }
   }
 
   public interface LeftAnimationTrackListener
@@ -420,6 +441,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     MissionAccess.init(this);
     MissionAccess.listeningActivity  = this;
     mBreakButton = (ImageButton)findViewById(R.id.breakButton);
+    mSimulationPauseButton = (ImageButton)findViewById(R.id.simulationPauseButton);
     mLegend = (View)findViewById(R.id.legend);
     new Thread(){ public void run(){
       while (mRowMissionActivity==null){
@@ -439,6 +461,8 @@ public class MwmActivity extends BaseMwmFragmentActivity
       }
       timerThread.start();
     }}.start();
+
+    instance = this;
   }
 
   private void initViews()
@@ -793,8 +817,18 @@ public class MwmActivity extends BaseMwmFragmentActivity
     // TODO move listeners attach-deattach to onStart-onStop since onDestroy isn't guaranteed.
     Framework.nativeRemoveMapObjectListener();
     BottomSheetHelper.free();
-    MwmApplication.gps().setSimulation(false);
+    GPS gps = MwmApplication.gps();
+    gps.setSimulation(false);
     super.onDestroy();
+  }
+
+  private void updateGpsSimulationActive(boolean b) {
+    gpsSimulationActive = b;
+    if (b){
+      mSimulationPauseButton.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_media_pause));
+    }else{
+      mSimulationPauseButton.setImageDrawable(getResources().getDrawable(android.R.drawable.ic_media_play));
+    }
   }
 
   @Override
@@ -1185,9 +1219,11 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
     // set this activity as active in routing-controller so that when the tour finishes, the activity can be terminated
     RoutingController.get().setTourFinishedListener(this);
+    updateGpsSimulationActive(false);
+    MwmApplication.gps().setSimulation(false);
   }
 
-  private void hideStatusBar() {
+  public void hideStatusBar() {
     getWindow().getDecorView().setSystemUiVisibility (View.SYSTEM_UI_FLAG_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
   }
 
@@ -1758,14 +1794,14 @@ public class MwmActivity extends BaseMwmFragmentActivity
   }
 
   public void gpsPause(View ignored){
-    // TODO: this boolean is nonsense, we need real information about gps-simulation activeness...
-    if (MwmApplication.gpsSimulationPaused){
-      MwmApplication.gps().setEmulation(true);
-      MwmApplication.gpsSimulationPaused = false;
-    }else{
+    if (gpsSimulationActive){
       MwmApplication.gps().pauseEmulation();
-      MwmApplication.gpsSimulationPaused = true;
+    }else{
+      MwmApplication.gps().setEmulation(true);
     }
+  }
+  public void gpsStop(View ignored){
+    MwmApplication.gps().setSimulation(false);
   }
 
   public void gpsRestart(View ignored) {
@@ -1803,8 +1839,6 @@ public class MwmActivity extends BaseMwmFragmentActivity
         }
       })
       .show();
-
-    MwmApplication.gpsSimulationPaused = false;
   }
 
 }

@@ -1,13 +1,14 @@
 package com.mapswithme.maps;
 
-import android.app.Application;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.media.MediaPlayer;
+import android.location.Location;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.support.multidex.MultiDexApplication;
 import android.text.TextUtils;
@@ -31,9 +32,9 @@ import com.mapswithme.util.Constants;
 import com.mapswithme.util.ThemeSwitcher;
 import com.mapswithme.util.UiUtils;
 import com.mapswithme.util.Yota;
-import com.mapswithme.util.statistics.AlohaHelper;
 import com.mapswithme.util.statistics.Statistics;
-import com.mobidat.wp2.missionservice.MissionListener;
+import com.mobidat.wp2.gpsProvider.GPSInfo;
+import com.mobidat.wp2.gpsProvider.ILocationReceiver;
 import com.mobidat.wp2.remotelogging.RemoteLogging;
 import com.parse.Parse;
 import com.parse.ParseException;
@@ -44,8 +45,7 @@ import net.hockeyapp.android.CrashManager;
 
 import com.mobidat.wp2.gpsProvider.GPS;
 
-public class MwmApplication extends MultiDexApplication
-{
+public class MwmApplication extends MultiDexApplication {
   private final static String TAG = "MwmApplication";
 
   // Parse
@@ -54,7 +54,6 @@ public class MwmApplication extends MultiDexApplication
 
   private static MwmApplication sSelf;
   private static GPS gps;
-  public static boolean gpsSimulationPaused = false;
   private SharedPreferences mPrefs;
   private AppBackgroundTracker mBackgroundTracker;
 

@@ -70,6 +70,7 @@ internal class TimerThread(private val activity: MwmActivity) : Thread() {
                     rowMissionTime?.visibility= View.VISIBLE
                 }
             } catch (_: NullPointerException) {}
+            activity.hideStatusBar()
         }
     }
 
