@@ -426,11 +426,18 @@ public class MwmActivity extends BaseMwmFragmentActivity
       .setTitle("Meldung")
       .setPositiveButton("OK", new DialogInterface.OnClickListener() { public void onClick(DialogInterface dialog, int which) {
         dialog.dismiss();
+      }})
+      .setOnDismissListener(new DialogInterface.OnDismissListener() { public void onDismiss(DialogInterface dialog) {
         MwmActivity.this.hideStatusBar();
-        String nextMessage = poiMessages.poll();
-        if (nextMessage!=null){
-          showPoiDialogNow(nextMessage);
-        }
+        final String nextMessage = poiMessages.poll();
+        new Thread(){public void run(){
+          try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
+          runOnUiThread(new Runnable() { public void run() {
+            if (nextMessage!=null){
+              showPoiDialogNow(nextMessage);
+            }
+          }});
+        }}.start();
       }})
       .create();
     Framework.nativeSetPoiVisitedListener(this);
@@ -1836,6 +1843,11 @@ public class MwmActivity extends BaseMwmFragmentActivity
           }
           MwmApplication.gps().restartEmulation();
           dialog.dismiss();
+        }
+      }).setOnDismissListener(new DialogInterface.OnDismissListener() {
+        @Override
+        public void onDismiss(DialogInterface dialog) {
+          MwmActivity.this.hideStatusBar();
         }
       })
       .show();

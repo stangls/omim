@@ -14,6 +14,8 @@ import com.mobidat.wp2.missionservice.MissionStatus
  */
 internal class TimerThread(private val activity: MwmActivity) : Thread() {
 
+    var count = 0;
+
     override fun run() {
         //missionService.setMissionListener(this)
 
@@ -70,7 +72,10 @@ internal class TimerThread(private val activity: MwmActivity) : Thread() {
                     rowMissionTime?.visibility= View.VISIBLE
                 }
             } catch (_: NullPointerException) {}
-            activity.hideStatusBar()
+            count=(count+1)%10;
+            if (count==0){
+                activity.hideStatusBar()
+            }
         }
     }
 
