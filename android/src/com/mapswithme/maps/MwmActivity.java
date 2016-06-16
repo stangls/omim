@@ -184,6 +184,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
   @Override
   public void onTourFinished() {
     new Thread(){public void run(){
+      MwmApplication.gps().setSimulation(false);
       try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
       runOnUiThread(new Runnable(){public void run(){
         finish();
@@ -792,6 +793,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     // TODO move listeners attach-deattach to onStart-onStop since onDestroy isn't guaranteed.
     Framework.nativeRemoveMapObjectListener();
     BottomSheetHelper.free();
+    MwmApplication.gps().setSimulation(false);
     super.onDestroy();
   }
 
