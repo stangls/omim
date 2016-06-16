@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.Locale;
 
+@Deprecated
 public class MxSimulationProvider extends BaseLocationProvider
 {
 
@@ -65,7 +66,7 @@ public class MxSimulationProvider extends BaseLocationProvider
         try {
           Date datetime = df.parse(date + " " + time, new ParsePosition(0));
           //Log.v("MxSimulationProvider", "Parsed date-time: " + datetime);
-          Location l = new Location(this.providerName);
+          Location l = new Location(providerName);
           l.setLongitude(Double.parseDouble(longitude));
           l.setLatitude(Double.parseDouble(latitude));
           l.setAccuracy(10); // meters with 68% confidence
@@ -136,7 +137,7 @@ public class MxSimulationProvider extends BaseLocationProvider
             @Override
             public void run() {
               LocationHelper.INSTANCE.initMagneticField(l); // maydo
-              LocationHelper.INSTANCE.setLastLocation(l);
+              LocationHelper.INSTANCE.saveLocation(l);
             }
           }));
           int time = simulationDataWaitTimeMS[currentSimulationStep];
@@ -163,14 +164,14 @@ public class MxSimulationProvider extends BaseLocationProvider
 
     final Location newLocation = retrieveCurrentLocation();
     if (isLocationBetterThanLast(newLocation))
-      LocationHelper.INSTANCE.setLastLocation(newLocation);
+      LocationHelper.INSTANCE.saveLocation(newLocation);
     else
     {
       // strange. why is this neccessary? (copied from AndroidNativeProvider)
-      final Location lastLocation = LocationHelper.INSTANCE.getLastLocation();
-      if (lastLocation != null && !LocationUtils.isExpired(lastLocation, LocationHelper.INSTANCE.getLastLocationTime(),
+      final Location lastLocation = LocationHelper.INSTANCE.getSavedLocation();
+      if (lastLocation != null && !LocationUtils.isExpired(lastLocation, LocationHelper.INSTANCE.getSavedLocationTime(),
                                                            LocationUtils.LOCATION_EXPIRATION_TIME_MILLIS_SHORT))
-        LocationHelper.INSTANCE.setLastLocation(lastLocation);
+        LocationHelper.INSTANCE.saveLocation(lastLocation);
     }
   }
 

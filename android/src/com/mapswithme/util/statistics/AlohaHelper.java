@@ -6,17 +6,17 @@ public class AlohaHelper
 
   public static void logClick(String element)
   {
-    org.alohalytics.Statistics.logEvent(ALOHA_CLICK, element);
+    //org.alohalytics.Statistics.logEvent(ALOHA_CLICK, element);
   }
 
   public static void logLongClick(String element)
   {
-    org.alohalytics.Statistics.logEvent(ALOHA_LONG_CLICK, element);
+    //org.alohalytics.Statistics.logEvent(ALOHA_LONG_CLICK, element);
   }
 
   public static void logException(Exception e)
   {
-    org.alohalytics.Statistics.logEvent(ALOHA_EXCEPTION, new String[] {e.getClass().getSimpleName(), e.getMessage()});
+    //org.alohalytics.Statistics.logEvent(ALOHA_EXCEPTION, new String[] {e.getClass().getSimpleName(), e.getMessage()});
   }
 
   public static class Settings
@@ -56,6 +56,7 @@ public class AlohaHelper
   public static final String MENU_SHARE = "share@";
   public static final String MENU_POINT2POINT = "point2point";
   public static final String MENU_TOUR = "tour";
+  public static final String MENU_ADD_PLACE = "addPlace";
   // place page
   public static final String PP_OPEN = "ppOpen";
   public static final String PP_CLOSE = "ppClose";

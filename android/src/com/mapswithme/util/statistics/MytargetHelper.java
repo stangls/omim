@@ -1,4 +1,4 @@
-package com.mapswithme.util.statistics;
+/*package com.mapswithme.util.statistics;
 
 import android.app.Activity;
 import android.preference.PreferenceManager;
@@ -130,13 +130,14 @@ public final class MytargetHelper
 
   public void displayShowcase()
   {
-    mShowcase.show();
+    if (!mShowcase.getBanners().isEmpty())
+      mShowcase.handleBannerClick(mShowcase.getBanners().get(0));
   }
 
   public static boolean isShowcaseSwitchedOnLocal()
   {
     return PreferenceManager.getDefaultSharedPreferences(MwmApplication.get())
-                             .getBoolean(MwmApplication.get().getString(R.string.pref_showcase_switched_on), false);
+                            .getBoolean(MwmApplication.get().getString(R.string.pref_showcase_switched_on), false);
   }
 
   public static boolean isShowcaseSwitchedOnServer()
@@ -150,3 +151,4 @@ public final class MytargetHelper
                                  .putBoolean(PREF_CHECK, switchedOn).apply();
   }
 }
+*/

@@ -9,7 +9,7 @@ import com.google.android.gms.common.GoogleApiAvailability;
 import com.mapswithme.maps.MwmApplication;
 import com.mapswithme.maps.R;
 import com.mapswithme.util.Config;
-import com.mapswithme.util.statistics.MytargetHelper;
+//import com.mapswithme.util.statistics.MytargetHelper;
 import com.mapswithme.util.statistics.Statistics;
 
 public class MiscPrefsFragment extends BaseXmlSettingsFragment
@@ -40,7 +40,7 @@ public class MiscPrefsFragment extends BaseXmlSettingsFragment
     if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(MwmApplication.get()) != ConnectionResult.SUCCESS)
       getPreferenceScreen().removePreference(findPreference(getString(R.string.pref_play_services)));
 
-    if (!MytargetHelper.isShowcaseSwitchedOnServer())
-      getPreferenceScreen().removePreference(findPreference(getString(R.string.pref_showcase_switched_on)));
+    /*if (!MytargetHelper.isShowcaseSwitchedOnServer())
+      getPreferenceScreen().removePreference(findPreference(getString(R.string.pref_showcase_switched_on)));*/
   }
 }

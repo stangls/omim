@@ -18,8 +18,8 @@ namespace routing
 namespace
 {
 double constexpr kLocationTimeThreshold = 60.0 * 1.0;
-double constexpr kOnEndToleranceM = 10.0;
-
+double constexpr kOnEndToleranceM = 25.0;
+double constexpr kSteetNameLinkMeters = 400.;
 }  //  namespace
 
 Route::Route(string const & router, vector<m2::PointD> const & points, string const & name)
@@ -40,6 +40,7 @@ void Route::Swap(Route & rhs)
   swap(m_currentTime, rhs.m_currentTime);
   swap(m_turns, rhs.m_turns);
   swap(m_times, rhs.m_times);
+  swap(m_streets, rhs.m_streets);
   m_absentCountries.swap(rhs.m_absentCountries);
   m_nonFastForward.swap(rhs.m_nonFastForward);
   swap(m_tourStart, rhs.m_tourStart);
@@ -181,6 +182,53 @@ Route::TTurns::const_iterator Route::GetCurrentTurn() const
          });
 }
 
+void Route::GetCurrentStreetName(string & name) const
+{
+  auto it = GetCurrentStreetNameIterAfter(m_poly.GetCurrentIter());
+  if (it == m_streets.cend())
+    name.clear();
+  else
+    name = it->second;
+}
+
+void Route::GetStreetNameAfterIdx(uint32_t idx, string & name) const
+{
+  name.clear();
+  auto polyIter = m_poly.GetIterToIndex(idx);
+  auto it = GetCurrentStreetNameIterAfter(polyIter);
+  if (it == m_streets.cend())
+    return;
+  for (;it != m_streets.cend(); ++it)
+    if (!it->second.empty())
+    {
+      if (m_poly.GetDistanceM(polyIter, m_poly.GetIterToIndex(max(it->first, static_cast<uint32_t>(polyIter.m_ind)))) < kSteetNameLinkMeters)
+        name = it->second;
+      return;
+    }
+}
+
+Route::TStreets::const_iterator Route::GetCurrentStreetNameIterAfter(FollowedPolyline::Iter iter) const
+{
+  // m_streets empty for pedestrian router.
+  if (m_streets.empty())
+  {
+    return m_streets.cend();
+  }
+
+  TStreets::const_iterator curIter = m_streets.cbegin();
+  TStreets::const_iterator prevIter = curIter;
+  curIter++;
+
+  while (curIter->first < iter.m_ind)
+  {
+    ++prevIter;
+    ++curIter;
+    if (curIter == m_streets.cend())
+      return curIter;
+  }
+  return curIter->first == iter.m_ind ? curIter : prevIter;
+}
+
 bool Route::GetCurrentTurn(double & distanceToTurnMeters, turns::TurnItem & turn) const
 {
   auto it = GetCurrentTurn();
@@ -240,7 +288,7 @@ void Route::GetCurrentDirectionPoint(m2::PointD & pt) const
     m_poly.GetCurrentDirectionPoint(pt, kOnEndToleranceM);
 }
 
-bool Route::MoveIterator(location::GpsInfo const & info) const
+bool Route::MoveIterator(location::GpsInfo const & info, TPossibleTourResumptionCallback const & possibleTourResumptionCallback, bool doContinueTourHere) const
 {
   double predictDistance = -1.0;
   if (m_currentTime > 0.0 && info.HasSpeed())
@@ -255,9 +303,9 @@ bool Route::MoveIterator(location::GpsInfo const & info) const
   m2::RectD const rect = MercatorBounds::MetresToXY(
         info.m_longitude, info.m_latitude,
         max(m_routingSettings.m_matchingThresholdM, info.m_horizontalAccuracy));
-  FollowedPolyline::Iter const res = m_poly.UpdateProjectionByPrediction(rect, predictDistance, m_nonFastForward);
+  FollowedPolyline::Iter const res = m_poly.UpdateProjectionByPrediction(rect, predictDistance, m_nonFastForward, possibleTourResumptionCallback, doContinueTourHere);
   if (m_simplifiedPoly.IsValid())
-    m_simplifiedPoly.UpdateProjectionByPrediction(rect, predictDistance, m_nonFastForward);
+    m_simplifiedPoly.UpdateProjectionByPrediction(rect, predictDistance, m_nonFastForward, 0, doContinueTourHere);
   return res.IsValid();
 }
 
@@ -308,7 +356,9 @@ void Route::MatchLocationToRoute(location::GpsInfo & location, location::RouteMa
 
 bool Route::IsCurrentOnEnd() const
 {
-  return (m_poly.GetDistanceToEndM() < kOnEndToleranceM);
+  auto dist = m_poly.GetDistanceToEndM();
+  //LOG(my::LINFO,("distance to end:",dist));
+  return (dist < kOnEndToleranceM);
 }
 
 void Route::Update()

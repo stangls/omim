@@ -3,7 +3,7 @@
 
 #include "base/logging.hpp"
 
-#include "3party/Alohalytics/src/alohalytics.h"
+//#include "3party/Alohalytics/src/alohalytics.h"
 
 namespace dp
 {
@@ -18,7 +18,7 @@ void SupportManager::Init()
   static bool gpuInfoSent = false;
   if (!gpuInfoSent)
   {
-    alohalytics::Stats::Instance().LogEvent("GPU", renderer);
+    //alohalytics::Stats::Instance().LogEvent("GPU", renderer);
     gpuInfoSent = true;
   }
 

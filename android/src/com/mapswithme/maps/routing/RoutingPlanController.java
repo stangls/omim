@@ -29,7 +29,7 @@ public class RoutingPlanController extends ToolbarController
   static final int ANIM_TOGGLE = MwmApplication.get().getResources().getInteger(R.integer.anim_slots_toggle);
 
   protected final View mFrame;
-  private final ImageView mToggle;
+  //private final ImageView mToggle;
   private final SlotFrame mSlotFrame;
   private final RadioGroup mRouterTypes;
   private final WheelProgressView mProgressVehicle;
@@ -72,7 +72,7 @@ public class RoutingPlanController extends ToolbarController
     super(root, activity);
     mFrame = root;
 
-    mToggle = (ImageView) mToolbar.findViewById(R.id.toggle);
+    //mToggle = (ImageView) mToolbar.findViewById(R.id.toggle);
     mSlotFrame = (SlotFrame) root.findViewById(R.id.slots);
 
     View planFrame = root.findViewById(R.id.planning_frame);
@@ -122,7 +122,7 @@ public class RoutingPlanController extends ToolbarController
 
     setTitle(R.string.p2p_route_planning);
 
-    mToggle.setImageDrawable(mToggleImage);
+    /*mToggle.setImageDrawable(mToggleImage);
     mToggle.setOnClickListener(new View.OnClickListener()
     {
       @Override
@@ -130,7 +130,7 @@ public class RoutingPlanController extends ToolbarController
       {
         toggleSlots();
       }
-    });
+    });*/
   }
 
   @Override
@@ -204,10 +204,10 @@ public class RoutingPlanController extends ToolbarController
     UiUtils.visibleIf(vehicle, mProgressVehicle);
     UiUtils.visibleIf(!vehicle, mProgressPedestrian);
 
-    if (vehicle)
-      mProgressVehicle.setProgress(progress);
-    else
-      mProgressPedestrian.setProgress(progress);
+    WheelProgressView view = (vehicle ? mProgressVehicle : mProgressPedestrian);
+    view.setPending(progress == 0);
+    if (progress != 0)
+      view.setProgress(progress);
   }
 
   private void toggleSlots()
@@ -262,7 +262,7 @@ public class RoutingPlanController extends ToolbarController
 
   public void disableToggle()
   {
-    UiUtils.hide(mToggle);
+    //UiUtils.hide(mToggle);
     showSlots(true, false);
   }
 

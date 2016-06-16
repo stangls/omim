@@ -34,6 +34,7 @@ public class BaseMwmDialogFragment extends DialogFragment
     int style = getStyle();
     int theme = getCustomTheme();
     if (style != STYLE_NORMAL || theme != 0)
+      //noinspection WrongConstant
       setStyle(style, theme);
   }
 
@@ -41,14 +42,19 @@ public class BaseMwmDialogFragment extends DialogFragment
   public void onResume()
   {
     super.onResume();
-    org.alohalytics.Statistics.logEvent("$onResume", getClass().getSimpleName()
-        + ":" + com.mapswithme.util.UiUtils.deviceOrientationAsString(getActivity()));
+    /*org.alohalytics.Statistics.logEvent("$onResume", getClass().getSimpleName()
+        + ":" + com.mapswithme.util.UiUtils.deviceOrientationAsString(getActivity()));*/
   }
 
   @Override
   public void onPause()
   {
     super.onPause();
-    org.alohalytics.Statistics.logEvent("$onPause", getClass().getSimpleName());
+    //org.alohalytics.Statistics.logEvent("$onPause", getClass().getSimpleName());
+  }
+
+  public BaseMwmFragmentActivity getMwmActivity()
+  {
+    return (BaseMwmFragmentActivity) getActivity();
   }
 }

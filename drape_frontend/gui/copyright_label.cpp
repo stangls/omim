@@ -23,10 +23,10 @@ namespace
     using TBase = StaticLabelHandle;
 
   public:
-    CopyrightHandle(ref_ptr<dp::TextureManager> textureManager,
+    CopyrightHandle(uint32_t id, ref_ptr<dp::TextureManager> textureManager,
                     dp::Anchor anchor, m2::PointF const & pivot,
                     m2::PointF const & size, TAlphabet const & alphabet)
-      : TBase(textureManager, anchor, pivot, size, alphabet)
+      : TBase(id, textureManager, anchor, pivot, size, alphabet)
     {
       SetIsVisible(true);
     }
@@ -66,7 +66,7 @@ drape_ptr<ShapeRenderer> CopyrightLabel::Draw(m2::PointF & size, ref_ptr<dp::Tex
 {
   StaticLabel::LabelResult result;
   // TODO: change if map data is not from open street map. maybe load dynamically from copright notice on device next to mwm file
-  StaticLabel::CacheStaticText("Map data © OpenStreetMap", "", m_position.m_anchor,
+  StaticLabel::CacheStaticText("initializing ...", "", m_position.m_anchor,
                                DrapeGui::GetGuiTextFont(), tex, result);
 
   dp::AttributeProvider provider(1 /*stream count*/, result.m_buffer.size());
@@ -78,7 +78,8 @@ drape_ptr<ShapeRenderer> CopyrightLabel::Draw(m2::PointF & size, ref_ptr<dp::Tex
   size_t indexCount = dp::Batcher::IndexPerQuad * vertexCount / dp::Batcher::VertexPerQuad;
 
   size = m2::PointF(result.m_boundRect.SizeX(), result.m_boundRect.SizeY());
-  drape_ptr<dp::OverlayHandle> handle = make_unique_dp<CopyrightHandle>(tex, m_position.m_anchor,
+  drape_ptr<dp::OverlayHandle> handle = make_unique_dp<CopyrightHandle>(EGuiHandle::GuiHandleCopyright,
+                                                                        tex, m_position.m_anchor,
                                                                         m_position.m_pixelPivot, size,
                                                                         result.m_alphabet);
 

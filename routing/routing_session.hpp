@@ -68,10 +68,14 @@ public:
   typedef function<void(Route const &, IRouter::ResultCode)> TReadyCallback;
   typedef function<void(float)> TProgressCallback;
 
+  // parameters: finished, position_index
+  typedef function<void(bool, size_t)> TTourChangeCallback;
+
   RoutingSession();
 
   void Init(TRoutingStatisticsCallback const & routingStatisticsFn,
-            RouterDelegate::TPointCheckCallback const & pointCheckCallback);
+            RouterDelegate::TPointCheckCallback const & pointCheckCallback,
+            const TTourChangeCallback &tourChangeCallback);
 
   void SetRouter(unique_ptr<IRouter> && router, unique_ptr<OnlineAbsentCountriesFetcher> && fetcher);
 
@@ -94,7 +98,9 @@ public:
 
   Route const & GetRoute() const { return m_route; }
 
-  State OnLocationPositionChanged(location::GpsInfo const & info, Index const & index);
+  State OnLocationPositionChanged(location::GpsInfo const & info, Index const & index,
+    const TPossibleTourResumptionCallback &possibleTourResumptionCallback
+  , bool doContinueTourHere);
   void GetRouteFollowingInfo(location::FollowingInfo & info) const;
 
   void MatchLocationToRoute(location::GpsInfo & location,
@@ -119,10 +125,13 @@ public:
   // Sound notifications for turn instructions.
   void EnableTurnNotifications(bool enable);
   bool AreTurnNotificationsEnabled() const;
-  void SetTurnNotificationsUnits(Settings::Units const units);
+  void SetTurnNotificationsUnits(settings::Units const units);
   void SetTurnNotificationsLocale(string const & locale);
   string GetTurnNotificationsLocale() const;
   void GenerateTurnNotifications(vector<string> & turnNotifications);
+  double GetCompletionPercent() const;
+
+  void EmitCloseRoutingEvent() const;
 
   void SetTour( unique_ptr<Tour> tour );
   void RemoveTour();
@@ -195,9 +204,11 @@ private:
   size_t m_tourStartIndexInRoute;
   // Index of "point nav" in m_tour
   size_t m_tourStartIndex;
+  // callback for changes on the tour
+  TTourChangeCallback m_tourChangeCallback;
 
   // Rerouting count
   int m_routingRebuildCount;
-
+  mutable double m_lastCompletionPercent;
 };
 }  // namespace routing

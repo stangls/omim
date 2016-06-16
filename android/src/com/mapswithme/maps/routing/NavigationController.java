@@ -2,6 +2,7 @@ package com.mapswithme.maps.routing;
 
 import android.app.Activity;
 import android.location.Location;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -18,6 +19,7 @@ import com.mapswithme.util.statistics.Statistics;
 
 public class NavigationController
 {
+  private static final String TAG = NavigationController.class.getSimpleName();
   private final View mFrame;
 
   private final TextView mDistanceTotal;
@@ -86,10 +88,10 @@ public class NavigationController
   private void updatePedestrian(RoutingInfo info)
   {
     Location next = info.pedestrianNextDirection;
-    Location location = LocationHelper.INSTANCE.getLastLocation();
-    DistanceAndAzimut da = Framework.nativeGetDistanceAndAzimutFromLatLon(next.getLatitude(), next.getLongitude(),
-                                                                          location.getLatitude(), location.getLongitude(),
-                                                                          mNorth);
+    Location location = LocationHelper.INSTANCE.getSavedLocation();
+    DistanceAndAzimut da = Framework.nativeGetDistanceAndAzimuthFromLatLon(next.getLatitude(), next.getLongitude(),
+                                                                           location.getLatitude(), location.getLongitude(),
+                                                                           mNorth);
     String[] splitDistance = da.getDistance().split(" ");
     mDistanceTurn.setText(Utils.formatUnitsText(R.dimen.text_size_display_1, R.dimen.text_size_toolbar,
                                                 splitDistance[0], splitDistance[1]));

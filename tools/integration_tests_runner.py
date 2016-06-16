@@ -1,12 +1,15 @@
 from __future__ import print_function
-from optparse import OptionParser
-import subprocess
+
+import logging
 import multiprocessing
+from optparse import OptionParser
+from os import path
+import shutil
+import subprocess
+import tempfile
 from threading import Lock
 from threading import Thread
 import traceback
-import logging
-from os import path
 
 
 from Queue import Queue
@@ -17,16 +20,20 @@ from run_desktop_tests import tests_on_disk
 __author__ = 't.danshin'
 
 
+TEMPFOLDER_TESTS = ["search_integration_tests"]
+
+
 class IntegrationRunner:
     def __init__(self):
         self.process_cli()
 
         self.proc_count = multiprocessing.cpu_count()
-        logging.info("Number of processors is: {}".format(self.proc_count))
+        logging.info("Number of processors is: {nproc}".format(nproc=self.proc_count))
 
         self.file_lock = Lock()
-
         self.tests = Queue()
+        self.resource_path_postfix = " \"--user_resource_path={}\"".format(self.user_resource_path) if self.user_resource_path else ""
+
 
     def run_tests(self):
         for exec_file in self.runlist:
@@ -58,22 +65,41 @@ class IntegrationRunner:
                     return
 
                 test_file, test = self.tests.get()
-                self.exec_test(test_file, test)
+                self.exec_test(test_file, test, clean_env=(test_file in TEMPFOLDER_TESTS))
+
             except:
                 logging.error(traceback.format_exc())
+                return
 
 
-    def exec_test(self, test_file, test):
-        out, err, result = self.get_tests_from_exec_file(test_file, '--filter={test}'.format(test=test))
+    def exec_test(self, test_file, test, clean_env=False):
+        keys = '"--filter={test}"'.format(test=test)
+        if clean_env:
+            tmpdir = tempfile.mkdtemp()
+            keys = '{old_key} "--user_resource_path={tmpdir}"'.format(old_key=keys, tmpdir=tmpdir)
+            logging.debug("Temp dir: {tmpdir}".format(tmpdir=tmpdir))
+        else:
+            keys = "{old_key}{resource_path}".format(old_key=keys, resource_path=self.resource_path_postfix)
+            logging.debug("Setting user_resource_path to {resource_path}".format(resource_path=self.resource_path_postfix))
+
+        out, err, result = self.get_tests_from_exec_file(test_file, keys)
+
+        if clean_env:
+            try:
+                shutil.rmtree(tmpdir)
+            except:
+                logging.error("Failed to remove tempdir {tmpdir}".format(tmpdir=tmpdir))
+
         with self.file_lock:
-            self.file.write("BEGIN: {}\n".format(test_file))
+            self.file.write("BEGIN: {file}\n".format(file=test_file))
             self.file.write(str(err))
-            self.file.write("\nEND: {} | result: {}\n\n".format(test_file, result))
+            self.file.write("\nEND: {file} | result: {res}\n\n".format(file=test_file, res=result))
             self.file.flush()
 
 
     def get_tests_from_exec_file(self, test, keys):
         spell = "{test} {keys}".format(test=path.join(self.workspace_path, test), keys=keys)
+        logging.debug(">> {spell}".format(spell=spell))
 
         process = subprocess.Popen(spell.split(" "),
                                    stdout=subprocess.PIPE,
@@ -91,6 +117,7 @@ class IntegrationRunner:
         parser.add_option("-o", "--output", dest="output", default="testlog.log", help="resulting log file. Default testlog.log")
         parser.add_option("-f", "--folder", dest="folder", default="omim-build-release/out/release", help="specify the folder where the tests reside (absolute path or relative to the location of this script)")
         parser.add_option("-i", "--include", dest="runlist", action="append", default=[], help="Include test into execution, comma separated list with no spaces or individual tests, or both. E.g.: -i one -i two -i three,four,five")
+        parser.add_option("-r", "--user_resource_path", dest="user_resource_path", default="", help="Path to user resources, such as MWMs")
 
         (options, args) = parser.parse_args()
 
@@ -99,8 +126,13 @@ class IntegrationRunner:
             exit(2)
 
         self.workspace_path = options.folder
-        self.runlist = filter(lambda x: x in tests_on_disk(self.workspace_path), options.runlist)
+        interim_runlist = list()
+        for opt in options.runlist:
+            interim_runlist.extend(map(lambda x: x.strip(), opt.split(",")))
+
+        self.runlist = filter(lambda x: x in tests_on_disk(self.workspace_path), interim_runlist)
         self.output = options.output
+        self.user_resource_path = options.user_resource_path
 
 
 if __name__ == "__main__":

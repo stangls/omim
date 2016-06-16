@@ -25,10 +25,12 @@ class TourParser
 
     PointD m_curPosition;
     int m_roadAngle=0;
-    int m_roadIndex=0;
+    int m_roadIndex=-1;
+    bool m_roundabout=false;
     double m_x=0;
     double m_y=0;
     bool m_tracePosition=false;
+    string m_poiText;
 
     void Reset()
     { }
@@ -72,6 +74,11 @@ public:
         }
         if (IsValidAttribute("junction", attrInLowerCase, "road_index", value))
             m_roadIndex = atoi(value.c_str());
+        if (IsValidAttribute("junction", attrInLowerCase, "type", value)){
+            if (value=="roundabout"){
+                m_roundabout=true;
+            }
+        }
         if (IsValidAttribute("road", attrInLowerCase, "angle", value))
             m_roadAngle = atoi(value.c_str());
     }
@@ -101,30 +108,39 @@ public:
         if (tag=="section") {
             LOG( my::LINFO, ("adding junction") );
             turns::TurnDirection turnDirection=turns::TurnDirection::NoTurn;
-            if (m_roadIndex!=0){
+            if (m_roundabout){
+                LOG( my::LINFO, ("junction roundabout road index : ",m_roadIndex) );
+                m_tour.AddTurn(TI(m_tour.GetAllPoints().size()-1-5,turns::TurnDirection::EnterRoundAbout,m_roadIndex+1));
                 turnDirection=turns::TurnDirection::LeaveRoundAbout;
             }else{
-                if (m_roadAngle>=170)
+                LOG( my::LINFO, ("junction road angle : ",m_roadAngle) );
+                if (m_roadAngle>=175)
                     turnDirection=TD::UTurnLeft;
-                else if (m_roadAngle>=90)
+                else if (m_roadAngle>=120)
                     turnDirection=TD::TurnSharpRight;
-                else if (m_roadAngle>=15)
+                else if (m_roadAngle>=45)
                     turnDirection=TD::TurnRight;
-                else if (m_roadAngle>=4)
+                else if (m_roadAngle>=5)
                     turnDirection=TD::TurnSlightRight;
-                else if (m_roadAngle<=-170)
+                else if (m_roadAngle<=-175)
                     turnDirection=TD::UTurnLeft;
-                else if (m_roadAngle<=-90)
+                else if (m_roadAngle<=-120)
                     turnDirection=TD::TurnSharpLeft;
-                else if (m_roadAngle<=-15)
+                else if (m_roadAngle<=-45)
                     turnDirection=TD::TurnLeft;
-                else if (m_roadAngle<=-4)
+                else if (m_roadAngle<=-5)
                     turnDirection=TD::TurnSlightLeft;
                 else
                     turnDirection=TD::GoStraight;
             }
-            m_tour.AddTurn(TI(m_tour.GetAllPoints().size()-1,turnDirection,m_roadIndex));
-            m_roadIndex = 0;
+            m_tour.AddTurn(TI(m_tour.GetAllPoints().size()-1,turnDirection,m_roadIndex+1));
+            m_roadIndex = -1;
+            m_roundabout = false;
+        }
+        if (tag=="poi"){
+            LOG( my::LINFO, ("adding POI") );
+            m_tour.AddPoi(m_poiText,m_x,m_y);
+            m_poiText="";
         }
         m_tags.pop_back();
     }
@@ -140,7 +156,11 @@ public:
             string const & prevTag = m_tags[count - 2];
             string const ppTag = count > 3 ? m_tags[count - 3] : string();
             if (prevTag=="tour" && currTag=="name"){
+                LOG( my::LINFO, ("tour name : ",value) );
                 m_tour.SetName(value);
+            }
+            if (prevTag=="poi" && currTag=="message"){
+                m_poiText=value;
             }
         }
     }
@@ -148,36 +168,25 @@ public:
 } // end anonymous namespace (parser)
 
 
-Tour::Tour(const string &filePath)
+Tour::Tour(const string &filePath, TPoiCallback const & poiVisited)
     : m_name("unnamed dummy tour"),
       m_currentIndex(0),
       m_points(),
       m_times(),
-      m_turns()
+      m_turns(),
+      m_pois()
 {
+
+    m_poiVisitedCallback = poiVisited;
+
     // parse the XML file
     LOG( my::LINFO, ("reading tour file ",filePath) );
-    ReaderPtr<Reader> const & reader = new FileReader(filePath);
-    ReaderSource<ReaderPtr<Reader> > src(reader);
+    FileReader reader(filePath);
+    ReaderSource<FileReader> src(reader);
     TourParser parser(*this);
     ParseXML(src, parser, true);
-    LOG( my::LINFO, ("done parsing tour file",filePath) );
-/*
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.123192), MercatorBounds::LatToY(47.796597) ) ); // Angerer Kurve (NO) / Einfahrt Mondi Inncoat
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.121801), MercatorBounds::LatToY(47.797094) ) ); // Angerer (N)
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.120500), MercatorBounds::LatToY(47.797566) ) ); // Kreuzung Angerer / B15
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.120908), MercatorBounds::LatToY(47.798967) ) ); // B15 Richtung Norden
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.121029), MercatorBounds::LatToY(47.799725) ) ); // B15 Richtung Norden
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.120902), MercatorBounds::LatToY(47.800527) ) ); // B15 Richtung Norden
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.120513), MercatorBounds::LatToY(47.801354) ) ); // Kreuzung Eichenweg / B15
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.121119), MercatorBounds::LatToY(47.801512) ) ); // Eichenweg Richtung O
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.121227), MercatorBounds::LatToY(47.801654) ) ); // Eichenweg Kurve
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.121151), MercatorBounds::LatToY(47.802211) ) ); // Eichenweg Richtung N
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.120991), MercatorBounds::LatToY(47.802656) ) ); // Kreuzung Eichenweg / Eschenweg
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.120404), MercatorBounds::LatToY(47.802446) ) ); // Eschenweg Richtung W
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.119868), MercatorBounds::LatToY(47.802172) ) ); // Kreuzung Eschenweg / B15
-    m_points.push_back( PointD( MercatorBounds::LonToX(12.120449), MercatorBounds::LatToY(47.801371) ) ); // Kreuzung Eichenweg / B15
-*/
+    LOG( my::LINFO, ("done parsing tour file",filePath,"with tour named",GetName()) );
+
     LOG( my::LINFO, ("calculating times.") );
     CalculateTimes();
     if (m_turns.size()>0) {
@@ -195,7 +204,45 @@ Tour::~Tour()
 {
 }
 
-bool Tour::UpdateCurrentPosition( size_t index ){
+string Tour::GetName() const {
+    return string(m_name);
+}
+
+void Tour::SetName(string name){
+    m_name = string(name);
+}
+
+bool Tour::UpdateCurrentPosition( size_t index )
+{
+    size_t start = m_currentIndex;
+    bool ret = JumpCurrentPosition( index );
+
+    // iterate over skipped points and check if POIs exist.
+    auto poi = m_pois.cbegin()+m_nextPoiIndex;
+    for (size_t idx=start; idx<m_currentIndex; idx++) {
+        // check all next POIs of this section
+        while (poi != m_pois.cend() && (*poi).GetEarliestIndex()<idx) {
+            PointD point = m_points[idx];
+            // TODO: actually check POI position and inform GUI
+            double dist = MercatorBounds::DistanceOnEarth((*poi).GetPos(),point);
+            //LOG( my::LDEBUG, ("checking POI ",m_nextPoiIndex," with distance ",dist," : ",(*poi).GetMessage()));
+            if (dist<=MAX_POI_DIST) {
+                LOG( my::LDEBUG, ("visiting POI : ",(*poi).GetMessage()));
+                if (m_poiVisitedCallback!=0){
+                    m_poiVisitedCallback(*poi);
+                }
+                m_nextPoiIndex++;
+            }
+            poi++;
+        }
+    }
+
+    // return actual value
+    return ret;
+}
+
+bool Tour::JumpCurrentPosition( size_t index )
+{
     if (index>=m_points.size()) {
         return false;
     }
@@ -207,11 +254,10 @@ void Tour::AddPoint(double lat, double lon)
 {
     // minimal distance between points
     // if the last point is further away, additional points are added in-between (to minimize errors of route-following)
-    const double minDist = 5; // meters
     PointD newPoint = PointD(MercatorBounds::LonToX(lat),MercatorBounds::LatToY(lon));
     if (m_points.size()>0){
         PointD lastPoint = m_points.back();
-        int steps = (int)ceil(MercatorBounds::DistanceOnEarth(lastPoint,newPoint)/minDist)-1;
+        int steps = (int)ceil(MercatorBounds::DistanceOnEarth(lastPoint,newPoint)/MIN_POINT_DIST)-1;
         auto vec = ( newPoint-lastPoint )/(steps+1);
         for (int i=0; i<steps; i++){
             lastPoint += vec;
@@ -219,6 +265,10 @@ void Tour::AddPoint(double lat, double lon)
         }
     }
     m_points.emplace_back(newPoint);
+}
+void Tour::AddPoi(const string & message, double lat, double lon)
+{
+    m_pois.emplace_back(message,lat,lon,m_points.size());
 }
 
 

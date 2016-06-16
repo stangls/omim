@@ -44,14 +44,14 @@ public class BaseActivityDelegate
 
   public void onResume()
   {
-    org.alohalytics.Statistics.logEvent("$onResume", mActivity.getClass().getSimpleName() + ":" +
-                                                     UiUtils.deviceOrientationAsString(mActivity.get()));
+    /*org.alohalytics.Statistics.logEvent("$onResume", mActivity.getClass().getSimpleName() + ":" +
+                                                     UiUtils.deviceOrientationAsString(mActivity.get()));*/
     ViewServer.get(mActivity.get()).setFocusedWindow(mActivity.get());
   }
 
   public void onPause()
   {
-    org.alohalytics.Statistics.logEvent("$onPause", mActivity.getClass().getSimpleName());
+    //org.alohalytics.Statistics.logEvent("$onPause", mActivity.getClass().getSimpleName());
   }
 
   public void onPostResume()

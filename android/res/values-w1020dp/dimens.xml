@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <dimen name="menu_line_button_inset_edge">-12dp</dimen>
+  <dimen name="menu_line_button_width_edge">72dp</dimen>
+  <dimen name="menu_line_button_width">60dp</dimen>
+  <dimen name="menu_line_button_width_double">120dp</dimen>
+</resources>
