@@ -1196,7 +1196,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
   {
     super.onStop();
     activityIsVisible.set(false);
-    MwmApplication.gps().setSimulation(false);
+    MwmApplication.gps().pauseEmulation();
     //mMytargetHelper.cancel();
     RoutingController.get().detach();
     mediaPlayer.stop();
