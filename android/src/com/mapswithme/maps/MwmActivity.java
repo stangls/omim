@@ -402,25 +402,34 @@ public class MwmActivity extends BaseMwmFragmentActivity
   @Override
   public void onCreate(@Nullable Bundle savedInstanceState)
   {
+    Log.d(TAG, "onCreate: start");
     super.onCreate(savedInstanceState);
+    int i = 1;
+    Log.d(TAG, "onCreate: "+(i++));
     activityIsVisible.set(false);
 
     mIsFragmentContainer = getResources().getBoolean(R.bool.tabletLayout);
 
     if (!mIsFragmentContainer && (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP))
       getWindow().addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+    Log.d(TAG, "onCreate: "+(i++));
 
     setContentView(R.layout.activity_map);
+    Log.d(TAG, "onCreate: "+(i++));
     initViews();
+    Log.d(TAG, "onCreate: "+(i++));
 
     Statistics.INSTANCE.trackConnectionState();
+    Log.d(TAG, "onCreate: "+(i++));
 
     Framework.nativeSetMapObjectListener(this);
+    Log.d(TAG, "onCreate: "+(i++));
 
     mSearchController = new FloatingSearchToolbarController(this);
     mLocationPredictor = new LocationPredictor(new Handler(), this);
     processIntent(getIntent());
     SharingHelper.prepare();
+    Log.d(TAG, "onCreate: "+(i++));
 
     poiDialog = new AlertDialog.Builder(MwmActivity.this)
       .setTitle("Meldung")
@@ -448,11 +457,19 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
     hideStatusBar();
 
+    Log.d(TAG, "onCreate: "+(i++));
+
     MissionAccess.init(this);
     MissionAccess.listeningActivity  = this;
+
+    Log.d(TAG, "onCreate: "+(i++));
+
     mBreakButton = (ImageButton)findViewById(R.id.breakButton);
     mSimulationPauseButton = (ImageButton)findViewById(R.id.simulationPauseButton);
     mLegend = (View)findViewById(R.id.legend);
+
+    Log.d(TAG, "onCreate: "+(i++));
+
     new Thread(){ public void run(){
       while (mRowMissionActivity==null){
         runOnUiThread(new Runnable() { public void run() {
@@ -472,7 +489,10 @@ public class MwmActivity extends BaseMwmFragmentActivity
       timerThread.start();
     }}.start();
 
+    Log.d(TAG, "onCreate: "+(i++));
+
     instance = this;
+    Log.d(TAG, "onCreate: done");
   }
 
   private void initViews()
@@ -1056,6 +1076,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
     timerThread.update();
     hideStatusBar();
+    findViewById(R.id.map_fragment_container).setVisibility(View.VISIBLE);
   }
 
   @Override

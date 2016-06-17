@@ -228,10 +228,10 @@ bool Tour::UpdateCurrentPosition( size_t index )
             //LOG( my::LDEBUG, ("checking POI ",m_nextPoiIndex," with distance ",dist," : ",(*poi).GetMessage()));
             if (dist<=MAX_POI_DIST) {
                 LOG( my::LDEBUG, ("visiting POI : ",(*poi).GetMessage()));
+                m_nextPoiIndex++;
                 if (m_poiVisitedCallback!=0){
                     m_poiVisitedCallback(*poi);
                 }
-                m_nextPoiIndex++;
             }
             poi++;
         }

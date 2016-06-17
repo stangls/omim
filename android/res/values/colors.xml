@@ -28,7 +28,7 @@
   <!-- Backgrounds -->
   <color name="bg_window">#FFEEEEEE</color>
   <color name="bg_window_night">#FF32363A</color>
-  <color name="bg_primary">#FF1F9952</color>
+  <color name="bg_primary">#1c65cb</color>
   <color name="bg_primary_night">#FF1E2226</color>
   <color name="bg_cards">@android:color/white</color>
   <color name="bg_cards_night">#FF3C4044</color>
@@ -109,5 +109,6 @@
   <color name="bg_editor_light_pressed">#3D000000</color>
 
   <color name="text_editor_add_disabled">#1A000000</color>
+  <color name="colorPrimaryDark">#142f65</color>
 
 </resources>

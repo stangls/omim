@@ -210,21 +210,25 @@ public class DownloadResourcesActivity extends BaseMwmFragmentActivity
   @Override
   protected void onCreate(Bundle savedInstanceState)
   {
+    Log.d(TAG, "onCreate: start");
     super.onCreate(savedInstanceState);
-
-    Utils.keepScreenOn(true, getWindow());
-    suggestRemoveLiteOrSamsung();
-    dispatchIntent();
     setContentView(R.layout.activity_download_resources);
-    initViewsAndListeners();
 
-    if (prepareFilesDownload())
-    {
-      setAction(DOWNLOAD);
+    new Thread(){public void run(){
+      Utils.keepScreenOn(true, getWindow());
+      suggestRemoveLiteOrSamsung();
+      dispatchIntent();
+      initViewsAndListeners();
 
-      if (ConnectionState.isWifiConnected())
-        onDownloadClicked();
-    }
+      if (prepareFilesDownload())
+      {
+        setAction(DOWNLOAD);
+
+        if (ConnectionState.isWifiConnected())
+          onDownloadClicked();
+      }
+    }}.start();
+    Log.d(TAG, "onCreate: done");
   }
 
   @Override
