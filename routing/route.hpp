@@ -12,7 +12,9 @@
 
 #include "base/logging.hpp"
 
-#include <limits>
+#include <float.h>
+#include <limits.h>
+//#include <limits>
 
 namespace location
 {
