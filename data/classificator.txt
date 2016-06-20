@@ -363,10 +363,13 @@ world  +
         wayside_shrine  -
         {}
     hwtag  +
+        bidir_bicycle  -
         lit  -
+        nobicycle  -
         nofoot  -
         oneway  -
         private  -
+        yesbicycle  -
         yesfoot  -
         {}
     internet_access  +
@@ -598,6 +601,12 @@ world  +
         substation  -
         tower  -
         {}
+    psurface  +
+        paved_bad  -
+        paved_good  -
+        unpaved_bad  -
+        unpaved_good  -
+        {}
     public_transport  +
         platform  -
         {}
@@ -779,6 +788,9 @@ world  +
         tyres  -
         wine  -
         {}
+    sponsored  +
+        booking  -
+        {}
     sport  +
         american_football  -
         archery  -
@@ -805,6 +817,7 @@ world  +
         {}
     tourism  +
         alpine_hut  -
+        apartment  -
         artwork  -
         attraction  -
         camp_site  -
@@ -822,6 +835,7 @@ world  +
         motel  -
         museum  -
         picnic_site  -
+        resort  -
         viewpoint  -
         zoo  -
         {}

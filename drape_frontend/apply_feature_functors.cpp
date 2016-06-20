@@ -23,8 +23,9 @@
 #include "base/logging.hpp"
 
 #include "std/algorithm.hpp"
-#include "std/utility.hpp"
 #include "std/mutex.hpp"
+#include "std/sstream.hpp"
+#include "std/utility.hpp"
 
 namespace df
 {
@@ -33,6 +34,9 @@ namespace
 {
 
 double const kMinVisibleFontSize = 8.0;
+
+string const kStarSymbol = "★";
+string const kPriceSymbol = "$";
 
 dp::Color ToDrapeColor(uint32_t src)
 {
@@ -237,6 +241,26 @@ void BaseApplyFeature::ExtractCaptionParams(CaptionDefProto const * primaryProto
   }
 }
 
+string BaseApplyFeature::ExtractHotelInfo() const
+{
+  if (!m_hotelData.m_isHotel)
+    return "";
+
+  ostringstream out;
+  out << m_hotelData.m_rating << kStarSymbol;
+  if (m_hotelData.m_priceCategory != 0)
+    out << "  ";
+  for (int i = 0; i < m_hotelData.m_priceCategory; i++)
+    out << kPriceSymbol;
+
+  return out.str();
+}
+
+void BaseApplyFeature::SetHotelData(HotelData && hotelData)
+{
+  m_hotelData = move(hotelData);
+}
+
 ApplyPointFeature::ApplyPointFeature(TInsertShapeFn const & insertShape, FeatureID const & id,
                                      int minVisibleScale, uint8_t rank, CaptionDescription const & captions,
                                      float posZ)
@@ -245,18 +269,22 @@ ApplyPointFeature::ApplyPointFeature(TInsertShapeFn const & insertShape, Feature
   , m_hasPoint(false)
   , m_hasArea(false)
   , m_createdByEditor(false)
+  , m_obsoleteInEditor(false)
   , m_symbolDepth(dp::minDepth)
   , m_circleDepth(dp::minDepth)
-  , m_symbolRule(NULL)
-  , m_circleRule(NULL)
+  , m_symbolRule(nullptr)
+  , m_circleRule(nullptr)
 {
 }
 
 void ApplyPointFeature::operator()(m2::PointD const & point, bool hasArea)
 {
+  auto const & editor = osm::Editor::Instance();
   m_hasPoint = true;
   m_hasArea = hasArea;
-  m_createdByEditor = osm::Editor::IsCreatedFeature(m_id);
+  auto const featureStatus = editor.GetFeatureStatus(m_id);
+  m_createdByEditor = featureStatus == osm::Editor::FeatureStatus::Created;
+  m_obsoleteInEditor = featureStatus == osm::Editor::FeatureStatus::Obsolete;
   m_centerPoint = point;
 }
 
@@ -294,10 +322,30 @@ void ApplyPointFeature::ProcessRule(Stylist::TRuleWrapper const & rule)
     params.m_posZ = m_posZ;
     params.m_hasArea = m_hasArea;
     params.m_createdByEditor = m_createdByEditor;
-    if(!params.m_primaryText.empty() || !params.m_secondaryText.empty())
+    if (!params.m_primaryText.empty() || !params.m_secondaryText.empty())
     {
-      m_insertShape(make_unique_dp<TextShape>(m_centerPoint, params, hasPOI, 0 /* textIndex */,
-                                              true /* affectedByZoomPriority */));
+      int displacementMode = dp::displacement::kAllModes;
+      // For hotels we set only kDefaultMode, because we have a special shape
+      // for kHotelMode and this shape will not be displayed in this case.
+      if (m_hotelData.m_isHotel)
+        displacementMode = dp::displacement::kDefaultMode;
+      m_insertShape(make_unique_dp<TextShape>(m_centerPoint, params,
+                                              hasPOI, 0 /* textIndex */,
+                                              true /* affectedByZoomPriority */,
+                                              displacementMode));
+    }
+    if (m_hotelData.m_isHotel && !params.m_primaryText.empty())
+    {
+      params.m_primaryOptional = false;
+      params.m_primaryTextFont.m_size *= 1.2;
+      params.m_primaryTextFont.m_outlineColor = dp::Color(255, 255, 255, 153);
+      params.m_secondaryTextFont = params.m_primaryTextFont;
+      params.m_secondaryText = ExtractHotelInfo();
+      params.m_secondaryOptional = false;
+      m_insertShape(make_unique_dp<TextShape>(m_centerPoint, params,
+                                              hasPOI, 0 /* textIndex */,
+                                              true /* affectedByZoomPriority */,
+                                              dp::displacement::kHotelMode));
     }
   }
 }
@@ -332,6 +380,7 @@ void ApplyPointFeature::Finish()
     params.m_posZ = m_posZ;
     params.m_hasArea = m_hasArea;
     params.m_createdByEditor = m_createdByEditor;
+    params.m_obsoleteInEditor = m_obsoleteInEditor;
     m_insertShape(make_unique_dp<PoiSymbolShape>(m_centerPoint, params));
   }
 }

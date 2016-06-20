@@ -24,6 +24,7 @@ namespace
 {
 enum class GeoMode
 {
+  Pending,
   InPosition,
   NotInPosition,
   FollowAndRotate,
@@ -45,20 +46,24 @@ struct GeoModeSettings
 };
 
 map<GeoMode, GeoModeSettings> const kGeoSettings{
+    {GeoMode::Pending,
+     {.distanceFilter = kCLDistanceFilterNone,
+      .accuracy = {.charging = kCLLocationAccuracyBestForNavigation,
+                   .battery = kCLLocationAccuracyBestForNavigation}}},
     {GeoMode::InPosition,
      {.distanceFilter = 5,
       .accuracy = {.charging = kCLLocationAccuracyBestForNavigation,
                    .battery = kCLLocationAccuracyBest}}},
     {GeoMode::NotInPosition,
      {.distanceFilter = 15,
-      .accuracy = {.charging = kCLLocationAccuracyNearestTenMeters,
-                   .battery = kCLLocationAccuracyNearestTenMeters}}},
+      .accuracy = {.charging = kCLLocationAccuracyBestForNavigation,
+                   .battery = kCLLocationAccuracyBest}}},
     {GeoMode::FollowAndRotate,
      {.distanceFilter = 5,
       .accuracy = {.charging = kCLLocationAccuracyBestForNavigation,
                    .battery = kCLLocationAccuracyBest}}},
     {GeoMode::VehicleRouting,
-     {.distanceFilter = 10,
+     {.distanceFilter = 5,
       .accuracy = {.charging = kCLLocationAccuracyBestForNavigation,
                    .battery = kCLLocationAccuracyBest}}},
     {GeoMode::PedestrianRouting,
@@ -78,6 +83,7 @@ map<GeoMode, GeoModeSettings> const kGeoSettings{
 @property (nonatomic) CLLocationManager * locationManager;
 
 @property (nonatomic, readwrite) BOOL isStarted;
+@property (nonatomic, readwrite) location::TLocationError lastLocationError;
 @property (nonatomic) NSMutableSet * observers;
 @property (nonatomic) NSDate * lastLocationTime;
 
@@ -166,7 +172,7 @@ map<GeoMode, GeoModeSettings> const kGeoSettings{
       }
     }
     else
-      [self observer:observer onLocationError:location::EDenied];
+      [self observer:observer onLocationError:location::EGPSIsOff];
   }
   else
   {
@@ -236,6 +242,7 @@ map<GeoMode, GeoModeSettings> const kGeoSettings{
   if (location.horizontalAccuracy < 0.)
     return;
 
+  self.lastLocationError = location::TLocationError::ENoError;
   // Save current device time for location.
   self.lastLocationTime = [NSDate date];
   [[Statistics instance] logLocation:location];
@@ -417,6 +424,7 @@ map<GeoMode, GeoModeSettings> const kGeoSettings{
 
 - (void)observer:(id<LocationObserver>)observer onLocationError:(location::TLocationError)errorCode
 {
+  self.lastLocationError = errorCode;
   if ([(NSObject *)observer respondsToSelector:@selector(onLocationError:)])
     [observer onLocationError:errorCode];
 }
@@ -490,6 +498,7 @@ location::CompassInfo compasInfoFromHeading(CLHeading const * h)
     switch (mode)
     {
       case location::EMyPositionMode::PendingPosition:
+        self.geoMode = GeoMode::Pending;
         break;
       case location::EMyPositionMode::NotFollowNoPosition:
       case location::EMyPositionMode::NotFollow:

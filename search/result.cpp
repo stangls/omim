@@ -1,6 +1,7 @@
-#include "result.hpp"
-#include "geometry_utils.hpp"
-#include "search_common.hpp"
+#include "search/result.hpp"
+
+#include "search/common.hpp"
+#include "search/geometry_utils.hpp"
 
 namespace search
 {
@@ -320,13 +321,8 @@ string DebugPrint(AddressInfo const & info)
 
 string DebugPrint(Result const & r)
 {
-  string s;
-  s.append(r.GetString());
-  s.append("|");
-  s.append(r.GetFeatureType());
-  s.append("|");
-  s.append(r.IsSuggest() ? "1" : "0");
-  return s;
+  return "Result { Name: " + r.GetString() + "; Type: " + r.GetFeatureType() +
+         "; Info: " + DebugPrint(r.GetRankingInfo()) + " }";
 }
 
 }  // namespace search

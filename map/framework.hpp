@@ -19,8 +19,10 @@
 #include "indexer/map_style.hpp"
 #include "indexer/new_feature_categories.hpp"
 
+#include "editor/user_stats.hpp"
+
+#include "search/engine.hpp"
 #include "search/query_saver.hpp"
-#include "search/search_engine.hpp"
 
 #include "storage/downloader_search_params.hpp"
 #include "storage/downloading_policy.hpp"
@@ -41,7 +43,6 @@
 #include "base/thread_checker.hpp"
 
 #include "std/list.hpp"
-#include "std/shared_ptr.hpp"
 #include "std/target_os.hpp"
 #include "std/unique_ptr.hpp"
 #include "std/vector.hpp"
@@ -120,6 +121,9 @@ protected:
 
   ScreenBase m_currentModelView;
 
+  using TViewportChanged = df::DrapeEngine::TModelViewListenerFn;
+  TViewportChanged m_viewportChanged;
+
   routing::RoutingSession m_routingSession;
 
   drape_ptr<df::DrapeEngine> m_drapeEngine;
@@ -151,6 +155,8 @@ protected:
   void ClearAllCaches();
 
   void StopLocationFollow();
+
+  void OnViewportChanged(ScreenBase const & screen);
 
   void CallDrapeFunction(TDrapeFunction const & fn) const;
 
@@ -259,7 +265,7 @@ public:
 private:
   void ActivateMapSelection(bool needAnimation,
                             df::SelectionShape::ESelectedObject selectionType,
-                            place_page::Info const & info) const;
+                            place_page::Info const & info);
   void InvalidateUserMarks();
 public:
   void DeactivateMapSelection(bool notifyUI);
@@ -344,6 +350,7 @@ public:
 
   void CreateDrapeEngine(ref_ptr<dp::OGLContextFactory> contextFactory, DrapeCreationParams && params);
   ref_ptr<df::DrapeEngine> GetDrapeEngine();
+  bool IsDrapeEngineCreated() const { return m_drapeEngine != nullptr; }
   void DestroyDrapeEngine();
   /// Called when graphics engine should be temporarily paused and then resumed.
   void SetRenderingEnabled(bool enable);
@@ -367,13 +374,14 @@ public:
 
   void PrepareToShutdown();
 
+  void SetDisplacementMode(int mode);
+
 private:
   void InitCountryInfoGetter();
   void InitSearchEngine();
 
   // Last search query params for the interactive search.
   search::SearchParams m_lastInteractiveSearchParams;
-  uint8_t m_fixedSearchResults;
 
   bool m_connectToGpsTrack; // need to connect to tracker when Drape is being constructed
 
@@ -392,8 +400,8 @@ private:
   search::SearchParams m_lastQueryParams;
   m2::RectD m_lastQueryViewport;
 
-  // A handle for the latest search query.
-  weak_ptr<search::QueryHandle> m_lastQueryHandle;
+  // A handle for the latest search processor.
+  weak_ptr<search::ProcessorHandle> m_lastProcessorHandle;
 
   // Returns true when |params| and |viewport| are almost the same as
   // the latest search query's params and viewport.
@@ -462,9 +470,7 @@ public:
 
   void GetTouchRect(m2::PointD const & center, uint32_t pxRadius, m2::AnyRectD & rect);
 
-  using TViewportChanged = df::DrapeEngine::TModelViewListenerFn;
-  int AddViewportListener(TViewportChanged const & fn);
-  void RemoveViewportListener(int slotID);
+  void SetViewportListener(TViewportChanged const & fn);
 
   /// Resize event from window.
   void OnSize(int w, int h);
@@ -523,7 +529,8 @@ public:
   /// @returns nullptr if no feature was found at the given mercator point.
   unique_ptr<FeatureType> GetFeatureAtPoint(m2::PointD const & mercator) const;
   using TFeatureTypeFn = function<void(FeatureType &)>;
-  void ForEachFeatureAtPoint(TFeatureTypeFn && fn, m2::PointD const & mercator) const;
+  void ForEachFeatureAtPoint(TFeatureTypeFn && fn, m2::PointD const & mercator,
+                             double featureDistanceToleranceInMeters = 0.0) const;
   /// Set parse to false if you don't need all feature fields ready.
   /// TODO(AlexZ): Refactor code which uses this method to get rid of it.
   /// FeatureType instances shoud not be used outside ForEach* core methods.
@@ -647,6 +654,10 @@ public:
   osm::Editor::SaveResult SaveEditedMapObject(osm::EditableMapObject emo);
   void DeleteFeature(FeatureID const & fid) const;
   osm::NewFeatureCategories GetEditorCategories() const;
+  bool RollBackChanges(FeatureID const & fid);
+  void CreateNote(ms::LatLon const & latLon, FeatureID const & fid,
+                  osm::Editor::NoteProblemType const type, string const & note);
+
   //@}
 
 private:
@@ -663,6 +674,28 @@ private:
   TRouteBuildingCallback m_routingCallback;
   TRouteProgressCallback m_progressCallback;
   routing::RouterType m_currentRouterType;
+  //@}
+
+public:
+  //@{
+  // User statistics.
+
+  editor::UserStats GetUserStats(string const & userName) const
+  {
+    return m_userStatsLoader.GetStats(userName);
+  }
+
+  // Reads user stats from server or gets it from cache calls |fn| on success.
+  void UpdateUserStats(string const & userName,
+                       editor::UserStatsLoader::TOnUpdateCallback fn)
+  {
+    m_userStatsLoader.Update(userName, fn);
+  }
+
+  void DropUserStats(string const & userName) { m_userStatsLoader.DropStats(userName); }
+
+private:
+  editor::UserStatsLoader m_userStatsLoader;
   //@}
 
   DECLARE_THREAD_CHECKER(m_threadChecker);

@@ -1,6 +1,10 @@
+#import "Common.h"
 #import "LocationManager.h"
 #import "MapsAppDelegate.h"
+#import "MapViewController.h"
 #import "MWMBasePlacePageView.h"
+#import "MWMCircularProgress.h"
+#import "MWMFrameworkListener.h"
 #import "MWMPlacePage.h"
 #import "MWMPlacePageActionBar.h"
 #import "MWMPlacePageBookmarkCell.h"
@@ -9,22 +13,30 @@
 #import "MWMPlacePageInfoCell.h"
 #import "MWMPlacePageOpeningHoursCell.h"
 #import "MWMPlacePageViewManager.h"
+#import "MWMStorage.h"
+#import "MWMViewController.h"
 #import "NSString+Categories.h"
 #import "Statistics.h"
 #import "UIColor+MapsMeColor.h"
 
 #include "map/place_page_info.hpp"
 
-extern CGFloat const kBottomPlacePageOffset = 15.;
-extern CGFloat const kLabelsBetweenOffset = 8.;
+#include "3party/opening_hours/opening_hours.hpp"
+#include "editor/opening_hours_ui.hpp"
+#include "editor/ui2oh.hpp"
 
 namespace
 {
+CGFloat const kDownloadProgressViewLeftOffset = 12.;
+CGFloat const kDownloadProgressViewTopOffset = 10.;
+CGFloat const kLabelsBetweenMainOffset = 8.;
+CGFloat const kLabelsBetweenSmallOffset = 4.;
+CGFloat const kBottomPlacePageOffset = 16.;
 CGFloat const kLeftOffset = 16.;
 CGFloat const kDefaultHeaderHeight = 16.;
 CGFloat const kLabelsPadding = kLeftOffset * 2;
 CGFloat const kDirectionArrowSide = 20.;
-CGFloat const kOffsetFromTitleToDistance = 8.;
+CGFloat const kOffsetFromLabelsToDistance = 8.;
 CGFloat const kOffsetFromDistanceToArrow = 5.;
 CGFloat const kMaximumWidth = 360.;
 
@@ -32,7 +44,8 @@ enum class PlacePageSection
 {
   Bookmark,
   Metadata,
-  Editing
+  Editing,
+  Booking
 };
 
 vector<MWMPlacePageCellType> const kSectionBookmarkCellTypes {
@@ -50,12 +63,17 @@ vector<MWMPlacePageCellType> const kSectionEditingCellTypes {
   MWMPlacePageCellTypeAddPlaceButton
 };
 
+vector<MWMPlacePageCellType> const kSectionBookingCellTypes {
+  MWMPlacePageCellTypeBookingMore
+};
+
 using TCellTypesSectionMap = pair<vector<MWMPlacePageCellType>, PlacePageSection>;
 
 vector<TCellTypesSectionMap> const kCellTypesSectionMap {
   {kSectionBookmarkCellTypes, PlacePageSection::Bookmark},
   {kSectionMetadataCellTypes, PlacePageSection::Metadata},
-  {kSectionEditingCellTypes, PlacePageSection::Editing}
+  {kSectionEditingCellTypes, PlacePageSection::Editing},
+  {kSectionBookingCellTypes, PlacePageSection::Booking}
 };
 
 MWMPlacePageCellTypeValueMap const kCellType2ReuseIdentifier{
@@ -70,7 +88,8 @@ MWMPlacePageCellTypeValueMap const kCellType2ReuseIdentifier{
     {MWMPlacePageCellTypeBookmark, "PlacePageBookmarkCell"},
     {MWMPlacePageCellTypeEditButton, "MWMPlacePageButtonCell"},
     {MWMPlacePageCellTypeAddBusinessButton, "MWMPlacePageButtonCell"},
-    {MWMPlacePageCellTypeAddPlaceButton, "MWMPlacePageButtonCell"}};
+    {MWMPlacePageCellTypeAddPlaceButton, "MWMPlacePageButtonCell"},
+    {MWMPlacePageCellTypeBookingMore, "MWMPlacePageButtonCell"}};
 
 NSString * reuseIdentifier(MWMPlacePageCellType cellType)
 {
@@ -89,28 +108,32 @@ CGFloat placePageWidth()
 enum class AttributePosition
 {
   Title,
-  Type,
+  ExternalTitle,
+  Subtitle,
+  Schedule,
   Address
 };
 } // namespace
 
-@interface MWMBasePlacePageView () <MWMPlacePageOpeningHoursCellProtocol>
+using namespace storage;
+
+@interface MWMBasePlacePageView ()<
+    UITableViewDelegate, UITableViewDataSource, MWMPlacePageOpeningHoursCellProtocol,
+    MWMPlacePageBookmarkDelegate, MWMCircularProgressProtocol, MWMFrameworkStorageObserver>
 {
   vector<PlacePageSection> m_sections;
   map<PlacePageSection, vector<MWMPlacePageCellType>> m_cells;
+  map<MWMPlacePageCellType, UITableViewCell *> m_offscreenCells;
 }
 
 @property (weak, nonatomic) MWMPlacePageEntity * entity;
 @property (weak, nonatomic) IBOutlet MWMPlacePage * ownerPlacePage;
-@property (weak, nonatomic) IBOutlet UIView * ppPreview;
-
-@property (nonatomic) NSMutableDictionary<NSString *, UITableViewCell *> * offscreenCells;
 
 @property (nonatomic, readwrite) BOOL openingHoursCellExpanded;
+@property (nonatomic) BOOL isBookmarkCellExpanded;
 
-@end
+@property (nonatomic) MWMCircularProgress * mapDownloadProgress;
 
-@interface MWMBasePlacePageView (UITableView) <UITableViewDelegate, UITableViewDataSource>
 @end
 
 @implementation MWMBasePlacePageView
@@ -121,18 +144,21 @@ enum class AttributePosition
   self.featureTable.delegate = self;
   self.featureTable.dataSource = self;
   self.featureTable.separatorColor = [UIColor blackDividers];
+
   for (auto const & type : kCellType2ReuseIdentifier)
   {
     NSString * identifier = @(type.second.c_str());
     [self.featureTable registerNib:[UINib nibWithNibName:identifier bundle:nil]
             forCellReuseIdentifier:identifier];
   }
+
   self.directionArrow.autoresizingMask = UIViewAutoresizingNone;
 }
 
 - (void)configureWithEntity:(MWMPlacePageEntity *)entity
 {
   self.entity = entity;
+  self.isBookmarkCellExpanded = NO;
   [self configTable];
   [self configure];
 }
@@ -141,6 +167,7 @@ enum class AttributePosition
 {
   m_sections.clear();
   m_cells.clear();
+  m_offscreenCells.clear();
   for (auto const cellSection : kCellTypesSectionMap)
   {
     for (auto const cellType : cellSection.first)
@@ -161,29 +188,50 @@ enum class AttributePosition
   MWMPlacePageEntity * entity = self.entity;
   if (entity.isBookmark)
   {
-    self.titleLabel.text = entity.bookmarkTitle.length > 0 ? entity.bookmarkTitle : entity.title;
-    self.typeLabel.text = entity.bookmarkCategory;
+    if (![entity.bookmarkTitle isEqualToString:entity.title] && entity.bookmarkTitle.length > 0)
+    {
+      self.titleLabel.text = entity.bookmarkTitle;
+      self.externalTitleLabel.text = entity.title;
+    }
+    else
+    {
+      self.titleLabel.text = entity.title;
+      self.externalTitleLabel.text = @"";
+    }
   }
   else
   {
     self.titleLabel.text = entity.title;
-    auto const ranges = [entity.category rangesOfString:@(place_page::Info::kSubtitleSeparator)];
-    if (!ranges.empty())
+    self.externalTitleLabel.text = @"";
+  }
+
+  self.subtitleLabel.text = entity.subtitle;
+  if (entity.subtitle)
+  {
+    NSMutableAttributedString * str = [[NSMutableAttributedString alloc] initWithString:entity.subtitle];
+    auto const separatorRanges = [entity.subtitle rangesOfString:@(place_page::Info::kSubtitleSeparator)];
+    if (!separatorRanges.empty())
     {
-      NSMutableAttributedString * str = [[NSMutableAttributedString alloc] initWithString:entity.category];
-      for (auto const & r : ranges)
+      for (auto const & r : separatorRanges)
         [str addAttributes:@{NSForegroundColorAttributeName : [UIColor blackHintText]} range:r];
 
-      self.typeLabel.attributedText = str;
     }
-    else
+
+    auto const starsRanges = [entity.subtitle rangesOfString:@(place_page::Info::kStarSymbol)];
+    if (!starsRanges.empty())
     {
-      self.typeLabel.text = entity.category;
+      for (auto const & r : starsRanges)
+        [str addAttributes:@{NSForegroundColorAttributeName : [UIColor yellow]} range:r];
     }
+
+    self.subtitleLabel.attributedText = str;
   }
 
   BOOL const isMyPosition = entity.isMyPosition;
   self.addressLabel.text = entity.address;
+  self.bookingPriceLabel.text = entity.bookingPrice;
+  self.bookingRatingLabel.text = entity.bookingRating;
+  self.bookingView.hidden = !entity.bookingPrice.length && !entity.bookingRating.length;
   BOOL const isHeadingAvaible = [CLLocationManager headingAvailable];
   BOOL const noLocation = MapsAppDelegate.theApp.locationManager.isLocationPendingOrNoPosition;
   self.distanceLabel.hidden = noLocation || isMyPosition;
@@ -192,50 +240,154 @@ enum class AttributePosition
   self.directionButton.hidden = hideDirection;
 
   [self.featureTable reloadData];
+  [self configureCurrentShedule];
+  [self configureMapDownloader];
+  [MWMFrameworkListener addObserver:self];
   [self setNeedsLayout];
   [self layoutIfNeeded];
+}
+
+- (void)configureMapDownloader
+{
+  TCountryId const & countryId = self.entity.countryId;
+  if (countryId == kInvalidCountryId)
+  {
+    self.downloadProgressView.hidden = YES;
+  }
+  else
+  {
+    self.downloadProgressView.hidden = NO;
+    NodeAttrs nodeAttrs;
+    GetFramework().Storage().GetNodeAttrs(countryId, nodeAttrs);
+    MWMCircularProgress * progress = self.mapDownloadProgress;
+    switch (nodeAttrs.m_status)
+    {
+      case NodeStatus::NotDownloaded:
+      case NodeStatus::Partly:
+      {
+        MWMCircularProgressStateVec const affectedStates = {MWMCircularProgressStateNormal,
+          MWMCircularProgressStateSelected};
+        [progress setImage:[UIImage imageNamed:@"ic_download"] forStates:affectedStates];
+        [progress setColoring:MWMButtonColoringBlack forStates:affectedStates];
+        progress.state = MWMCircularProgressStateNormal;
+        break;
+      }
+      case NodeStatus::Downloading:
+      {
+        auto const & prg = nodeAttrs.m_downloadingProgress;
+        progress.progress = static_cast<CGFloat>(prg.first) / prg.second;
+        break;
+      }
+      case NodeStatus::InQueue:
+        progress.state = MWMCircularProgressStateSpinner;
+        break;
+      case NodeStatus::Undefined:
+      case NodeStatus::Error:
+        progress.state = MWMCircularProgressStateFailed;
+        break;
+      case NodeStatus::OnDisk:
+      {
+        self.downloadProgressView.hidden = YES;
+        [self setNeedsLayout];
+        [UIView animateWithDuration:kDefaultAnimationDuration animations:^{ [self layoutIfNeeded]; }];
+        break;
+      }
+      case NodeStatus::OnDiskOutOfDate:
+      {
+        MWMCircularProgressStateVec const affectedStates = {MWMCircularProgressStateNormal,
+          MWMCircularProgressStateSelected};
+        [progress setImage:[UIImage imageNamed:@"ic_update"] forStates:affectedStates];
+        [progress setColoring:MWMButtonColoringOther forStates:affectedStates];
+        progress.state = MWMCircularProgressStateNormal;
+        break;
+      }
+    }
+  }
+}
+
+- (void)configureCurrentShedule
+{
+  MWMPlacePageOpeningHoursCell * cell =
+                          static_cast<MWMPlacePageOpeningHoursCell *>(m_offscreenCells[MWMPlacePageCellTypeOpenHours]);
+  if (cell)
+  {
+    self.placeScheduleLabel.text = cell.isClosed ? L(@"closed_now") : L(@"editor_time_open");
+    self.placeScheduleLabel.textColor = cell.isClosed ? [UIColor red] : [UIColor blackSecondaryText];
+  }
+  else
+  {
+    self.placeScheduleLabel.text = @"";
+  }
 }
 
 #pragma mark - Layout
 
 - (AttributePosition)distanceAttributePosition
 {
-  if (self.typeLabel.text.length)
-    return AttributePosition::Type;
-  else if (!self.typeLabel.text.length && self.addressLabel.text.length)
+  if (self.addressLabel.text.length)
     return AttributePosition::Address;
+  else if (!self.addressLabel.text.length && self.placeScheduleLabel.text.length)
+    return AttributePosition::Schedule;
+  else if (!self.placeScheduleLabel.text.length && self.subtitleLabel.text.length)
+    return AttributePosition::Subtitle;
+  else if (self.externalTitleLabel.text.length)
+    return AttributePosition::ExternalTitle;
   else
     return AttributePosition::Title;
 }
 
 - (void)setupLabelsWidthWithBoundedWidth:(CGFloat)bound distancePosition:(AttributePosition)position
 {
-  CGFloat const labelsMaxWidth = placePageWidth() - kLabelsPadding;
+  auto const defaultMaxWidth = placePageWidth() - kLabelsPadding;
+  CGFloat const labelsMaxWidth = self.downloadProgressView.hidden ? defaultMaxWidth :
+                                            defaultMaxWidth - 2 * kDownloadProgressViewLeftOffset - self.downloadProgressView.width;
   switch (position)
   {
   case AttributePosition::Title:
     self.titleLabel.width = labelsMaxWidth - bound;
-    self.typeLabel.width = self.addressLabel.width = 0;
+    self.subtitleLabel.width = self.addressLabel.width = self.externalTitleLabel.width = self.placeScheduleLabel.width = 0;
     break;
-  case AttributePosition::Type:
-    if (self.addressLabel.text.length > 0)
-    {
-      self.titleLabel.width = self.addressLabel.width = labelsMaxWidth;
-      self.typeLabel.width = labelsMaxWidth - bound;
-    }
-    else
-    {
-      self.titleLabel.width = labelsMaxWidth;
-      self.typeLabel.width = labelsMaxWidth - bound;
-      self.addressLabel.width = 0;
-    }
+  case AttributePosition::ExternalTitle:
+    self.addressLabel.width = self.subtitleLabel.width = self.placeScheduleLabel.width = 0;
+    self.externalTitleLabel.width = labelsMaxWidth - bound;
+    self.titleLabel.width = self.titleLabel.text.length > 0 ? labelsMaxWidth : 0;
+    break;
+  case AttributePosition::Subtitle:
+    self.addressLabel.width = self.placeScheduleLabel.width = 0;
+    self.titleLabel.width = self.titleLabel.text.length > 0 ? labelsMaxWidth : 0;
+    self.externalTitleLabel.width = self.externalTitleLabel.text.length > 0 ? labelsMaxWidth : 0;
+    self.subtitleLabel.width = labelsMaxWidth - bound;
+    break;
+  case AttributePosition::Schedule:
+    self.addressLabel.width = 0;
+    self.titleLabel.width = self.titleLabel.text.length > 0 ? labelsMaxWidth : 0;
+    self.externalTitleLabel.width = self.externalTitleLabel.text.length > 0 ? labelsMaxWidth : 0;
+    self.subtitleLabel.width = self.subtitleLabel.text.length > 0 ? labelsMaxWidth : 0;
+    self.placeScheduleLabel.width = labelsMaxWidth - bound;
     break;
   case AttributePosition::Address:
-    self.titleLabel.width = labelsMaxWidth;
-    self.typeLabel.width = 0;
+    self.titleLabel.width = self.titleLabel.text.length > 0 ? labelsMaxWidth : 0;
+    self.subtitleLabel.width = self.subtitleLabel.text.length > 0 ? labelsMaxWidth : 0;
+    self.externalTitleLabel.width = self.externalTitleLabel.text.length > 0 ? labelsMaxWidth : 0;
+    self.placeScheduleLabel.width = self.placeScheduleLabel.text.length > 0 ? labelsMaxWidth : 0;
     self.addressLabel.width = labelsMaxWidth - bound;
     break;
   }
+
+  self.externalTitleLabel.width = self.entity.isBookmark ? labelsMaxWidth : 0;
+
+  CGFloat const bookingWidth = labelsMaxWidth / 2;
+  self.bookingRatingLabel.width = bookingWidth;
+  self.bookingPriceLabel.width = bookingWidth - kLabelsBetweenSmallOffset;
+  self.bookingView.width = labelsMaxWidth;
+
+  [self.titleLabel sizeToFit];
+  [self.subtitleLabel sizeToFit];
+  [self.addressLabel sizeToFit];
+  [self.externalTitleLabel sizeToFit];
+  [self.placeScheduleLabel sizeToFit];
+  [self.bookingRatingLabel sizeToFit];
+  [self.bookingPriceLabel sizeToFit];
 }
 
 - (void)setDistance:(NSString *)distance
@@ -249,27 +401,47 @@ enum class AttributePosition
 - (void)layoutSubviews
 {
   [super layoutSubviews];
-  CGFloat const bound = self.distanceLabel.width + kDirectionArrowSide + kOffsetFromDistanceToArrow + kOffsetFromTitleToDistance;
+  CGFloat const bound = self.distanceLabel.width + kDirectionArrowSide + kOffsetFromDistanceToArrow + kOffsetFromLabelsToDistance;
   AttributePosition const position = [self distanceAttributePosition];
   [self setupLabelsWidthWithBoundedWidth:bound distancePosition:position];
-  [self.titleLabel sizeToFit];
-  [self.typeLabel sizeToFit];
-  [self.addressLabel sizeToFit];
-  [self layoutLabels];
+  [self setupBookingView];
+  [self layoutLabelsAndBooking];
   [self layoutTableViewWithPosition:position];
   [self setDistance:self.distanceLabel.text];
-  self.height = self.featureTable.height + self.separatorView.height + self.titleLabel.height +
-                (self.typeLabel.text.length > 0 ? self.typeLabel.height + kLabelsBetweenOffset : 0) +
-                (self.addressLabel.text.length > 0 ? self.addressLabel.height + kLabelsBetweenOffset : 0) + kBottomPlacePageOffset;
+  self.height = self.featureTable.height + self.ppPreview.height;
 }
 
-- (void)layoutLabels
+- (void)setupBookingView
 {
-  self.titleLabel.origin = {kLeftOffset, 0};
-  self.typeLabel.origin = {kLeftOffset, self.titleLabel.maxY + kLabelsBetweenOffset};
-  self.addressLabel.origin = self.typeLabel.text.length > 0 ?
-                                                  CGPointMake(kLeftOffset, self.typeLabel.maxY + kLabelsBetweenOffset) :
-                                                  self.typeLabel.origin;
+  self.bookingRatingLabel.origin = {};
+  self.bookingPriceLabel.origin = {self.bookingView.width - self.bookingPriceLabel.width, 0};
+  self.bookingSeparator.origin = {0, self.bookingRatingLabel.maxY + kLabelsBetweenMainOffset};
+  self.bookingView.height = self.bookingSeparator.maxY + kLabelsBetweenMainOffset;
+}
+
+- (void)layoutLabelsAndBooking
+{
+  BOOL const isDownloadProgressViewHidden = self.downloadProgressView.hidden;
+  if (!isDownloadProgressViewHidden)
+    self.downloadProgressView.origin = {kDownloadProgressViewLeftOffset, kDownloadProgressViewTopOffset};
+
+  CGFloat const leftOffset = isDownloadProgressViewHidden ? kLeftOffset : self.downloadProgressView.maxX + kDownloadProgressViewLeftOffset;
+
+  auto originFrom = ^ CGPoint (UIView * v, BOOL isBigOffset)
+  {
+    CGFloat const offset = isBigOffset ? kLabelsBetweenMainOffset : kLabelsBetweenSmallOffset;
+    if ([v isKindOfClass:[UILabel class]])
+      return {leftOffset, (static_cast<UILabel *>(v).text.length == 0 ? v.minY : v.maxY) +
+                          offset};
+    return {leftOffset, v.hidden ? v.minY : v.maxY + offset};
+  };
+
+  self.titleLabel.origin = {leftOffset, kLabelsBetweenSmallOffset};
+  self.externalTitleLabel.origin = originFrom(self.titleLabel, NO);
+  self.subtitleLabel.origin = originFrom(self.externalTitleLabel, NO);
+  self.placeScheduleLabel.origin = originFrom(self.subtitleLabel, NO);
+  self.bookingView.origin = originFrom(self.placeScheduleLabel, NO);
+  self.addressLabel.origin = originFrom(self.bookingView, YES);
 }
 
 - (void)layoutDistanceBoxWithPosition:(AttributePosition)position
@@ -282,8 +454,12 @@ enum class AttributePosition
     {
     case AttributePosition::Title:
       return self.titleLabel.minY + defaultCenter;
-    case AttributePosition::Type:
-      return self.typeLabel.minY + defaultCenter;
+    case AttributePosition::ExternalTitle:
+      return self.externalTitleLabel.minY + defaultCenter;
+    case AttributePosition::Subtitle:
+      return self.subtitleLabel.minY + defaultCenter;
+    case AttributePosition::Schedule:
+      return self.placeScheduleLabel.minY + defaultCenter;
     case AttributePosition::Address:
       return self.addressLabel.minY + defaultCenter;
     }
@@ -302,19 +478,39 @@ enum class AttributePosition
 {
   auto getY = ^ CGFloat (AttributePosition p)
   {
-    switch (position)
+    if (self.bookingView.hidden)
     {
-    case AttributePosition::Title:
-      return self.titleLabel.maxY + kBottomPlacePageOffset;
-    case AttributePosition::Type:
-      return (self.addressLabel.text.length > 0 ? self.addressLabel.maxY : self.typeLabel.maxY) + kBottomPlacePageOffset;
-    case AttributePosition::Address:
-      return self.addressLabel.maxY + kBottomPlacePageOffset;
+      switch (position)
+      {
+      case AttributePosition::Title:
+        return self.titleLabel.maxY + kBottomPlacePageOffset;
+      case AttributePosition::ExternalTitle:
+        return self.externalTitleLabel.maxY + kBottomPlacePageOffset;
+      case AttributePosition::Subtitle:
+        return self.subtitleLabel.maxY + kBottomPlacePageOffset;
+      case AttributePosition::Schedule:
+        return self.placeScheduleLabel.maxY + kBottomPlacePageOffset;
+      case AttributePosition::Address:
+        return self.addressLabel.maxY + kBottomPlacePageOffset;
+      }
+    }
+    else
+    {
+      switch (position)
+      {
+      case AttributePosition::Title:
+      case AttributePosition::ExternalTitle:
+      case AttributePosition::Subtitle:
+      case AttributePosition::Schedule:
+        return self.bookingView.maxY + kBottomPlacePageOffset;
+      case AttributePosition::Address:
+        return self.addressLabel.maxY + kBottomPlacePageOffset;
+      }
     }
   };
 
   self.separatorView.minY = getY(position);
-  self.ppPreview.height = self.separatorView.maxY;
+  self.ppPreview.frame = {{}, {self.ppPreview.superview.width, self.separatorView.maxY}};
   self.featureTable.minY = self.separatorView.maxY;
   self.featureTable.height = self.featureTable.contentSize.height;
 }
@@ -325,12 +521,11 @@ enum class AttributePosition
 {
   [Statistics logEvent:kStatEventName(kStatPlacePage, kStatToggleBookmark)
                    withParameters:@{kStatValue : kStatAdd}];
-  [self.typeLabel sizeToFit];
+  [self.subtitleLabel sizeToFit];
 
   m_sections.push_back(PlacePageSection::Bookmark);
   m_cells[PlacePageSection::Bookmark].push_back(MWMPlacePageCellTypeBookmark);
   sort(m_sections.begin(), m_sections.end());
-
   [self configure];
 }
 
@@ -346,27 +541,53 @@ enum class AttributePosition
     m_cells.erase(PlacePageSection::Bookmark);
   }
 
+  m_offscreenCells.erase(MWMPlacePageCellTypeBookmark);
+
   [self configure];
 }
 
 - (void)reloadBookmarkCell
 {
+  MWMPlacePageCellType const type = MWMPlacePageCellTypeBookmark;
+  [self fillCell:m_offscreenCells[type] withType:type];
   [self configure];
-  [self.featureTable reloadData];
-  [self setNeedsLayout];
-  [self layoutIfNeeded];
+  [CATransaction begin];
+  [CATransaction setCompletionBlock:^
+  {
+     [self setNeedsLayout];
+     dispatch_async(dispatch_get_main_queue(), ^{ [self.ownerPlacePage refresh]; });
+  }];
+  [CATransaction commit];
 }
 
 - (IBAction)directionButtonTap
 {
   [Statistics logEvent:kStatEventName(kStatPlacePage, kStatCompass)];
-  [self.ownerPlacePage.manager showDirectionViewWithTitle:self.titleLabel.text type:self.typeLabel.text];
+  [self.ownerPlacePage.manager showDirectionViewWithTitle:self.titleLabel.text type:self.subtitleLabel.text];
 }
 
 - (void)updateAndLayoutMyPositionSpeedAndAltitude:(NSString *)text
 {
-  self.typeLabel.text = text;
+  self.subtitleLabel.text = text;
   [self setNeedsLayout];
+}
+
+#pragma mark - MWMPlacePageBookmarkDelegate
+
+- (void)reloadBookmark
+{
+  [self reloadBookmarkCell];
+}
+
+- (void)editBookmarkTap
+{
+  [self.ownerPlacePage editBookmark];
+}
+
+- (void)moreTap
+{
+  self.isBookmarkCellExpanded = YES;
+  [self reloadBookmarkCell];
 }
 
 #pragma mark - MWMPlacePageOpeningHoursCellProtocol
@@ -386,37 +607,37 @@ enum class AttributePosition
   return NO;
 }
 
-- (void)setOpeningHoursCellExpanded:(BOOL)openingHoursCellExpanded forCell:(UITableViewCell *)cell
+- (void)setOpeningHoursCellExpanded:(BOOL)openingHoursCellExpanded
 {
   _openingHoursCellExpanded = openingHoursCellExpanded;
   UITableView * tv = self.featureTable;
-  NSIndexPath * indexPath = [tv indexPathForCell:cell];
-  [CATransaction begin];
+  MWMPlacePageCellType const type = MWMPlacePageCellTypeOpenHours;
+  [self fillCell:m_offscreenCells[MWMPlacePageCellTypeOpenHours] withType:type];
   [tv beginUpdates];
+  [CATransaction begin];
   [CATransaction setCompletionBlock:^
   {
     [self setNeedsLayout];
     dispatch_async(dispatch_get_main_queue(), ^{ [self.ownerPlacePage refresh]; });
   }];
-  [tv reloadRowsAtIndexPaths:@[indexPath] withRowAnimation:UITableViewRowAnimationAutomatic];
   [tv endUpdates];
   [CATransaction commit];
 }
 
-- (UITableViewCell *)offscreenCellForIdentifier:(NSString *)reuseIdentifier
+- (UITableViewCell *)offscreenCellForCellType:(MWMPlacePageCellType)type
 {
-  UITableViewCell * cell = self.offscreenCells[reuseIdentifier];
+  UITableViewCell * cell = m_offscreenCells[type];
   if (!cell)
   {
-    cell = [[[NSBundle mainBundle] loadNibNamed:reuseIdentifier owner:nil options:nil] firstObject];
-    self.offscreenCells[reuseIdentifier] = cell;
+    NSString * identifier = reuseIdentifier(type);
+    cell = [[[NSBundle mainBundle] loadNibNamed:identifier owner:nil options:nil] firstObject];
+    [self fillCell:cell withType:type];
+    m_offscreenCells[type] = cell;
   }
   return cell;
 }
 
-@end
-
-@implementation MWMBasePlacePageView (UITableView)
+#pragma mark - UITableView
 
 - (MWMPlacePageCellType)cellTypeForIndexPath:(NSIndexPath *)indexPath
 {
@@ -429,14 +650,17 @@ enum class AttributePosition
   return reuseIdentifier(cellType);
 }
 
-- (void)fillCell:(UITableViewCell *)cell atIndexPath:(NSIndexPath * _Nonnull)indexPath forHeight:(BOOL)forHeight
+- (void)fillCell:(UITableViewCell *)cell withType:(MWMPlacePageCellType)cellType
 {
   MWMPlacePageEntity * entity = self.entity;
-  MWMPlacePageCellType const cellType = [self cellTypeForIndexPath:indexPath];
   switch (cellType)
   {
     case MWMPlacePageCellTypeBookmark:
-      [(MWMPlacePageBookmarkCell *)cell config:self.ownerPlacePage forHeight:NO];
+      [static_cast<MWMPlacePageBookmarkCell *>(cell) configWithText:entity.bookmarkDescription
+                                                           delegate:self
+                                                     placePageWidth:placePageWidth()
+                                                             isOpen:self.isBookmarkCellExpanded
+                                                             isHtml:entity.isHTMLDescription];
       break;
     case MWMPlacePageCellTypeOpenHours:
       [(MWMPlacePageOpeningHoursCell *)cell configWithDelegate:self info:[entity getCellValue:cellType]];
@@ -444,6 +668,7 @@ enum class AttributePosition
     case MWMPlacePageCellTypeEditButton:
     case MWMPlacePageCellTypeAddBusinessButton:
     case MWMPlacePageCellTypeAddPlaceButton:
+    case MWMPlacePageCellTypeBookingMore:
       [static_cast<MWMPlacePageButtonCell *>(cell) config:self.ownerPlacePage forType:cellType];
       break;
     default:
@@ -458,10 +683,8 @@ enum class AttributePosition
 
 - (CGFloat)tableView:(UITableView *)tableView heightForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  NSString * reuseIdentifier = [self cellIdentifierForIndexPath:indexPath];
-  UITableViewCell * cell = [self offscreenCellForIdentifier:reuseIdentifier];
-  [self fillCell:cell atIndexPath:indexPath forHeight:YES];
   MWMPlacePageCellType const cellType = [self cellTypeForIndexPath:indexPath];
+  UITableViewCell * cell = [self offscreenCellForCellType:cellType];
   switch (cellType)
   {
     case MWMPlacePageCellTypeBookmark:
@@ -481,11 +704,6 @@ enum class AttributePosition
   }
 }
 
-- (void)tableView:(UITableView * _Nonnull)tableView willDisplayCell:(UITableViewCell * _Nonnull)cell forRowAtIndexPath:(NSIndexPath * _Nonnull)indexPath
-{
-  [self fillCell:cell atIndexPath:indexPath forHeight:NO];
-}
-
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section
 {
   return [self cellsForSection:section].size();
@@ -498,8 +716,13 @@ enum class AttributePosition
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath
 {
-  NSString * reuseIdentifier = [self cellIdentifierForIndexPath:indexPath];
-  return [tableView dequeueReusableCellWithIdentifier:reuseIdentifier];
+  MWMPlacePageCellType const type = [self cellTypeForIndexPath:indexPath];
+  NSString * identifier = reuseIdentifier(type);
+  UITableViewCell * cell = m_offscreenCells[type];
+  if (!cell)
+    cell = [tableView dequeueReusableCellWithIdentifier:identifier];
+
+  return cell;
 }
 
 - (CGFloat)tableView:(UITableView *)tableView heightForFooterInSection:(NSInteger)section
@@ -509,6 +732,8 @@ enum class AttributePosition
 
 - (CGFloat)tableView:(UITableView *)tableView heightForHeaderInSection:(NSInteger)section
 {
+  if (m_sections[section] == PlacePageSection::Bookmark)
+    return 0.001;
   return kDefaultHeaderHeight;
 }
 
@@ -516,6 +741,64 @@ enum class AttributePosition
 {
   NSAssert(m_sections.size() > section, @"Invalid section");
   return m_cells[m_sections[section]];
+}
+
+#pragma mark - MWMFrameworkStorageObserver
+
+- (void)processCountryEvent:(TCountryId const &)countryId
+{
+  if (countryId != self.entity.countryId)
+    return;
+  [self configureMapDownloader];
+}
+
+- (void)processCountry:(TCountryId const &)countryId progress:(MapFilesDownloader::TProgress const &)progress
+{
+  if (countryId != self.entity.countryId)
+    return;
+  self.mapDownloadProgress.progress = static_cast<CGFloat>(progress.first) / progress.second;
+}
+
+#pragma mark - MWMCircularProgressProtocol
+
+- (void)progressButtonPressed:(nonnull MWMCircularProgress *)progress
+{
+  TCountryId const & countryId = self.entity.countryId;
+  NodeAttrs nodeAttrs;
+  GetFramework().Storage().GetNodeAttrs(countryId, nodeAttrs);
+  MWMAlertViewController * avc = self.ownerPlacePage.manager.ownerViewController.alertController;
+  switch (nodeAttrs.m_status)
+  {
+    case NodeStatus::NotDownloaded:
+    case NodeStatus::Partly:
+      [MWMStorage downloadNode:countryId alertController:avc onSuccess:nil];
+      break;
+    case NodeStatus::Undefined:
+    case NodeStatus::Error:
+      [MWMStorage retryDownloadNode:countryId];
+      break;
+    case NodeStatus::OnDiskOutOfDate:
+      [MWMStorage updateNode:countryId alertController:avc];
+      break;
+    case NodeStatus::Downloading:
+    case NodeStatus::InQueue:
+      [MWMStorage cancelDownloadNode:countryId];
+      break;
+    case NodeStatus::OnDisk:
+      break;
+  }
+}
+
+#pragma mark - Properties
+
+- (MWMCircularProgress *)mapDownloadProgress
+{
+  if (!_mapDownloadProgress)
+  {
+    _mapDownloadProgress = [MWMCircularProgress downloaderProgressForParentView:self.downloadProgressView];
+    _mapDownloadProgress.delegate = self;
+  }
+  return _mapDownloadProgress;
 }
 
 @end

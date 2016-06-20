@@ -1,6 +1,5 @@
 package com.mapswithme.maps.location;
 
-
 import android.content.Context;
 import android.location.Location;
 import android.location.LocationManager;
@@ -23,44 +22,43 @@ class AndroidNativeProvider extends BaseLocationProvider
   }
 
   @Override
-  protected void startUpdates()
+  protected boolean start()
   {
     if (mIsActive)
-      return;
+      return true;
 
-    final List<String> providers = getFilteredProviders();
-
+    List<String> providers = filterProviders();
     if (providers.isEmpty())
-      LocationHelper.INSTANCE.notifyLocationError(LocationHelper.ERROR_DENIED);
-    else
+      return false;
+
+    mIsActive = true;
+    for (String provider : providers)
+      mLocationManager.requestLocationUpdates(provider, LocationHelper.INSTANCE.getInterval(), 0, this);
+
+    LocationHelper.INSTANCE.startSensors();
+
+    Location location = findBestNotExpiredLocation(providers, LocationUtils.LOCATION_EXPIRATION_TIME_MILLIS_SHORT);
+    if (!isLocationBetterThanLast(location))
     {
-      mIsActive = true;
-      for (final String provider : providers)
-        mLocationManager.requestLocationUpdates(provider, LocationHelper.INSTANCE.getInterval(), 0, this);
-
-      LocationHelper.INSTANCE.registerSensorListeners();
-
-      final Location newLocation = findBestNotExpiredLocation(providers, LocationUtils.LOCATION_EXPIRATION_TIME_MILLIS_SHORT);
-      if (isLocationBetterThanLast(newLocation))
-        LocationHelper.INSTANCE.saveLocation(newLocation);
-      else
-      {
-        final Location lastLocation = LocationHelper.INSTANCE.getSavedLocation();
-        if (lastLocation != null && !LocationUtils.isExpired(lastLocation, LocationHelper.INSTANCE.getSavedLocationTime(),
-                                                             LocationUtils.LOCATION_EXPIRATION_TIME_MILLIS_SHORT))
-          LocationHelper.INSTANCE.saveLocation(lastLocation);
-      }
+      location = LocationHelper.INSTANCE.getSavedLocation();
+      if (location == null || LocationUtils.isExpired(location, LocationHelper.INSTANCE.getSavedLocationTime(),
+                                                      LocationUtils.LOCATION_EXPIRATION_TIME_MILLIS_SHORT))
+        return true;
     }
+
+    onLocationChanged(location);
+    return true;
   }
 
   @Override
-  protected void stopUpdates()
+  protected void stop()
   {
     mLocationManager.removeUpdates(this);
     mIsActive = false;
   }
 
-  @Nullable Location findBestNotExpiredLocation(List<String> providers, long expirationMs)
+  @Nullable
+  Location findBestNotExpiredLocation(List<String> providers, long expirationMs)
   {
     Location res = null;
     for (final String pr : providers)
@@ -75,26 +73,20 @@ class AndroidNativeProvider extends BaseLocationProvider
     return res;
   }
 
-  List<String> getFilteredProviders()
+  List<String> filterProviders()
   {
-    final List<String> allProviders = mLocationManager.getProviders(false);
-    final List<String> acceptedProviders = new ArrayList<>(allProviders.size());
+    List<String> allProviders = mLocationManager.getProviders(false);
+    List<String> res = new ArrayList<>(allProviders.size());
 
-    for (final String prov : allProviders)
+    for (final String provider : allProviders)
     {
-      if (LocationManager.PASSIVE_PROVIDER.equals(prov))
+      if (LocationManager.PASSIVE_PROVIDER.equals(provider))
         continue;
 
-      if (!mLocationManager.isProviderEnabled(prov))
-      {
-        if (LocationManager.GPS_PROVIDER.equals(prov))
-          LocationHelper.INSTANCE.notifyLocationError(LocationHelper.ERROR_GPS_OFF);
-        continue;
-      }
-
-      acceptedProviders.add(prov);
+      if (mLocationManager.isProviderEnabled(provider))
+        res.add(provider);
     }
 
-    return acceptedProviders;
+    return res;
   }
 }

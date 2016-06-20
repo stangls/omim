@@ -8,7 +8,6 @@
 
 #include "drape/texture_manager.hpp"
 
-#include "platform/platform.hpp"
 #include "platform/settings.hpp"
 
 #include "std/bind.hpp"
@@ -55,7 +54,7 @@ DrapeEngine::DrapeEngine(Params && params)
                                     bind(&DrapeEngine::MyPositionModeChanged, this, _1, _2),
                                     mode, make_ref(m_requestedTiles), timeInBackground,
                                     params.m_allow3dBuildings, params.m_blockTapEvents,
-                                    params.m_isFirstLaunch);
+                                    params.m_isFirstLaunch, params.m_isRoutingActive);
 
   m_frontend = make_unique_dp<FrontendRenderer>(frParams);
 
@@ -130,18 +129,6 @@ void DrapeEngine::SetModelViewAnyRect(m2::AnyRectD const & rect, bool isAnim)
   AddUserEvent(SetAnyRectEvent(rect, isAnim));
 }
 
-int DrapeEngine::AddModelViewListener(TModelViewListenerFn const & listener)
-{
-  static int currentSlotID = 0;
-  VERIFY(m_listeners.insert(make_pair(++currentSlotID, listener)).second, ());
-  return currentSlotID;
-}
-
-void DrapeEngine::RemoveModeViewListener(int slotID)
-{
-  m_listeners.erase(slotID);
-}
-
 void DrapeEngine::ClearUserMarksLayer(df::TileKey const & tileKey)
 {
   m_threadCommutator->PostMessage(ThreadsCommutator::RenderThread,
@@ -213,42 +200,27 @@ void DrapeEngine::AddUserEvent(UserEvent const & e)
 
 void DrapeEngine::ModelViewChanged(ScreenBase const & screen)
 {
-  Platform & pl = GetPlatform();
-  pl.RunOnGuiThread(bind(&DrapeEngine::ModelViewChangedGuiThread, this, screen));
-}
-
-void DrapeEngine::ModelViewChangedGuiThread(ScreenBase const & screen)
-{
-  for (pair<int, TModelViewListenerFn> const & p : m_listeners)
-    p.second(screen);
+  if (m_modelViewChanged != nullptr)
+    m_modelViewChanged(screen);
 }
 
 void DrapeEngine::MyPositionModeChanged(location::EMyPositionMode mode, bool routingActive)
 {
   settings::Set(settings::kLocationStateMode, mode);
-  GetPlatform().RunOnGuiThread([this, mode, routingActive]()
-  {
-    if (m_myPositionModeChanged != nullptr)
-      m_myPositionModeChanged(mode, routingActive);
-  });
+  if (m_myPositionModeChanged != nullptr)
+    m_myPositionModeChanged(mode, routingActive);
 }
 
 void DrapeEngine::TapEvent(TapInfo const & tapInfo)
 {
-  GetPlatform().RunOnGuiThread([=]()
-  {
-    if (m_tapListener)
-      m_tapListener(tapInfo);
-  });
+  if (m_tapListener != nullptr)
+    m_tapListener(tapInfo);
 }
 
 void DrapeEngine::UserPositionChanged(m2::PointD const & position)
 {
-  GetPlatform().RunOnGuiThread([this, position]()
-  {
-    if (m_userPositionChangedFn)
-      m_userPositionChangedFn(position);
-  });
+  if (m_userPositionChanged != nullptr)
+    m_userPositionChanged(position);
 }
 
 void DrapeEngine::ResizeImpl(int w, int h)
@@ -301,19 +273,24 @@ void DrapeEngine::FollowRoute(int preferredZoomLevel, int preferredZoomLevel3d, 
                                   MessagePriority::High);
 }
 
-void DrapeEngine::SetMyPositionModeListener(location::TMyPositionModeChanged const & fn)
+void DrapeEngine::SetModelViewListener(TModelViewListenerFn && fn)
 {
-  m_myPositionModeChanged = fn;
+  m_modelViewChanged = move(fn);
 }
 
-void DrapeEngine::SetTapEventInfoListener(TTapEventInfoFn const & fn)
+void DrapeEngine::SetMyPositionModeListener(location::TMyPositionModeChanged && fn)
 {
-  m_tapListener = fn;
+  m_myPositionModeChanged = move(fn);
 }
 
-void DrapeEngine::SetUserPositionListener(DrapeEngine::TUserPositionChangedFn const & fn)
+void DrapeEngine::SetTapEventInfoListener(TTapEventInfoFn && fn)
 {
-  m_userPositionChangedFn = fn;
+  m_tapListener = move(fn);
+}
+
+void DrapeEngine::SetUserPositionListener(TUserPositionChangedFn && fn)
+{
+  m_userPositionChanged = move(fn);
 }
 
 FeatureID DrapeEngine::GetVisiblePOI(m2::PointD const & glbPoint)
@@ -367,10 +344,10 @@ bool DrapeEngine::GetMyPosition(m2::PointD & myPosition)
 }
 
 void DrapeEngine::AddRoute(m2::PolylineD const & routePolyline, vector<double> const & turns,
-                           df::ColorConstant color)
+                           df::ColorConstant color, df::RoutePattern pattern)
 {
   m_threadCommutator->PostMessage(ThreadsCommutator::ResourceUploadThread,
-                                  make_unique_dp<AddRouteMessage>(routePolyline, turns, color),
+                                  make_unique_dp<AddRouteMessage>(routePolyline, turns, color, pattern),
                                   MessagePriority::Normal);
 }
 
@@ -482,6 +459,13 @@ void DrapeEngine::SetTimeInBackground(double time)
   m_threadCommutator->PostMessage(ThreadsCommutator::RenderThread,
                                   make_unique_dp<SetTimeInBackgroundMessage>(time),
                                   MessagePriority::High);
+}
+
+void DrapeEngine::SetDisplacementMode(int mode)
+{
+  m_threadCommutator->PostMessage(ThreadsCommutator::RenderThread,
+                                  make_unique_dp<SetDisplacementModeMessage>(mode),
+                                  MessagePriority::Normal);
 }
 
 } // namespace df

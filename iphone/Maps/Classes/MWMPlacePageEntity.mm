@@ -1,9 +1,12 @@
-#import "MWMFrameworkListener.h"
+#import "MapsAppDelegate.h"
+#import "MapViewController.h"
+#import "MWMMapViewControlsManager.h"
 #import "MWMPlacePageEntity.h"
 #import "MWMPlacePageViewManager.h"
-#import "MapViewController.h"
 
 #include "Framework.h"
+
+#include "indexer/osm_editor.hpp"
 
 #include "platform/measurement_utils.hpp"
 #include "platform/mwm_version.hpp"
@@ -23,10 +26,11 @@ void putFields(NSUInteger eTypeValue, NSUInteger ppValue)
   gMetaFieldsMap[ppValue] = eTypeValue;
 }
 
-void initFieldsMap()
+void initFieldsMap(BOOL isBooking)
 {
+  auto const websiteType = isBooking ? MWMPlacePageCellTypeBookingMore : MWMPlacePageCellTypeWebsite;
   putFields(Metadata::FMD_URL, MWMPlacePageCellTypeURL);
-  putFields(Metadata::FMD_WEBSITE, MWMPlacePageCellTypeWebsite);
+  putFields(Metadata::FMD_WEBSITE, websiteType);
   putFields(Metadata::FMD_PHONE_NUMBER, MWMPlacePageCellTypePhoneNumber);
   putFields(Metadata::FMD_OPEN_HOURS, MWMPlacePageCellTypeOpenHours);
   putFields(Metadata::FMD_EMAIL, MWMPlacePageCellTypeEmail);
@@ -36,7 +40,7 @@ void initFieldsMap()
 
   ASSERT_EQUAL(gMetaFieldsMap[Metadata::FMD_URL], MWMPlacePageCellTypeURL, ());
   ASSERT_EQUAL(gMetaFieldsMap[MWMPlacePageCellTypeURL], Metadata::FMD_URL, ());
-  ASSERT_EQUAL(gMetaFieldsMap[Metadata::FMD_WEBSITE], MWMPlacePageCellTypeWebsite, ());
+  ASSERT_EQUAL(gMetaFieldsMap[Metadata::FMD_WEBSITE], websiteType, ());
   ASSERT_EQUAL(gMetaFieldsMap[MWMPlacePageCellTypeWebsite], Metadata::FMD_WEBSITE, ());
   ASSERT_EQUAL(gMetaFieldsMap[Metadata::FMD_POSTCODE], MWMPlacePageCellTypePostcode, ());
   ASSERT_EQUAL(gMetaFieldsMap[MWMPlacePageCellTypePostcode], Metadata::FMD_POSTCODE, ());
@@ -56,7 +60,7 @@ void initFieldsMap()
   if (self)
   {
     m_info = info;
-    initFieldsMap();
+    initFieldsMap(info.IsSponsoredHotel());
     [self config];
   }
   return self;
@@ -86,15 +90,18 @@ void initFieldsMap()
 {
   self.title = @(m_info.GetTitle().c_str());
   self.address = @(m_info.GetAddress().c_str());
+  self.subtitle = @(m_info.GetSubtitle().c_str());
+  self.bookingRating = @(m_info.GetRatingFormatted().c_str());
+  self.bookingPrice = @(m_info.GetApproximatePricing().c_str());
 }
 
 - (void)configureFeature
 {
   // Category can also be custom-formatted, please check m_info getters.
-  self.category = @(m_info.GetSubtitle().c_str());
   // TODO(Vlad): Refactor using osm::Props instead of direct Metadata access.
   feature::Metadata const & md = m_info.GetMetadata();
-  for (auto const type : md.GetPresentTypes())
+  auto const types = md.GetPresentTypes();
+  for (auto const type : types)
   {
     switch (type)
     {
@@ -122,7 +129,7 @@ void initFieldsMap()
   BookmarkData const & data = static_cast<Bookmark const *>(cat->GetUserMark(bac.second))->GetData();
 
   self.bookmarkTitle = @(data.GetName().c_str());
-  self.bookmarkCategory = @(cat->GetName().c_str());
+  self.bookmarkCategory = @(m_info.GetBookmarkCategoryName().c_str());
   string const & description = data.GetDescription();
   self.bookmarkDescription = @(description.c_str());
   _isHTMLDescription = strings::IsHTML(description);
@@ -140,7 +147,8 @@ void initFieldsMap()
 
 - (NSString *)getCellValue:(MWMPlacePageCellType)cellType
 {
-  bool const isNewMWM = version::IsSingleMwm(GetFramework().Storage().GetCurrentDataVersion());
+  auto const s = MapsAppDelegate.theApp.mapViewController.controlsManager.navigationState;
+  BOOL const editOrAddAreAvailable = version::IsSingleMwm(GetFramework().Storage().GetCurrentDataVersion()) && s == MWMNavigationDashboardStateHidden && m_info.IsEditable();
   switch (cellType)
   {
     case MWMPlacePageCellTypeName:
@@ -148,21 +156,28 @@ void initFieldsMap()
     case MWMPlacePageCellTypeCoordinate:
       return [self coordinate];
     case MWMPlacePageCellTypeAddPlaceButton:
-      return m_info.ShouldShowAddPlace() && isNewMWM ? @"" : nil;
+      return editOrAddAreAvailable && m_info.ShouldShowAddPlace() ? @"" : nil;
     case MWMPlacePageCellTypeBookmark:
       return m_info.IsBookmark() ? @"" : nil;
     case MWMPlacePageCellTypeEditButton:
       // TODO(Vlad): It's a really strange way to "display" cell if returned text is not nil.
-      return isNewMWM && !m_info.IsMyPosition() && m_info.IsFeature() ? @"": nil;
+      return editOrAddAreAvailable && !m_info.IsMyPosition() && m_info.IsFeature() ? @"": nil;
     case MWMPlacePageCellTypeAddBusinessButton:
-      return m_info.IsBuilding() ? @"" : nil;
+      return editOrAddAreAvailable && m_info.IsBuilding() ? @"" : nil;
+    case MWMPlacePageCellTypeWebsite:
+      return m_info.IsSponsoredHotel() ? nil : [self getDefaultField:cellType];
+    case MWMPlacePageCellTypeBookingMore:
+      return m_info.IsSponsoredHotel() ? [self getDefaultField:cellType] : nil;
     default:
-    {
-      auto const it = m_values.find(cellType);
-      BOOL const haveField = (it != m_values.end());
-      return haveField ? @(it->second.c_str()) : nil;
-    }
+      return [self getDefaultField:cellType];
   }
+}
+
+- (NSString *)getDefaultField:(MWMPlacePageCellType)cellType
+{
+  auto const it = m_values.find(cellType);
+  BOOL const haveField = (it != m_values.end());
+  return haveField ? @(it->second.c_str()) : nil;
 }
 
 - (place_page::Info const &)info
@@ -173,6 +188,11 @@ void initFieldsMap()
 - (FeatureID const &)featureID
 {
   return m_info.GetID();
+}
+
+- (storage::TCountryId const &)countryId
+{
+   return m_info.m_countryId;
 }
 
 - (BOOL)isMyPosition
@@ -188,6 +208,11 @@ void initFieldsMap()
 - (BOOL)isApi
 {
   return m_info.HasApiUrl();
+}
+
+- (BOOL)isBooking
+{
+  return m_info.IsSponsoredHotel();
 }
 
 - (ms::LatLon)latlon

@@ -1,3 +1,4 @@
+#include "generator/booking_dataset.hpp"
 #include "generator/coastlines_generator.hpp"
 #include "generator/feature_generator.hpp"
 #include "generator/intermediate_data.hpp"
@@ -407,7 +408,7 @@ void BuildIntermediateDataFromXML(SourceReader & stream, TCache & cache, TownsDu
   ParseXMLSequence(stream, parser);
 }
 
-void BuildFeaturesFromXML(SourceReader & stream, function<void(OsmElement *)> processor)
+void ProcessOsmElementsFromXML(SourceReader & stream, function<void(OsmElement *)> processor)
 {
   XMLSource parser([&](OsmElement * e) { processor(e); });
   ParseXMLSequence(stream, parser);
@@ -430,7 +431,7 @@ void BuildIntermediateDataFromO5M(SourceReader & stream, TCache & cache, TownsDu
   }
 }
 
-void BuildFeaturesFromO5M(SourceReader & stream, function<void(OsmElement *)> processor)
+void ProcessOsmElementsFromO5M(SourceReader & stream, function<void(OsmElement *)> processor)
 {
   using TType = osm::O5MSource::EntityType;
 
@@ -511,12 +512,24 @@ bool GenerateFeaturesImpl(feature::GenerateInfo & info)
     TagAdmixer tagAdmixer(info.GetIntermediateFileName("ways", ".csv"),
                           info.GetIntermediateFileName("towns", ".csv"));
     TagReplacer tagReplacer(GetPlatform().ResourcesDir() + REPLACED_TAGS_FILE);
+    
+    // If info.m_bookingDatafileName is empty then no data will be loaded.
+    generator::BookingDataset bookingDataset(info.m_bookingDatafileName);
 
+    stringstream skippedElements;
+    
     // Here we can add new tags to element!!!
     auto const fn = [&](OsmElement * e)
     {
       tagReplacer(e);
       tagAdmixer(e);
+
+      if (bookingDataset.BookingFilter(*e))
+      {
+        skippedElements << e->id << endl;
+        return;
+      }
+      
       parser.EmitElement(e);
     };
 
@@ -524,15 +537,32 @@ bool GenerateFeaturesImpl(feature::GenerateInfo & info)
     switch (info.m_osmFileType)
     {
       case feature::GenerateInfo::OsmSourceType::XML:
-        BuildFeaturesFromXML(reader, fn);
+        ProcessOsmElementsFromXML(reader, fn);
         break;
       case feature::GenerateInfo::OsmSourceType::O5M:
-        BuildFeaturesFromO5M(reader, fn);
+        ProcessOsmElementsFromO5M(reader, fn);
         break;
     }
 
     LOG(LINFO, ("Processing", info.m_osmFileName, "done."));
 
+    if (!info.m_bookingDatafileName.empty())
+    {
+      bookingDataset.BuildFeatures([&](OsmElement * e) { parser.EmitElement(e); });
+      LOG(LINFO, ("Processing booking data from", info.m_bookingDatafileName, "done."));
+      string skippedElementsPath = info.GetIntermediateFileName("skipped_elements", ".lst");
+      ofstream file(skippedElementsPath);
+      if (file.is_open())
+      {
+        file << skippedElements.str();
+        LOG(LINFO, ("Saving skipped elements to", skippedElementsPath, "done."));
+      }
+      else
+      {
+        LOG(LERROR, ("Can't output into", skippedElementsPath));
+      }
+    }
+    
     parser.Finish();
 
     // Stop if coasts are not merged and FLAG_fail_on_coasts is set

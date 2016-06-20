@@ -14,6 +14,7 @@ INCLUDEPATH *= $$ROOT_DIR/3party/gflags/src \
 QT *= core
 
 SOURCES += \
+    booking_dataset.cpp \
     borders_generator.cpp \
     borders_loader.cpp \
     check_model.cpp \
@@ -30,12 +31,14 @@ SOURCES += \
     osm_source.cpp \
     routing_generator.cpp \
     search_index_builder.cpp \
+    srtm_parser.cpp \
     statistics.cpp \
     tesselator.cpp \
     towns_dumper.cpp \
     unpack_mwm.cpp \
 
 HEADERS += \
+    booking_dataset.hpp \
     borders_generator.hpp \
     borders_loader.hpp \
     check_model.hpp \
@@ -60,6 +63,7 @@ HEADERS += \
     polygonizer.hpp \
     routing_generator.hpp \
     search_index_builder.hpp \
+    srtm_parser.hpp \
     statistics.hpp \
     tag_admixer.hpp \
     tesselator.hpp \

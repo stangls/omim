@@ -49,8 +49,6 @@
 	<!-- View and button titles for accessibility -->
 	<string name="my_position">我的位置</string>
 	<string name="ok">确定</string>
-	<!-- not used? Search View - Location is disabled by user warning text -->
-	<string name="enable_location_services">请启用位置服务</string>
 	<!-- Settings/Downloader - No free space dialog message -->
 	<string name="free_disk_space_for_country_x">请在设备上先释放一些空间以便下载%s</string>
 	<!-- Leave Review dialog - Not now button (remind me later) -->
@@ -523,7 +521,7 @@
 	<!-- map is not downloaded -->
 	<string name="not_found_map">您地点的地图没有被下载</string>
 	<!-- location service disabled -->
-	<string name="enable_location_service">请启用位置服务</string>
+	<string name="enable_location_services">请启用位置服务</string>
 	<!-- download map -->
 	<string name="download_map">为您的地点下载地图</string>
 	<!-- download map on iPhone -->
@@ -646,7 +644,7 @@
 	<string name="p2p_start">开始</string>
 	<string name="p2p_planning">计划中…</string>
 	<string name="p2p_from_here">从</string>
-	<string name="p2p_to_here">到</string>
+	<string name="p2p_to_here">发送至</string>
 	<string name="p2p_only_from_current">导航只能从您目前的位置开始。</string>
 	<string name="p2p_reroute_from_current">你是否想要规划当前位置的路线？</string>
 	<string name="whats_new_next_button">下一页</string>
@@ -833,7 +831,7 @@
 	<string name="current_location_unknown_error_title">当前位置未知</string>
 	<string name="current_location_unknown_error_message">搜索您的位置时发生错误。请检查您的设备是否工作正常，然后重试。</string>
 	<string name="whatsnew_update_editor_title">我们已经更新了地图编辑器</string>
-	<string name="whatsnew_update_editor_message">MAPS.ME 用户已经进行了 50 000 处地图修改。我们正在齐心协力打造世界上最详细的地图，加入我们吧！</string>
+	<string name="whatsnew_update_editor_message">MAPS.ME 用户已经进行了 200 000 处地图修改。我们正在齐心协力打造世界上最详细的地图，加入我们吧！</string>
 	<!-- Additional text in whats new -->
 	<string name="whatsnew_update_editor_message_update">如要使用地图编辑器，请更新所有地图</string>
 	<string name="location_services_disabled_header">地点定位被禁用</string>
@@ -854,8 +852,9 @@
 	<string name="placepage_entrance_number">编号</string>
 	<string name="placepage_entrance_type">入口</string>
 	<string name="placepage_flat">公寓</string>
+	<string name="placepage_open_24_7">24 / 7</string>
 	<string name="placepage_place_rating">评价</string>
-	<string name="place_page_starting_from">从 %d</string>
+	<string name="place_page_starting_from">从 %s</string>
 	<string name="meter">m</string>
 	<string name="kilometer">km</string>
 	<string name="placepage_place_description">说明</string>

@@ -176,6 +176,10 @@ UNIT_TEST(to_int)
   int i;
   string s;
 
+  s = "AF";
+  TEST(strings::to_int(s, i, 16), ());
+  TEST_EQUAL(175, i, ());
+
   s = "-2";
   TEST(strings::to_int(s, i), ());
   TEST_EQUAL(-2, i, ());
@@ -190,16 +194,52 @@ UNIT_TEST(to_int)
 
   s = "labuda";
   TEST(!strings::to_int(s, i), ());
+}
 
+UNIT_TEST(to_uint)
+{
+  unsigned int i;
+  string s;
+
+  s = "";
+  TEST(!strings::to_uint(s, i), ());
+
+  s = "-2";
+  TEST(!strings::to_uint(s, i), ());
+  
+  s = "0";
+  TEST(strings::to_uint(s, i), ());
+  TEST_EQUAL(0, i, ());
+  
+  s = "123456789123456789123456789";
+  TEST(!strings::to_uint(s, i), ());
+  
+  s = "labuda";
+  TEST(!strings::to_uint(s, i), ());
+  
   s = "AF";
-  TEST(strings::to_int(s, i, 16), ());
+  TEST(strings::to_uint(s, i, 16), ());
   TEST_EQUAL(175, i, ());
+
+  s = "100";
+  TEST(strings::to_uint(s, i), ());
+  TEST_EQUAL(100, i, ());
+
+  s = "4294967295";
+  TEST(strings::to_uint(s, i), ());
+  TEST_EQUAL(0xFFFFFFFF, i, ());
+
+  s = "4294967296";
+  TEST(!strings::to_uint(s, i), ());
 }
 
 UNIT_TEST(to_uint64)
 {
   uint64_t i;
   string s;
+
+  s = "";
+  TEST(!strings::to_uint64(s, i), ());
 
   s = "0";
   TEST(strings::to_uint64(s, i), ());
@@ -292,30 +332,45 @@ struct FunctorTester
   size_t & m_index;
   vector<string> const & m_tokens;
 
-  explicit FunctorTester(size_t & counter, vector<string> const & tokens)
-    : m_index(counter), m_tokens(tokens) {}
+  FunctorTester(size_t & counter, vector<string> const & tokens)
+    : m_index(counter), m_tokens(tokens)
+  {
+  }
+
   void operator()(string const & s)
   {
     TEST_EQUAL(s, m_tokens[m_index++], ());
   }
 };
 
-void TestIter(string const & str, char const * delims, vector<string> const & tokens)
+void TestIter(string const & s, char const * delims, vector<string> const & tokens)
 {
-  strings::SimpleTokenizer it(str, delims);
+  strings::SimpleTokenizer it(s, delims);
   for (size_t i = 0; i < tokens.size(); ++i)
   {
-    TEST_EQUAL(true, it, (str, delims, i));
-    TEST_EQUAL(i == tokens.size() - 1, it.IsLast(), ());
-    TEST_EQUAL(*it, tokens[i], (str, delims, i));
+    TEST(it, (s, delims, i));
+    TEST_EQUAL(*it, tokens[i], (s, delims, i));
     ++it;
   }
-  TEST_EQUAL(false, it, (str, delims));
+  TEST(!it, (s, delims));
 
   size_t counter = 0;
-  FunctorTester f = FunctorTester(counter, tokens);
-  strings::Tokenize(str, delims, f);
+  FunctorTester f(counter, tokens);
+  strings::Tokenize(s, delims, f);
   TEST_EQUAL(counter, tokens.size(), ());
+}
+
+void TestIterWithEmptyTokens(string const & s, char const * delims, vector<string> const & tokens)
+{
+  strings::SimpleTokenizerWithEmptyTokens it(s, delims);
+
+  for (size_t i = 0; i < tokens.size(); ++i)
+  {
+    TEST(it, (s, delims, i));
+    TEST_EQUAL(*it, tokens[i], (s, delims, i));
+    ++it;
+  }
+  TEST(!it, (s, delims));
 }
 
 UNIT_TEST(SimpleTokenizer)
@@ -361,6 +416,42 @@ UNIT_TEST(SimpleTokenizer)
     string const str("a,b,c");
     TEST_EQUAL(vector<string>(SimpleTokenizer(str, ","), SimpleTokenizer()),
                (vector<string>{"a", "b", "c"}), ());
+  }
+
+  {
+    string const s = "";
+    vector<string> const tokens = {""};
+    TestIterWithEmptyTokens(s, ",", tokens);
+  }
+
+  {
+    string const s = ";";
+    vector<string> const tokens = {"", ""};
+    TestIterWithEmptyTokens(s, ";", tokens);
+  }
+
+  {
+    string const s = ";;";
+    vector<string> const tokens = {"", "", ""};
+    TestIterWithEmptyTokens(s, ";", tokens);
+  }
+
+  {
+    string const s = "Hello, World!";
+    vector<string> const tokens = {s};
+    TestIterWithEmptyTokens(s, "", tokens);
+  }
+
+  {
+    string const s = "Hello, World!";
+    vector<string> const tokens = {"Hello", " World", ""};
+    TestIterWithEmptyTokens(s, ",!", tokens);
+  }
+
+  {
+    string const s = ";a;b;;c;d;";
+    vector<string> const tokens = {"", "a", "b", "", "c", "d", ""};
+    TestIterWithEmptyTokens(s, ";", tokens);
   }
 }
 

@@ -83,9 +83,6 @@
 
 "ok" = "OK";
 
-/* not used? Search View - Location is disabled by user warning text */
-"enable_location_services" = "Please enable Location Services";
-
 /* Settings/Downloader - No free space dialog message */
 "free_disk_space_for_country_x" = "Please free some space on your device first in order to download %@";
 
@@ -846,7 +843,7 @@
 "not_found_map" = "The map for your location is not downloaded";
 
 /* location service disabled */
-"enable_location_service" = "Please enable Location Services";
+"enable_location_services" = "Please enable Location Services";
 
 /* download map */
 "download_map" = "Download the map for your location";
@@ -1067,9 +1064,9 @@
 
 "p2p_planning" = "Planning…";
 
-"p2p_from_here" = "From";
+"p2p_from_here" = "Route from";
 
-"p2p_to_here" = "To";
+"p2p_to_here" = "Route to";
 
 "p2p_only_from_current" = "Navigation is available only from your current location.";
 
@@ -1378,7 +1375,7 @@
 
 "editor_storey_number" = "Building levels (max %d)";
 
-"error_enter_correct_storey_number" = "Buildigns at highest of 25 levels can be edited";
+"error_enter_correct_storey_number" = "Buildings at highest of 25 levels can be edited";
 
 "editor_zip_code" = "ZIP Code";
 
@@ -1429,11 +1426,11 @@
 
 "current_location_unknown_error_title" = "Current location is unknown.";
 
-"current_location_unknown_error_message" = "An error occured while searching for your location. Check that your device is working properly and try again later.";
+"current_location_unknown_error_message" = "An error occurred while searching for your location. Check that your device is working properly and try again later.";
 
 "whatsnew_update_editor_title" = "We've updated the map editor";
 
-"whatsnew_update_editor_message" = "MAPS.ME users have made 50 000 map changes. Together we are making the most detailed maps in the World. Join us!";
+"whatsnew_update_editor_message" = "MAPS.ME users have made 200 000 map changes. Together we are making the most detailed maps in the World. Join us!";
 
 /* Additional text in whats new */
 "whatsnew_update_editor_message_update" = "Update all maps to use Map Editor.";
@@ -1478,7 +1475,7 @@
 
 "placepage_place_rating" = "Rating:";
 
-"place_page_starting_from" = "from %d";
+"place_page_starting_from" = "from %s";
 
 "meter" = "m";
 
@@ -1515,3 +1512,15 @@
 "editor_status_sending" = "Sending…";
 
 "editor_place_doesnt_exist" = "Place does not exist";
+
+"place_page_booking_rating" = "Rating: %s";
+
+"text_more_button" = "… more";
+
+"error_enter_correct_phone" = "Enter a valid phone number";
+
+"error_enter_correct_web" = "Enter a valid web address";
+
+"error_enter_correct_email" = "Enter a valid email";
+
+"error_enter_correct" = "Enter a valid value";

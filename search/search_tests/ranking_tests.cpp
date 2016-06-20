@@ -1,8 +1,8 @@
 #include "testing/testing.hpp"
 
-#include "search/search_query_params.hpp"
-#include "search/v2/ranking_utils.hpp"
-#include "search/v2/token_slice.hpp"
+#include "search/query_params.hpp"
+#include "search/ranking_utils.hpp"
+#include "search/token_slice.hpp"
 
 #include "indexer/search_delimiters.hpp"
 #include "indexer/search_string_utils.hpp"
@@ -13,7 +13,6 @@
 #include "std/string.hpp"
 
 using namespace search;
-using namespace search::v2;
 using namespace strings;
 
 namespace
@@ -21,7 +20,7 @@ namespace
 NameScore GetScore(string const & name, string const & query, size_t startToken, size_t endToken)
 {
   search::Delimiters delims;
-  SearchQueryParams params;
+  QueryParams params;
   auto addToken = [&params](UniString const & token)
   {
     params.m_tokens.push_back({token});
@@ -44,5 +43,6 @@ UNIT_TEST(NameTest_Smoke)
   TEST_EQUAL(GetScore("Moscow", "Red Square Moscow", 2, 3), NAME_SCORE_FULL_MATCH, ());
   TEST_EQUAL(GetScore("San Francisco", "Fran", 0, 1), NAME_SCORE_SUBSTRING_PREFIX, ());
   TEST_EQUAL(GetScore("San Francisco", "Fran ", 0, 1), NAME_SCORE_ZERO, ());
+  TEST_EQUAL(GetScore("Лермонтовъ", "Лермонтов", 0, 1), NAME_SCORE_FULL_MATCH_PREFIX, ());
 }
 }  // namespace

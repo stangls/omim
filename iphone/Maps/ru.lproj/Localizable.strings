@@ -83,9 +83,6 @@
 
 "ok" = "OK";
 
-/* not used? Search View - Location is disabled by user warning text */
-"enable_location_services" = "Пожалуйста, включите геолокацию в настройках телефона";
-
 /* Settings/Downloader - No free space dialog message */
 "free_disk_space_for_country_x" = "Нет свободного места. Пожалуйста, удалите ненужные карты или приложения, чтобы загрузить %@";
 
@@ -846,7 +843,7 @@
 "not_found_map" = "Карта вашего местоположения не загружена";
 
 /* location service disabled */
-"enable_location_service" = "Пожалуйста, включите геолокацию";
+"enable_location_services" = "Пожалуйста, включите геолокацию";
 
 /* download map */
 "download_map" = "Скачайте карту места, где вы находитесь";
@@ -1433,7 +1430,7 @@
 
 "whatsnew_update_editor_title" = "Мы обновили редактор";
 
-"whatsnew_update_editor_message" = "Пользователи MAPS.ME внесли уже 50 000 правок на карту. Вместе мы сделаем карты самыми подробными в мире. Присоединяйся!";
+"whatsnew_update_editor_message" = "Пользователи MAPS.ME внесли уже 200 000 правок на карту. Вместе мы сделаем карты самыми подробными в мире. Присоединяйся!";
 
 /* Additional text in whats new */
 "whatsnew_update_editor_message_update" = "Обновите все карты, чтобы использовать редактор.";
@@ -1478,7 +1475,7 @@
 
 "placepage_place_rating" = "Рейтинг:";
 
-"place_page_starting_from" = "от %d";
+"place_page_starting_from" = "от %s";
 
 "meter" = "м";
 
@@ -1515,3 +1512,15 @@
 "editor_status_sending" = "Отправка…";
 
 "editor_place_doesnt_exist" = "Места не существует";
+
+"place_page_booking_rating" = "Рейтинг: %s";
+
+"text_more_button" = "… еще";
+
+"error_enter_correct_phone" = "Введите корректный номер телефона";
+
+"error_enter_correct_web" = "Введите корректный веб-сайт";
+
+"error_enter_correct_email" = "Введите корректный email";
+
+"error_enter_correct" = "Введите корректное значение";

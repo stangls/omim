@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Typeface;
 import android.location.Location;
-import android.support.annotation.AttrRes;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -17,11 +16,9 @@ import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.StyleSpan;
 import android.util.SparseArray;
-import android.util.SparseIntArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -38,10 +35,8 @@ import com.mapswithme.maps.R;
 import com.mapswithme.maps.background.Notifier;
 import com.mapswithme.maps.location.LocationHelper;
 import com.mapswithme.maps.routing.RoutingController;
-import com.mapswithme.maps.widget.WheelProgressView;
 import com.mapswithme.util.BottomSheetHelper;
 import com.mapswithme.util.StringUtils;
-import com.mapswithme.util.ThemeUtils;
 import com.mapswithme.util.UiUtils;
 import com.mapswithme.util.statistics.Statistics;
 import com.timehop.stickyheadersrecyclerview.StickyRecyclerHeadersAdapter;
@@ -65,8 +60,6 @@ class DownloaderAdapter extends RecyclerView.Adapter<DownloaderAdapter.ViewHolde
 
   private final SparseArray<String> mHeaders = new SparseArray<>();
   private final Stack<PathEntry> mPath = new Stack<>();  // Holds navigation history. The last element is the current level.
-
-  private final SparseIntArray mIconsCache = new SparseIntArray();
 
   private int mListenerSlot;
 
@@ -99,7 +92,7 @@ class DownloaderAdapter extends RecyclerView.Adapter<DownloaderAdapter.ViewHolde
       {
         MapManager.nativeCancel(item.id);
         MapManager.nativeDelete(item.id);
-        OnmapDownloader.lockAutodownload();
+        OnmapDownloader.setAutodownloadLocked(true);
 
         Statistics.INSTANCE.trackEvent(Statistics.EventName.DOWNLOADER_ACTION,
                                        Statistics.params().add(Statistics.EventParam.ACTION, "delete")
@@ -214,16 +207,14 @@ class DownloaderAdapter extends RecyclerView.Adapter<DownloaderAdapter.ViewHolde
 
   private static class PathEntry
   {
-    final String countryId;
-    final String name;
+    final CountryItem item;
     final boolean myMapsMode;
     final int topPosition;
     final int topOffset;
 
-    private PathEntry(String countryId, String name, boolean myMapsMode, int topPosition, int topOffset)
+    private PathEntry(CountryItem item, boolean myMapsMode, int topPosition, int topOffset)
     {
-      this.countryId = countryId;
-      this.name = name;
+      this.item = item;
       this.myMapsMode = myMapsMode;
       this.topPosition = topPosition;
       this.topOffset = topOffset;
@@ -232,7 +223,7 @@ class DownloaderAdapter extends RecyclerView.Adapter<DownloaderAdapter.ViewHolde
     @Override
     public String toString()
     {
-      return countryId + " (" + name + "), " +
+      return item.id + " (" + item.name + "), " +
              "myMapsMode: " + myMapsMode +
              ", topPosition: " + topPosition +
              ", topOffset: " + topOffset;
@@ -291,8 +282,7 @@ class DownloaderAdapter extends RecyclerView.Adapter<DownloaderAdapter.ViewHolde
 
   class ViewHolder extends RecyclerView.ViewHolder
   {
-    private final WheelProgressView mProgress;
-    private final ImageView mStatus;
+    private final DownloaderStatusIcon mStatusIcon;
     private final TextView mName;
     private final TextView mSubtitle;
     private final TextView mFoundName;
@@ -419,8 +409,45 @@ class DownloaderAdapter extends RecyclerView.Adapter<DownloaderAdapter.ViewHolde
     {
       super(frame);
 
-      mProgress = (WheelProgressView) frame.findViewById(R.id.progress);
-      mStatus = (ImageView) frame.findViewById(R.id.status);
+      mStatusIcon = new DownloaderStatusIcon(frame.findViewById(R.id.downloader_status_frame))
+      {
+        @Override
+        protected int selectIcon(CountryItem country)
+        {
+          if (country.status == CountryItem.STATUS_DOWNLOADABLE || country.status == CountryItem.STATUS_PARTLY)
+          {
+            return (country.isExpandable() ? (mMyMapsMode ? R.attr.status_folder_done
+                                                          : R.attr.status_folder)
+                                           : R.attr.status_downloadable);
+          }
+
+          return super.selectIcon(country);
+        }
+
+        @Override
+        protected void updateIcon(CountryItem country)
+        {
+          super.updateIcon(country);
+          mIcon.setFocusable(country.isExpandable() && country.status != CountryItem.STATUS_DONE);
+        }
+      }.setOnIconClickListener(new View.OnClickListener()
+      {
+        @Override
+        public void onClick(View v)
+        {
+          processClick(true);
+        }
+      }).setOnCancelClickListener(new View.OnClickListener()
+      {
+        @Override
+        public void onClick(View v)
+        {
+          MapManager.nativeCancel(mItem.id);
+          Statistics.INSTANCE.trackEvent(Statistics.EventName.DOWNLOADER_CANCEL,
+                                         Statistics.params().add(Statistics.EventParam.FROM, "downloader"));
+        }
+      });
+
       mName = (TextView) frame.findViewById(R.id.name);
       mSubtitle = (TextView) frame.findViewById(R.id.subtitle);
       mFoundName = (TextView) frame.findViewById(R.id.found_name);
@@ -432,7 +459,7 @@ class DownloaderAdapter extends RecyclerView.Adapter<DownloaderAdapter.ViewHolde
         public void onClick(View v)
         {
           if (mItem.isExpandable())
-            goDeeper(mItem.id, mItem.name, true);
+            goDeeper(mItem, true);
           else
             processClick(false);
         }
@@ -447,75 +474,6 @@ class DownloaderAdapter extends RecyclerView.Adapter<DownloaderAdapter.ViewHolde
           return true;
         }
       });
-
-      mStatus.setOnClickListener(new View.OnClickListener()
-      {
-        @Override
-        public void onClick(View v)
-        {
-          processClick(true);
-        }
-      });
-
-      mProgress.setOnClickListener(new View.OnClickListener()
-      {
-        @Override
-        public void onClick(View v)
-        {
-          MapManager.nativeCancel(mItem.id);
-          Statistics.INSTANCE.trackEvent(Statistics.EventName.DOWNLOADER_CANCEL,
-                                         Statistics.params().add(Statistics.EventParam.FROM, "downloader"));
-        }
-      });
-    }
-
-    private void updateStatus()
-    {
-      boolean pending = (mItem.status == CountryItem.STATUS_ENQUEUED);
-      boolean inProgress = (mItem.status == CountryItem.STATUS_PROGRESS || pending);
-
-      UiUtils.showIf(inProgress, mProgress);
-      UiUtils.showIf(!inProgress, mStatus);
-      mProgress.setPending(pending);
-
-      if (inProgress)
-      {
-        if (!pending)
-          mProgress.setProgress(mItem.progress);
-        return;
-      }
-
-      boolean clickable = mItem.isExpandable();
-      @AttrRes int iconAttr;
-
-      switch (mItem.status)
-      {
-      case CountryItem.STATUS_DONE:
-        clickable = false;
-        iconAttr = R.attr.status_done;
-        break;
-
-      case CountryItem.STATUS_DOWNLOADABLE:
-      case CountryItem.STATUS_PARTLY:
-        iconAttr = (mItem.isExpandable() ? (mMyMapsMode ? R.attr.status_folder_done
-                                                        : R.attr.status_folder)
-                                         : R.attr.status_downloadable);
-        break;
-
-      case CountryItem.STATUS_FAILED:
-        iconAttr = R.attr.status_failed;
-        break;
-
-      case CountryItem.STATUS_UPDATABLE:
-        iconAttr = R.attr.status_updatable;
-        break;
-
-      default:
-        throw new IllegalArgumentException("Inappropriate item status: " + mItem.status);
-      }
-
-      mStatus.setFocusable(clickable);
-      mStatus.setImageResource(resolveIcon(iconAttr));
     }
 
     void bind(CountryItem item)
@@ -556,8 +514,15 @@ class DownloaderAdapter extends RecyclerView.Adapter<DownloaderAdapter.ViewHolde
       }
 
       UiUtils.showIf(mSearchResultsMode, mFoundName);
-      mSize.setText(StringUtils.getFileSizeString(mItem.totalSize));
-      updateStatus();
+
+      long size;
+      if (mItem.status == CountryItem.STATUS_ENQUEUED || mItem.status == CountryItem.STATUS_PROGRESS)
+        size = mItem.enqueuedSize;
+      else
+        size = (mMyMapsMode ? mItem.size : mItem.totalSize);
+
+      mSize.setText(StringUtils.getFileSizeString(size));
+      mStatusIcon.update(mItem);
     }
   }
 
@@ -572,18 +537,6 @@ class DownloaderAdapter extends RecyclerView.Adapter<DownloaderAdapter.ViewHolde
     void bind(int position) {
       mTitle.setText(mHeaders.get(mItems.get(position).headerId));
     }
-  }
-
-  private @DrawableRes int resolveIcon(@AttrRes int iconAttr)
-  {
-    int res = mIconsCache.get(iconAttr);
-    if (res == 0)
-    {
-      res = ThemeUtils.getResource(mActivity, R.attr.downloaderTheme, iconAttr);
-      mIconsCache.put(iconAttr, res);
-    }
-
-    return res;
   }
 
   private void collectHeaders()
@@ -637,7 +590,7 @@ class DownloaderAdapter extends RecyclerView.Adapter<DownloaderAdapter.ViewHolde
 
     mItems.clear();
 
-    String parent = getCurrentRoot();
+    String parent = getCurrentRootId();
     boolean hasLocation = false;
     double lat = 0.0;
     double lon = 0.0;
@@ -738,7 +691,7 @@ class DownloaderAdapter extends RecyclerView.Adapter<DownloaderAdapter.ViewHolde
     return mItems.size();
   }
 
-  private void goDeeper(String childId, String childName, boolean refresh)
+  private void goDeeper(CountryItem child, boolean refresh)
   {
     LinearLayoutManager lm = (LinearLayoutManager)mRecycler.getLayoutManager();
 
@@ -755,7 +708,8 @@ class DownloaderAdapter extends RecyclerView.Adapter<DownloaderAdapter.ViewHolde
     }
 
     boolean wasEmpty = mPath.isEmpty();
-    mPath.push(new PathEntry(childId, childName, mMyMapsMode, position, offset));
+    mPath.push(new PathEntry(child, mMyMapsMode, position, offset));
+    mMyMapsMode &= (!mSearchResultsMode || child.childCount > 0);
 
     if (wasEmpty)
       mFragment.clearSearchQuery();
@@ -792,19 +746,24 @@ class DownloaderAdapter extends RecyclerView.Adapter<DownloaderAdapter.ViewHolde
 
   void setAvailableMapsMode()
   {
-    goDeeper(getCurrentRoot(), getCurrentRootName(), false);
+    goDeeper(getCurrentRootItem(), false);
     mMyMapsMode = false;
     refreshData();
   }
 
-  @NonNull String getCurrentRoot()
+  private CountryItem getCurrentRootItem()
   {
-    return (canGoUpwards() ? mPath.peek().countryId : CountryItem.getRootId());
+    return (canGoUpwards() ? mPath.peek().item : CountryItem.fill(CountryItem.getRootId()));
+  }
+
+  @NonNull String getCurrentRootId()
+  {
+    return (canGoUpwards() ? getCurrentRootItem().id : CountryItem.getRootId());
   }
 
   @Nullable String getCurrentRootName()
   {
-    return (canGoUpwards() ? mPath.peek().name : null);
+    return (canGoUpwards() ? getCurrentRootItem().name : null);
   }
 
   boolean isMyMapsMode()

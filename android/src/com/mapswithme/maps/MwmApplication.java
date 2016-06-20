@@ -1,7 +1,9 @@
 package com.mapswithme.maps;
 
 import android.app.Application;
+import android.content.ComponentName;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.Environment;
 import android.os.Handler;
@@ -23,17 +25,21 @@ import com.mapswithme.maps.downloader.CountryItem;
 import com.mapswithme.maps.downloader.MapManager;
 import com.mapswithme.maps.editor.Editor;
 import com.mapswithme.maps.location.TrackRecorder;
+import com.mapswithme.maps.routing.RoutingController;
 import com.mapswithme.maps.sound.TtsPlayer;
 import com.mapswithme.util.Config;
 import com.mapswithme.util.Constants;
 import com.mapswithme.util.ThemeSwitcher;
 import com.mapswithme.util.UiUtils;
-import com.mapswithme.util.Yota;
 import com.mapswithme.util.statistics.AlohaHelper;
 import com.mapswithme.util.statistics.Statistics;
+import com.parse.GcmBroadcastReceiver;
 import com.parse.Parse;
+import com.parse.ParseBroadcastReceiver;
 import com.parse.ParseException;
 import com.parse.ParseInstallation;
+import com.parse.ParsePushBroadcastReceiver;
+import com.parse.PushService;
 import com.parse.SaveCallback;
 import io.fabric.sdk.android.Fabric;
 import net.hockeyapp.android.CrashManager;
@@ -64,10 +70,13 @@ public class MwmApplication extends Application
       for (MapManager.StorageCallbackData item : data)
         if (item.isLeafNode && item.newStatus == CountryItem.STATUS_FAILED)
         {
-          Notifier.cancelDownloadSuggest();
+          if (MapManager.nativeIsAutoretryFailed())
+          {
+            Notifier.cancelDownloadSuggest();
 
-          Notifier.notifyDownloadFailed(item.countryId, MapManager.nativeGetName(item.countryId));
-          MapManager.sendErrorStat(Statistics.EventName.DOWNLOADER_ERROR, MapManager.nativeGetError(item.countryId));
+            Notifier.notifyDownloadFailed(item.countryId, MapManager.nativeGetName(item.countryId));
+            MapManager.sendErrorStat(Statistics.EventName.DOWNLOADER_ERROR, MapManager.nativeGetError(item.countryId));
+          }
 
           return;
         }
@@ -109,10 +118,10 @@ public class MwmApplication extends Application
 
     initPaths();
     nativeInitPlatform(getApkPath(), getDataStoragePath(), getTempPath(), getObbGooglePath(),
-                       BuildConfig.FLAVOR, BuildConfig.BUILD_TYPE,
-                       Yota.isFirstYota(), UiUtils.isTablet());
-    initParse();
+                       BuildConfig.FLAVOR, BuildConfig.BUILD_TYPE, UiUtils.isTablet());
+
     mPrefs = getSharedPreferences(getString(R.string.pref_file_name), MODE_PRIVATE);
+    initParse();
     mBackgroundTracker = new AppBackgroundTracker();
     TrackRecorder.init();
     Editor.init();
@@ -131,6 +140,7 @@ public class MwmApplication extends Application
     BookmarkManager.nativeLoadBookmarks();
     TtsPlayer.INSTANCE.init(this);
     ThemeSwitcher.restart();
+    RoutingController.get().initialize();
     mIsFrameworkInitialized = true;
   }
 
@@ -164,6 +174,8 @@ public class MwmApplication extends Application
     nativeAddLocalization("routing_failed_cross_mwm_building", getString(R.string.routing_failed_cross_mwm_building));
     nativeAddLocalization("routing_failed_route_not_found", getString(R.string.routing_failed_route_not_found));
     nativeAddLocalization("routing_failed_internal_error", getString(R.string.routing_failed_internal_error));
+    nativeAddLocalization("place_page_booking_rating", getString(R.string.place_page_booking_rating));
+
   }
 
   private void initHockeyApp()
@@ -234,7 +246,23 @@ public class MwmApplication extends Application
     // Do not initialize Parse in default open-source version.
     final String appId = PrivateVariables.parseApplicationId();
     if (appId.isEmpty())
+    {
+      PackageManager pm = getPackageManager();
+
+      ComponentName c = new ComponentName(this, PushService.class);
+      if (pm.getComponentEnabledSetting(c) != PackageManager.COMPONENT_ENABLED_STATE_DISABLED)
+      {
+        pm.setComponentEnabledSetting(c, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+
+        c = new ComponentName(this, ParseBroadcastReceiver.class);
+        pm.setComponentEnabledSetting(c, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+        c = new ComponentName(this, ParsePushBroadcastReceiver.class);
+        pm.setComponentEnabledSetting(c, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+        c = new ComponentName(this, GcmBroadcastReceiver.class);
+        pm.setComponentEnabledSetting(c, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+      }
       return;
+    }
 
     Parse.initialize(this, appId, PrivateVariables.parseClientKey());
     ParseInstallation.getCurrentInstallation().saveInBackground(new SaveCallback()
@@ -290,16 +318,11 @@ public class MwmApplication extends Application
     mMainLoopHandler.sendMessage(m);
   }
 
-  void clearFunctorsOnUiThread()
-  {
-    mMainLoopHandler.removeCallbacksAndMessages(mMainQueueToken);
-  }
-
   /**
    * Initializes native Platform with paths. Should be called before usage of any other native components.
    */
   private native void nativeInitPlatform(String apkPath, String storagePath, String tmpPath, String obbGooglePath,
-                                         String flavorName, String buildType, boolean isYota, boolean isTablet);
+                                         String flavorName, String buildType, boolean isTablet);
 
   private static native void nativeInitFramework();
 

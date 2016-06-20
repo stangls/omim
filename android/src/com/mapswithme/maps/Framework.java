@@ -1,13 +1,17 @@
 package com.mapswithme.maps;
 
+import android.support.annotation.IntDef;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.annotation.Size;
 import android.support.annotation.UiThread;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 import com.mapswithme.maps.bookmarks.data.DistanceAndAzimut;
 import com.mapswithme.maps.bookmarks.data.MapObject;
 import com.mapswithme.maps.routing.RoutingInfo;
+import com.mapswithme.maps.widget.placepage.SponsoredHotelInfo;
 import com.mapswithme.util.Constants;
 
 /**
@@ -20,8 +24,13 @@ public class Framework
   public static final int MAP_STYLE_DARK = 1;
   public static final int MAP_STYLE_CLEAR = 2;
 
+  @Retention(RetentionPolicy.SOURCE)
+  @IntDef({ROUTER_TYPE_VEHICLE, ROUTER_TYPE_PEDESTRIAN, ROUTER_TYPE_BICYCLE})
+  public @interface RouterType {}
+
   public static final int ROUTER_TYPE_VEHICLE = 0;
   public static final int ROUTER_TYPE_PEDESTRIAN = 1;
+  public static final int ROUTER_TYPE_BICYCLE = 2;
 
   @SuppressWarnings("unused")
   public interface MapObjectListener
@@ -154,15 +163,12 @@ public class Framework
    */
   public static native void nativeMarkMapStyle(int mapStyle);
 
-  public static native void nativeSetRouter(int routerType);
-
+  public static native void nativeSetRouter(@RouterType int routerType);
+  @RouterType
   public static native int nativeGetRouter();
-
+  @RouterType
   public static native int nativeGetLastUsedRouter();
-
-  /**
-   * @return {@link Framework#ROUTER_TYPE_VEHICLE} or {@link Framework#ROUTER_TYPE_PEDESTRIAN}
-   */
+  @RouterType
   public static native int nativeGetBestRouter(double srcLat, double srcLon, double dstLat, double dstLon);
 
   public static native void nativeSetRouteStartPoint(double lat, double lon, boolean valid);
@@ -197,11 +203,16 @@ public class Framework
 
   public static native void nativeZoomToPoint(double lat, double lon, int zoom, boolean animate);
 
-  public static native void nativeTurnChoosePositionMode(boolean turnedOn, boolean isBusiness);
-
+  /**
+   * @param isBusiness selection area will be bounded by building borders, if its true(eg. true for businesses in buildings).
+   * @param applyPosition if true, map'll be animated to currently selected object.
+   */
+  public static native void nativeTurnOnChoosePositionMode(boolean isBusiness, boolean applyPosition);
+  public static native void nativeTurnOffChoosePositionMode();
+  public static native boolean nativeIsInChoosePositionMode();
   public static native boolean nativeIsDownloadedMapAtScreenCenter();
-
   public static native String nativeGetActiveObjectFormattedCuisine();
-
   public static native boolean nativeIsActiveObjectABuilding();
+  public static native boolean nativeCanAddPlaceFromPlacePage();
+  public static native SponsoredHotelInfo nativeGetSponsoredHotelInfo();
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "search/search_query_params.hpp"
+#include "search/query_params.hpp"
 
 #include "indexer/mwm_set.hpp"
 
@@ -18,8 +18,6 @@ class CompressedBitVector;
 
 namespace search
 {
-namespace v2
-{
 class MwmContext;
 class TokenSlice;
 
@@ -28,7 +26,7 @@ class TokenSlice;
 unique_ptr<coding::CompressedBitVector> RetrieveAddressFeatures(MwmSet::MwmId const & id,
                                                                 MwmValue & value,
                                                                 my::Cancellable const & cancellable,
-                                                                SearchQueryParams const & params);
+                                                                QueryParams const & params);
 
 // Retrieves from the search index corresponding to |value| all
 // postcodes matching to |slice|.
@@ -40,5 +38,5 @@ unique_ptr<coding::CompressedBitVector> RetrievePostcodeFeatures(
 unique_ptr<coding::CompressedBitVector> RetrieveGeometryFeatures(
     MwmContext const & context, my::Cancellable const & cancellable, m2::RectD const & rect,
     int scale);
-} // namespace v2
+
 } // namespace search

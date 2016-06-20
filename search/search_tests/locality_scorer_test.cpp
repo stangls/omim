@@ -1,6 +1,6 @@
 #include "testing/testing.hpp"
 
-#include "search/v2/locality_scorer.hpp"
+#include "search/locality_scorer.hpp"
 
 #include "indexer/search_delimiters.hpp"
 #include "indexer/search_string_utils.hpp"
@@ -15,13 +15,12 @@
 #include "std/unordered_map.hpp"
 #include "std/vector.hpp"
 
-using namespace search::v2;
 using namespace search;
 using namespace strings;
 
 namespace
 {
-void InitParams(string const & query, bool lastTokenIsPrefix, SearchQueryParams & params)
+void InitParams(string const & query, bool lastTokenIsPrefix, QueryParams & params)
 {
   params.m_tokens.clear();
   params.m_prefixTokens.clear();
@@ -40,7 +39,7 @@ void InitParams(string const & query, bool lastTokenIsPrefix, SearchQueryParams 
   }
 }
 
-void AddLocality(string const & name, uint32_t featureId, SearchQueryParams & params,
+void AddLocality(string const & name, uint32_t featureId, QueryParams & params,
                  vector<Geocoder::Locality> & localities)
 {
   set<UniString> tokens;
@@ -98,7 +97,7 @@ public:
   void GetTopLocalities(size_t limit)
   {
     m_scorer.GetTopLocalities(limit, m_localities);
-    sort(m_localities.begin(), m_localities.end(), my::CompareBy(&Geocoder::Locality::m_featureId));
+    sort(m_localities.begin(), m_localities.end(), my::LessBy(&Geocoder::Locality::m_featureId));
   }
 
   // LocalityScorer::Delegate overrides:
@@ -112,7 +111,7 @@ public:
   uint8_t GetRank(uint32_t featureId) const override { return 0; }
 
 protected:
-  SearchQueryParams m_params;
+  QueryParams m_params;
   vector<Geocoder::Locality> m_localities;
   unordered_map<uint32_t, vector<string>> m_names;
   LocalityScorer m_scorer;
@@ -208,7 +207,7 @@ UNIT_CLASS_TEST(LocalityScorerTest, PrefixMatch)
     ID_MOSCOW
   };
 
-  // SearchQueryParams params;
+  // QueryParams params;
   InitParams("New York San Anto", true /* lastTokenIsPrefix */);
 
   // vector<Geocoder::Locality> localities;

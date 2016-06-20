@@ -1,18 +1,29 @@
 #include "search/search_integration_tests/helpers.hpp"
 
-#include "search/search_query_factory.hpp"
+#include "search/processor_factory.hpp"
 #include "search/search_tests_support/test_search_request.hpp"
 
+#include "indexer/classificator_loader.hpp"
+#include "indexer/map_style.hpp"
+#include "indexer/map_style_reader.hpp"
 #include "indexer/scales.hpp"
 
 #include "platform/platform.hpp"
 
 namespace search
 {
+// TestWithClassificator ---------------------------------------------------------------------------
+TestWithClassificator::TestWithClassificator()
+{
+  GetStyleReader().SetCurrentStyle(MapStyleMerged);
+  classificator::Load();
+}
+
+// SearchTest --------------------------------------------------------------------------------------
 SearchTest::SearchTest()
   : m_platform(GetPlatform())
   , m_scopedLog(LDEBUG)
-  , m_engine(make_unique<storage::CountryInfoGetterForTesting>(), make_unique<SearchQueryFactory>(),
+  , m_engine(make_unique<storage::CountryInfoGetterForTesting>(), make_unique<ProcessorFactory>(),
              Engine::Params())
 {
 }

@@ -30,7 +30,7 @@
 "download_maps" = "Gedownloade Kaarten";
 
 /* Settings/Downloader - Download confirmation button */
-"download_x_kb" = "Download %qu kB";
+"download_x_kb" = "Download %qu KB";
 
 /* Settings/Downloader - Download confirmation button */
 "download_x_mb" = "Download %qu MB";
@@ -82,9 +82,6 @@
 "my_position" = "Mijn Locatie";
 
 "ok" = "OK";
-
-/* not used? Search View - Location is disabled by user warning text */
-"enable_location_services" = "Schakel Locatie Services in";
 
 /* Settings/Downloader - No free space dialog message */
 "free_disk_space_for_country_x" = "Maak ruimte vrij op uw apparaat om %@ te kunnen downloaden";
@@ -206,7 +203,7 @@
 
 "downloaded_touch_to_update" = "(%@) gedownload, klik om te updaten of te verwijderen";
 
-"update_mb_or_kb" = "Update %@";
+"update_mb_or_kb" = "%@ Bijwerken";
 
 /* Show popup notification when we have downloaded countries without search (from Lite version) */
 "search_update_maps" = "Om de zoekfunctie te kunnen gebruiken moet u de kaarten updaten";
@@ -370,7 +367,7 @@
 "load_kmz_failed" = "Bladwijzers uploaden mislukt. Het bestand is mogelijk beschadigd of defect.";
 
 /* resource for context menu */
-"edit" = "Edit";
+"edit" = "Wijzigen";
 
 /* Warning message when doing search around current position */
 "unknown_current_position" = "Je plaats werd nog niet vastgesteld";
@@ -718,7 +715,7 @@
 "downloader_uptodate_maps" = "Up-to-date";
 
 /* Status of outdated country in the list */
-"downloader_status_outdated" = "Update";
+"downloader_status_outdated" = "Bijwerken";
 
 /* Status of failed country in the list */
 "downloader_status_failed" = "Mislukt";
@@ -846,7 +843,7 @@
 "not_found_map" = "De kaart voor uw locatie is niet gedownload";
 
 /* location service disabled */
-"enable_location_service" = "Schakel Locatie Services in";
+"enable_location_services" = "Schakel Locatie Services in";
 
 /* download map */
 "download_map" = "Download de kaart voor uw locatie";
@@ -1069,7 +1066,7 @@
 
 "p2p_from_here" = "Van";
 
-"p2p_to_here" = "Naar";
+"p2p_to_here" = "Route naar";
 
 "p2p_only_from_current" = "Navigatie is uitsluitend beschikbaar vanuit uw huidige locatie.";
 
@@ -1433,7 +1430,7 @@
 
 "whatsnew_update_editor_title" = "We hebben de kaarteditor bijgewerkt";
 
-"whatsnew_update_editor_message" = "MAPS.ME-gebruikers hebben 50.000 kaartwijzigingen doorgevoerd. Samen maken we de meest gedetailleerde kaarten ter wereld. Doe met ons mee!";
+"whatsnew_update_editor_message" = "MAPS.ME-gebruikers hebben 200.000 kaartwijzigingen doorgevoerd. Samen maken we de meest gedetailleerde kaarten ter wereld. Doe met ons mee!";
 
 /* Additional text in whats new */
 "whatsnew_update_editor_message_update" = "Om de kaartaanpasser te kunnen gebruiken, moet je alle kaarten actualiseren.";
@@ -1478,7 +1475,7 @@
 
 "placepage_place_rating" = "Cijfer:";
 
-"place_page_starting_from" = "from %d";
+"place_page_starting_from" = "van %s";
 
 "meter" = "m";
 
@@ -1515,3 +1512,15 @@
 "editor_status_sending" = "Verzenden…";
 
 "editor_place_doesnt_exist" = "Locatie bestaat niet";
+
+"place_page_booking_rating" = "Rating: %s";
+
+"text_more_button" = "… more";
+
+"error_enter_correct_phone" = "Enter a valid phone number";
+
+"error_enter_correct_web" = "Enter a valid web address";
+
+"error_enter_correct_email" = "Enter a valid email";
+
+"error_enter_correct" = "Enter a valid value";

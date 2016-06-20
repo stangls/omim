@@ -20,6 +20,8 @@
 namespace df
 {
 
+int const kDoNotChangeZoom = -1;
+
 struct Touch
 {
   m2::PointF m_location = m2::PointF::Zero();
@@ -254,21 +256,23 @@ public:
     virtual void CorrectGlobalScalePoint(m2::PointD & pt) const = 0;
     virtual void CorrectScalePoint(m2::PointD & pt1, m2::PointD & pt2) const = 0;
     virtual void OnScaleEnded() = 0;
+    virtual void OnAnimatedScaleEnded() = 0;
 
     virtual void OnAnimationStarted(ref_ptr<Animation> anim) = 0;
+    virtual void OnPerspectiveSwitchRejected() = 0;
+
+    virtual void OnTouchMapAction() = 0;
   };
 
   UserEventStream();
   void AddEvent(UserEvent const & event);
-  ScreenBase const & ProcessEvents(bool & modelViewChange, bool & viewportChanged);
+  ScreenBase const & ProcessEvents(bool & modelViewChanged, bool & viewportChanged);
   ScreenBase const & GetCurrentScreen() const;
 
   m2::AnyRectD GetTargetRect() const;
   bool IsInUserAction() const;
   bool IsInPerspectiveAnimation() const;
   bool IsWaitingForActionCompletion() const;
-
-  static bool IsScaleAllowableIn3d(int scale);
 
   void SetListener(ref_ptr<Listener> listener) { m_listener = listener; }
 
@@ -349,9 +353,11 @@ private:
   void EndFilter(Touch const & t);
   void CancelFilter(Touch const & t);
 
-  void ApplyAnimations(bool & modelViewChanged, bool & viewportChanged);
-  void ResetCurrentAnimations(Animation::Type animType);
+  void ApplyAnimations();
+  void ResetAnimations(Animation::Type animType, bool finishAll = false);
   void ResetMapPlaneAnimations();
+  void ResetAnimationsBeforeSwitch3D();
+  bool InterruptFollowAnimations();
 
   list<UserEvent> m_events;
   mutable mutex m_lock;
@@ -374,6 +380,9 @@ private:
   array<Touch, 2> m_touches;
 
   AnimationSystem & m_animationSystem;
+
+  bool m_modelViewChanged = false;
+  bool m_viewportChanged = false;
 
   bool m_perspectiveAnimation = false;
   unique_ptr<UserEvent> m_pendingEvent;

@@ -257,7 +257,7 @@ void DrawWidget::CreateEngine()
   p.m_widgetsInitInfo[gui::WIDGET_SCALE_LABEL] = gui::Position(dp::LeftBottom);
 
   m_framework->CreateDrapeEngine(make_ref(m_contextFactory), std::move(p));
-  m_framework->AddViewportListener(bind(&DrawWidget::OnViewportChanged, this, _1));
+  m_framework->SetViewportListener(bind(&DrawWidget::OnViewportChanged, this, _1));
 }
 
 void DrawWidget::initializeGL()
@@ -486,7 +486,8 @@ void DrawWidget::ShowSearchResult(search::Result const & res)
 
 void DrawWidget::CreateFeature()
 {
-  CreateFeatureDialog dlg(this, m_framework->GetEditorCategories());
+  auto cats = m_framework->GetEditorCategories();
+  CreateFeatureDialog dlg(this, cats);
   if (dlg.exec() == QDialog::Accepted)
   {
     osm::EditableMapObject emo;

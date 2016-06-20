@@ -11,12 +11,12 @@
 #include "routing/route.hpp"
 #include "routing/routing_algorithm.hpp"
 
+#include "search/engine.hpp"
 #include "search/geometry_utils.hpp"
 #include "search/intermediate_result.hpp"
+#include "search/processor_factory.hpp"
 #include "search/result.hpp"
 #include "search/reverse_geocoder.hpp"
-#include "search/search_engine.hpp"
-#include "search/search_query_factory.hpp"
 
 #include "storage/storage_helpers.hpp"
 
@@ -25,6 +25,8 @@
 #include "drape_frontend/visual_params.hpp"
 #include "drape_frontend/watch/cpu_drawer.hpp"
 #include "drape_frontend/watch/feature_processor.hpp"
+
+#include "drape/constants.hpp"
 
 #include "indexer/categories_holder.hpp"
 #include "indexer/classificator.hpp"
@@ -59,12 +61,15 @@
 #include "coding/png_memory_encoder.hpp"
 
 #include "geometry/angles.hpp"
+#include "geometry/any_rect2d.hpp"
 #include "geometry/distance_on_sphere.hpp"
+#include "geometry/rect2d.hpp"
 #include "geometry/triangle2d.hpp"
 
+#include "base/logging.hpp"
 #include "base/math.hpp"
-#include "base/timer.hpp"
 #include "base/scope_guard.hpp"
+#include "base/timer.hpp"
 
 #include "std/algorithm.hpp"
 #include "std/bind.hpp"
@@ -132,7 +137,7 @@ void ParseSetGpsTrackMinAccuracyCommand(string const & query)
 }
 
 // Cancels search query by |handle|.
-void CancelQuery(weak_ptr<search::QueryHandle> & handle)
+void CancelQuery(weak_ptr<search::ProcessorHandle> & handle)
 {
   auto queryHandle = handle.lock();
   if (queryHandle)
@@ -223,6 +228,18 @@ void Framework::OnUserPositionChanged(m2::PointD const & position)
     m_routingSession.SetUserCurrentPosition(position);
 }
 
+void Framework::OnViewportChanged(ScreenBase const & screen)
+{
+  double constexpr kEps = 1.0E-4;
+  if (!screen.GlobalRect().EqualDxDy(m_currentModelView.GlobalRect(), kEps))
+    UpdateUserViewportChanged();
+
+  m_currentModelView = screen;
+
+  if (m_viewportChanged != nullptr)
+    m_viewportChanged(screen);
+}
+
 void Framework::CallDrapeFunction(TDrapeFunction const & fn) const
 {
   if (m_drapeEngine)
@@ -287,7 +304,6 @@ Framework::Framework()
   , m_storage(platform::migrate::NeedMigrate() ? COUNTRIES_OBSOLETE_FILE : COUNTRIES_FILE)
   , m_bmManager(*this)
   , m_isRenderingEnabled(true)
-  , m_fixedSearchResults(0)
   , m_lastReportedCountry(kInvalidCountryId)
 {
   m_startBackgroundTime = my::Timer::LocalTime();
@@ -338,6 +354,7 @@ Framework::Framework()
   m_storage.Init(
                  bind(&Framework::OnCountryFileDownloaded, this, _1, _2),
                  bind(&Framework::OnCountryFileDelete, this, _1, _2));
+  m_storage.SetDownloadingPolicy(&m_storageDownloadingPolicy);
   LOG(LDEBUG, ("Storage initialized"));
 
   auto const routingStatisticsFn = [](map<string, string> const & statistics)
@@ -388,8 +405,16 @@ Framework::Framework()
       return streets.first[streets.second].m_name;
     return {};
   });
-  editor.SetForEachFeatureAtPointFn(bind(&Framework::ForEachFeatureAtPoint, this, _1, _2));
+  // Due to floating points accuracy issues (geometry is saved in editor up to 7 digits
+  // after dicimal poin) some feature vertexes are threated as external to a given feature.
+  auto const pointToFeatureDistanceToleranceInMeters = 1e-3;
+  editor.SetForEachFeatureAtPointFn(bind(&Framework::ForEachFeatureAtPoint, this, _1, _2,
+                                         pointToFeatureDistanceToleranceInMeters));
   editor.LoadMapEdits();
+
+  m_model.GetIndex().AddObserver(editor);
+
+  LOG(LINFO, ("Editor initialized"));
 }
 
 Framework::~Framework()
@@ -498,7 +523,7 @@ bool Framework::OnCountryFileDelete(storage::TCountryId const & countryId, stora
   if (countryId == m_lastReportedCountry)
     m_lastReportedCountry = kInvalidCountryId;
 
-  if(auto handle = m_lastQueryHandle.lock())
+  if (auto handle = m_lastProcessorHandle.lock())
     handle->Cancel();
 
   m2::RectD rect = MercatorBounds::FullRect();
@@ -666,6 +691,7 @@ void Framework::FillBookmarkInfo(Bookmark const & bmk, BookmarkAndCategory const
 {
   FillPointInfo(bmk.GetPivot(), string(), info);
   info.m_bac = bac;
+  info.m_bookmarkCategoryName = GetBmCategory(bac.first)->GetName();
 }
 
 void Framework::FillFeatureInfo(FeatureID const & fid, place_page::Info & info) const
@@ -708,13 +734,21 @@ void Framework::FillPointInfo(m2::PointD const & mercator, string const & custom
 
 void Framework::FillInfoFromFeatureType(FeatureType const & ft, place_page::Info & info) const
 {
+  auto const featureStatus = osm::Editor::Instance().GetFeatureStatus(ft.GetID());
+  ASSERT_NOT_EQUAL(featureStatus, osm::Editor::FeatureStatus::Deleted,
+                   ("Deleted features cannot be selected from UI."));
   info.SetFromFeatureType(ft);
-
-  info.m_isEditable = osm::Editor::Instance().GetEditableProperties(ft).IsEditable();
-  info.m_localizedWifiString = m_stringsBundle.GetString("wifi");
 
   if (ftypes::IsAddressObjectChecker::Instance()(ft))
     info.m_address = GetAddressInfoAtPoint(feature::GetCenter(ft)).FormatHouseAndStreet();
+
+  if (ftypes::IsBookingChecker::Instance()(ft))
+    info.m_isSponsoredHotel = true;
+
+  info.m_isEditable = featureStatus != osm::Editor::FeatureStatus::Obsolete &&
+                      !info.IsSponsoredHotel();
+  info.m_localizedWifiString = m_stringsBundle.GetString("wifi");
+  info.m_localizedRatingString = m_stringsBundle.GetString("place_page_booking_rating");
 }
 
 void Framework::FillApiMarkInfo(ApiMarkPoint const & api, place_page::Info & info) const
@@ -729,10 +763,10 @@ void Framework::FillApiMarkInfo(ApiMarkPoint const & api, place_page::Info & inf
 
 void Framework::FillSearchResultInfo(SearchMarkPoint const & smp, place_page::Info & info) const
 {
-  if (smp.m_foundFeatureID.IsValid())
-    FillFeatureInfo(smp.m_foundFeatureID, info);
+  if (smp.GetFoundFeature().IsValid())
+    FillFeatureInfo(smp.GetFoundFeature(), info);
   else
-    FillPointInfo(smp.GetPivot(), smp.m_matchedName, info);
+    FillPointInfo(smp.GetPivot(), smp.GetMatchedName(), info);
 }
 
 void Framework::FillMyPositionInfo(place_page::Info & info) const
@@ -854,6 +888,11 @@ void Framework::PrepareToShutdown()
   DestroyDrapeEngine();
 }
 
+void Framework::SetDisplacementMode(int mode)
+{
+  CallDrapeFunction(bind(&df::DrapeEngine::SetDisplacementMode, _1, mode));
+}
+
 void Framework::SaveViewport()
 {
   m2::AnyRectD rect;
@@ -925,16 +964,9 @@ void Framework::GetTouchRect(m2::PointD const & center, uint32_t pxRadius, m2::A
   m_currentModelView.GetTouchRect(center, static_cast<double>(pxRadius), rect);
 }
 
-int Framework::AddViewportListener(TViewportChanged const & fn)
+void Framework::SetViewportListener(TViewportChanged const & fn)
 {
-  ASSERT(m_drapeEngine, ());
-  return m_drapeEngine->AddModelViewListener(fn);
-}
-
-void Framework::RemoveViewportListener(int slotID)
-{
-  ASSERT(m_drapeEngine, ());
-  m_drapeEngine->RemoveModeViewListener(slotID);
+  m_viewportChanged = fn;
 }
 
 void Framework::OnSize(int w, int h)
@@ -1012,7 +1044,7 @@ void Framework::StartInteractiveSearch(search::SearchParams const & params)
 
   m_lastInteractiveSearchParams = params;
   m_lastInteractiveSearchParams.SetForceSearch(false);
-  m_lastInteractiveSearchParams.SetMode(Mode::Viewport);
+  m_lastInteractiveSearchParams.SetMode(search::Mode::Viewport);
   m_lastInteractiveSearchParams.SetSuggestsEnabled(false);
   m_lastInteractiveSearchParams.m_onResults = [this](Results const & results)
   {
@@ -1094,8 +1126,8 @@ bool Framework::Search(search::SearchParams const & params)
   m_lastQueryViewport = viewport;
 
   // Cancels previous search request (if any) and initiates new search request.
-  CancelQuery(m_lastQueryHandle);
-  m_lastQueryHandle = m_searchEngine->Search(m_lastQueryParams, m_lastQueryViewport);
+  CancelQuery(m_lastProcessorHandle);
+  m_lastProcessorHandle = m_searchEngine->Search(m_lastQueryParams, m_lastQueryViewport);
   return true;
 }
 
@@ -1233,7 +1265,7 @@ void Framework::InitSearchEngine()
     params.m_numThreads = 1;
     m_searchEngine.reset(new search::Engine(const_cast<Index &>(m_model.GetIndex()),
                                             GetDefaultCategories(), *m_infoGetter,
-                                            make_unique<search::SearchQueryFactory>(), params));
+                                            make_unique<search::ProcessorFactory>(), params));
   }
   catch (RootException const & e)
   {
@@ -1345,9 +1377,7 @@ size_t Framework::ShowSearchResults(search::Results const & results)
     return count;
   }
 
-  m_fixedSearchResults = 0;
   FillSearchResultsMarks(results);
-  m_fixedSearchResults = count;
 
   // Setup viewport according to results.
   m2::AnyRectD viewport = m_currentModelView.GlobalRect();
@@ -1398,7 +1428,7 @@ void Framework::FillSearchResultsMarks(search::Results const & results)
   UserMarkControllerGuard guard(m_bmManager, UserMarkType::SEARCH_MARK);
   guard.m_controller.SetIsVisible(true);
   guard.m_controller.SetIsDrawable(true);
-  guard.m_controller.Clear(m_fixedSearchResults);
+  guard.m_controller.Clear();
 
   size_t const count = results.GetCount();
   for (size_t i = 0; i < count; ++i)
@@ -1409,8 +1439,11 @@ void Framework::FillSearchResultsMarks(search::Results const & results)
       SearchMarkPoint * mark = static_cast<SearchMarkPoint *>(guard.m_controller.CreateUserMark(r.GetFeatureCenter()));
       ASSERT_EQUAL(mark->GetMarkType(), UserMark::Type::SEARCH, ());
       if (r.GetResultType() == search::Result::RESULT_FEATURE)
-        mark->m_foundFeatureID = r.GetFeatureID();
-      mark->m_matchedName = r.GetString();
+        mark->SetFoundFeature(r.GetFeatureID());
+      mark->SetMatchedName(r.GetString());
+
+      if (r.m_metadata.m_isSponsoredHotel)
+        mark->SetCustomSymbol("search-booking");
     }
   }
 }
@@ -1421,10 +1454,8 @@ void Framework::CancelInteractiveSearch()
   if (IsInteractiveSearchActive())
   {
     m_lastInteractiveSearchParams.Clear();
-    CancelQuery(m_lastQueryHandle);
+    CancelQuery(m_lastProcessorHandle);
   }
-
-  m_fixedSearchResults = 0;
 }
 
 bool Framework::GetDistanceAndAzimut(m2::PointD const & point,
@@ -1490,20 +1521,37 @@ void Framework::CreateDrapeEngine(ref_ptr<dp::OGLContextFactory> contextFactory,
                             params.m_visualScale, move(params.m_widgetsInitInfo),
                             make_pair(params.m_initialMyPositionState, params.m_hasMyPositionState),
                             allow3dBuildings, params.m_isChoosePositionMode,
-                            params.m_isChoosePositionMode, GetSelectedFeatureTriangles(), params.m_isFirstLaunch);
+                            params.m_isChoosePositionMode, GetSelectedFeatureTriangles(), params.m_isFirstLaunch,
+                            m_routingSession.IsActive() && m_routingSession.IsFollowing());
 
   m_drapeEngine = make_unique_dp<df::DrapeEngine>(move(p));
-  AddViewportListener([this](ScreenBase const & screen)
+  m_drapeEngine->SetModelViewListener([this](ScreenBase const & screen)
   {
-    if (!screen.GlobalRect().EqualDxDy(m_currentModelView.GlobalRect(), 1.0E-4))
-      UpdateUserViewportChanged();
-    m_currentModelView = screen;
+    GetPlatform().RunOnGuiThread([this, screen](){ OnViewportChanged(screen); });
   });
-  m_drapeEngine->SetTapEventInfoListener(bind(&Framework::OnTapEvent, this, _1));
-  m_drapeEngine->SetUserPositionListener(bind(&Framework::OnUserPositionChanged, this, _1));
+  m_drapeEngine->SetTapEventInfoListener([this](df::TapInfo const & tapInfo)
+  {
+    GetPlatform().RunOnGuiThread([this, tapInfo](){ OnTapEvent(tapInfo); });
+  });
+  m_drapeEngine->SetUserPositionListener([this](m2::PointD const & position)
+  {
+    GetPlatform().RunOnGuiThread([this, position](){ OnUserPositionChanged(position); });
+  });
+
   OnSize(params.m_surfaceWidth, params.m_surfaceHeight);
 
-  m_drapeEngine->SetMyPositionModeListener(m_myPositionListener);
+  m_drapeEngine->SetMyPositionModeListener([this](location::EMyPositionMode mode, bool routingActive)
+  {
+    GetPlatform().RunOnGuiThread([this, mode, routingActive]()
+    {
+      // Deactivate selection (and hide place page) if we return to routing in F&R mode.
+      if (routingActive && mode == location::FollowAndRotate)
+        DeactivateMapSelection(true /* notifyUI */);
+
+      if (m_myPositionListener != nullptr)
+        m_myPositionListener(mode, routingActive);
+    });
+  });
 
   InvalidateUserMarks();
 
@@ -1710,7 +1758,7 @@ bool Framework::ShowMapForURL(string const & url)
   if (result != FAILED)
   {
     // Always hide current map selection.
-    DeactivateMapSelection(true);
+    DeactivateMapSelection(true /* notifyUI */);
 
     // set viewport and stop follow mode if any
     StopLocationFollow();
@@ -1739,7 +1787,8 @@ bool Framework::ShowMapForURL(string const & url)
   return false;
 }
 
-void Framework::ForEachFeatureAtPoint(TFeatureTypeFn && fn, m2::PointD const & mercator) const
+void Framework::ForEachFeatureAtPoint(TFeatureTypeFn && fn, m2::PointD const & mercator,
+                                      double featureDistanceToleranceInMeters) const
 {
   constexpr double kSelectRectWidthInMeters = 1.1;
   constexpr double kMetersToLinearFeature = 3;
@@ -1758,10 +1807,17 @@ void Framework::ForEachFeatureAtPoint(TFeatureTypeFn && fn, m2::PointD const & m
         fn(ft);
       break;
     case feature::GEOM_AREA:
-      if (ft.GetLimitRect(kScale).IsPointInside(mercator) &&
-          feature::GetMinDistanceMeters(ft, mercator) == 0.0)
       {
-        fn(ft);
+        auto limitRect = ft.GetLimitRect(kScale);
+        // Be a little more tolerant. When used by editor mercator is given
+        // with some error, so we must extend limit rect a bit.
+        limitRect.Inflate(MercatorBounds::GetCellID2PointAbsEpsilon(),
+                          MercatorBounds::GetCellID2PointAbsEpsilon());
+        if (limitRect.IsPointInside(mercator) &&
+            feature::GetMinDistanceMeters(ft, mercator) <= featureDistanceToleranceInMeters)
+        {
+          fn(ft);
+        }
       }
       break;
     case feature::GEOM_UNDEFINED:
@@ -1856,12 +1912,15 @@ void Framework::SetMapSelectionListeners(TActivateMapSelectionFn const & activat
 }
 
 void Framework::ActivateMapSelection(bool needAnimation, df::SelectionShape::ESelectedObject selectionType,
-                                     place_page::Info const & info) const
+                                     place_page::Info const & info)
 {
   ASSERT_NOT_EQUAL(selectionType, df::SelectionShape::OBJECT_EMPTY, ("Empty selections are impossible."));
   m_selectedFeature = info.GetID();
   CallDrapeFunction(bind(&df::DrapeEngine::SelectObject, _1, selectionType, info.GetMercator(),
                          needAnimation));
+
+  SetDisplacementMode(info.m_isSponsoredHotel ? dp::displacement::kHotelMode : dp::displacement::kDefaultMode);
+
   if (m_activateMapSelectionFn)
     m_activateMapSelectionFn(info);
   else
@@ -1878,14 +1937,19 @@ void Framework::DeactivateMapSelection(bool notifyUI)
 
   if (somethingWasAlreadySelected)
     CallDrapeFunction(bind(&df::DrapeEngine::DeselectObject, _1));
+
+  SetDisplacementMode(dp::displacement::kDefaultMode);
 }
 
 void Framework::UpdatePlacePageInfoForCurrentSelection()
 {
-  ASSERT(m_lastTapEvent, ());
+  if (m_lastTapEvent == nullptr)
+    return;
 
   place_page::Info info;
-  ActivateMapSelection(false, OnTapEventImpl(*m_lastTapEvent, info), info);
+  df::SelectionShape::ESelectedObject const obj = OnTapEventImpl(*m_lastTapEvent, info);
+  if (obj != df::SelectionShape::OBJECT_EMPTY)
+    ActivateMapSelection(false, obj, info);
 }
 
 void Framework::InvalidateUserMarks()
@@ -1937,7 +2001,7 @@ void Framework::OnTapEvent(df::TapInfo const & tapInfo)
     alohalytics::Stats::Instance().LogEvent(somethingWasAlreadySelected ? "$DelectMapObject" : "$EmptyTapOnMap");
     // UI is always notified even if empty map is tapped,
     // because empty tap event switches on/off full screen map view mode.
-    DeactivateMapSelection(true);
+    DeactivateMapSelection(true /* notifyUI */);
   }
 }
 
@@ -1980,6 +2044,9 @@ FeatureID Framework::FindBuildingAtPoint(m2::PointD const & mercator) const
 df::SelectionShape::ESelectedObject Framework::OnTapEventImpl(df::TapInfo const & tapInfo,
                                                               place_page::Info & outInfo) const
 {
+  if (m_drapeEngine == nullptr)
+    return df::SelectionShape::OBJECT_EMPTY;
+
   m2::PointD const pxPoint2d = m_currentModelView.P3dtoP(tapInfo.m_pixelPoint);
 
   if (tapInfo.m_isMyPositionTapped)
@@ -2282,9 +2349,20 @@ void Framework::InsertRoute(Route const & route)
   if (m_currentRouterType == RouterType::Vehicle)
     route.GetTurnsDistances(turns);
 
-  df::ColorConstant const routeColor = (m_currentRouterType == RouterType::Pedestrian) ?
-                                        df::RoutePedestrian : df::Route;
-  m_drapeEngine->AddRoute(route.GetPoly(), turns, routeColor);
+  df::ColorConstant routeColor = df::Route;
+  df::RoutePattern pattern;
+  if (m_currentRouterType == RouterType::Pedestrian)
+  {
+    routeColor = df::RoutePedestrian;
+    pattern = df::RoutePattern(4.0, 2.0);
+  }
+  else if (m_currentRouterType == RouterType::Bicycle)
+  {
+    routeColor = df::RouteBicycle;
+    pattern = df::RoutePattern(8.0, 2.0);
+  }
+
+  m_drapeEngine->AddRoute(route.GetPoly(), turns, routeColor, pattern);
 }
 
 void Framework::CheckLocationForRouting(GpsInfo const & info)
@@ -2362,8 +2440,15 @@ RouterType Framework::GetBestRouter(m2::PointD const & startPoint, m2::PointD co
 {
   if (MercatorBounds::DistanceOnEarth(startPoint, finalPoint) < kKeepPedestrianDistanceMeters)
   {
-    if (GetLastUsedRouter() == RouterType::Pedestrian)
-      return RouterType::Pedestrian;
+    auto const lastUsedRouter = GetLastUsedRouter();
+    switch (lastUsedRouter)
+    {
+      case RouterType::Pedestrian:
+      case RouterType::Bicycle:
+        return lastUsedRouter;
+      case RouterType::Vehicle:
+        ; // fall through
+    }
 
     // Return on a short distance the vehicle router flag only if we are already have routing files.
     auto countryFileGetter = [this](m2::PointD const & pt)
@@ -2383,7 +2468,12 @@ RouterType Framework::GetLastUsedRouter() const
 {
   string routerType;
   settings::Get(kRouterTypeKey, routerType);
-  return (routerType == routing::ToString(RouterType::Pedestrian) ? RouterType::Pedestrian : RouterType::Vehicle);
+
+  if (routerType == routing::ToString(RouterType::Pedestrian))
+    return  RouterType::Pedestrian;
+  if (routerType == routing::ToString(RouterType::Bicycle))
+    return RouterType::Bicycle;
+  return RouterType::Vehicle;
 }
 
 void Framework::SetLastUsedRouter(RouterType type)
@@ -2623,7 +2713,8 @@ bool Framework::CreateMapObject(m2::PointD const & mercator, uint32_t const feat
                                 osm::EditableMapObject & emo) const
 {
   emo = {};
-  MwmSet::MwmId const mwmId = m_model.GetIndex().GetMwmIdByCountryFile(
+  auto const & index = m_model.GetIndex();
+  MwmSet::MwmId const mwmId = index.GetMwmIdByCountryFile(
         platform::CountryFile(m_infoGetter->GetRegionCountryId(mercator)));
   if (!mwmId.IsAlive())
     return false;
@@ -2633,6 +2724,10 @@ bool Framework::CreateMapObject(m2::PointD const & mercator, uint32_t const feat
 
   coder.GetNearbyStreets(mwmId, mercator, streets);
   emo.SetNearbyStreets(TakeSomeStreetsAndLocalize(streets, m_model.GetIndex()));
+
+  // TODO(mgsergio): Check emo is a poi. For now it is the only option.
+  SetHostingBuildingAddress(FindBuildingAtPoint(mercator), index, coder, emo);
+
   return osm::Editor::Instance().CreatePoint(featureType, mercator, mwmId, emo);
 }
 
@@ -2742,6 +2837,11 @@ osm::Editor::SaveResult Framework::SaveEditedMapObject(osm::EditableMapObject em
     // and emo.SetHouseNumber("") will be called in the following code. So OSM ends up
     // with incorrect data.
 
+    // There is (almost) always a street and/or house number set in emo. We must keep them from
+    // saving to editor and pushing to OSM if they ware not overidden. To be saved to editor
+    // emo is first converted to FeatureType and FeatureType is then saved to a file and editor.
+    // To keep street and house number from penetrating to FeatureType we set them to be empty.
+
     // Do not save street if it was taken from hosting building.
     if ((originalFeatureStreet.empty() || isCreatedFeature) && !isStreetOverridden)
         emo.SetStreet({});
@@ -2763,12 +2863,12 @@ osm::Editor::SaveResult Framework::SaveEditedMapObject(osm::EditableMapObject em
       // Such a notification have been already sent. I.e at least one of
       // street of house number should differ in emo and editor.
       shouldNotify = !isCreatedFeature &&
-                     (editor.GetEditedFeature(emo.GetID(), editedFeature) &&
-                      !editedFeature.GetHouseNumber().empty() &&
-                      editedFeature.GetHouseNumber() != emo.GetHouseNumber()) ||
-                     (editor.GetEditedFeatureStreet(emo.GetID(), editedFeatureStreet) &&
-                      !editedFeatureStreet.empty() &&
-                      editedFeatureStreet != emo.GetStreet().m_defaultName);
+                     ((editor.GetEditedFeature(emo.GetID(), editedFeature) &&
+                       !editedFeature.GetHouseNumber().empty() &&
+                       editedFeature.GetHouseNumber() != emo.GetHouseNumber()) ||
+                      (editor.GetEditedFeatureStreet(emo.GetID(), editedFeatureStreet) &&
+                       !editedFeatureStreet.empty() &&
+                       editedFeatureStreet != emo.GetStreet().m_defaultName));
     }
   } while (0);
 
@@ -2789,9 +2889,36 @@ void Framework::DeleteFeature(FeatureID const & fid) const
 {
   // TODO(AlexZ): Use FeatureID in the editor interface.
   osm::Editor::Instance().DeleteFeature(*GetFeatureByID(fid));
+  if (m_selectedFeature == fid)
+    m_selectedFeature = FeatureID();
 }
 
 osm::NewFeatureCategories Framework::GetEditorCategories() const
 {
   return osm::Editor::Instance().GetNewFeatureCategories();
+}
+
+bool Framework::RollBackChanges(FeatureID const & fid)
+{
+  if (m_selectedFeature == fid) // reset selected feature since it becomes invalid after rollback
+    m_selectedFeature = FeatureID();
+  auto & editor = osm::Editor::Instance();
+  auto const status = editor.GetFeatureStatus(fid);
+  auto const rolledBack = editor.RollBackChanges(fid);
+  if (rolledBack)
+  {
+    if (status == osm::Editor::FeatureStatus::Created)
+      DeactivateMapSelection(true /* notifyUI */);
+    else
+      UpdatePlacePageInfoForCurrentSelection();
+  }
+  return rolledBack;
+}
+
+void Framework::CreateNote(ms::LatLon const & latLon, FeatureID const & fid,
+                           osm::Editor::NoteProblemType const type, string const & note)
+{
+  osm::Editor::Instance().CreateNote(latLon, fid, type, note);
+  if (type == osm::Editor::NoteProblemType::PlaceDoesNotExist)
+    DeactivateMapSelection(true /* notifyUI */);
 }

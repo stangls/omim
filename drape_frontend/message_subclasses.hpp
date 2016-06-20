@@ -544,10 +544,12 @@ private:
 class AddRouteMessage : public Message
 {
 public:
-  AddRouteMessage(m2::PolylineD const & routePolyline, vector<double> const & turns, df::ColorConstant color)
+  AddRouteMessage(m2::PolylineD const & routePolyline, vector<double> const & turns,
+                  df::ColorConstant color, df::RoutePattern const & pattern)
     : m_routePolyline(routePolyline)
     , m_color(color)
     , m_turns(turns)
+    , m_pattern(pattern)
   {}
 
   Type GetType() const override { return Message::AddRoute; }
@@ -555,11 +557,13 @@ public:
   m2::PolylineD const & GetRoutePolyline() { return m_routePolyline; }
   df::ColorConstant GetColor() const { return m_color; }
   vector<double> const & GetTurns() const { return m_turns; }
+  df::RoutePattern const & GetPattern() const { return m_pattern; }
 
 private:
   m2::PolylineD m_routePolyline;
   df::ColorConstant m_color;
   vector<double> m_turns;
+  df::RoutePattern m_pattern;
 };
 
 class CacheRouteSignMessage : public Message
@@ -801,6 +805,20 @@ public:
 
 private:
   double m_time;
+};
+
+class SetDisplacementModeMessage : public Message
+{
+public:
+  explicit SetDisplacementModeMessage(int mode)
+    : m_mode(mode)
+  {}
+
+  Type GetType() const override { return Message::SetDisplacementMode; }
+  int GetMode() const { return m_mode; }
+
+private:
+  int m_mode;
 };
 
 } // namespace df

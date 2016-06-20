@@ -9,6 +9,7 @@
 #import "MWMAuthorizationCommon.h"
 #import "MWMAuthorizationLoginViewController.h"
 #import "MWMAuthorizationWebViewLoginViewController.h"
+#import "MWMEditBookmarkController.h"
 #import "MWMEditorViewController.h"
 #import "MWMFirstLaunchController.h"
 #import "MWMFrameworkListener.h"
@@ -396,6 +397,7 @@ BOOL gIsFirstMyPositionMode = YES;
     return;
   self.view.clipsToBounds = YES;
   [MTRGManager setMyCom:YES];
+  [self processMyPositionStateModeEvent:location::PendingPosition];
 }
 
 - (void)mwm_refreshUI
@@ -520,8 +522,6 @@ BOOL gIsFirstMyPositionMode = YES;
     // Probably it's better to subscribe only wnen needed and usubscribe in other cases.
     // May be better solution would be multiobservers support in the C++ core.
     [self processMyPositionStateModeEvent:mode];
-    [self.controlsManager.menuController processMyPositionStateModeEvent:mode];
-    [[MapsAppDelegate theApp].locationManager processMyPositionStateModeEvent:mode];
   });
 
   m_predictor = [[LocationPredictor alloc] initWithObserver:self];
@@ -568,11 +568,14 @@ BOOL gIsFirstMyPositionMode = YES;
 {
   [m_predictor setMode:mode];
 
+  LocationManager * lm = [MapsAppDelegate theApp].locationManager;
+  [lm processMyPositionStateModeEvent:mode];
+  [self.controlsManager processMyPositionStateModeEvent:mode];
   switch (mode)
   {
     case location::PendingPosition:
       self.disableStandbyOnLocationStateMode = NO;
-      [[MapsAppDelegate theApp].locationManager start:self];
+      [lm start:self];
       break;
     case location::NotFollowNoPosition:
       if (gIsFirstMyPositionMode && ![Alohalytics isFirstSession])
@@ -582,18 +585,20 @@ BOOL gIsFirstMyPositionMode = YES;
       else
       {
         self.disableStandbyOnLocationStateMode = NO;
-        BOOL const isLocationManagerStarted = [MapsAppDelegate theApp].locationManager.isStarted;
         BOOL const isMapVisible = (self.navigationController.visibleViewController == self);
-        if (isLocationManagerStarted && isMapVisible && ![Alohalytics isFirstSession])
+        if (isMapVisible && lm.isStarted)
         {
-          [self.alertController presentLocationNotFoundAlertWithOkBlock:^
+          [lm stop:self];
+          BOOL  const isLocationProhibited =
+              lm.lastLocationError == location::TLocationError::EDenied ||
+              lm.lastLocationError == location::TLocationError::EGPSIsOff;
+          if (!isLocationProhibited)
           {
-            GetFramework().SwitchMyPositionNextMode();
+            [self.alertController presentLocationNotFoundAlertWithOkBlock:^
+            {
+              GetFramework().SwitchMyPositionNextMode();
+            }];
           }
-          cancelBlock:^
-          {
-            [[MapsAppDelegate theApp].locationManager stop:self];
-          }];
         }
       }
       break;
@@ -869,6 +874,17 @@ BOOL gIsFirstMyPositionMode = YES;
     MWMAuthorizationWebViewLoginViewController * dvc = segue.destinationViewController;
     dvc.authType = MWMWebViewAuthorizationTypeGoogle;
   }
+  else if ([segue.identifier isEqualToString:@"PP2BookmarkEditingIPAD"])
+  {
+    UINavigationController * nav = segue.destinationViewController;
+    MWMEditBookmarkController * dvc = nav.viewControllers.firstObject;
+    dvc.manager = sender;
+  }
+  else if ([segue.identifier isEqualToString:@"PP2BookmarkEditing"])
+  {
+    MWMEditBookmarkController * dvc = segue.destinationViewController;
+    dvc.manager = sender;
+  }
 }
 
 #pragma mark - Properties
@@ -881,6 +897,8 @@ BOOL gIsFirstMyPositionMode = YES;
 
 - (MWMMapViewControlsManager *)controlsManager
 {
+  if (!self.isViewLoaded)
+    return nil;
   if (!_controlsManager)
     _controlsManager = [[MWMMapViewControlsManager alloc] initWithParentController:self];
   return _controlsManager;

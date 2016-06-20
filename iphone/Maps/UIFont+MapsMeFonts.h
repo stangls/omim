@@ -2,6 +2,7 @@
 
 + (UIFont *)regular10;
 + (UIFont *)regular12;
++ (UIFont *)regular13;
 + (UIFont *)regular14;
 + (UIFont *)regular15;
 + (UIFont *)regular16;
@@ -17,6 +18,7 @@
 + (UIFont *)medium18;
 + (UIFont *)medium20;
 + (UIFont *)medium24;
++ (UIFont *)medium28;
 + (UIFont *)medium36;
 + (UIFont *)medium40;
 + (UIFont *)medium44;

@@ -83,9 +83,6 @@
 
 "ok" = "OK";
 
-/* not used? Search View - Location is disabled by user warning text */
-"enable_location_services" = "Veuillez activer les services de localisation";
-
 /* Settings/Downloader - No free space dialog message */
 "free_disk_space_for_country_x" = "Veuillez d'abord libérer de l'espace sur votre appareil afin de télécharger %@";
 
@@ -117,7 +114,7 @@
 "use_wifi_recommendation_text" = "Nous recommandons d'utiliser une connexion Wi-Fi pour télécharger de grandes cartes";
 
 /* Choose measurement on first launch alert - title */
-"which_measurement_system" = "Quel système de mesure préférez-vous ?";
+"which_measurement_system" = "Quel système de mesure préférez-vous ?";
 
 /* Location services are disabled by user alert - message */
 "location_is_disabled_long_text" = "Tous les services de localisation de cet appareil sont désactivés, ou ils le sont pour cette application. Veuillez les activer dans les paramètres.";
@@ -185,9 +182,9 @@
 
 "downloading_country_can_proceed" = "%@ en téléchargement. Vous pouvez\nmaintenant aller sur la carte.";
 
-"download_country_ask" = "Télécharger %@ ?";
+"download_country_ask" = "Télécharger %@ ?";
 
-"update_country_ask" = "Mettre %@ à jour ?";
+"update_country_ask" = "Mettre %@ à jour ?";
 
 /* REMOVE THIS STRING AFTER REFACTORING */
 "download_location_map_proposal" = "Vous pouvez télécharger la carte\nde votre position actuelle.";
@@ -209,10 +206,10 @@
 "update_mb_or_kb" = "Mettre à jour %@";
 
 /* Show popup notification when we have downloaded countries without search (from Lite version) */
-"search_update_maps" = "Il vous faut des cartes mises à jour pour la fonction de recherche :";
+"search_update_maps" = "Il vous faut des cartes mises à jour pour la fonction de recherche :";
 
 /* Show popup notification on app start when we have out-of-date maps */
-"advise_update_maps" = "Des mises à jour sont disponibles pour ces cartes :";
+"advise_update_maps" = "Des mises à jour sont disponibles pour ces cartes :";
 
 /* Show popup notification in Pro version that Lite can be deleted */
 "suggest_uninstall_lite" = "Vous n'avez plus besoin de MAPS.ME Lite, pouvez donc le désinstaller.";
@@ -275,7 +272,7 @@
 "maps_storage_summary" = "Sélectionner l'emplacement où les cartes devraient être téléchargées";
 
 /* Question dialog for transferring maps from one storage to another */
-"move_maps" = "Déplacer les cartes ?";
+"move_maps" = "Déplacer les cartes ?";
 
 /* Ask to wait user several minutes (some long process in modal dialog). */
 "wait_several_minutes" = "Ceci peut prendre plusieurs minutes.\nVeuillez patienter…";
@@ -358,7 +355,7 @@
 "share_bookmarks_email_subject" = "Signets MAPS.ME partagés";
 
 /* Email text when sharing bookmarks category */
-"share_bookmarks_email_body" = "Bonjour,\n\nVous trouverez ci-joints mes signets de MAPS.ME - cartes hors ligne. Veuillez ouvrir le ficher si vous avez MAPS.ME d'installé. Sinon, téléchargez l'appli pour votre appareil iOS ou Android en suivant ce lien http://maps.me/get?kmz\n\nAppréciez vos voyages avec MAPS.ME !";
+"share_bookmarks_email_body" = "Bonjour,\n\nVous trouverez ci-joints mes signets de MAPS.ME - cartes hors ligne. Veuillez ouvrir le ficher si vous avez MAPS.ME d'installé. Sinon, téléchargez l'appli pour votre appareil iOS ou Android en suivant ce lien http://maps.me/get?kmz\n\nAppréciez vos voyages avec MAPS.ME !";
 
 /* message title of loading file */
 "load_kmz_title" = "Chargement des signets";
@@ -388,7 +385,7 @@
 "downloading_is_active" = "Le téléchargement du pays est en cours.";
 
 /* Message that will be shown in alert view, when we ask user to leave review on App Store */
-"appStore_message" = "Nous espérons que vous appréciez l'utilisation de MAPS.ME ! Si oui, veuillez évaluer l'appli ou laisser une critique sur l'App Store. Cela prend moins d'une minute, mais peut vraiment nous aider. Merci pour votre soutien !";
+"appStore_message" = "Nous espérons que vous appréciez l'utilisation de MAPS.ME ! Si oui, veuillez évaluer l'appli ou laisser une critique sur l'App Store. Cela prend moins d'une minute, mais peut vraiment nous aider. Merci pour votre soutien !";
 
 /* No, thanks */
 "no_thanks" = "Non, merci";
@@ -409,7 +406,7 @@
 "my_position_share_email_subject" = "Hé, regarde ma position actuelle sur la carte MAPS.ME !";
 
 /* Share my position using EMail, %1$@ is ge0:// and %2$@ is http://ge0.me link WITHOUT NAME */
-"my_position_share_email" = "Bonjour,\n\nJe suis actuelement ici : %1$@. Clique sur ce lien %2$@ ou sur celui-ci %3$@ pour voir l'endroit sur la carte.\n\nMerci.";
+"my_position_share_email" = "Bonjour,\n\nJe suis actuelement ici : %1$@. Clique sur ce lien %2$@ ou sur celui-ci %3$@ pour voir l'endroit sur la carte.\n\nMerci.";
 
 /* Android share by Message/SMS button text (including SMS) */
 "share_by_message" = "Partager par message";
@@ -430,7 +427,7 @@
 "more_info" = "Afficher plus d'informations";
 
 /* Text for message when used successfully copied something */
-"copied_to_clipboard" = "Copié dans le presse-papiers : %1$@";
+"copied_to_clipboard" = "Copié dans le presse-papiers : %1$@";
 
 /* Setting label for statistics turn on/off */
 "allow_statistics" = "Envoyer des statistiques";
@@ -454,13 +451,13 @@
 "show_on_backscreen" = "Afficher sur l'arrière-plan";
 
 /* Prints version number in About dialog */
-"version" = "Version : %@";
+"version" = "Version : %@";
 
 /* Data version in «About» screen */
 "data_version" = "Data version: %d";
 
 /* Confirmation in downloading countries dialog */
-"are_you_sure" = "Êtes-vous certain de vouloir continuer ?";
+"are_you_sure" = "Êtes-vous certain de vouloir continuer ?";
 
 /* Title for tracks category in bookmarks manager */
 "tracks" = "Parcours";
@@ -837,7 +834,7 @@
 "routing_download_more_than_avail" = "Vous devez télécharger %@ Mo, mais seulement %@ Mo sont disponibles.";
 
 /* Text for routing error dialog */
-"routing_download_roaming" = "Vous allez télécharger 2 840 Mo à l'aide de données mobiles (frais d' itinérance). Cela peut entraîner des frais additionnels, en fonction du plan de données mobiles proposé par votre opérateur.";
+"routing_download_roaming" = "Vous allez télécharger %@ Mo à l'aide de données mobiles (frais d' itinérance). Cela peut entraîner des frais additionnels, en fonction du plan de données mobiles proposé par votre opérateur.";
 
 /* bookmark button text */
 "bookmark" = "signet";
@@ -846,7 +843,7 @@
 "not_found_map" = "La carte pour votre emplacement n'est pas téléchargée";
 
 /* location service disabled */
-"enable_location_service" = "Veuillez activer les services de localisation";
+"enable_location_services" = "Veuillez activer les services de localisation";
 
 /* download map */
 "download_map" = "Télécharger la carte de l'endroit où vous êtes";
@@ -1069,7 +1066,7 @@
 
 "p2p_from_here" = "Depuis";
 
-"p2p_to_here" = "Jusqu'à";
+"p2p_to_here" = "Itinéraire vers";
 
 "p2p_only_from_current" = "La navigation est uniquement disponible à partir de votre emplacement actuel.";
 
@@ -1433,7 +1430,7 @@
 
 "whatsnew_update_editor_title" = "Nous avons mis à jour l'éditeur de cartes";
 
-"whatsnew_update_editor_message" = "Les utilisateurs de MAPS.ME ont procédé à 50 000 modifications de cartes. Nous créons ensemble les cartes les plus détaillées du monde. Rejoignez-nous !";
+"whatsnew_update_editor_message" = "Les utilisateurs de MAPS.ME ont procédé à 200 000 modifications de cartes. Nous créons ensemble les cartes les plus détaillées du monde. Rejoignez-nous !";
 
 /* Additional text in whats new */
 "whatsnew_update_editor_message_update" = "Pour utiliser l'Éditeur de Cartes, veuillez mettre à jour toutes les cartes.";
@@ -1478,7 +1475,7 @@
 
 "placepage_place_rating" = "Notation";
 
-"place_page_starting_from" = "à partir de %d";
+"place_page_starting_from" = "à partir de %s";
 
 "meter" = "m";
 
@@ -1515,3 +1512,15 @@
 "editor_status_sending" = "Envoyer…";
 
 "editor_place_doesnt_exist" = "La place n'existe pas";
+
+"place_page_booking_rating" = "Rating: %s";
+
+"text_more_button" = "… more";
+
+"error_enter_correct_phone" = "Enter a valid phone number";
+
+"error_enter_correct_web" = "Enter a valid web address";
+
+"error_enter_correct_email" = "Enter a valid email";
+
+"error_enter_correct" = "Enter a valid value";

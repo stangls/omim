@@ -1,9 +1,9 @@
+#include "search/ranking_info.hpp"
 #include "search/result.hpp"
 #include "search/search_quality/helpers.hpp"
 #include "search/search_quality/sample.hpp"
 #include "search/search_tests_support/test_search_engine.hpp"
 #include "search/search_tests_support/test_search_request.hpp"
-#include "search/v2/ranking_info.hpp"
 
 #include "indexer/classificator_loader.hpp"
 #include "indexer/feature_algo.hpp"
@@ -141,15 +141,26 @@ void DisplayStats(ostream & os, vector<Sample> const & samples, vector<Stats> co
 {
   auto const n = samples.size();
   ASSERT_EQUAL(stats.size(), n, ());
+
+  size_t numWarnings = 0;
+  for (auto const & stat : stats)
+  {
+    if (!stat.m_notFound.empty())
+      ++numWarnings;
+  }
+
+  if (numWarnings == 0)
+  {
+    os << "All " << stats.size() << " queries are OK." << endl;
+    return;
+  }
+
+  os << numWarnings << " warnings." << endl;
   for (size_t i = 0; i < n; ++i)
   {
-    os << "Query #" << i << " \"" << strings::ToUtf8(samples[i].m_query) << "\"";
     if (stats[i].m_notFound.empty())
-    {
-      os << ": OK" << endl;
       continue;
-    }
-    os << ": WARNING" << endl;
+    os << "Query #" << i << " \"" << strings::ToUtf8(samples[i].m_query) << "\":" << endl;
     for (auto const & j : stats[i].m_notFound)
       os << "Not found: " << DebugPrint(samples[i].m_results[j]) << endl;
   }
@@ -206,7 +217,7 @@ int main(int argc, char * argv[])
   }
 
   classificator::Load();
-  TestSearchEngine engine(move(infoGetter), make_unique<SearchQueryFactory>(), Engine::Params{});
+  TestSearchEngine engine(move(infoGetter), make_unique<ProcessorFactory>(), Engine::Params{});
 
   vector<platform::LocalCountryFile> mwms;
   platform::FindAllLocalMapsAndCleanup(numeric_limits<int64_t>::max() /* the latest version */,
@@ -221,7 +232,7 @@ int main(int argc, char * argv[])
   Context context(engine);
 
   cout << "SampleId,";
-  v2::RankingInfo::PrintCSVHeader(cout);
+  RankingInfo::PrintCSVHeader(cout);
   cout << ",Relevance" << endl;
 
   for (size_t i = 0; i < samples.size(); ++i)

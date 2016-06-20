@@ -64,7 +64,7 @@ routing::VehicleModel::InitListT const g_bicycleLimitsDefault =
   { {"highway", "road"},           kSpeedRoadKMpH },
   { {"highway", "track"},          kSpeedTrackKMpH }, // *
   { {"highway", "path"},           kSpeedPathKMpH },
-  { {"highway", "cycleway"},       kSpeedPedestrianKMpH },
+  { {"highway", "cycleway"},       kSpeedCyclewayKMpH },
   { {"highway", "residential"},    kSpeedResidentialKMpH },
   { {"highway", "living_street"},  kSpeedLivingStreetKMpH },
   { {"highway", "steps"},          kSpeedStepsKMpH }, // *
@@ -74,27 +74,27 @@ routing::VehicleModel::InitListT const g_bicycleLimitsDefault =
 // All options available.
 routing::VehicleModel::InitListT const g_bicycleLimitsAll =
 {
-  { {"highway", "trunk"},          kSpeedPedestrianKMpH },
-  { {"highway", "trunk_link"},     kSpeedPedestrianKMpH },
-  { {"highway", "primary"},        kSpeedPedestrianKMpH },
-  { {"highway", "primary_link"},   kSpeedPedestrianKMpH },
-  { {"highway", "secondary"},      kSpeedPedestrianKMpH },
-  { {"highway", "secondary_link"}, kSpeedPedestrianKMpH },
-  { {"highway", "tertiary"},       kSpeedPedestrianKMpH },
-  { {"highway", "tertiary_link"},  kSpeedPedestrianKMpH },
-  { {"highway", "service"},        kSpeedPedestrianKMpH },
-  { {"highway", "unclassified"},   kSpeedPedestrianKMpH },
-  { {"highway", "road"},           kSpeedPedestrianKMpH },
-  { {"highway", "track"},          kSpeedPedestrianKMpH },
-  { {"highway", "path"},           kSpeedPedestrianKMpH },
-  { {"highway", "bridleway"},      kSpeedPedestrianKMpH },
-  { {"highway", "cycleway"},       kSpeedPedestrianKMpH },
-  { {"highway", "residential"},    kSpeedPedestrianKMpH },
-  { {"highway", "living_street"},  kSpeedPedestrianKMpH },
-  { {"highway", "steps"},          kSpeedPedestrianKMpH },
-  { {"highway", "pedestrian"},     kSpeedPedestrianKMpH },
-  { {"highway", "footway"},        kSpeedPedestrianKMpH },
-  { {"highway", "platform"},       kSpeedPedestrianKMpH },
+  { {"highway", "trunk"},          kSpeedCyclewayKMpH },
+  { {"highway", "trunk_link"},     kSpeedCyclewayKMpH },
+  { {"highway", "primary"},        kSpeedCyclewayKMpH },
+  { {"highway", "primary_link"},   kSpeedCyclewayKMpH },
+  { {"highway", "secondary"},      kSpeedCyclewayKMpH },
+  { {"highway", "secondary_link"}, kSpeedCyclewayKMpH },
+  { {"highway", "tertiary"},       kSpeedCyclewayKMpH },
+  { {"highway", "tertiary_link"},  kSpeedCyclewayKMpH },
+  { {"highway", "service"},        kSpeedCyclewayKMpH },
+  { {"highway", "unclassified"},   kSpeedCyclewayKMpH },
+  { {"highway", "road"},           kSpeedCyclewayKMpH },
+  { {"highway", "track"},          kSpeedCyclewayKMpH },
+  { {"highway", "path"},           kSpeedCyclewayKMpH },
+  { {"highway", "bridleway"},      kSpeedCyclewayKMpH },
+  { {"highway", "cycleway"},       kSpeedCyclewayKMpH },
+  { {"highway", "residential"},    kSpeedCyclewayKMpH },
+  { {"highway", "living_street"},  kSpeedCyclewayKMpH },
+  { {"highway", "steps"},          kSpeedCyclewayKMpH },
+  { {"highway", "pedestrian"},     kSpeedCyclewayKMpH },
+  { {"highway", "footway"},        kSpeedCyclewayKMpH },
+  { {"highway", "platform"},       kSpeedCyclewayKMpH },
 };
 
 // Australia
@@ -435,7 +435,9 @@ routing::VehicleModel::InitListT const g_bicycleLimitsRussia =
   { {"highway", "cycleway"},       kSpeedCyclewayKMpH },
   { {"highway", "residential"},    kSpeedResidentialKMpH },
   { {"highway", "living_street"},  kSpeedLivingStreetKMpH },
+  { {"highway", "steps"},          kSpeedStepsKMpH }, // *
   { {"highway", "pedestrian"},     kSpeedPedestrianKMpH },
+  { {"highway", "footway"},        kSpeedPedestrianKMpH },
   { {"highway", "platform"},       kSpeedPlatformKMpH }, // *
 };
 
@@ -523,6 +525,7 @@ routing::VehicleModel::InitListT const g_bicycleLimitsUkraine =
   { {"highway", "cycleway"},       kSpeedCyclewayKMpH },
   { {"highway", "residential"},    kSpeedResidentialKMpH },
   { {"highway", "living_street"},  kSpeedLivingStreetKMpH },
+  { {"highway", "steps"},          kSpeedStepsKMpH }, // *
   { {"highway", "pedestrian"},     kSpeedPedestrianKMpH },
   { {"highway", "footway"},        kSpeedFootwayKMpH },
   { {"highway", "platform"},       kSpeedPlatformKMpH }, // *
@@ -598,40 +601,41 @@ BicycleModel::BicycleModel(VehicleModel::InitListT const & speedLimits)
 
 void BicycleModel::Init()
 {
-  // @TODO(bykoianko) Uncomment line below what tags hwtag=nobicycle and hwtag=yesbicycle
-  // will be added to classificator.txt. (https://jira.mail.ru/browse/MAPSME-858)
-//  m_noBicycleType = classif().GetTypeByPath({ "hwtag", "nobicycle" });
-//  m_yesBicycleType = classif().GetTypeByPath({ "hwtag", "yesbicycle" });
+  initializer_list<char const *> hwtagYesBicycle = {"hwtag", "yesbicycle"};
 
-  initializer_list<char const *> arr[] =
-  {
-    { "route", "ferry" },
-    { "man_made", "pier" },
+  m_yesBicycleType = classif().GetTypeByPath(hwtagYesBicycle);
+  m_noBicycleType = classif().GetTypeByPath({"hwtag", "nobicycle"});
+  m_bidirBicycleType = classif().GetTypeByPath({"hwtag", "bidir_bicycle"});
+
+  initializer_list<char const *> arr[] = {
+      hwtagYesBicycle, {"route", "ferry"}, {"man_made", "pier"},
   };
 
   SetAdditionalRoadTypes(classif(), arr, ARRAY_SIZE(arr));
 }
 
-bool BicycleModel::IsNoBicycle(feature::TypesHolder const & types) const
+IVehicleModel::RoadAvailability BicycleModel::GetRoadAvailability(feature::TypesHolder const & types) const
 {
-  return find(types.begin(), types.end(), m_noBicycleType) != types.end();
+  if (types.Has(m_yesBicycleType))
+    return RoadAvailability::Available;
+  if (types.Has(m_noBicycleType))
+    return RoadAvailability::NotAvailable;
+  return RoadAvailability::Unknown;
 }
 
-bool BicycleModel::IsYesBicycle(feature::TypesHolder const & types) const
+bool BicycleModel::IsBicycleBidir(feature::TypesHolder const & types) const
 {
-  return find(types.begin(), types.end(), m_yesBicycleType) != types.end();
+  return types.Has(m_bidirBicycleType);
 }
 
-double BicycleModel::GetSpeed(FeatureType const & f) const
+bool BicycleModel::IsOneWay(FeatureType const & f) const
 {
-  feature::TypesHolder types(f);
+  feature::TypesHolder const types(f);
 
-  if (IsYesBicycle(types))
-    return VehicleModel::GetMaxSpeed();
-  if (!IsNoBicycle(types) && IsRoad(types))
-    return VehicleModel::GetSpeed(types);
+  if (IsBicycleBidir(types))
+    return false;
 
-  return 0.0;
+  return VehicleModel::IsOneWay(f);
 }
 
 BicycleModelFactory::BicycleModelFactory()

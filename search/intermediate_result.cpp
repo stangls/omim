@@ -52,16 +52,15 @@ void ProcessMetadata(FeatureType const & ft, Result::Metadata & meta)
     meta.m_stars = my::clamp(meta.m_stars, 0, 5);
   else
     meta.m_stars = 0;
+  
+  meta.m_isSponsoredHotel = ftypes::IsBookingChecker::Instance()(ft);
+  
   meta.m_isInitialized = true;
 }
 
 namespace impl
 {
-PreResult1::PreResult1(double priority) : m_priority(priority) {}
-
-PreResult1::PreResult1(FeatureID const & fID, double priority, int8_t viewportID,
-                       v2::PreRankingInfo const & info)
-  : m_id(fID), m_priority(priority), m_viewportID(viewportID), m_info(info)
+PreResult1::PreResult1(FeatureID const & fID, PreRankingInfo const & info) : m_id(fID), m_info(info)
 {
   ASSERT(m_id.IsValid(), ());
 }
@@ -71,14 +70,14 @@ bool PreResult1::LessRank(PreResult1 const & r1, PreResult1 const & r2)
 {
   if (r1.m_info.m_rank != r2.m_info.m_rank)
     return r1.m_info.m_rank > r2.m_info.m_rank;
-  return r1.m_priority < r2.m_priority;
+  return r1.m_info.m_distanceToPivot < r2.m_info.m_distanceToPivot;
 }
 
 // static
-bool PreResult1::LessPriority(PreResult1 const & r1, PreResult1 const & r2)
+bool PreResult1::LessDistance(PreResult1 const & r1, PreResult1 const & r2)
 {
-  if (r1.m_priority != r2.m_priority)
-    return r1.m_priority < r2.m_priority;
+  if (r1.m_info.m_distanceToPivot != r2.m_info.m_distanceToPivot)
+    return r1.m_info.m_distanceToPivot < r2.m_info.m_distanceToPivot;
   return r1.m_info.m_rank > r2.m_info.m_rank;
 }
 
@@ -208,12 +207,8 @@ Result PreResult2::GenerateFinalResult(storage::CountryInfoGetter const & infoGe
   {
   case RESULT_FEATURE:
   case RESULT_BUILDING:
-    return Result(m_id, GetCenter(), name, address, pCat->GetReadableFeatureType(type, locale)
-              #ifdef DEBUG
-                  + ' ' + strings::to_string(static_cast<int>(m_info.m_rank))
-              #endif
-                  , type, m_metadata);
-
+    return Result(m_id, GetCenter(), name, address, pCat->GetReadableFeatureType(type, locale),
+                  type, m_metadata);
   default:
     ASSERT_EQUAL(m_resultType, RESULT_LATLON, ());
     return Result(GetCenter(), name, address);

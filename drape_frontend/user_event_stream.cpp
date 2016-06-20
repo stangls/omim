@@ -1,7 +1,14 @@
 #include "drape_frontend/user_event_stream.hpp"
+#include "drape_frontend/animation/linear_animation.hpp"
+#include "drape_frontend/animation/scale_animation.hpp"
+#include "drape_frontend/animation/follow_animation.hpp"
+#include "drape_frontend/animation/perspective_animation.hpp"
+#include "drape_frontend/animation/sequence_animation.hpp"
 #include "drape_frontend/animation_constants.hpp"
 #include "drape_frontend/animation_system.hpp"
 #include "drape_frontend/animation_utils.hpp"
+#include "drape_frontend/screen_animations.hpp"
+#include "drape_frontend/screen_operations.hpp"
 #include "drape_frontend/visual_params.hpp"
 
 #include "indexer/scales.hpp"
@@ -24,12 +31,10 @@ namespace
 {
 
 uint64_t const kDoubleTapPauseMs = 250;
-uint64_t const kLongTouchMs = 1000;
+uint64_t const kLongTouchMs = 500;
 uint64_t const kKineticDelayMs = 500;
 
 float const kForceTapThreshold = 0.75;
-
-int const kDoNotChangeZoom = -1;
 
 size_t GetValidTouchesCount(array<Touch, 2> const & touches)
 {
@@ -40,45 +45,6 @@ size_t GetValidTouchesCount(array<Touch, 2> const & touches)
     ++result;
 
   return result;
-}
-
-drape_ptr<SequenceAnimation> GetPrettyMoveAnimation(ScreenBase const screen, double startScale, double endScale,
-                                                    m2::PointD const & startPt, m2::PointD const & endPt,
-                                                    function<void(ref_ptr<Animation>)> onStartAnimation)
-{
-  double const moveDuration = PositionInterpolator::GetMoveDuration(startPt, endPt, screen);
-  double const scaleFactor = moveDuration / kMaxAnimationTimeSec * 2.0;
-
-  drape_ptr<SequenceAnimation> sequenceAnim = make_unique_dp<SequenceAnimation>();
-  drape_ptr<MapLinearAnimation> zoomOutAnim = make_unique_dp<MapLinearAnimation>();
-  zoomOutAnim->SetScale(startScale, startScale * scaleFactor);
-  zoomOutAnim->SetMaxDuration(kMaxAnimationTimeSec * 0.5);
-  zoomOutAnim->SetOnStartAction(onStartAnimation);
-
-  //TODO (in future): Pass fixed duration instead of screen.
-  drape_ptr<MapLinearAnimation> moveAnim = make_unique_dp<MapLinearAnimation>();
-  moveAnim->SetMove(startPt, endPt, screen);
-  moveAnim->SetMaxDuration(kMaxAnimationTimeSec);
-
-  drape_ptr<MapLinearAnimation> zoomInAnim = make_unique_dp<MapLinearAnimation>();
-  zoomInAnim->SetScale(startScale * scaleFactor, endScale);
-  zoomInAnim->SetMaxDuration(kMaxAnimationTimeSec * 0.5);
-
-  sequenceAnim->AddAnimation(move(zoomOutAnim));
-  sequenceAnim->AddAnimation(move(moveAnim));
-  sequenceAnim->AddAnimation(move(zoomInAnim));
-  return sequenceAnim;
-}
-
-double CalculateScale(ScreenBase const & screen, m2::RectD const & localRect)
-{
-  m2::RectD const pixelRect = screen.PixelRect();
-  return max(localRect.SizeX() / pixelRect.SizeX(), localRect.SizeY() / pixelRect.SizeY());
-}
-  
-double CalculateScale(ScreenBase const & screen, m2::AnyRectD const & rect)
-{
-  return CalculateScale(screen, rect.GetLocalRect());
 }
 
 } // namespace
@@ -171,11 +137,8 @@ void UserEventStream::AddEvent(UserEvent const & event)
   m_events.push_back(event);
 }
 
-ScreenBase const & UserEventStream::ProcessEvents(bool & modelViewChange, bool & viewportChanged)
+ScreenBase const & UserEventStream::ProcessEvents(bool & modelViewChanged, bool & viewportChanged)
 {
-  modelViewChange = false;
-  viewportChanged = false;
-
   list<UserEvent> events;
 
   {
@@ -184,7 +147,7 @@ ScreenBase const & UserEventStream::ProcessEvents(bool & modelViewChange, bool &
     swap(m_events, events);
   }
 
-  modelViewChange = !events.empty() || m_state == STATE_SCALE || m_state == STATE_DRAG;
+  m_modelViewChanged = !events.empty() || m_state == STATE_SCALE || m_state == STATE_DRAG;
   for (UserEvent const & e : events)
   {
     if (m_perspectiveAnimation && FilterEventWhile3dAnimation(e.m_type))
@@ -200,7 +163,7 @@ ScreenBase const & UserEventStream::ProcessEvents(bool & modelViewChange, bool &
       break;
     case UserEvent::EVENT_RESIZE:
       m_navigator.OnSize(e.m_resize.m_width, e.m_resize.m_height);
-      viewportChanged = true;
+      m_viewportChanged = true;
       breakAnim = true;
       TouchCancel(m_touches);
       if (m_state == STATE_DOUBLE_TAP_HOLD)
@@ -254,8 +217,7 @@ ScreenBase const & UserEventStream::ProcessEvents(bool & modelViewChange, bool &
       m_discardedFOV = m_discardedAngle = 0.0;
       break;
     case UserEvent::EVENT_DISABLE_PERSPECTIVE:
-      if (m_navigator.Screen().isPerspective())
-        SetDisable3dModeAnimation();
+      SetDisable3dModeAnimation();
       m_discardedFOV = m_discardedAngle = 0.0;
       break;
     case UserEvent::EVENT_SWITCH_VIEW_MODE:
@@ -277,10 +239,10 @@ ScreenBase const & UserEventStream::ProcessEvents(bool & modelViewChange, bool &
     }
 
     if (breakAnim)
-      modelViewChange = true;
+      m_modelViewChanged = true;
   }
 
-  ApplyAnimations(modelViewChange, viewportChanged);
+  ApplyAnimations();
 
   if (m_perspectiveAnimation)
   {
@@ -293,7 +255,7 @@ ScreenBase const & UserEventStream::ProcessEvents(bool & modelViewChange, bool &
       SetRect(m_pendingEvent->m_rectEvent.m_rect, m_pendingEvent->m_rectEvent.m_zoom,
               m_pendingEvent->m_rectEvent.m_applyRotation, m_pendingEvent->m_rectEvent.m_isAnim);
       m_pendingEvent.reset();
-      modelViewChange = true;
+      m_modelViewChanged = true;
     }
   }
 
@@ -305,10 +267,15 @@ ScreenBase const & UserEventStream::ProcessEvents(bool & modelViewChange, bool &
       DetectLongTap(m_touches[0]);
   }
 
+  modelViewChanged = m_modelViewChanged;
+  viewportChanged = m_viewportChanged;
+  m_modelViewChanged = false;
+  m_viewportChanged = false;
+
   return m_navigator.Screen();
 }
 
-void UserEventStream::ApplyAnimations(bool & modelViewChanged, bool & viewportChanged)
+void UserEventStream::ApplyAnimations()
 {
   if (m_animationSystem.AnimationExists(Animation::MapPlane))
   {
@@ -328,7 +295,7 @@ void UserEventStream::ApplyAnimations(bool & modelViewChanged, bool & viewportCh
       {
         m_navigator.Disable3dMode();
       }
-      viewportChanged = true;
+      m_viewportChanged = true;
     }
 
     double perspectiveAngle;
@@ -338,7 +305,7 @@ void UserEventStream::ApplyAnimations(bool & modelViewChanged, bool & viewportCh
       m_navigator.SetRotationIn3dMode(perspectiveAngle);
     }
 
-    modelViewChanged = true;
+    m_modelViewChanged = true;
   }
 }
 
@@ -355,37 +322,41 @@ bool UserEventStream::SetScale(m2::PointD const & pxScaleCenter, double factor, 
 
   if (isAnim)
   {
+    auto const & followAnim = m_animationSystem.FindAnimation<MapFollowAnimation>(Animation::MapFollow);
+    if (followAnim != nullptr && followAnim->HasScale())
+    {
+      // Scaling is not possible if current follow animation does pixel offset.
+      if (followAnim->HasPixelOffset())
+        return false;
+
+      // Reset follow animation with scaling if we apply scale explicitly.
+      ResetAnimations(Animation::MapFollow);
+    }
+    
     m2::PointD glbScaleCenter = m_navigator.PtoG(m_navigator.P3dtoP(scaleCenter));
     if (m_listener)
       m_listener->CorrectGlobalScalePoint(glbScaleCenter);
 
-    m2::PointD const offset = GetCurrentScreen().PixelRect().Center() - m_navigator.P3dtoP(scaleCenter);
-
     ScreenBase const & startScreen = GetCurrentScreen();
-    ScreenBase endScreen = startScreen;
-    m_navigator.CalculateScale(scaleCenter, factor, endScreen);
 
-    auto anim = make_unique_dp<MapScaleAnimation>(startScreen.GetScale(), endScreen.GetScale(),
-                                                  glbScaleCenter, offset);
-    anim->SetMaxDuration(kMaxAnimationTimeSec);
+    auto anim = GetScaleAnimation(startScreen, scaleCenter, glbScaleCenter, factor);
+    anim->SetOnFinishAction([this](ref_ptr<Animation> animation)
+    {
+      if (m_listener)
+        m_listener->OnAnimatedScaleEnded();
+    });
+
     m_animationSystem.CombineAnimation(move(anim));
     return false;
   }
 
   ResetMapPlaneAnimations();
-  m_navigator.Scale(scaleCenter, factor);
-  return true;
-}
 
-// static
-bool UserEventStream::IsScaleAllowableIn3d(int scale)
-{
-  int minScale = scales::GetMinAllowableIn3dScale();
-  if (df::VisualParams::Instance().GetVisualScale() <= 1.0)
-    --minScale;
-  if (GetPlatform().IsTablet())
-    ++minScale;
-  return scale >= minScale;
+  m_navigator.Scale(scaleCenter, factor);
+  if (m_listener)
+    m_listener->OnAnimatedScaleEnded();
+
+  return true;
 }
 
 bool UserEventStream::SetCenter(m2::PointD const & center, int zoom, bool isAnim)
@@ -469,45 +440,57 @@ bool UserEventStream::SetRect(m2::AnyRectD const & rect, bool isAnim)
 {
   if (isAnim)
   {
-    ScreenBase const & screen = GetCurrentScreen();
-    m2::AnyRectD const startRect = GetCurrentRect();
-    double const startScale = CalculateScale(screen, startRect);
-    double const endScale = CalculateScale(screen, rect);
-    
-    drape_ptr<MapLinearAnimation> anim = make_unique_dp<MapLinearAnimation>();
-    anim->SetRotate(startRect.Angle().val(), rect.Angle().val());
-    anim->SetMove(startRect.GlobalCenter(), rect.GlobalCenter(), screen);
-    anim->SetScale(startScale, endScale);
-    anim->SetMaxScaleDuration(kMaxAnimationTimeSec);
-
     auto onStartHandler = [this](ref_ptr<Animation> animation)
     {
       if (m_listener)
         m_listener->OnAnimationStarted(animation);
     };
-    if (df::IsAnimationAllowed(anim->GetDuration(), screen))
+
+    m2::AnyRectD const startRect = GetCurrentRect();
+    ScreenBase const & screen = GetCurrentScreen();
+
+    drape_ptr<Animation> anim = GetSetRectAnimation(screen, startRect, rect);
+    if (!df::IsAnimationAllowed(anim->GetDuration(), screen))
+    {
+      anim.reset();
+      double const moveDuration = PositionInterpolator::GetMoveDuration(startRect.GlobalCenter(),
+                                                                        rect.GlobalCenter(), screen);
+      if (moveDuration > kMaxAnimationTimeSec)
+        anim = GetPrettyMoveAnimation(screen, startRect, rect);
+    }
+
+    if (anim != nullptr)
     {
       anim->SetOnStartAction(onStartHandler);
       m_animationSystem.CombineAnimation(move(anim));
       return false;
     }
-    else
-    {
-      m2::PointD const startPt = startRect.GlobalCenter();
-      m2::PointD const endPt = rect.GlobalCenter();
-      double const moveDuration = PositionInterpolator::GetMoveDuration(startPt, endPt, screen);
-      if (moveDuration > kMaxAnimationTimeSec)
-      {
-        auto sequenceAnim = GetPrettyMoveAnimation(screen, startScale, endScale, startPt, endPt,
-                                                   onStartHandler);
-        m_animationSystem.CombineAnimation(move(sequenceAnim));
-        return false;
-      }
-    }
   }
 
   ResetMapPlaneAnimations();
   m_navigator.SetFromRect(rect);
+  return true;
+}
+
+bool UserEventStream::InterruptFollowAnimations()
+{
+  Animation const * followAnim = m_animationSystem.FindAnimation<MapFollowAnimation>(Animation::MapFollow);
+
+  if (followAnim == nullptr)
+    followAnim = m_animationSystem.FindAnimation<SequenceAnimation>(Animation::Sequence, kPrettyMoveAnim);
+
+  if (followAnim != nullptr)
+  {
+    if (followAnim->CouldBeInterrupted())
+    {
+      bool const isFollowAnim = followAnim->GetType() == Animation::MapFollow;
+      ResetAnimations(followAnim->GetType());
+      if (isFollowAnim)
+        ResetAnimations(Animation::Arrow);
+    }
+    else
+      return false;
+  }
   return true;
 }
 
@@ -533,44 +516,59 @@ bool UserEventStream::SetFollowAndRotate(m2::PointD const & userPos, m2::PointD 
 
   if (isAnim)
   {
-    ScreenBase const & screen = m_navigator.Screen();
-    double const targetScale = CalculateScale(screen, targetLocalRect);
+    // Reset current follow-and-rotate animation if possible.
+    if (!InterruptFollowAnimations())
+      return false;
+
     auto onStartHandler = [this](ref_ptr<Animation> animation)
     {
       if (m_listener)
         m_listener->OnAnimationStarted(animation);
     };
-    
-    double const startScale = CalculateScale(screen, GetCurrentRect());
 
-    // Run pretty move animation if we are far from userPos.
+    drape_ptr<Animation> anim;
+
+    ScreenBase const & screen = m_navigator.Screen();
+    double const targetScale = CalculateScale(screen.PixelRect(), targetLocalRect);
     m2::PointD const startPt = GetCurrentRect().GlobalCenter();
+    bool const changeZoom = preferredZoomLevel != kDoNotChangeZoom;
+
     double const moveDuration = PositionInterpolator::GetMoveDuration(startPt, userPos, screen);
     if (moveDuration > kMaxAnimationTimeSec)
     {
-      auto sequenceAnim = GetPrettyMoveAnimation(screen, startScale, targetScale, startPt, userPos,
-                                                 onStartHandler);
-      sequenceAnim->SetOnFinishAction([this, userPos, pixelPos, onStartHandler, targetScale, azimuth]
-                                      (ref_ptr<Animation> animation)
+      // Run pretty move animation if we are far from userPos.
+      double const startScale = CalculateScale(screen.PixelRect(), GetCurrentRect().GetLocalRect());
+
+      anim = GetPrettyMoveAnimation(screen, startScale, targetScale, startPt, userPos);
+      anim->SetOnFinishAction([this, userPos, pixelPos, onStartHandler, targetScale, azimuth, changeZoom]
+                              (ref_ptr<Animation> animation)
       {
         ScreenBase const & screen = m_navigator.Screen();
-        double const startScale = CalculateScale(screen, GetCurrentRect());
-        auto anim = make_unique_dp<MapFollowAnimation>(userPos, startScale, targetScale,
-                                                       screen.GlobalRect().Angle().val(), -azimuth,
-                                                       screen.GtoP(userPos), pixelPos, screen.PixelRect());
+        auto anim = GetFollowAnimation(screen, userPos, targetScale, -azimuth, pixelPos);
+
         anim->SetOnStartAction(onStartHandler);
-        anim->SetMaxDuration(kMaxAnimationTimeSec);
+
+        if (changeZoom)
+        {
+          anim->SetCouldBeInterrupted(false);
+          anim->SetCouldBeBlended(false);
+        }
+
         m_animationSystem.CombineAnimation(move(anim));
       });
-      m_animationSystem.CombineAnimation(move(sequenceAnim));
-      return false;
+    }
+    else
+    {
+      // Run follow-and-rotate animation.
+      anim = GetFollowAnimation(screen, userPos, targetScale, -azimuth, pixelPos);
     }
 
-    // Run follow-and-rotate animation.
-    auto anim = make_unique_dp<MapFollowAnimation>(userPos, startScale, targetScale,
-                                                   screen.GlobalRect().Angle().val(), -azimuth,
-                                                   screen.GtoP(userPos), pixelPos, screen.PixelRect());
-    anim->SetMaxDuration(kMaxAnimationTimeSec);
+    if (changeZoom)
+    {
+      anim->SetCouldBeInterrupted(false);
+      anim->SetCouldBeBlended(false);
+    }
+
     anim->SetOnStartAction(onStartHandler);
     m_animationSystem.CombineAnimation(move(anim));
     return false;
@@ -584,14 +582,19 @@ bool UserEventStream::SetFollowAndRotate(m2::PointD const & userPos, m2::PointD 
 
 bool UserEventStream::FilterEventWhile3dAnimation(UserEvent::EEventType type) const
 {
-  return type != UserEvent::EVENT_RESIZE && type != UserEvent::EVENT_SET_RECT;
+  return type != UserEvent::EVENT_RESIZE && type != UserEvent::EVENT_SET_RECT &&
+         type != UserEvent::EVENT_ENABLE_PERSPECTIVE &&
+         type != UserEvent::EVENT_DISABLE_PERSPECTIVE &&
+         type != UserEvent::EVENT_SWITCH_VIEW_MODE;
 }
 
 void UserEventStream::SetEnable3dMode(double maxRotationAngle, double angleFOV,
                                       bool isAnim, bool immediatelyStart)
 {
-  ResetCurrentAnimations(Animation::MapLinear);
-  ResetCurrentAnimations(Animation::MapScale);
+  ResetAnimationsBeforeSwitch3D();
+
+  if (immediatelyStart)
+    InterruptFollowAnimations();
 
   double const startAngle = isAnim ? 0.0 : maxRotationAngle;
   double const endAngle = maxRotationAngle;
@@ -613,8 +616,15 @@ void UserEventStream::SetEnable3dMode(double maxRotationAngle, double angleFOV,
 
 void UserEventStream::SetDisable3dModeAnimation()
 {
-  ResetCurrentAnimations(Animation::MapLinear);
-  ResetCurrentAnimations(Animation::MapScale);
+  ResetAnimationsBeforeSwitch3D();
+  InterruptFollowAnimations();
+
+  if (m_discardedFOV > 0.0 && IsScaleAllowableIn3d(GetDrawTileScale(GetCurrentScreen())))
+  {
+    m_discardedFOV = m_discardedAngle = 0.0;
+    m_listener->OnPerspectiveSwitchRejected();
+    return;
+  }
 
   double const startAngle = m_navigator.Screen().GetRotationAngle();
   double const endAngle = 0.0;
@@ -631,28 +641,27 @@ void UserEventStream::SetDisable3dModeAnimation()
   m_animationSystem.CombineAnimation(move(anim));
 }
 
-void UserEventStream::ResetCurrentAnimations(Animation::Type animType)
+void UserEventStream::ResetAnimations(Animation::Type animType, bool finishAll)
 {
   bool const hasAnimations = m_animationSystem.HasAnimations();
-  m_animationSystem.FinishAnimations(animType, true /* rewind */);
+  m_animationSystem.FinishAnimations(animType, true /* rewind */, finishAll);
   if (hasAnimations)
-  {
-    m2::AnyRectD rect;
-    if (m_animationSystem.GetRect(GetCurrentScreen(), rect))
-      m_navigator.SetFromRect(rect);
-  }
+    ApplyAnimations();
 }
 
 void UserEventStream::ResetMapPlaneAnimations()
 {
   bool const hasAnimations = m_animationSystem.HasAnimations();
-  m_animationSystem.FinishObjectAnimations(Animation::MapPlane, false /* finishAll */);
+  m_animationSystem.FinishObjectAnimations(Animation::MapPlane, false /* rewind */, false /* finishAll */);
   if (hasAnimations)
-  {
-    m2::AnyRectD rect;
-    if (m_animationSystem.GetRect(GetCurrentScreen(), rect))
-      m_navigator.SetFromRect(rect);
-  }
+    ApplyAnimations();
+}
+
+void UserEventStream::ResetAnimationsBeforeSwitch3D()
+{
+  ResetAnimations(Animation::MapLinear);
+  ResetAnimations(Animation::MapScale);
+  ResetAnimations(Animation::MapPerspective, true /* finishAll */);
 }
 
 m2::AnyRectD UserEventStream::GetCurrentRect() const
@@ -662,8 +671,9 @@ m2::AnyRectD UserEventStream::GetCurrentRect() const
 
 m2::AnyRectD UserEventStream::GetTargetRect() const
 {
-  // TODO: Calculate target rect inside the animation system.
-  return GetCurrentRect();
+  m2::AnyRectD targetRect;
+  m_animationSystem.GetTargetRect(m_navigator.Screen(), targetRect);
+  return targetRect;
 }
 
 bool UserEventStream::ProcessTouch(TouchEvent const & touch)
@@ -698,11 +708,14 @@ bool UserEventStream::ProcessTouch(TouchEvent const & touch)
 
 bool UserEventStream::TouchDown(array<Touch, 2> const & touches)
 {
+  if (m_listener)
+    m_listener->OnTouchMapAction();
+
   size_t touchCount = GetValidTouchesCount(touches);
   bool isMapTouch = true;
-
+  
   // Interrupt kinetic scroll on touch down.
-  m_animationSystem.FinishAnimations(Animation::KineticScroll, false /* rewind */);
+  m_animationSystem.FinishAnimations(Animation::KineticScroll, false /* rewind */, true /* finishAll */);
 
   if (touchCount == 1)
   {
@@ -758,6 +771,9 @@ bool UserEventStream::TouchDown(array<Touch, 2> const & touches)
 
 bool UserEventStream::TouchMove(array<Touch, 2> const & touches, double timestamp)
 {
+  if (m_listener)
+    m_listener->OnTouchMapAction();
+
   double const kDragThreshold = my::sq(VisualParams::Instance().GetDragThreshold());
   size_t touchCount = GetValidTouchesCount(touches);
   bool isMapTouch = true;
@@ -839,6 +855,9 @@ bool UserEventStream::TouchMove(array<Touch, 2> const & touches, double timestam
 
 bool UserEventStream::TouchCancel(array<Touch, 2> const & touches)
 {
+  if (m_listener)
+    m_listener->OnTouchMapAction();
+
   size_t touchCount = GetValidTouchesCount(touches);
   UNUSED_VALUE(touchCount);
   bool isMapTouch = true;
@@ -880,6 +899,9 @@ bool UserEventStream::TouchCancel(array<Touch, 2> const & touches)
 
 bool UserEventStream::TouchUp(array<Touch, 2> const & touches)
 {
+  if (m_listener)
+    m_listener->OnTouchMapAction();
+
   size_t touchCount = GetValidTouchesCount(touches);
   bool isMapTouch = true;
   switch (m_state)
@@ -1212,14 +1234,6 @@ void UserEventStream::UpdateDoubleTapAndHold(Touch const & touch)
   if (m_listener)
     m_listener->CorrectScalePoint(scaleCenter);
   m_navigator.Scale(scaleCenter, scaleFactor);
-
-  m2::PointD glbScaleCenter = m_navigator.PtoG(m_navigator.P3dtoP(scaleCenter));
-  if (m_listener)
-    m_listener->CorrectGlobalScalePoint(glbScaleCenter);
-
-  m2::PointD const offset = GetCurrentScreen().PixelRect().Center() - m_navigator.P3dtoP(scaleCenter);
-  m2::PointD const center = m_navigator.PtoG(m_navigator.GtoP(glbScaleCenter) + offset);
-  m_navigator.SetFromRect(m2::AnyRectD(center, m_navigator.Screen().GetAngle(), m_navigator.Screen().GlobalRect().GetLocalRect()));
 }
 
 void UserEventStream::EndDoubleTapAndHold(Touch const & touch)

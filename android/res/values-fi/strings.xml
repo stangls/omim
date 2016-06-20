@@ -53,8 +53,6 @@
 	<!-- View and button titles for accessibility -->
 	<string name="my_position">Sijaintini</string>
 	<string name="ok">OK</string>
-	<!-- not used? Search View - Location is disabled by user warning text -->
-	<string name="enable_location_services">Ota sijaintipalvelut käyttöön</string>
 	<!-- Settings/Downloader - No free space dialog message -->
 	<string name="free_disk_space_for_country_x">Vapauta tilaa laitteellasi ladataksesi tiedoston %s</string>
 	<!-- Leave Review dialog - Not now button (remind me later) -->
@@ -517,7 +515,7 @@
 	<!-- map is not downloaded -->
 	<string name="not_found_map">Olinpaikkasi karttaa ei ole ladattu</string>
 	<!-- location service disabled -->
-	<string name="enable_location_service">Ota sijaintipalvelut käyttöön</string>
+	<string name="enable_location_services">Ota sijaintipalvelut käyttöön</string>
 	<!-- download map -->
 	<string name="download_map">Lataa olinpaikkasi kartta</string>
 	<!-- download map on iPhone -->
@@ -640,7 +638,7 @@
 	<string name="p2p_start">Aloita</string>
 	<string name="p2p_planning">Lasketaan…</string>
 	<string name="p2p_from_here">Lähtöpaikka</string>
-	<string name="p2p_to_here">Määränpää</string>
+	<string name="p2p_to_here">Reitin loppupiste</string>
 	<string name="p2p_only_from_current">Navigointi onnistuu vain nykyisestä sijainnistasi.</string>
 	<string name="p2p_reroute_from_current">Haluatko valita vaihtoehtoisen reitin?</string>
 	<string name="whats_new_next_button">Seuraava</string>
@@ -797,7 +795,7 @@
 	<string name="download_over_mobile_header">Lataa käyttämällä puhelinverkkoyhteyttä?</string>
 	<string name="download_over_mobile_message">Tämä vaihtoehto saattaa olla huomattavasti kalliimpi tietyillä sopimuksilla tai roaming-yhteydellä.</string>
 	<string name="error_enter_correct_house_number">Syötä oikea talon numero</string>
-	<string name="editor_storey_number">Kerrosten määrä (maks. %2d)</string>
+	<string name="editor_storey_number">Kerrosten määrä (maks. %d)</string>
 	<string name="error_enter_correct_storey_number">Muokkaa kerroksia, enintään 25 kerrosta</string>
 	<string name="editor_zip_code">Postinumero</string>
 	<string name="error_enter_correct_zip_code">Anna kelvollinen postinumero</string>
@@ -827,7 +825,7 @@
 	<string name="current_location_unknown_error_title">Nykyinen paikka on tuntematon.</string>
 	<string name="current_location_unknown_error_message">Tapahtui virhe etsittäessä paikkaasi. Tarkista laitteesi ja yritä myöhemmin uudelleen.</string>
 	<string name="whatsnew_update_editor_title">Olemme päivittäneet karttamuokkaimen</string>
-	<string name="whatsnew_update_editor_message">MAPS.ME -käyttäjät ovat tehneet 50 000 karttavaihtoehtoa. Yhdessä teemme maailman yksityiskohtaisimmat kartat. Liity meihin!</string>
+	<string name="whatsnew_update_editor_message">MAPS.ME -käyttäjät ovat tehneet 200 000 karttavaihtoehtoa. Yhdessä teemme maailman yksityiskohtaisimmat kartat. Liity meihin!</string>
 	<!-- Additional text in whats new -->
 	<string name="whatsnew_update_editor_message_update">Päivitä kaikki kartat käyttääksesi Karttamuokkainta.</string>
 	<string name="location_services_disabled_header">Locatie-identificatie is uitgeschakeld</string>
@@ -850,7 +848,7 @@
 	<string name="placepage_flat">sov.</string>
 	<string name="placepage_open_24_7">24_7</string>
 	<string name="placepage_place_rating">Luokitus</string>
-	<string name="place_page_starting_from">%d:stä</string>
+	<string name="place_page_starting_from">%s:stä</string>
 	<string name="meter">m</string>
 	<string name="kilometer">km</string>
 	<string name="placepage_place_description">Kuvaus</string>

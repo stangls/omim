@@ -12,9 +12,18 @@ INCLUDEPATH *= $$ROOT_DIR/3party/freetype/include
 
 SOURCES += \
     $$ROOT_DIR/3party/agg/agg_curves.cpp \
+    animation/animation.cpp \
+    animation/arrow_animation.cpp \
     animation/base_interpolator.cpp \
+    animation/follow_animation.cpp \
     animation/interpolation_holder.cpp \
     animation/interpolations.cpp \
+    animation/interpolators.cpp \
+    animation/linear_animation.cpp \
+    animation/scale_animation.cpp \
+    animation/sequence_animation.cpp \
+    animation/parallel_animation.cpp \
+    animation/perspective_animation.cpp \
     animation/opacity_animation.cpp \
     animation/show_hide_animation.cpp \
     gui/choose_position_mark.cpp \
@@ -35,6 +44,7 @@ SOURCES += \
     backend_renderer.cpp \
     base_renderer.cpp \
     batchers_pool.cpp \
+    batch_merge_helper.cpp \
     circle_shape.cpp \
     color_constants.cpp \
     drape_engine.cpp \
@@ -64,6 +74,8 @@ SOURCES += \
     route_renderer.cpp \
     route_shape.cpp \
     rule_drawer.cpp \
+    screen_animations.cpp \
+    screen_operations.cpp \
     selection_shape.cpp \
     stylist.cpp \
     text_handle.cpp \
@@ -90,12 +102,20 @@ SOURCES += \
     watch/geometry_processors.cpp \
     watch/feature_processor.cpp \
     watch/default_font.cpp \
-    batch_merge_helper.cpp \
 
 HEADERS += \
+    animation/animation.hpp \
+    animation/arrow_animation.hpp \
     animation/base_interpolator.hpp \
+    animation/follow_animation.hpp \
     animation/interpolation_holder.hpp \
     animation/interpolations.hpp \
+    animation/interpolators.hpp \
+    animation/linear_animation.hpp \
+    animation/scale_animation.hpp \
+    animation/sequence_animation.hpp \
+    animation/parallel_animation.hpp \
+    animation/perspective_animation.hpp \
     animation/opacity_animation.hpp \
     animation/show_hide_animation.hpp \
     animation/value_mapping.hpp \
@@ -118,6 +138,7 @@ HEADERS += \
     backend_renderer.hpp \
     base_renderer.hpp \
     batchers_pool.hpp \
+    batch_merge_helper.hpp \
     circle_shape.hpp \
     color_constants.hpp \
     drape_engine.hpp \
@@ -152,6 +173,8 @@ HEADERS += \
     route_renderer.hpp \
     route_shape.hpp \
     rule_drawer.hpp \
+    screen_animations.hpp \
+    screen_operations.hpp \
     selection_shape.hpp \
     shape_view_params.hpp \
     stylist.hpp \
@@ -188,4 +211,3 @@ HEADERS += \
     watch/brush_info.hpp \
     watch/geometry_processors.hpp \
     watch/feature_processor.hpp \
-    batch_merge_helper.hpp \

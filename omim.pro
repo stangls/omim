@@ -28,6 +28,14 @@ SUBDIRS = 3party base coding geometry editor indexer routing search
 !CONFIG(osrm) {
   SUBDIRS *= platform stats storage
 
+  CONFIG(desktop) {
+    SUBDIRS *= generator
+
+    generator_tool.subdir = generator/generator_tool
+    generator_tool.depends = $$SUBDIRS
+    SUBDIRS *= generator_tool
+  }
+
   # Integration tests dependencies for gtool.
   # TODO(AlexZ): Avoid duplication for routing_integration_tests.
   CONFIG(gtool):!CONFIG(no-tests) {
@@ -37,15 +45,11 @@ SUBDIRS = 3party base coding geometry editor indexer routing search
     routing_integration_tests.depends = $$SUBDIRS
     routing_consistency_tests.subdir = routing/routing_consistency_tests
     routing_consistency_tests.depends = $$SUBDIRS
-    SUBDIRS *= routing_integration_tests routing_consistency_tests
-  }
-
-  CONFIG(desktop) {
-    SUBDIRS *= generator
-
-    generator_tool.subdir = generator/generator_tool
-    generator_tool.depends = $$SUBDIRS
-    SUBDIRS *= generator_tool
+    srtm_coverage_checker.subdir = generator/srtm_coverage_checker
+    srtm_coverage_checker.depends = $$SUBDIRS routing
+    feature_segments_checker.subdir = generator/feature_segments_checker
+    feature_segments_checker.depends = $$SUBDIRS routing
+    SUBDIRS *= routing_integration_tests routing_consistency_tests srtm_coverage_checker feature_segments_checker
   }
 }
 
@@ -168,6 +172,14 @@ SUBDIRS = 3party base coding geometry editor indexer routing search
     routing_consistency_tests.depends = $$MapDepLibs routing
     SUBDIRS *= routing_consistency_tests
 
+    srtm_coverage_checker.subdir = generator/srtm_coverage_checker
+    srtm_coverage_checker.depends = $$MapDepLibs routing
+    SUBDIRS *= srtm_coverage_checker
+
+    feature_segments_checker.subdir = generator/feature_segments_checker
+    feature_segments_checker.depends = $$MapDepLibs routing
+    SUBDIRS *= feature_segments_checker
+
     # TODO(AlexZ): Move pedestrian tests into routing dir.
     pedestrian_routing_tests.depends = $$MapDepLibs routing
     SUBDIRS *= pedestrian_routing_tests
@@ -190,7 +202,7 @@ SUBDIRS = 3party base coding geometry editor indexer routing search
     SUBDIRS *= generator_tests
 
     editor_tests.subdir = editor/editor_tests
-    editor_tests.depends = 3party base coding geometry editor
+    editor_tests.depends = 3party base coding geometry platform editor
     SUBDIRS *= editor_tests
 
     SUBDIRS *= qt_tstfrm

@@ -11,9 +11,9 @@ extern "C"
 {
   JNIEXPORT void JNICALL
   Java_com_mapswithme_maps_MwmApplication_nativeInitPlatform(JNIEnv * env, jobject thiz, jstring apkPath, jstring storagePath, jstring tmpPath,
-                                                             jstring obbGooglePath, jstring flavorName, jstring buildType, jboolean isYota, jboolean isTablet)
+                                                             jstring obbGooglePath, jstring flavorName, jstring buildType, jboolean isTablet)
   {
-    android::Platform::Instance().Initialize(env, thiz, apkPath, storagePath, tmpPath, obbGooglePath, flavorName, buildType, isYota, isTablet);
+    android::Platform::Instance().Initialize(env, thiz, apkPath, storagePath, tmpPath, obbGooglePath, flavorName, buildType, isTablet);
   }
 
   JNIEXPORT void JNICALL
@@ -27,12 +27,6 @@ extern "C"
   Java_com_mapswithme_maps_MwmApplication_nativeProcessFunctor(JNIEnv * env, jclass clazz, jlong functorPointer)
   {
     android::Platform::Instance().ProcessFunctor(functorPointer);
-  }
-
-  JNIEXPORT jboolean JNICALL
-  Java_com_mapswithme_maps_MwmApplication_nativeHasFreeSpace(JNIEnv * env, jclass clazz, jlong size)
-  {
-    return android::Platform::Instance().HasAvailableSpaceForWriting(size);
   }
 
   JNIEXPORT void JNICALL

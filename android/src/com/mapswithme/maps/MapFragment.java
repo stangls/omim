@@ -195,10 +195,7 @@ public class MapFragment extends BaseMwmFragment
     if (!mEngineCreated)
       return;
 
-    // We're in the main thread here. So nothing from the queue will be run between these two calls.
-    // Destroy engine first, then clear the queue that theoretically can be filled by nativeDestroyEngine().
     nativeDestroyEngine();
-    MwmApplication.get().clearFunctorsOnUiThread();
     mEngineCreated = false;
   }
 
@@ -273,12 +270,9 @@ public class MapFragment extends BaseMwmFragment
 
   boolean isFirstStart()
   {
-    return mFirstStart;
-  }
-
-  void clearFirstStart()
-  {
+    boolean res = mFirstStart;
     mFirstStart = false;
+    return res;
   }
 
   static native void nativeCompassUpdated(double magneticNorth, double trueNorth, boolean forceRedraw);

@@ -64891,6 +64891,40 @@ cont {
   }
 }
 cont {
+  name: "sponsored"
+  element {
+    scale: 18
+    symbol {
+      name: "hotel"
+      priority: 16000
+    }
+  }
+  element {
+    scale: 19
+    symbol {
+      name: "hotel"
+      priority: 16000
+    }
+  }
+}
+cont {
+  name: "sponsored-booking"
+  element {
+    scale: 18
+    symbol {
+      name: "hotel"
+      priority: 16000
+    }
+  }
+  element {
+    scale: 19
+    symbol {
+      name: "hotel"
+      priority: 16000
+    }
+  }
+}
+cont {
   name: "sport-american_football"
   element {
     scale: 17
@@ -65506,6 +65540,45 @@ cont {
       name: "alpine_hut"
       priority: 16003
     }
+    caption {
+      primary {
+        height: 11
+        color: 4210752
+        stroke_color: 16777215
+        offset_y: 10
+      }
+      priority: 15003
+    }
+  }
+}
+cont {
+  name: "tourism-apartment"
+  element {
+    scale: 17
+    caption {
+      primary {
+        height: 11
+        color: 4210752
+        stroke_color: 16777215
+        offset_y: 10
+      }
+      priority: 15003
+    }
+  }
+  element {
+    scale: 18
+    caption {
+      primary {
+        height: 11
+        color: 4210752
+        stroke_color: 16777215
+        offset_y: 10
+      }
+      priority: 15003
+    }
+  }
+  element {
+    scale: 19
     caption {
       primary {
         height: 11
@@ -66561,6 +66634,45 @@ cont {
       name: "picnic"
       priority: 16003
     }
+    caption {
+      primary {
+        height: 11
+        color: 4210752
+        stroke_color: 16777215
+        offset_y: 10
+      }
+      priority: 15003
+    }
+  }
+}
+cont {
+  name: "tourism-resort"
+  element {
+    scale: 17
+    caption {
+      primary {
+        height: 11
+        color: 4210752
+        stroke_color: 16777215
+        offset_y: 10
+      }
+      priority: 15003
+    }
+  }
+  element {
+    scale: 18
+    caption {
+      primary {
+        height: 11
+        color: 4210752
+        stroke_color: 16777215
+        offset_y: 10
+      }
+      priority: 15003
+    }
+  }
+  element {
+    scale: 19
     caption {
       primary {
         height: 11

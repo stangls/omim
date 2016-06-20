@@ -40,6 +40,7 @@
 
 #include "3party/Alohalytics/src/alohalytics.h"
 #include "3party/pugixml/src/pugixml.hpp"
+#include "3party/opening_hours/opening_hours.hpp"
 
 using namespace pugi;
 using feature::EGeomType;
@@ -54,6 +55,7 @@ constexpr char const * kXmlMwmNode = "mwm";
 constexpr char const * kDeleteSection = "delete";
 constexpr char const * kModifySection = "modify";
 constexpr char const * kCreateSection = "create";
+constexpr char const * kObsoleteSection = "obsolete";
 /// We store edited streets in OSM-compatible way.
 constexpr char const * kAddrStreetTag = "addr:street";
 
@@ -137,6 +139,7 @@ namespace osm
 // (e.g. insert/remove spaces after ';' delimeter);
 
 Editor::Editor() : m_notes(editor::Notes::MakeNotes()) {}
+
 Editor & Editor::Instance()
 {
   static Editor instance;
@@ -163,16 +166,19 @@ void Editor::LoadMapEdits()
     }
   }
 
-  array<pair<FeatureStatus, char const *>, 3> const sections =
+  array<pair<FeatureStatus, char const *>, 4> const sections =
   {{
       {FeatureStatus::Deleted, kDeleteSection},
       {FeatureStatus::Modified, kModifySection},
+      {FeatureStatus::Obsolete, kObsoleteSection},
       {FeatureStatus::Created, kCreateSection}
   }};
-  int deleted = 0, modified = 0, created = 0;
+  int deleted = 0, obsolete = 0, modified = 0, created = 0;
 
   bool needRewriteEdits = false;
 
+  // TODO(mgsergio): synchronize access to m_features.
+  m_features.clear();
   for (xml_node mwm : doc.child(kXmlRootNode).children(kXmlMwmNode))
   {
     string const mapName = mwm.attribute("name").as_string("");
@@ -191,11 +197,14 @@ void Editor::LoadMapEdits()
         {
           XMLFeature const xml(nodeOrWay.node());
 
+          // TODO(mgsergio): Deleted features are not properly handled yet.
           auto const fid = needMigrateEdits
-                               ? editor::MigrateFeatureIndex(m_forEachFeatureAtPointFn, xml)
+                               ? editor::MigrateFeatureIndex(
+                                     m_forEachFeatureAtPointFn, xml, section.first,
+                                     [this, &mwmId] { return GenerateNewFeatureId(mwmId); })
                                : FeatureID(mwmId, xml.GetMWMFeatureIndex());
 
-          // Remove obsolete edit during migration.
+          // Remove obsolete changes during migration.
           if (needMigrateEdits && IsObsolete(xml, fid))
             continue;
 
@@ -223,6 +232,7 @@ void Editor::LoadMapEdits()
           {
           case FeatureStatus::Deleted: ++deleted; break;
           case FeatureStatus::Modified: ++modified; break;
+          case FeatureStatus::Obsolete: ++obsolete; break;
           case FeatureStatus::Created: ++created; break;
           case FeatureStatus::Untouched: ASSERT(false, ()); continue;
           }
@@ -246,7 +256,8 @@ void Editor::LoadMapEdits()
   // Save edits with new indexes and mwm version to avoid another migration on next startup.
   if (needRewriteEdits)
     Save(GetEditorFilePath());
-  LOG(LINFO, ("Loaded", modified, "modified,", created, "created and", deleted, "deleted features."));
+  LOG(LINFO, ("Loaded", modified, "modified,",
+              created, "created,", deleted, "deleted and", obsolete, "obsolete features."));
 }
 
 bool Editor::Save(string const & fullFilePath) const
@@ -273,6 +284,7 @@ bool Editor::Save(string const & fullFilePath) const
     xml_node deleted = mwmNode.append_child(kDeleteSection);
     xml_node modified = mwmNode.append_child(kModifySection);
     xml_node created = mwmNode.append_child(kCreateSection);
+    xml_node obsolete = mwmNode.append_child(kObsoleteSection);
     for (auto const & index : mwm.second)
     {
       FeatureTypeInfo const & fti = index.second;
@@ -296,6 +308,7 @@ bool Editor::Save(string const & fullFilePath) const
       case FeatureStatus::Deleted: VERIFY(xf.AttachToParentNode(deleted), ()); break;
       case FeatureStatus::Modified: VERIFY(xf.AttachToParentNode(modified), ()); break;
       case FeatureStatus::Created: VERIFY(xf.AttachToParentNode(created), ()); break;
+      case FeatureStatus::Obsolete: VERIFY(xf.AttachToParentNode(obsolete), ()); break;
       case FeatureStatus::Untouched: CHECK(false, ("Not edited features shouldn't be here."));
       }
     }
@@ -397,6 +410,8 @@ Editor::SaveResult Editor::SaveEditedFeature(EditableMapObject const & emo)
   FeatureTypeInfo fti;
 
   auto const featureStatus = GetFeatureStatus(fid.m_mwmId, fid.m_index);
+  ASSERT_NOT_EQUAL(featureStatus, FeatureStatus::Obsolete, ("Obsolete feature cannot be modified."));
+
   bool const wasCreatedByUser = IsCreatedFeature(fid);
   if (wasCreatedByUser && featureStatus == FeatureStatus::Untouched)
   {
@@ -405,7 +420,7 @@ Editor::SaveResult Editor::SaveEditedFeature(EditableMapObject const & emo)
   }
   else
   {
-    ASSERT_NOT_EQUAL(featureStatus, FeatureStatus::Deleted, ("Unexpected feature status"));
+    ASSERT_NOT_EQUAL(featureStatus, FeatureStatus::Deleted, ("Unexpected feature status."));
 
     fti.m_feature = featureStatus == FeatureStatus::Untouched
         ? *m_getOriginalFeatureFn(fid)
@@ -474,7 +489,7 @@ bool Editor::RollBackChanges(FeatureID const & fid)
 
   RemoveFeatureFromStorageIfExists(fid.m_mwmId, fid.m_index);
   Invalidate();
-  return true;
+  return Save(GetEditorFilePath());
 }
 
 void Editor::ForEachFeatureInMwmRectAndScale(MwmSet::MwmId const & id,
@@ -563,8 +578,30 @@ EditableProperties Editor::GetEditableProperties(FeatureType const & feature) co
   // Disable editor for old data.
   if (!version::IsSingleMwm(feature.GetID().m_mwmId.GetInfo()->m_version.GetVersion()))
     return {};
+
+  if (GetFeatureStatus(feature.GetID()) == FeatureStatus::Obsolete)
+    return {};
+
   // TODO(mgsergio): Check if feature is in the area where editing is disabled in the config.
-  return GetEditablePropertiesForTypes(feature::TypesHolder(feature));
+  auto editableProperties = GetEditablePropertiesForTypes(feature::TypesHolder(feature));
+
+  // Disable opening hours editing if opening hours cannot be parsed.
+  if (GetFeatureStatus(feature.GetID()) != FeatureStatus::Created)
+  {
+    auto const & originalFeature = m_getOriginalFeatureFn(feature.GetID());
+    auto const & metadata = originalFeature->GetMetadata();
+    auto const & featureOpeningHours = metadata.Get(feature::Metadata::FMD_OPEN_HOURS);
+    // Note: empty string is parsed as a valid opening hours rule.
+    if (!osmoh::OpeningHours(featureOpeningHours).IsValid())
+    {
+      auto & meta = editableProperties.m_metadata;
+      auto const toBeRemoved = remove(begin(meta), end(meta), feature::Metadata::FMD_OPEN_HOURS);
+      if (toBeRemoved != end(meta))
+        meta.erase(toBeRemoved);
+    }
+  }
+
+  return editableProperties;
 }
 // private
 EditableProperties Editor::GetEditablePropertiesForTypes(feature::TypesHolder const & types) const
@@ -649,7 +686,7 @@ void Editor::UploadChanges(string const & key, string const & secret, TChangeset
           switch (fti.m_status)
           {
           case FeatureStatus::Untouched: CHECK(false, ("It's impossible.")); continue;
-
+          case FeatureStatus::Obsolete: continue;  // Obsolete features will be deleted by OSMers.
           case FeatureStatus::Created:
             {
               XMLFeature feature = fti.m_feature.ToXML(true);
@@ -867,6 +904,23 @@ void Editor::Invalidate()
     m_invalidateFn();
 }
 
+void Editor::MarkFeatureAsObsolete(FeatureID const & fid)
+{
+  auto const featureStatus = GetFeatureStatus(fid);
+  ASSERT(featureStatus == FeatureStatus::Untouched ||
+         featureStatus == FeatureStatus::Modified,
+         ("Only untouched and modified features can be made obsolete"));
+
+  auto & fti = m_features[fid.m_mwmId][fid.m_index];
+  // If a feature was modified we can drop all changes since it's now obsolete.
+  fti.m_feature = *m_getOriginalFeatureFn(fid);
+  fti.m_status = FeatureStatus::Obsolete;
+  fti.m_modificationTimestamp = time(nullptr);
+
+  Save(GetEditorFilePath());
+  Invalidate();
+}
+
 Editor::Stats Editor::GetStats() const
 {
   Stats stats;
@@ -940,6 +994,7 @@ void Editor::CreateNote(ms::LatLon const & latLon, FeatureID const & fid,
       sstr << kPlaceDoesNotExistMessage;
       if (!note.empty())
         sstr << " User comments: \"" << note << '\"';
+      MarkFeatureAsObsolete(fid);
       break;
     case NoteProblemType::General:
       sstr << note;
@@ -962,6 +1017,7 @@ string DebugPrint(Editor::FeatureStatus fs)
   {
   case Editor::FeatureStatus::Untouched: return "Untouched";
   case Editor::FeatureStatus::Deleted: return "Deleted";
+  case Editor::FeatureStatus::Obsolete: return "Obsolete";
   case Editor::FeatureStatus::Modified: return "Modified";
   case Editor::FeatureStatus::Created: return "Created";
   };

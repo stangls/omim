@@ -1107,3 +1107,14 @@ leisure|sports_centre|shooting
 leisure|sports_centre|swimming
 leisure|sports_centre|yoga
 amenity|public_bookcase
+tourism|apartment
+tourism|resort
+sponsored
+sponsored|booking
+hwtag|nobicycle
+hwtag|yesbicycle
+hwtag|bidir_bicycle
+psurface|paved_good
+psurface|paved_bad
+psurface|unpaved_good
+psurface|unpaved_bad

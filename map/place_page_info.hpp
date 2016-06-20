@@ -2,6 +2,8 @@
 
 #include "map/bookmark.hpp"
 
+#include "storage/index.hpp"
+
 #include "indexer/feature_data.hpp"
 #include "indexer/feature_meta.hpp"
 #include "indexer/map_object.hpp"
@@ -17,14 +19,17 @@ namespace place_page
 class Info : public osm::MapObject
 {
 public:
-  static char const * kSubtitleSeparator;
-  static char const * kStarSymbol;
-  static char const * kMountainSymbol;
+  static char const * const kSubtitleSeparator;
+  static char const * const kStarSymbol;
+  static char const * const kMountainSymbol;
+  static char const * const kEmptyRatingSymbol;
+  static char const * const kPricingSymbol;
 
   bool IsFeature() const;
   bool IsBookmark() const;
   bool IsMyPosition() const;
   bool ShouldShowAddPlace() const;
+  bool IsSponsoredHotel() const;
   /// @returns true if Back API button should be displayed.
   bool HasApiUrl() const;
   /// @returns true if Edit Place button should be displayed.
@@ -48,7 +53,13 @@ public:
 
   string GetCustomName() const;
   BookmarkAndCategory GetBookmarkAndCategory() const;
+  string GetBookmarkCategoryName() const;
   string const & GetApiUrl() const;
+
+  /// @returns formatted rating string for booking object, or empty if it isn't booking object
+  string GetRatingFormatted() const;
+  /// @returns string with |kPricingSymbol| signs or empty string if it isn't booking object
+  string GetApproximatePricing() const;
 
   void SetMercator(m2::PointD const & mercator);
 
@@ -56,21 +67,27 @@ public:
   string m_customName;
   /// If not empty, bookmark is bound to this place page.
   BookmarkAndCategory m_bac = MakeEmptyBookmarkAndCategory();
+  /// Bookmark category name. Empty, if it's not bookmark;
+  string m_bookmarkCategoryName;
   /// Api ID passed for the selected object. It's automatically included in api url below.
   string m_apiId;
   /// [Deep] link to open when "Back" button is pressed in a Place Page.
   string m_apiUrl;
   /// Formatted feature address.
   string m_address;
+  /// Feature is a sponsored hotel.
+  bool m_isSponsoredHotel = false;
 
   /// Which country this MapObject is in.
   /// For a country point it will be set to topmost node for country.
   storage::TCountryId m_countryId = storage::kInvalidCountryId;
-  
+
   bool m_isMyPosition = false;
   bool m_isEditable = false;
 
   // TODO(AlexZ): Temporary solution. It's better to use a wifi icon in UI instead of text.
   string m_localizedWifiString;
+  /// Booking rating string
+  string m_localizedRatingString;
 };
 }  // namespace place_page

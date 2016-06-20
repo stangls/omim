@@ -22,7 +22,7 @@
 
 namespace osm
 {
-class Editor final
+class Editor final : public MwmSet::Observer
 {
   Editor();
 
@@ -48,6 +48,7 @@ public:
   {
     Untouched,
     Deleted,
+    Obsolete,  // The feature is obsolete when is marked for deletion via note.
     Modified,
     Created
   };
@@ -63,6 +64,12 @@ public:
   void LoadMapEdits();
   /// Resets editor to initial state: no any edits or created/deleted features.
   void ClearAllLocalEdits();
+
+  void OnMapUpdated(platform::LocalCountryFile const &,
+                    platform::LocalCountryFile const &) override
+  {
+    LoadMapEdits();
+  }
 
   using TFeatureIDFunctor = function<void(FeatureID const &)>;
   void ForEachFeatureInMwmRectAndScale(MwmSet::MwmId const & id,
@@ -151,6 +158,9 @@ public:
   };
   Stats GetStats() const;
 
+  // Don't use this function to determine if a feature in editor was created.
+  // Use GetFeatureStatus(fid) instead. This function is used when a feature is
+  // not yet saved and we have to know if it was modified or created.
   static bool IsCreatedFeature(FeatureID const & fid);
 
 private:
@@ -160,6 +170,9 @@ private:
   void RemoveFeatureFromStorageIfExists(MwmSet::MwmId const & mwmId, uint32_t index);
   /// Notify framework that something has changed and should be redisplayed.
   void Invalidate();
+
+  // Saves a feature in internal storage with FeatureStatus::Obsolete status.
+  void MarkFeatureAsObsolete(FeatureID const & fid);
 
   FeatureID GenerateNewFeatureId(MwmSet::MwmId const & id);
   EditableProperties GetEditablePropertiesForTypes(feature::TypesHolder const & types) const;

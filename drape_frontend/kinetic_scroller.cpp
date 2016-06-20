@@ -38,7 +38,6 @@ public:
     , m_elapsedTime(0.0)
   {
     SetInterruptedOnCombine(true);
-
     m_objects.insert(Animation::MapPlane);
     m_properties.insert(Animation::Position);
   }
@@ -92,6 +91,13 @@ public:
     // Current position = target position - amplutide * e ^ (elapsed / duration).
     // We calculate current position not based on start position, but based on target position.
     value = PropertyValue(m_endPos - m_direction * exp(-kKineticFadeoff * GetT()));
+    return true;
+  }
+
+  bool GetTargetProperty(TObject object, TProperty property, PropertyValue & value) const override
+  {
+    ASSERT(HasProperty(object, property), ());
+    value = PropertyValue(m_endPos);
     return true;
   }
 

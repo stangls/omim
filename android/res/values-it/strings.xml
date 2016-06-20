@@ -48,8 +48,6 @@
 	<string name="miles">Miglia</string>
 	<!-- View and button titles for accessibility -->
 	<string name="my_position">La mia posizione</string>
-	<!-- not used? Search View - Location is disabled by user warning text -->
-	<string name="enable_location_services">Cortesemente abilita i servizi di localizzazione</string>
 	<!-- Settings/Downloader - No free space dialog message -->
 	<string name="free_disk_space_for_country_x">Cortesemente libera spazio sul tuo dispositivo prima per poter scaricare %s</string>
 	<!-- Leave Review dialog - Not now button (remind me later) -->
@@ -510,13 +508,13 @@
 	<!-- Text for routing error dialog -->
 	<string name="routing_download_more_than_avail">Devi scaricare %1$s MB, ma lo spazio disponibile è di soli %2$s MB.</string>
 	<!-- Text for routing error dialog -->
-	<string name="routing_download_roaming">Stai per scaricare 2840MB tramite la rete cellulare (in roaming). Questo potrebbe comportare costi aggiuntivi, in base al piano dati del tuo operatore mobile.</string>
+	<string name="routing_download_roaming">Stai per scaricare %s MB tramite la rete cellulare (in roaming). Questo potrebbe comportare costi aggiuntivi, in base al piano dati del tuo operatore mobile.</string>
 	<!-- bookmark button text -->
 	<string name="bookmark">segnalibro</string>
 	<!-- map is not downloaded -->
 	<string name="not_found_map">La mappa del tuo posto non è stata trovata</string>
 	<!-- location service disabled -->
-	<string name="enable_location_service">Cortesemente abilita i servizi di localizzazione</string>
+	<string name="enable_location_services">Cortesemente abilita i servizi di localizzazione</string>
 	<!-- download map -->
 	<string name="download_map">Scarica la mappa per il tuo paese</string>
 	<!-- download map on iPhone -->
@@ -639,7 +637,7 @@
 	<string name="p2p_start">Inizia</string>
 	<string name="p2p_planning">Pianificazione…</string>
 	<string name="p2p_from_here">Da</string>
-	<string name="p2p_to_here">A</string>
+	<string name="p2p_to_here">Percorso per</string>
 	<string name="p2p_only_from_current">La navigazione è disponibile solo dalla tua posizione attuale.</string>
 	<string name="p2p_reroute_from_current">Vuoi che impostiamo il percorso dalla tua posizione corrente?</string>
 	<string name="whats_new_next_button">Avanti</string>
@@ -826,7 +824,7 @@
 	<string name="current_location_unknown_error_title">La posizione attuale è sconosciuta.</string>
 	<string name="current_location_unknown_error_message">Si è verificato un errore durante la ricerca della posizione. Controllare che il dispositivo utilizzato funzioni correttamente e riprovare.</string>
 	<string name="whatsnew_update_editor_title">Abbiamo aggiornato l\&#39;editor mappe</string>
-	<string name="whatsnew_update_editor_message">Gli utenti di MAPS.ME hanno apportato 50.000 modifiche alle mappe. Stiamo costruendo insieme le mappe più dettagliate al mondo. Unisciti a noi!</string>
+	<string name="whatsnew_update_editor_message">Gli utenti di MAPS.ME hanno apportato 200.000 modifiche alle mappe. Stiamo costruendo insieme le mappe più dettagliate al mondo. Unisciti a noi!</string>
 	<!-- Additional text in whats new -->
 	<string name="whatsnew_update_editor_message_update">Per utilizzare l\&#39;editor delle mappe, aggiorna tutte le mappe.</string>
 	<string name="location_services_disabled_header">La geolocalizzazione è disabilitata</string>
@@ -847,8 +845,9 @@
 	<string name="placepage_entrance_number">N.</string>
 	<string name="placepage_entrance_type">Ingresso</string>
 	<string name="placepage_flat">app.</string>
+	<string name="placepage_open_24_7">24 / 7</string>
 	<string name="placepage_place_rating">Valutazione:</string>
-	<string name="place_page_starting_from">da %d</string>
+	<string name="place_page_starting_from">da %s</string>
 	<string name="meter">m</string>
 	<string name="kilometer">km</string>
 	<string name="placepage_place_description">Descrizione</string>

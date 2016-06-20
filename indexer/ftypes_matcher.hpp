@@ -157,6 +157,13 @@ public:
   static IsTunnelChecker const & Instance();
 };
 
+class IsBookingChecker : public BaseChecker
+{
+  IsBookingChecker();
+public:
+  static IsBookingChecker const & Instance();
+};
+
 /// Type of locality (do not change values and order - they have detalization order)
 /// COUNTRY < STATE < CITY < ...
 enum Type { NONE = -1, COUNTRY = 0, STATE, CITY, TOWN, VILLAGE, LOCALITY_COUNT };
@@ -198,12 +205,11 @@ enum class HighwayClass
   Tertiary,
   LivingStreet,
   Service,
-  Count           // This value is used for internals only.
+  Pedestrian,
+  Count  // This value is used for internals only.
 };
 
 string DebugPrint(HighwayClass const cls);
 
 HighwayClass GetHighwayClass(feature::TypesHolder const & types);
-HighwayClass GetHighwayClass(FeatureType const & ft);
-
 }  // namespace ftypes

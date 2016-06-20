@@ -83,9 +83,6 @@
 
 "ok" = "OK";
 
-/* not used? Search View - Location is disabled by user warning text */
-"enable_location_services" = "Prosím, povoľte Služby určovania polohy";
-
 /* Settings/Downloader - No free space dialog message */
 "free_disk_space_for_country_x" = "Prosím, uvoľnite nejaké miesto vo svojom zariadení, kým začnete sťahovať %@";
 
@@ -846,7 +843,7 @@
 "not_found_map" = "Mapa vašej polohy nebola nájdená";
 
 /* location service disabled */
-"enable_location_service" = "Prosím, povoľte Služby určovania polohy";
+"enable_location_services" = "Prosím, povoľte Služby určovania polohy";
 
 /* download map */
 "download_map" = "Stiahnite si mapu miesta, kde sa práve nachádzate";
@@ -1069,7 +1066,7 @@
 
 "p2p_from_here" = "Z";
 
-"p2p_to_here" = "Do";
+"p2p_to_here" = "Cesta do";
 
 "p2p_only_from_current" = "Navigácia je dostupná iba z vašej aktuálnej polohy.";
 
@@ -1433,7 +1430,7 @@
 
 "whatsnew_update_editor_title" = "Aktualizovali sme program na úpravu máp";
 
-"whatsnew_update_editor_message" = "Používatelia MAPS.ME urobili 50 000 zmien v mapách. Spoločne vytvárame najpodrobnejšie mapy na svete. Pridajte sa!";
+"whatsnew_update_editor_message" = "Používatelia MAPS.ME urobili 200 000 zmien v mapách. Spoločne vytvárame najpodrobnejšie mapy na svete. Pridajte sa!";
 
 /* Additional text in whats new */
 "whatsnew_update_editor_message_update" = "Ak chcete použiť editor máp, prosím, aktualizujte všetky mapy.";
@@ -1478,7 +1475,7 @@
 
 "placepage_place_rating" = "Hodnotenie:";
 
-"place_page_starting_from" = "od %d";
+"place_page_starting_from" = "od %s";
 
 "meter" = "m";
 
@@ -1515,3 +1512,15 @@
 "editor_status_sending" = "Odosiela sa…";
 
 "editor_place_doesnt_exist" = "Miesto neexistuje";
+
+"place_page_booking_rating" = "Rating: %s";
+
+"text_more_button" = "… more";
+
+"error_enter_correct_phone" = "Enter a valid phone number";
+
+"error_enter_correct_web" = "Enter a valid web address";
+
+"error_enter_correct_email" = "Enter a valid email";
+
+"error_enter_correct" = "Enter a valid value";

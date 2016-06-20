@@ -3,8 +3,9 @@
 #include "drape_frontend/backend_renderer.hpp"
 #include "drape_frontend/color_constants.hpp"
 #include "drape_frontend/frontend_renderer.hpp"
-#include "drape_frontend/threads_commutator.hpp"
+#include "drape_frontend/route_shape.hpp"
 #include "drape_frontend/selection_shape.hpp"
+#include "drape_frontend/threads_commutator.hpp"
 
 #include "drape/pointers.hpp"
 #include "drape/texture_manager.hpp"
@@ -45,7 +46,8 @@ public:
            bool blockTapEvents,
            bool showChoosePositionMark,
            vector<m2::TriangleD> && boundAreaTriangles,
-           bool firstLaunch)
+           bool firstLaunch,
+           bool isRoutingActive)
       : m_factory(factory)
       , m_stringsBundle(stringBundle)
       , m_viewport(viewport)
@@ -58,6 +60,7 @@ public:
       , m_showChoosePositionMark(showChoosePositionMark)
       , m_boundAreaTriangles(move(boundAreaTriangles))
       , m_isFirstLaunch(firstLaunch)
+      , m_isRoutingActive(isRoutingActive)
     {}
 
     ref_ptr<dp::OGLContextFactory> m_factory;
@@ -72,6 +75,7 @@ public:
     bool m_showChoosePositionMark;
     vector<m2::TriangleD> m_boundAreaTriangles;
     bool m_isFirstLaunch;
+    bool m_isRoutingActive;
   };
 
   DrapeEngine(Params && params);
@@ -89,8 +93,7 @@ public:
   void SetModelViewAnyRect(m2::AnyRectD const & rect, bool isAnim);
 
   using TModelViewListenerFn = FrontendRenderer::TModelViewChanged;
-  int AddModelViewListener(TModelViewListenerFn const & listener);
-  void RemoveModeViewListener(int slotID);
+  void SetModelViewListener(TModelViewListenerFn && fn);
 
   void ClearUserMarksLayer(TileKey const & tileKey);
   void ChangeVisibilityUserMarksLayer(TileKey const & tileKey, bool isVisible);
@@ -105,12 +108,12 @@ public:
   void SwitchMyPositionNextMode();
   void LoseLocation();
   void StopLocationFollow();
-  void SetMyPositionModeListener(location::TMyPositionModeChanged const & fn);
+  void SetMyPositionModeListener(location::TMyPositionModeChanged && fn);
 
   using TTapEventInfoFn = FrontendRenderer::TTapEventInfoFn;
-  void SetTapEventInfoListener(TTapEventInfoFn const & fn);
+  void SetTapEventInfoListener(TTapEventInfoFn && fn);
   using TUserPositionChangedFn = FrontendRenderer::TUserPositionChangedFn;
-  void SetUserPositionListener(TUserPositionChangedFn const & fn);
+  void SetUserPositionListener(TUserPositionChangedFn && fn);
 
   FeatureID GetVisiblePOI(m2::PointD const & glbPoint);
   void SelectObject(SelectionShape::ESelectedObject obj, m2::PointD const & pt, bool isAnim);
@@ -119,7 +122,7 @@ public:
   SelectionShape::ESelectedObject GetSelectedObject();
 
   void AddRoute(m2::PolylineD const & routePolyline, vector<double> const & turns,
-                df::ColorConstant color);
+                df::ColorConstant color, df::RoutePattern pattern = df::RoutePattern());
   void RemoveRoute(bool deactivateFollowing);
   void FollowRoute(int preferredZoomLevel, int preferredZoomLevel3d, double rotationAngle, double angleFOV);
   void DeactivateRouteFollowing();
@@ -141,10 +144,11 @@ public:
 
   void SetTimeInBackground(double time);
 
+  void SetDisplacementMode(int mode);
+
 private:
   void AddUserEvent(UserEvent const & e);
   void ModelViewChanged(ScreenBase const & screen);
-  void ModelViewChangedGuiThread(ScreenBase const & screen);
 
   void MyPositionModeChanged(location::EMyPositionMode mode, bool routingActive);
   void TapEvent(TapInfo const & tapInfo);
@@ -162,12 +166,10 @@ private:
 
   Viewport m_viewport;
 
-  using TListenerMap = map<int, TModelViewListenerFn>;
-  TListenerMap m_listeners;
-
+  TModelViewListenerFn m_modelViewChanged;
   location::TMyPositionModeChanged m_myPositionModeChanged;
+  TUserPositionChangedFn m_userPositionChanged;
   TTapEventInfoFn m_tapListener;
-  TUserPositionChangedFn m_userPositionChangedFn;
 
   gui::TWidgetsInitInfo m_widgetsInfo;
   gui::TWidgetsLayoutInfo m_widgetsLayout;

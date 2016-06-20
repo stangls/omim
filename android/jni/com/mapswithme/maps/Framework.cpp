@@ -77,6 +77,13 @@ void Framework::OnLocationError(int errorCode)
 void Framework::OnLocationUpdated(location::GpsInfo const & info)
 {
   m_work.OnLocationUpdate(info);
+
+  if (!IsDrapeEngineCreated())
+  {
+    location::EMyPositionMode const mode = GetMyPositionMode();
+    if (mode == location::PendingPosition)
+      SetMyPositionMode(location::Follow);
+  }
 }
 
 void Framework::OnCompassUpdated(location::CompassInfo const & info, bool forceRedraw)
@@ -99,8 +106,15 @@ void Framework::UpdateCompassSensor(int ind, float * arr)
 
 void Framework::MyPositionModeChanged(location::EMyPositionMode mode, bool routingActive)
 {
-  if (m_myPositionModeSignal != nullptr)
+  if (m_myPositionModeSignal)
     m_myPositionModeSignal(mode, routingActive);
+}
+
+void Framework::SetMyPositionMode(location::EMyPositionMode mode)
+{
+    OnMyPositionModeChanged(mode);
+    settings::Set(settings::kLocationStateMode, m_currentMode);
+    MyPositionModeChanged(m_currentMode, false /* routingActive, does not matter */);
 }
 
 bool Framework::CreateDrapeEngine(JNIEnv * env, jobject jSurface, int densityDpi, bool firstLaunch)
@@ -146,7 +160,7 @@ void Framework::DeleteDrapeEngine()
 
 bool Framework::IsDrapeEngineCreated()
 {
-  return m_work.GetDrapeEngine() != nullptr;
+  return m_work.IsDrapeEngineCreated();
 }
 
 void Framework::Resize(int w, int h)
@@ -209,6 +223,11 @@ void Framework::SetChoosePositionMode(bool isChoosePositionMode, bool isBusiness
   m_isChoosePositionMode = isChoosePositionMode;
   m_work.BlockTapEvents(isChoosePositionMode);
   m_work.EnableChoosePositionMode(isChoosePositionMode, isBusiness, hasPosition, position);
+}
+
+bool Framework::GetChoosePositionMode()
+{
+  return m_isChoosePositionMode;
 }
 
 Storage & Framework::Storage()
@@ -357,18 +376,35 @@ void Framework::SetMyPositionModeListener(location::TMyPositionModeChanged const
   m_myPositionModeSignal = fn;
 }
 
-location::EMyPositionMode Framework::GetMyPositionMode() const
+location::EMyPositionMode Framework::GetMyPositionMode()
 {
   if (!m_isCurrentModeInitialized)
-    return location::PendingPosition;
+  {
+    m_currentMode = location::NotFollowNoPosition;
+    settings::Get(settings::kLocationStateMode, m_currentMode);
+    m_isCurrentModeInitialized = true;
+  }
 
   return m_currentMode;
 }
 
-void Framework::SetMyPositionMode(location::EMyPositionMode mode)
+void Framework::OnMyPositionModeChanged(location::EMyPositionMode mode)
 {
   m_currentMode = mode;
   m_isCurrentModeInitialized = true;
+}
+
+void Framework::SwitchMyPositionNextMode()
+{
+  if (IsDrapeEngineCreated())
+  {
+    m_work.SwitchMyPositionNextMode();
+    return;
+  }
+
+  // Engine is not available, but the client requests to change mode.
+  if (GetMyPositionMode() == location::NotFollowNoPosition)
+    SetMyPositionMode(location::PendingPosition);
 }
 
 void Framework::SetupWidget(gui::EWidget widget, float x, float y, dp::Anchor anchor)
@@ -826,12 +862,14 @@ Java_com_mapswithme_maps_Framework_nativeShowCountry(JNIEnv * env, jclass, jstri
 JNIEXPORT void JNICALL
 Java_com_mapswithme_maps_Framework_nativeSetRoutingListener(JNIEnv * env, jclass, jobject listener)
 {
+  CHECK(g_framework, ("Framework isn't created yet!"));
   frm()->SetRouteBuildingListener(bind(&CallRoutingListener, jni::make_global_ref(listener), _1, _2));
 }
 
 JNIEXPORT void JNICALL
 Java_com_mapswithme_maps_Framework_nativeSetRouteProgressListener(JNIEnv * env, jclass, jobject listener)
 {
+  CHECK(g_framework, ("Framework isn't created yet!"));
   frm()->SetRouteProgressListener(bind(&CallRouteProgressListener, jni::make_global_ref(listener), _1));
 }
 
@@ -980,10 +1018,21 @@ Java_com_mapswithme_maps_Framework_nativeOnBookmarkCategoryChanged(JNIEnv * env,
 }
 
 JNIEXPORT void JNICALL
-Java_com_mapswithme_maps_Framework_nativeTurnChoosePositionMode(JNIEnv *, jclass, jboolean turnOn, jboolean isBusiness)
+Java_com_mapswithme_maps_Framework_nativeTurnOnChoosePositionMode(JNIEnv *, jclass, jboolean isBusiness, jboolean applyPosition)
 {
-  //TODO(Android team): implement positioning
-  g_framework->SetChoosePositionMode(turnOn, isBusiness, false /* hasPosition */, m2::PointD());
+  g_framework->SetChoosePositionMode(true, isBusiness, applyPosition, applyPosition ? g_framework->GetPlacePageInfo().GetMercator() : m2::PointD());
+}
+
+JNIEXPORT void JNICALL
+Java_com_mapswithme_maps_Framework_nativeTurnOffChoosePositionMode(JNIEnv *, jclass)
+{
+  g_framework->SetChoosePositionMode(false, false, false, m2::PointD());
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_mapswithme_maps_Framework_nativeIsInChoosePositionMode(JNIEnv *, jclass)
+{
+  return g_framework->GetChoosePositionMode();
 }
 
 JNIEXPORT jboolean JNICALL
@@ -1004,4 +1053,26 @@ Java_com_mapswithme_maps_Framework_nativeIsActiveObjectABuilding(JNIEnv * env, j
 {
   return g_framework->GetPlacePageInfo().IsBuilding();
 }
+
+JNIEXPORT jboolean JNICALL
+Java_com_mapswithme_maps_Framework_nativeCanAddPlaceFromPlacePage(JNIEnv * env, jclass clazz)
+{
+  return g_framework->GetPlacePageInfo().ShouldShowAddPlace();
+}
+
+JNIEXPORT jobject JNICALL
+Java_com_mapswithme_maps_Framework_nativeGetSponsoredHotelInfo(JNIEnv * env, jclass clazz)
+{
+  place_page::Info const & ppInfo = g_framework->GetPlacePageInfo();
+  if (!ppInfo.m_isSponsoredHotel)
+    return nullptr;
+
+  static jclass const infoClass = jni::GetGlobalClassRef(env, "com/mapswithme/maps/widget/placepage/SponsoredHotelInfo");
+  static jmethodID const infoCtor = jni::GetConstructorID(env, infoClass, "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
+
+  return env->NewObject(infoClass, infoCtor, jni::ToJavaString(env, ppInfo.GetRatingFormatted()),
+                                             jni::ToJavaString(env, ppInfo.GetApproximatePricing()),
+                                             jni::ToJavaString(env, ppInfo.GetWebsite()));
+}
+
 } // extern "C"

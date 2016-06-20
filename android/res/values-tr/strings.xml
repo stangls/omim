@@ -53,8 +53,6 @@
 	<!-- View and button titles for accessibility -->
 	<string name="my_position">Konumum</string>
 	<string name="ok">Tamam</string>
-	<!-- not used? Search View - Location is disabled by user warning text -->
-	<string name="enable_location_services">Lütfen Yer Hizmetlerini etkinleştirin</string>
 	<!-- Settings/Downloader - No free space dialog message -->
 	<string name="free_disk_space_for_country_x">%s indirmek için lütfen ilk önce cihazınızda biraz alan boşaltın</string>
 	<!-- Leave Review dialog - Not now button (remind me later) -->
@@ -523,7 +521,7 @@
 	<!-- map is not downloaded -->
 	<string name="not_found_map">Konum haritası bulunamadı</string>
 	<!-- location service disabled -->
-	<string name="enable_location_service">Lütfen Yer Hizmetlerini etkinleştirin</string>
+	<string name="enable_location_services">Lütfen Yer Hizmetlerini etkinleştirin</string>
 	<!-- download map -->
 	<string name="download_map">Konumunuz için haritayı indirin</string>
 	<!-- download map on iPhone -->
@@ -646,7 +644,7 @@
 	<string name="p2p_start">Başla</string>
 	<string name="p2p_planning">Planlanıyor…</string>
 	<string name="p2p_from_here">Başlangıç</string>
-	<string name="p2p_to_here">Hedef</string>
+	<string name="p2p_to_here">Varış yeri:</string>
 	<string name="p2p_only_from_current">Navigasyon sadece şu anki konumunuzdan mevcut.</string>
 	<string name="p2p_reroute_from_current">Mevcut konumunuzdan bir rota planlamamızı ister misiniz?</string>
 	<string name="whats_new_next_button">Sonraki</string>
@@ -833,7 +831,7 @@
 	<string name="current_location_unknown_error_title">Geçerli konum bilinmiyor.</string>
 	<string name="current_location_unknown_error_message">Konumunuz aranırken bir hata oluştu. Cihazının düzgün çalışıp çalışmadığını kontrol edip daha sonra tekrar deneyin.</string>
 	<string name="whatsnew_update_editor_title">Harita düzenleyicisini güncelledik</string>
-	<string name="whatsnew_update_editor_message">MAPS.ME kullanıcıları, haritalar üzerinde 50.000 değişiklik yaptı. Birlikte, dünyanın en detaylı haritalarını yaratıyoruz. Bize katılın!</string>
+	<string name="whatsnew_update_editor_message">MAPS.ME kullanıcıları, haritalar üzerinde 200.000 değişiklik yaptı. Birlikte, dünyanın en detaylı haritalarını yaratıyoruz. Bize katılın!</string>
 	<!-- Additional text in whats new -->
 	<string name="whatsnew_update_editor_message_update">Harita Editörü\&#39;nü kullanmak için lütfen tüm haritaları güncelleyin.</string>
 	<string name="location_services_disabled_header">Konum tanımlama devre dışı bırakıldı</string>
@@ -856,7 +854,7 @@
 	<string name="placepage_flat">uygulama</string>
 	<string name="placepage_open_24_7">24 / 7</string>
 	<string name="placepage_place_rating">Derecelendirme:</string>
-	<string name="place_page_starting_from">%d’dan</string>
+	<string name="place_page_starting_from">%s’dan</string>
 	<string name="meter">m</string>
 	<string name="kilometer">km</string>
 	<string name="placepage_place_description">Açıklama</string>
