@@ -12,6 +12,8 @@
 
 #include "base/logging.hpp"
 
+#include <limits>
+
 namespace location
 {
   class GpsInfo;
