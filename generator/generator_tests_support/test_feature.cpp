@@ -53,7 +53,11 @@ void TestFeature::Serialize(FeatureBuilder1 & fb) const
   if (m_hasCenter)
     fb.SetCenter(m_center);
   if (!m_name.empty())
+  {
     CHECK(fb.AddName(m_lang, m_name), ("Can't set feature name:", m_name, "(", m_lang, ")"));
+    if (m_lang != "default")
+      CHECK(fb.AddName("default", m_name), ("Can't set feature name:", m_name, "( default )"));
+  }
   if (!m_postcode.empty())
     fb.AddPostcode(m_postcode);
 }
@@ -68,7 +72,7 @@ void TestCountry::Serialize(FeatureBuilder1 & fb) const
 {
   TestFeature::Serialize(fb);
   auto const & classificator = classif();
-  fb.SetType(classificator.GetTypeByPath({"place", "country"}));
+  fb.AddType(classificator.GetTypeByPath({"place", "country"}));
 
   // Localities should have default name too.
   fb.AddName("default", m_name);
@@ -92,7 +96,7 @@ void TestCity::Serialize(FeatureBuilder1 & fb) const
 {
   TestFeature::Serialize(fb);
   auto const & classificator = classif();
-  fb.SetType(classificator.GetTypeByPath({"place", "city"}));
+  fb.AddType(classificator.GetTypeByPath({"place", "city"}));
   fb.SetRank(m_rank);
 }
 
@@ -115,7 +119,7 @@ void TestVillage::Serialize(FeatureBuilder1 & fb) const
 {
   TestFeature::Serialize(fb);
   auto const & classificator = classif();
-  fb.SetType(classificator.GetTypeByPath({"place", "village"}));
+  fb.AddType(classificator.GetTypeByPath({"place", "village"}));
   fb.SetRank(m_rank);
 }
 
@@ -134,10 +138,7 @@ TestStreet::TestStreet(vector<m2::PointD> const & points, string const & name, s
 
 void TestStreet::Serialize(FeatureBuilder1 & fb) const
 {
-  fb.SetTestId(m_id);
-  CHECK(fb.AddName(m_lang, m_name), ("Can't set feature name:", m_name, "(", m_lang, ")"));
-  if (m_lang != "default")
-    CHECK(fb.AddName("default", m_name), ("Can't set feature name:", m_name, "( default )"));
+  TestFeature::Serialize(fb);
 
   auto const & classificator = classif();
   fb.SetType(classificator.GetTypeByPath({"highway", "living_street"}));
@@ -228,7 +229,7 @@ void TestBuilding::Serialize(FeatureBuilder1 & fb) const
     fb.AddStreet(m_streetName);
 
   auto const & classificator = classif();
-  fb.SetType(classificator.GetTypeByPath({"building"}));
+  fb.AddType(classificator.GetTypeByPath({"building"}));
 }
 
 string TestBuilding::ToString() const
@@ -253,7 +254,7 @@ void TestPark::Serialize(FeatureBuilder1 & fb) const
   fb.SetArea();
 
   auto const & classificator = classif();
-  fb.SetType(classificator.GetTypeByPath({"leisure", "park"}));
+  fb.AddType(classificator.GetTypeByPath({"leisure", "park"}));
 }
 
 string TestPark::ToString() const
