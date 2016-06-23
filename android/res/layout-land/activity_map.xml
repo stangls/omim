@@ -5,8 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="bottom"
-    android:background="@drawable/loading_01">
+    android:gravity="bottom">
 
 
   <FrameLayout
@@ -96,7 +95,7 @@
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:textAppearance="?android:attr/textAppearanceLarge"
-          android:text="Tourenführung : Legende"
+          android:text="@string/legende"
           android:layout_marginBottom="10dp"
       />
 
