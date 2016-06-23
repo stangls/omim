@@ -1250,8 +1250,8 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
     // set this activity as active in routing-controller so that when the tour finishes, the activity can be terminated
     RoutingController.get().setTourFinishedListener(this);
-    updateGpsSimulationActive(false);
-    MwmApplication.gps().setSimulation(false);
+    /*updateGpsSimulationActive(false);
+    MwmApplication.gps().setSimulation(false);*/
   }
 
   public void hideStatusBar() {
