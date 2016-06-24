@@ -229,13 +229,14 @@ RoutingSession::State RoutingSession::OnLocationPositionChanged(
                                                         MercatorBounds::FromLatLon(info.m_latitude, info.m_longitude));
     if (my::AlmostEqualAbs(dist, m_lastDistance, kRunawayDistanceSensitivityMeters))
         return m_state;
+    LOG(my::LINFO,("distance from last good point is ",dist));
     if (dist > m_lastDistance)
     {
       ++m_moveAwayCounter;
       m_lastDistance = dist;
     }
-
-    if (m_moveAwayCounter > kOnRouteMissedCount)
+    LOG(my::LINFO,("move away conter is ",m_moveAwayCounter));
+    if (m_moveAwayCounter > kOnRouteMissedCount || dist > 50 )
     {
       m_passedDistanceOnRouteMeters += m_route.GetCurrentDistanceFromBeginMeters();
       m_state = RouteNeedRebuild;
