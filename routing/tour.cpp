@@ -106,14 +106,14 @@ public:
             }
         }
         if (tag=="section") {
-            LOG( my::LINFO, ("adding junction") );
+            //LOG( my::LINFO, ("adding junction") );
             turns::TurnDirection turnDirection=turns::TurnDirection::NoTurn;
             if (m_roundabout){
-                LOG( my::LINFO, ("junction roundabout road index : ",m_roadIndex) );
+                //LOG( my::LINFO, ("junction roundabout road index : ",m_roadIndex) );
                 m_tour.AddTurn(TI(m_tour.GetAllPoints().size()-1-5,turns::TurnDirection::EnterRoundAbout,m_roadIndex+1));
                 turnDirection=turns::TurnDirection::LeaveRoundAbout;
             }else{
-                LOG( my::LINFO, ("junction road angle : ",m_roadAngle) );
+                //LOG( my::LINFO, ("junction road angle : ",m_roadAngle) );
                 if (m_roadAngle>=175)
                     turnDirection=TD::UTurnLeft;
                 else if (m_roadAngle>=120)
@@ -138,7 +138,7 @@ public:
             m_roundabout = false;
         }
         if (tag=="poi"){
-            LOG( my::LINFO, ("adding POI") );
+            //LOG( my::LINFO, ("adding POI") );
             m_tour.AddPoi(m_poiText,m_x,m_y);
             m_poiText="";
         }
@@ -156,7 +156,7 @@ public:
             string const & prevTag = m_tags[count - 2];
             string const ppTag = count > 3 ? m_tags[count - 3] : string();
             if (prevTag=="tour" && currTag=="name"){
-                LOG( my::LINFO, ("tour name : ",value) );
+                //LOG( my::LINFO, ("tour name : ",value) );
                 m_tour.SetName(value);
             }
             if (prevTag=="poi" && currTag=="message"){
