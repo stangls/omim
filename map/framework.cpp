@@ -377,7 +377,7 @@ Framework::Framework()
 
   LOG(LINFO, ("System languages:", languages::GetPreferred()));
 
-  osm::Editor & editor = osm::Editor::Instance();
+  /*osm::Editor & editor = osm::Editor::Instance();
   editor.SetMwmIdByNameAndVersionFn([this](string const & name) -> MwmSet::MwmId
   {
     return m_model.GetIndex().GetMwmIdByCountryFile(platform::CountryFile(name));
@@ -400,7 +400,7 @@ Framework::Framework()
     return {};
   });
   editor.SetForEachFeatureAtPointFn(bind(&Framework::ForEachFeatureAtPoint, this, _1, _2));
-  editor.LoadMapEdits();
+  editor.LoadMapEdits();*/
 }
 
 Framework::~Framework()
@@ -2174,7 +2174,7 @@ void Framework::LoadTour(string const & filePath , int position, const TTourLoad
     drape_ptr<Tour> tour = make_unique<Tour>(filePath,poiVisitedCallbackFn);
     tour->UpdateCurrentPosition(position);
     auto name = tour->GetName();
-    BuildRoute(start,m2::PointD::Zero(),move(tour),5);
+    BuildRoute(start,m2::PointD::Zero(),move(tour),30);
     if (tourLoadedCallback!=0){
         LOG(my::LINFO,("tour name: ",name));
         tourLoadedCallback(name);

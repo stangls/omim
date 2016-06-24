@@ -112,8 +112,8 @@ public class MwmApplication extends MultiDexApplication {
     RemoteLogging.init(this);
     mMainLoopHandler = new Handler(getMainLooper());
 
-    initHockeyApp();
-    initCrashlytics();
+    //initHockeyApp();
+    //initCrashlytics();
 
     initPaths();
     nativeInitPlatform(getApkPath(), getDataStoragePath(), getTempPath(), getObbGooglePath(),

@@ -52,9 +52,11 @@ class ChunkTask extends AsyncTask<Void, byte[], Boolean>
     mBeg = beg;
     mEnd = end;
     mExpectedFileSize = expectedFileSize;
-    mPostBody = postBody;
+    mPostBody = postBody; // 160426/Germany_Free State of Bavaria_Upper Bavaria_East
     mUserAgent = userAgent;
+    Log.d(TAG, "ChunkTask: Trying to download "+(new String(postBody))+" at url \""+url+"\"");
   }
+
 
   @Override
   protected void onPreExecute() {}

@@ -27,7 +27,9 @@ bool ParseServerList(string const & jsonStr, vector<string> & outUrls)
   }
   catch (my::Json::Exception const & ex)
   {
-    LOG(LERROR, ("Can't parse server list json:", ex.Msg(), jsonStr));
+    LOG(LERROR, ("Can't parse server list json"));
+    LOG(LERROR, ("Can't parse server list json:", ex.Msg()));
+    //LOG(LERROR, ("Can't parse server list json:", ex.Msg(), jsonStr));
   }
   return !outUrls.empty();
 }
