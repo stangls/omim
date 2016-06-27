@@ -55,6 +55,9 @@ class ChunkTask extends AsyncTask<Void, byte[], Boolean>
     mPostBody = postBody; // 160426/Germany_Free State of Bavaria_Upper Bavaria_East
     mUserAgent = userAgent;
     Log.d(TAG, "ChunkTask: Trying to download "+(new String(postBody))+" at url \""+url+"\"");
+    // Cancel downloading and notify about error.
+    cancel(false);
+    nativeOnFinish(mHttpCallbackID, NOT_SET, mBeg, mEnd);
   }
 
 
