@@ -63,18 +63,8 @@ void TileInfo::ReadFeatureIndex(MapDataProvider const & model)
       m_featureInfo.push_back(id);
     }, GetGlobalRect(), GetZoomLevel());
   }
-  // TODO: really read custom geometries from file or something
-  CustomGeom x(
-    m2::RectD(
-      MercatorBounds::LonToX(12.120659), MercatorBounds::LatToY(47.797162),
-      MercatorBounds::LonToX(12.120981), MercatorBounds::LatToY(47.797328)
-    ),
-    dp::Color::Red()
-  );
-  if ( rect.IsPointInside(x.GetBoundingBox().Center()) ){
-      LOG(my::LDEBUG,("custom geometry added"));
-      m_customGeoms.push_back(x);
-  }
+
+  m_customGeoms = CustomGeometries::GetInstance()->GetGeometries(rect);
 
 }
 
@@ -106,8 +96,7 @@ void TileInfo::ReadFeatures(MapDataProvider const & model)
         model.ReadFeatures(bind<void>(ref(drawer), _1), m_featureInfo);
     }
 
-    auto it = m_customGeoms.cbegin();
-    while (it!=m_customGeoms.cend()){
+    for (auto it = m_customGeoms.cbegin(); it!=m_customGeoms.cend(); it++){
         drawer.AddCustomGeometry(*it);
     }
   }

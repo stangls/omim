@@ -3,6 +3,7 @@
 
 #include "drape/color.hpp"
 #include "geometry/rect2d.hpp"
+#include "base/logging.hpp"
 
 namespace df
 {
@@ -22,16 +23,19 @@ private:
 
 class CustomGeometries
 {
+private:
+    static CustomGeometries* s_inst;
+    CustomGeometries();
+    vector<CustomGeom> m_geoms;
 public:
-    static const CustomGeometries* GetInstance() {
+    static CustomGeometries* GetInstance() {
         if (!s_inst){
             s_inst=new CustomGeometries();
         }
         return s_inst;
     }
-protected:
-    static CustomGeometries* s_inst;
-    CustomGeometries(){}
+    vector<CustomGeom*> GetGeometries( m2::RectD rectangle );
+
 };
 
 } // end namespace df

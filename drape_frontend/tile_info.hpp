@@ -50,7 +50,7 @@ private:
 private:
   drape_ptr<EngineContext> m_context;
   vector<FeatureID> m_featureInfo;
-  vector<CustomGeom> m_customGeoms;
+  vector<CustomGeom*> m_customGeoms;
   bool m_is3dBuildings;
 
   atomic<bool> m_isCanceled;

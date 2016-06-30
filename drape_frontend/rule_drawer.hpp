@@ -35,7 +35,7 @@ public:
   ~RuleDrawer();
 
   void operator() (FeatureType const & f);
-  void AddCustomGeometry(CustomGeom const & geometry );
+  void AddCustomGeometry(const CustomGeom *geometry );
 
 private:
   bool CheckCancelled();

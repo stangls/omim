@@ -297,24 +297,27 @@ void RuleDrawer::operator()(FeatureType const & f)
   }
 }
 
-void RuleDrawer::AddCustomGeometry( CustomGeom const & geometry )
+void RuleDrawer::AddCustomGeometry( CustomGeom const *geometry )
 {
     AreaViewParams params;
     params.m_depth = 0;
-    params.m_color = geometry.GetColor();
+    params.m_color = geometry->GetColor();
     params.m_minVisibleScale = 0;
     params.m_rank = 0;
     params.m_minPosZ = 0;
     params.m_posZ = 0;
 
-    auto bbox = geometry.GetBoundingBox();
+    auto bbox = geometry->GetBoundingBox();
 
     vector<BuildingEdge> edges;
     vector<m2::PointF> triangles;
     triangles.emplace_back( bbox.LeftTop() );
-    triangles.emplace_back( bbox.RightBottom().x, bbox.LeftTop().y);
     triangles.emplace_back( bbox.RightBottom() );
     triangles.emplace_back( bbox.LeftTop().x, bbox.RightBottom().y);
+
+    triangles.emplace_back( bbox.LeftTop() );
+    triangles.emplace_back( bbox.RightBottom().x, bbox.LeftTop().y);
+    triangles.emplace_back( bbox.RightBottom() );
 
     drape_ptr<AreaShape> shape = make_unique_dp<AreaShape>(move(triangles), move(edges), params);
 
