@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.location.Location;
+import android.os.Handler;
 import android.support.annotation.DimenRes;
 import android.support.annotation.IntRange;
 import android.support.annotation.NonNull;
@@ -201,10 +202,16 @@ public class RoutingController
         mLastResultCode == ResultCodesHelper.NO_POSITION ||
         mLastResultCode == ResultCodesHelper.START_POINT_NOT_FOUND
       ) {
+        final Handler h = new Handler();
         new Thread(){public void run(){
           try { Thread.sleep(1000); } catch (InterruptedException e) {}
           Log.d(TAG, "trying to continue tour");
-          continueSavedTour(tourLoadedListener);
+          h.post(new Runnable() {
+                   @Override
+                   public void run() {
+                     continueSavedTour(tourLoadedListener);
+                   }
+                 });
         }}.start();
         return;
       }
