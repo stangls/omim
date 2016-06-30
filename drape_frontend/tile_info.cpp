@@ -28,8 +28,19 @@ m2::RectD TileInfo::GetGlobalRect() const
 
 void TileInfo::ReadFeatureIndex(MapDataProvider const & model)
 {
+  m2::RectD rect = GetGlobalRect();
+
+  LOG(my::LDEBUG,("TileInfo::ReadFeatureIndex for",
+    MercatorBounds::XToLon(rect.LeftTop().x),
+    MercatorBounds::YToLat(rect.LeftTop().y),
+    MercatorBounds::XToLon(rect.RightBottom().x),
+    MercatorBounds::YToLat(rect.RightBottom().y)
+  ));
+
+
   if (DoNeedReadIndex())
   {
+    LOG(my::LDEBUG,("TileInfo::ReadFeatureIndex DoNeedReadIndex"));
     CheckCanceled();
 
     size_t const kAverageFeaturesCount = 256;
@@ -52,6 +63,19 @@ void TileInfo::ReadFeatureIndex(MapDataProvider const & model)
       m_featureInfo.push_back(id);
     }, GetGlobalRect(), GetZoomLevel());
   }
+  // TODO: really read custom geometries from file or something
+  CustomGeom x(
+    m2::RectD(
+      MercatorBounds::LonToX(12.120659), MercatorBounds::LatToY(47.797162),
+      MercatorBounds::LonToX(12.120981), MercatorBounds::LatToY(47.797328)
+    ),
+    dp::Color::Red()
+  );
+  if ( rect.IsPointInside(x.GetBoundingBox().Center()) ){
+      LOG(my::LDEBUG,("custom geometry added"));
+      m_customGeoms.push_back(x);
+  }
+
 }
 
 void TileInfo::ReadFeatures(MapDataProvider const & model)
@@ -65,36 +89,26 @@ void TileInfo::ReadFeatures(MapDataProvider const & model)
   CheckCanceled();
 
   m2::RectD rect = GetGlobalRect();
-
-  CustomGeom x;
-  x.outerRect=m2::RectD(
-              MercatorBounds::LonToX(12.120659), MercatorBounds::LatToY(47.797162),
-              MercatorBounds::LonToX(12.120981), MercatorBounds::LatToY(47.797328)
-            );
-  x.color=dp::Color::Red();
-
   LOG(my::LDEBUG,("TileInfo::ReadFeatures for",
     MercatorBounds::XToLon(rect.LeftTop().x),
     MercatorBounds::YToLat(rect.LeftTop().y),
     MercatorBounds::XToLon(rect.RightBottom().x),
-    MercatorBounds::YToLat(rect.RightBottom().y),
-    "-",
-    rect.LeftTop(),rect.RightBottom()
+    MercatorBounds::YToLat(rect.RightBottom().y)
   ));
 
-  if (!m_featureInfo.empty())
+  if (!m_featureInfo.empty() || !m_customGeoms.empty())
   {
     RuleDrawer drawer(bind(&TileInfo::InitStylist, this, _1, _2),
                       bind(&TileInfo::IsCancelled, this),
                       model.m_isCountryLoadedByName,
                       make_ref(m_context), m_is3dBuildings);
-    model.ReadFeatures(bind<void>(ref(drawer), _1), m_featureInfo);
+    if (!m_featureInfo.empty()){
+        model.ReadFeatures(bind<void>(ref(drawer), _1), m_featureInfo);
+    }
 
-    if (
-        x.outerRect.IsIntersect(rect)
-    ){
-        LOG(my::LDEBUG,("intersection with hack!"));
-        drawer.AddCustomGeometry(x);
+    auto it = m_customGeoms.cbegin();
+    while (it!=m_customGeoms.cend()){
+        drawer.AddCustomGeometry(*it);
     }
   }
 

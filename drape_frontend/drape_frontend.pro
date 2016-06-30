@@ -91,6 +91,7 @@ SOURCES += \
     watch/feature_processor.cpp \
     watch/default_font.cpp \
     batch_merge_helper.cpp \
+    custom_geometries.cpp
 
 HEADERS += \
     animation/base_interpolator.hpp \
@@ -189,3 +190,4 @@ HEADERS += \
     watch/geometry_processors.hpp \
     watch/feature_processor.hpp \
     batch_merge_helper.hpp \
+    custom_geometries.h

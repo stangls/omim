@@ -12,7 +12,8 @@
 #include "std/function.hpp"
 #include "std/set.hpp"
 #include "std/string.hpp"
-#include "drape/color.hpp"
+
+#include "custom_geometries.h"
 
 class FeatureType;
 
@@ -21,11 +22,6 @@ namespace df
 
 class EngineContext;
 class Stylist;
-
-struct CustomGeom{
-    m2::RectD outerRect;
-    dp::Color color;
-};
 
 class RuleDrawer
 {
@@ -39,7 +35,7 @@ public:
   ~RuleDrawer();
 
   void operator() (FeatureType const & f);
-  void AddCustomGeometry(CustomGeom x);
+  void AddCustomGeometry(CustomGeom const & geometry );
 
 private:
   bool CheckCancelled();

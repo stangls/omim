@@ -4,6 +4,7 @@
 #include "drape_frontend/tile_key.hpp"
 
 #include "indexer/feature_decl.hpp"
+#include "custom_geometries.h"
 
 #include "base/exception.hpp"
 
@@ -49,6 +50,7 @@ private:
 private:
   drape_ptr<EngineContext> m_context;
   vector<FeatureID> m_featureInfo;
+  vector<CustomGeom> m_customGeoms;
   bool m_is3dBuildings;
 
   atomic<bool> m_isCanceled;
