@@ -10,17 +10,20 @@ using std::shared_ptr;
 namespace df
 {
 
+using TPolyFun = function<void (m2::PointF,m2::PointF,m2::PointF)>;
 
 class CustomGeom
 {
 public:
-    CustomGeom( m2::RectD outerRect, dp::Color color );
+    CustomGeom(vector<m2::PointF> &outerPoints, dp::Color &color );
 
     dp::Color GetColor() const { return m_color; }
-    m2::RectD GetBoundingBox() const { return m_outerRect; }
+    m2::RectF GetBoundingBox() const { return m_outerRect; }
+    void CreatePolys(TPolyFun callback );
 
 private:
-    m2::RectD m_outerRect;
+    vector<m2::PointF> m_outerPoints;
+    m2::RectF m_outerRect;
     dp::Color m_color;
 };
 
@@ -49,7 +52,7 @@ public:
         }
         return s_inst;
     }
-    vector<shared_ptr<CustomGeom>> const GetGeometries( m2::RectD rectangle );
+    vector<shared_ptr<CustomGeom>> const GetGeometries(m2::RectD rectangle );
     void ReloadGeometries();
 };
 

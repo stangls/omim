@@ -29,18 +29,17 @@ m2::RectD TileInfo::GetGlobalRect() const
 void TileInfo::ReadFeatureIndex(MapDataProvider const & model)
 {
   m2::RectD rect = GetGlobalRect();
-
+/*
   LOG(my::LDEBUG,("TileInfo::ReadFeatureIndex for",
     MercatorBounds::XToLon(rect.LeftTop().x),
     MercatorBounds::YToLat(rect.LeftTop().y),
     MercatorBounds::XToLon(rect.RightBottom().x),
     MercatorBounds::YToLat(rect.RightBottom().y)
-  ));
+  ));*/
 
 
   if (DoNeedReadIndex())
   {
-    LOG(my::LDEBUG,("TileInfo::ReadFeatureIndex DoNeedReadIndex"));
     CheckCanceled();
 
     size_t const kAverageFeaturesCount = 256;
@@ -66,7 +65,6 @@ void TileInfo::ReadFeatureIndex(MapDataProvider const & model)
 
   vector<shared_ptr<CustomGeom>> temp(CustomGeometries::GetInstance()->GetGeometries(rect));
   m_customGeoms = temp;
-  LOG(my::LDEBUG,("We got",m_customGeoms.size(),"geometries."));
 
 }
 
@@ -81,12 +79,12 @@ void TileInfo::ReadFeatures(MapDataProvider const & model)
   CheckCanceled();
 
   m2::RectD rect = GetGlobalRect();
-  LOG(my::LDEBUG,("TileInfo::ReadFeatures for",
+  /*LOG(my::LDEBUG,("TileInfo::ReadFeatures for",
     MercatorBounds::XToLon(rect.LeftTop().x),
     MercatorBounds::YToLat(rect.LeftTop().y),
     MercatorBounds::XToLon(rect.RightBottom().x),
     MercatorBounds::YToLat(rect.RightBottom().y)
-  ));
+  ));*/
 
   if (!m_featureInfo.empty() || !m_customGeoms.empty())
   {
