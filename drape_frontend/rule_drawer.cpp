@@ -4,6 +4,9 @@
 #include "drape_frontend/apply_feature_functors.hpp"
 #include "drape_frontend/visual_params.hpp"
 
+#include "drape/color.hpp"
+#include "drape_frontend/area_shape.hpp"
+
 #include "indexer/feature.hpp"
 #include "indexer/feature_algo.hpp"
 #include "indexer/feature_visibility.hpp"
@@ -293,6 +296,29 @@ void RuleDrawer::operator()(FeatureType const & f)
     geomShapes.swap(m_mapShapes[df::GeometryType]);
     m_context->Flush(move(geomShapes));
   }
+}
+
+void RuleDrawer::AddCustomGeometry(CustomGeom x)
+{
+    AreaViewParams params;
+    params.m_depth = 0;
+    params.m_color = x.color;
+    params.m_minVisibleScale = 0;
+    params.m_rank = 0;
+    params.m_minPosZ = 0;
+    params.m_posZ = 0;
+
+    vector<BuildingEdge> edges;
+    vector<m2::PointF> triangles;
+    triangles.emplace_back( x.outerRect.LeftTop() );
+    triangles.emplace_back( x.outerRect.RightBottom() );
+    triangles.emplace_back( x.outerRect.LeftTop().x, x.outerRect.RightBottom().y);
+
+    drape_ptr<AreaShape> shape = make_unique_dp<AreaShape>(move(triangles), move(edges), params);
+
+    shape->SetFeatureMinZoom(0);
+    // this should actually be df::GeometryType from shape->GetType() but OverlayType is required because of flush (see above)
+    m_mapShapes[df::OverlayType].push_back(move(shape));
 }
 
 } // namespace df

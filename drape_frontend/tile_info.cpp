@@ -64,6 +64,24 @@ void TileInfo::ReadFeatures(MapDataProvider const & model)
   ReadFeatureIndex(model);
   CheckCanceled();
 
+  m2::RectD rect = GetGlobalRect();
+
+  CustomGeom x;
+  x.outerRect=m2::RectD(
+              MercatorBounds::LonToX(12.120659), MercatorBounds::LatToY(47.797162),
+              MercatorBounds::LonToX(12.120981), MercatorBounds::LatToY(47.797328)
+            );
+  x.color=dp::Color::Red();
+
+  LOG(my::LDEBUG,("TileInfo::ReadFeatures for",
+    MercatorBounds::XToLon(rect.LeftTop().x),
+    MercatorBounds::YToLat(rect.LeftTop().y),
+    MercatorBounds::XToLon(rect.RightBottom().x),
+    MercatorBounds::YToLat(rect.RightBottom().y),
+    "-",
+    rect.LeftTop(),rect.RightBottom()
+  ));
+
   if (!m_featureInfo.empty())
   {
     RuleDrawer drawer(bind(&TileInfo::InitStylist, this, _1, _2),
@@ -71,7 +89,15 @@ void TileInfo::ReadFeatures(MapDataProvider const & model)
                       model.m_isCountryLoadedByName,
                       make_ref(m_context), m_is3dBuildings);
     model.ReadFeatures(bind<void>(ref(drawer), _1), m_featureInfo);
+
+    if (
+        x.outerRect.IsIntersect(rect)
+    ){
+        LOG(my::LDEBUG,("intersection with hack!"));
+        drawer.AddCustomGeometry(x);
+    }
   }
+
 }
 
 void TileInfo::Cancel()
