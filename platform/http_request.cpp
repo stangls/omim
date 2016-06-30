@@ -324,7 +324,10 @@ public:
     : HttpRequest(onFinish, onProgress), m_strategy(urls), m_filePath(filePath),
       m_goodChunksCount(0), m_doCleanProgressFiles(doCleanProgressFiles)
   {
-    ASSERT ( !urls.empty(), () );
+    //ASSERT ( !urls.empty(), () );
+    if (urls.empty()){
+      return;
+    }
 
     // Load resume downloading information.
     m_progress.first = m_strategy.LoadOrInitChunks(m_filePath + RESUME_FILE_EXTENSION,
