@@ -64,7 +64,9 @@ void TileInfo::ReadFeatureIndex(MapDataProvider const & model)
     }, GetGlobalRect(), GetZoomLevel());
   }
 
-  m_customGeoms = CustomGeometries::GetInstance()->GetGeometries(rect);
+  vector<shared_ptr<CustomGeom>> temp(CustomGeometries::GetInstance()->GetGeometries(rect));
+  m_customGeoms = temp;
+  LOG(my::LDEBUG,("We got",m_customGeoms.size(),"geometries."));
 
 }
 
@@ -96,7 +98,7 @@ void TileInfo::ReadFeatures(MapDataProvider const & model)
         model.ReadFeatures(bind<void>(ref(drawer), _1), m_featureInfo);
     }
 
-    for (auto it = m_customGeoms.cbegin(); it!=m_customGeoms.cend(); it++){
+    for (vector<shared_ptr<CustomGeom>>::const_iterator it = m_customGeoms.cbegin(); it!=m_customGeoms.cend(); it++){
         drawer.AddCustomGeometry(*it);
     }
   }

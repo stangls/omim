@@ -297,8 +297,11 @@ void RuleDrawer::operator()(FeatureType const & f)
   }
 }
 
-void RuleDrawer::AddCustomGeometry( CustomGeom const *geometry )
+void RuleDrawer::AddCustomGeometry( shared_ptr<CustomGeom> geometry )
 {
+
+    LOG(my::LINFO,("adding custom geometry shape (1triangle)",*geometry));
+
     AreaViewParams params;
     params.m_depth = 0;
     params.m_color = geometry->GetColor();
@@ -314,10 +317,10 @@ void RuleDrawer::AddCustomGeometry( CustomGeom const *geometry )
     triangles.emplace_back( bbox.LeftTop() );
     triangles.emplace_back( bbox.RightBottom() );
     triangles.emplace_back( bbox.LeftTop().x, bbox.RightBottom().y);
-
+/*
     triangles.emplace_back( bbox.LeftTop() );
     triangles.emplace_back( bbox.RightBottom().x, bbox.LeftTop().y);
-    triangles.emplace_back( bbox.RightBottom() );
+    triangles.emplace_back( bbox.RightBottom() );*/
 
     drape_ptr<AreaShape> shape = make_unique_dp<AreaShape>(move(triangles), move(edges), params);
 

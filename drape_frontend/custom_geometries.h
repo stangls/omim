@@ -5,28 +5,43 @@
 #include "geometry/rect2d.hpp"
 #include "base/logging.hpp"
 
+using std::shared_ptr;
+
 namespace df
 {
+
 
 class CustomGeom
 {
 public:
     CustomGeom( m2::RectD outerRect, dp::Color color );
 
-    const dp::Color GetColor() const { return m_color; }
-    const m2::RectD GetBoundingBox() const { return m_outerRect; }
+    dp::Color GetColor() const { return m_color; }
+    m2::RectD GetBoundingBox() const { return m_outerRect; }
 
 private:
     m2::RectD m_outerRect;
     dp::Color m_color;
 };
 
+
+inline string DebugPrint(CustomGeom const & c)
+{
+  ostringstream out;
+  out << "BoundingBox = " << DebugPrint(c.GetBoundingBox());
+  out << "Color = ( " << DebugPrint(c.GetColor()) << " ) ";
+  return out.str();
+}
+
 class CustomGeometries
 {
 private:
     static CustomGeometries* s_inst;
     CustomGeometries();
-    vector<CustomGeom> m_geoms;
+    CustomGeometries( const CustomGeometries& ); // no copy constructor
+    ~CustomGeometries () { }
+
+    vector<shared_ptr<CustomGeom>> m_geoms;
 public:
     static CustomGeometries* GetInstance() {
         if (!s_inst){
@@ -34,8 +49,8 @@ public:
         }
         return s_inst;
     }
-    vector<CustomGeom*> GetGeometries( m2::RectD rectangle );
-
+    vector<shared_ptr<CustomGeom>> const GetGeometries( m2::RectD rectangle );
+    void ReloadGeometries();
 };
 
 } // end namespace df
