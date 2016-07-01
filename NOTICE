@@ -1,3 +1,17 @@
+
+Copyright 2016 Mobiworx Telematik GmbH
+
+Based on https://github.com/mapsme/omim (Apache License 2.0)
+Please note that we modified a lot of source files.
+The modifications are not noticed in the individual files, because those modified files are not about to be distributed to others.
+
+If you or anyone decides to distribute the modified files, a record of those files is kept in the directory .git in the well-known format of GIT.
+Please note that if you do so, you have to modify these files by adding a prominent notice about changes as written in the Apache License.
+
+
+
+This was the original NOTICE-file:
+
 Copyright 2015 My.com B.V. (Mail.Ru Group)
 
 Licensed under the Apache License, Version 2.0 (the "License");
