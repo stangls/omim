@@ -6,21 +6,16 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import com.facebook.appevents.AppEventsLogger;
 //import com.flurry.android.FlurryAgent;
-import com.mapswithme.maps.BuildConfig;
 import com.mapswithme.maps.MwmApplication;
-import com.mapswithme.maps.PrivateVariables;
 import com.mapswithme.maps.api.ParsedMwmRequest;
 import com.mapswithme.maps.bookmarks.data.MapObject;
 import com.mapswithme.maps.downloader.MapManager;
-import com.mapswithme.maps.editor.Editor;
-import com.mapswithme.maps.editor.OsmOAuth;
+//import com.mapswithme.maps.editor.OsmOAuth;
 import com.mapswithme.util.Config;
 import com.mapswithme.util.ConnectionState;
 //import ru.mail.android.mytracker.MRMyTracker;
@@ -366,7 +361,7 @@ public enum Statistics
     trackEvent(EventName.ROUTING_BUILD, params().add(EventParam.FROM, from)
                                                 .add(EventParam.TO, to));
   }
-
+/*
   public void trackEditorLaunch(boolean newObject)
   {
     trackEvent(newObject ? EventName.EDITOR_START_CREATE : EventName.EDITOR_START_EDIT,
@@ -392,18 +387,18 @@ public enum Statistics
   {
     trackEvent(EventName.EDITOR_AUTH_REQUEST, Statistics.params().add(Statistics.EventParam.TYPE, type.name));
   }
-
+*/
   public static ParameterBuilder params()
   {
     return new ParameterBuilder();
   }
-
+/*
   public static ParameterBuilder editorMwmParams()
   {
     return params().add(EventParam.MWM_NAME, Editor.nativeGetMwmName())
                    .add(EventParam.MWM_VERSION, Editor.nativeGetMwmVersion());
   }
-
+*/
   public static class ParameterBuilder
   {
     private final Map<String, String> mParams = new HashMap<>();

@@ -51,9 +51,9 @@
         android:layout_marginTop="@dimen/margin_half"
         android:background="?dividerHorizontal"/>
 
-      <include layout="@layout/place_page_editor"/>
+      <!--<include layout="@layout/place_page_editor"/>-->
 
-      <include layout="@layout/place_page_add_business"/>
+      <!--<include layout="@layout/place_page_add_business"/>-->
 
       <Space
         android:layout_width="match_parent"

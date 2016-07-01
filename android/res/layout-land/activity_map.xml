@@ -17,10 +17,10 @@
   <include
     android:id="@+id/onmap_downloader"
     layout="@layout/onmap_downloader"/>
-
+<!--
   <include
     android:id="@+id/position_chooser"
-    layout="@layout/position_chooser"/>
+    layout="@layout/position_chooser"/>-->
 
   <include
     android:id="@+id/navigation_buttons"

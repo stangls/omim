@@ -55,10 +55,6 @@ import com.mapswithme.maps.bookmarks.data.Icon;
 import com.mapswithme.maps.bookmarks.data.MapObject;
 import com.mapswithme.maps.bookmarks.data.Metadata;
 import com.mapswithme.maps.downloader.MapManager;
-import com.mapswithme.maps.editor.Editor;
-import com.mapswithme.maps.editor.OpeningHours;
-import com.mapswithme.maps.editor.data.TimeFormatUtils;
-import com.mapswithme.maps.editor.data.Timetable;
 import com.mapswithme.maps.location.LocationHelper;
 import com.mapswithme.maps.routing.RoutingController;
 import com.mapswithme.maps.widget.ArrowView;
@@ -112,7 +108,7 @@ public class PlacePageView extends RelativeLayout implements View.OnClickListene
   private View mWiki;
   private View mEntrance;
   private TextView mTvEntrance;
-  private View mEditor;
+  //private View mEditor;
   private View mAddOrganisation;
   // Bookmark
   private ImageView mIvColor;
@@ -204,10 +200,10 @@ public class PlacePageView extends RelativeLayout implements View.OnClickListene
     mWiki.setOnClickListener(this);
     mEntrance = mDetails.findViewById(R.id.ll__place_entrance);
     mTvEntrance = (TextView) mEntrance.findViewById(R.id.tv__place_entrance);
-    mEditor = mDetails.findViewById(R.id.ll__place_editor);
-    mEditor.setOnClickListener(this);
-    mAddOrganisation = mDetails.findViewById(R.id.ll__add_organisation);
-    mAddOrganisation.setOnClickListener(this);
+    //mEditor = mDetails.findViewById(R.id.ll__place_editor);
+    //mEditor.setOnClickListener(this);
+    //mAddOrganisation = mDetails.findViewById(R.id.ll__add_organisation);
+    //mAddOrganisation.setOnClickListener(this);
     latlon.setOnLongClickListener(this);
     address.setOnLongClickListener(this);
     mPhone.setOnLongClickListener(this);
@@ -438,16 +434,16 @@ public class PlacePageView extends RelativeLayout implements View.OnClickListene
     refreshMetadataOrHide(mMapObject.getMetadata(Metadata.MetadataType.FMD_WIKIPEDIA), mWiki, null);
     refreshMetadataOrHide(mMapObject.getMetadata(Metadata.MetadataType.FMD_INTERNET), mWifi, null);
     refreshMetadataOrHide(mMapObject.getMetadata(Metadata.MetadataType.FMD_FLATS), mEntrance, mTvEntrance);
-    refreshOpeningHours();
-    UiUtils.showIf(mMapObject != null && Editor.nativeIsFeatureEditable() &&
+    //refreshOpeningHours();
+    /*UiUtils.showIf(mMapObject != null && Editor.nativeIsFeatureEditable() &&
                    !RoutingController.get().isNavigating() && !MapManager.nativeIsLegacyMode(),
-                   mEditor);
+                   mEditor);*/
     UiUtils.showIf(!RoutingController.get().isNavigating() && !MapManager.nativeIsLegacyMode() &&
                    !MapObject.isOfType(MapObject.MY_POSITION, mMapObject) &&
                    Framework.nativeIsActiveObjectABuilding(),
                    mAddOrganisation);
   }
-
+/*
   private void refreshOpeningHours()
   {
     final Timetable[] timetables = OpeningHours.nativeTimetablesFromString(mMapObject.getMetadata(Metadata.MetadataType.FMD_OPEN_HOURS));
@@ -486,7 +482,7 @@ public class PlacePageView extends RelativeLayout implements View.OnClickListene
     if (!containsCurrentWeekday)
       refreshTodayOpeningHours(resources.getString(R.string.day_off_today), resources.getColor(R.color.base_red));
   }
-
+*/
   private void refreshTodayOpeningHours(String text, @ColorInt int color)
   {
     UiUtils.setTextAndShow(mTodayOpeningHours, text);
@@ -526,7 +522,7 @@ public class PlacePageView extends RelativeLayout implements View.OnClickListene
     if (RoutingController.get().isPlanning())
     {
       UiUtils.show(mRouteButtonsFrame);
-      UiUtils.hide(mGeneralButtonsFrame, mEditor);
+      //UiUtils.hide(mGeneralButtonsFrame, mEditor);
     }
     else
     {
@@ -669,7 +665,7 @@ public class PlacePageView extends RelativeLayout implements View.OnClickListene
       }
     });
   }
-
+/*
   private void showEditor()
   {
     ((MwmActivity) getContext()).showEditor();
@@ -681,18 +677,20 @@ public class PlacePageView extends RelativeLayout implements View.OnClickListene
                                    Statistics.params().add(Statistics.EventParam.FROM, "placepage"));
     ((MwmActivity) getContext()).showPositionChooser(true);
   }
-
+*/
   @Override
   public void onClick(View v)
   {
     switch (v.getId())
     {
+    /*
     case R.id.ll__place_editor:
       showEditor();
       break;
     case R.id.ll__add_organisation:
       addOrganisation();
       break;
+    */
     case R.id.iv__bookmark_color:
       saveBookmarkTitle();
       selectBookmarkColor();

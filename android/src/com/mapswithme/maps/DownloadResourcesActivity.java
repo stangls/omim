@@ -216,7 +216,7 @@ public class DownloadResourcesActivity extends BaseMwmFragmentActivity
 
     new Thread(){public void run(){
       Utils.keepScreenOn(true, getWindow());
-      suggestRemoveLiteOrSamsung();
+      //suggestRemoveLiteOrSamsung();
       dispatchIntent();
       initViewsAndListeners();
 
@@ -255,13 +255,14 @@ public class DownloadResourcesActivity extends BaseMwmFragmentActivity
     super.onPause();
     LocationHelper.INSTANCE.removeLocationListener(mLocationListener);
   }
-
+/*
   private void suggestRemoveLiteOrSamsung()
   {
     if (!Yota.isFirstYota() &&
         (Utils.isPackageInstalled(Constants.Package.MWM_LITE_PACKAGE) || Utils.isPackageInstalled(Constants.Package.MWM_SAMSUNG_PACKAGE)))
       Toast.makeText(this, R.string.suggest_uninstall_lite, Toast.LENGTH_LONG).show();
   }
+  */
 
   private void setDownloadMessage(int bytesToDownload)
   {

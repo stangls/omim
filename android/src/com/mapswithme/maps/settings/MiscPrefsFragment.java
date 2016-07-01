@@ -1,4 +1,4 @@
-package com.mapswithme.maps.settings;
+/*package com.mapswithme.maps.settings;
 
 import android.os.Bundle;
 import android.preference.Preference;
@@ -40,7 +40,8 @@ public class MiscPrefsFragment extends BaseXmlSettingsFragment
     if (GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(MwmApplication.get()) != ConnectionResult.SUCCESS)
       getPreferenceScreen().removePreference(findPreference(getString(R.string.pref_play_services)));
 
-    /*if (!MytargetHelper.isShowcaseSwitchedOnServer())
-      getPreferenceScreen().removePreference(findPreference(getString(R.string.pref_showcase_switched_on)));*/
+    /-*if (!MytargetHelper.isShowcaseSwitchedOnServer())
+      getPreferenceScreen().removePreference(findPreference(getString(R.string.pref_showcase_switched_on)));*-/
   }
 }
+*/

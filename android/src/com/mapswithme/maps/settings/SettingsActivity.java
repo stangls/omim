@@ -25,13 +25,9 @@ import com.mapswithme.maps.R;
 import com.mapswithme.maps.base.BaseActivity;
 import com.mapswithme.maps.base.BaseActivityDelegate;
 import com.mapswithme.maps.base.OnBackPressListener;
-import com.mapswithme.maps.editor.OsmOAuth;
-import com.mapswithme.maps.editor.ProfileActivity;
 import com.mapswithme.util.FragmentListHelper;
 import com.mapswithme.util.ThemeUtils;
 import com.mapswithme.util.UiUtils;
-import com.mapswithme.util.statistics.AlohaHelper;
-import com.mapswithme.util.statistics.Statistics;
 
 public class SettingsActivity extends PreferenceActivity
                            implements BaseActivity
@@ -83,18 +79,20 @@ public class SettingsActivity extends PreferenceActivity
     for (Header h : target)
     {
       mHeaders.put(h.id, h);
+      /*
       // Hack to change profile header to username, if user is logged in.
       if (h.id == R.id.osm_profile && OsmOAuth.isAuthorized())
       {
         h.titleRes = 0;
         h.title = OsmOAuth.getUsername();
-      }
+      }*/
     }
   }
 
   @Override
   public void onHeaderClick(@NonNull Header header, int position)
   {
+    /*
     if (header.id == R.id.group_map)
       Statistics.INSTANCE.trackEvent(Statistics.EventName.Settings.GROUP_MAP);
     else if (header.id == R.id.group_route)
@@ -116,7 +114,7 @@ public class SettingsActivity extends PreferenceActivity
       Statistics.INSTANCE.trackEvent(Statistics.EventName.Settings.OSM_PROFILE);
       startActivity(new Intent(this, ProfileActivity.class));
     }
-
+    */
     super.onHeaderClick(header, position);
   }
 
