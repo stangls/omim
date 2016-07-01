@@ -14,7 +14,6 @@ import com.mapswithme.maps.MwmApplication;
 import com.mapswithme.maps.R;
 import com.mapswithme.maps.downloader.CountryItem;
 import com.mapswithme.maps.downloader.MapManager;
-import com.mapswithme.maps.editor.Editor;
 import com.mapswithme.util.LocationUtils;
 import com.mapswithme.util.concurrency.UiThread;
 

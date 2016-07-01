@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.DialogFragment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -50,11 +49,6 @@ import com.mapswithme.maps.downloader.DownloaderFragment;
 import com.mapswithme.maps.downloader.MapManager;
 import com.mapswithme.maps.downloader.MigrationFragment;
 import com.mapswithme.maps.downloader.OnmapDownloader;
-import com.mapswithme.maps.editor.Editor;
-import com.mapswithme.maps.editor.EditorActivity;
-import com.mapswithme.maps.editor.EditorHostFragment;
-import com.mapswithme.maps.editor.FeatureCategoryActivity;
-import com.mapswithme.maps.editor.ReportFragment;
 import com.mapswithme.maps.location.LocationHelper;
 import com.mapswithme.maps.location.LocationPredictor;
 import com.mapswithme.maps.routing.NavigationController;
@@ -128,9 +122,10 @@ public class MwmActivity extends BaseMwmFragmentActivity
   private static final String[] DOCKED_FRAGMENTS = { SearchFragment.class.getName(),
                                                      DownloaderFragment.class.getName(),
                                                      MigrationFragment.class.getName(),
-                                                     RoutingPlanFragment.class.getName(),
-                                                     EditorHostFragment.class.getName(),
-                                                     ReportFragment.class.getName() };
+                                                     RoutingPlanFragment.class.getName()
+                                                     //EditorHostFragment.class.getName(),
+                                                     //ReportFragment.class.getName()
+                                                   };
   // Instance state
   private static final String STATE_PP_OPENED = "PpOpened";
   private static final String STATE_MAP_OBJECT = "MapObject";
@@ -158,7 +153,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
   private ImageButton mBtnZoomOut;
   private ImageButton mButtonContinueTourHere;
 
-  private View mPositionChooser;
+  //private View mPositionChooser;
 
   private boolean mIsFragmentContainer;
   private boolean mIsFullscreen;
@@ -334,7 +329,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     else
       SearchActivity.start(this, query);
   }
-
+/*
   public void showEditor()
   {
     // TODO(yunikkk) think about refactoring. It probably should be called in editor.
@@ -345,7 +340,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     else
       EditorActivity.start(this);
   }
-
+*/
   private void shareMyLocation()
   {
     final Location loc = LocationHelper.INSTANCE.getSavedLocation();
@@ -510,9 +505,9 @@ public class MwmActivity extends BaseMwmFragmentActivity
     mNavigationController = new NavigationController(this);
     initMenu();
     initOnmapDownloader();
-    initPositionChooser();
+    //initPositionChooser();
   }
-
+/*
   private void initPositionChooser()
   {
     mPositionChooser = findViewById(R.id.position_chooser);
@@ -546,11 +541,11 @@ public class MwmActivity extends BaseMwmFragmentActivity
   {
     UiUtils.showIf(show, mPositionChooser);
     setFullscreen(show);
-    Framework.nativeTurnChoosePositionMode(show, false /* isBusiness */); //TODO(Android team): set isBusiness correctly
+    Framework.nativeTurnChoosePositionMode(show, false /-* isBusiness *-/); //TODO(Android team): set isBusiness correctly
     closePlacePage();
     mSearchController.hide();
   }
-
+*/
   private void initMap()
   {
     mMapFrame = findViewById(R.id.map_fragment_container);
@@ -640,7 +635,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     mFadeView.fadeOut(false);
     mMainMenu.close(true, procAfterClose);
   }
-
+/*
   private boolean closePositionChooser()
   {
     if (UiUtils.isVisible(mPositionChooser))
@@ -651,7 +646,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
     return false;
   }
-
+*/
   private void startLocationToPoint(String statisticsEvent, String alohaEvent, final @Nullable MapObject endPoint)
   {
     closeMenu(statisticsEvent, alohaEvent, new Runnable()
@@ -725,7 +720,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
           AlohaHelper.logClick(AlohaHelper.TOOLBAR_MENU);
           toggleMenu();
           break;
-*/
+
 
         case ADD_PLACE:
           closePlacePage();
@@ -742,7 +737,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
             }
           });
           break;
-/*
+
         case SEARCH:
           RoutingController.get().cancelPlanning();
           closeMenu(Statistics.EventName.TOOLBAR_SEARCH, AlohaHelper.TOOLBAR_SEARCH, new Runnable()
@@ -1284,7 +1279,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     }
 
     if (!closePlacePage() && !closeSidePanel() &&
-        !RoutingController.get().cancel() && !closePositionChooser())
+        !RoutingController.get().cancel() /*&& !closePositionChooser()*/)
     {
       MwmApplication.gps().pauseEmulation();
       super.onBackPressed();

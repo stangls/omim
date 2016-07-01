@@ -54,9 +54,9 @@
 
           <include layout="@layout/place_page_wiki"/>
 
-          <include layout="@layout/place_page_editor"/>
+          <!--<include layout="@layout/place_page_editor"/>-->
 
-          <include layout="@layout/place_page_add_business"/>
+          <!--<include layout="@layout/place_page_add_business"/>-->
         </LinearLayout>
 
         <LinearLayout

@@ -2,13 +2,10 @@ package com.mapswithme.maps;
 
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.location.Location;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.preference.PreferenceManager;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.annotation.UiThread;
 import android.support.multidex.MultiDexApplication;
 import android.text.TextUtils;
@@ -24,7 +21,6 @@ import com.mapswithme.maps.background.Notifier;
 import com.mapswithme.maps.bookmarks.data.BookmarkManager;
 import com.mapswithme.maps.downloader.CountryItem;
 import com.mapswithme.maps.downloader.MapManager;
-import com.mapswithme.maps.editor.Editor;
 import com.mapswithme.maps.location.TrackRecorder;
 import com.mapswithme.maps.sound.TtsPlayer;
 import com.mapswithme.util.Config;
@@ -33,8 +29,6 @@ import com.mapswithme.util.ThemeSwitcher;
 import com.mapswithme.util.UiUtils;
 import com.mapswithme.util.Yota;
 import com.mapswithme.util.statistics.Statistics;
-import com.mobidat.wp2.gpsProvider.GPSInfo;
-import com.mobidat.wp2.gpsProvider.ILocationReceiver;
 import com.mobidat.wp2.remotelogging.RemoteLogging;
 import com.parse.Parse;
 import com.parse.ParseException;
@@ -123,7 +117,7 @@ public class MwmApplication extends MultiDexApplication {
     mPrefs = getSharedPreferences(getString(R.string.pref_file_name), MODE_PRIVATE);
     mBackgroundTracker = new AppBackgroundTracker();
     TrackRecorder.init();
-    Editor.init();
+    //Editor.init();
   }
 
   public void initNativeCore()

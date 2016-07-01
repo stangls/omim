@@ -138,7 +138,7 @@ public class MainMenu
   public enum Item
   {
     //TOGGLE(R.id.toggle),
-    ADD_PLACE(R.id.add_place),
+    //ADD_PLACE(R.id.add_place),
     //SEARCH(R.id.search),
     TOUR(R.id.tour),
     /*P2P(R.id.p2p),
@@ -420,7 +420,7 @@ public class MainMenu
                    mItemViews.get(Item.SEARCH),
                    mItemViews.get(Item.BOOKMARKS));
                    */
-    setVisible(Item.ADD_PLACE, !isRouting && !MapManager.nativeIsLegacyMode());
+    //setVisible(Item.ADD_PLACE, !isRouting && !MapManager.nativeIsLegacyMode());
 
     if (isLayoutCorrected())
     {
