@@ -1,4 +1,4 @@
-package com.mapswithme.maps.ads;
+/*package com.mapswithme.maps.ads;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -65,3 +65,4 @@ public class GooglePlusDialogFragment extends BaseMwmDialogFragment
     Statistics.INSTANCE.trackEvent(Statistics.EventName.PLUS_DIALOG_LATER);
   }
 }
+*/

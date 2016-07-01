@@ -1,4 +1,4 @@
-package com.mapswithme.maps.settings;
+/*package com.mapswithme.maps.settings;
 
 import android.app.AlertDialog;
 import android.content.DialogInterface;
@@ -104,3 +104,4 @@ public class HelpFragment extends BaseSettingsFragment
     return mFrame;
   }
 }
+*/

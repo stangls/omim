@@ -1,4 +1,4 @@
-package com.mapswithme.maps.ads;
+/*package com.mapswithme.maps.ads;
 
 import android.animation.Animator;
 import android.animation.ObjectAnimator;
@@ -136,3 +136,4 @@ public class RateStoreDialogFragment extends BaseMwmDialogFragment implements Vi
     }
   }
 }
+*/

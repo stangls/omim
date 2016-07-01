@@ -54,19 +54,20 @@ public class AboutFragment extends BaseSettingsFragment
   {
     super.onCreateView(inflater, container, savedInstanceState);
 
+
     ((TextView) mFrame.findViewById(R.id.version))
         .setText(getString(R.string.version, BuildConfig.VERSION_NAME));
 
     ((TextView) mFrame.findViewById(R.id.data_version))
         .setText(getString(R.string.data_version, Framework.nativeGetDataVersion()));
-
+    /*
     setupItem(R.id.web, true);
-    setupItem(R.id.blog, true);
+    setupItem(R.id.blog, true);*/
     setupItem(R.id.facebook, false);
-    setupItem(R.id.twitter, false);
+    /*setupItem(R.id.twitter, false);
     setupItem(R.id.subscribe, true);
     setupItem(R.id.rate, true);
-    setupItem(R.id.share, true);
+    setupItem(R.id.share, true);*/
     setupItem(R.id.copyright, false);
 
     return mFrame;
@@ -79,6 +80,7 @@ public class AboutFragment extends BaseSettingsFragment
     {
       switch (v.getId())
       {
+/*
       case R.id.web:
         Statistics.INSTANCE.trackEvent(Statistics.EventName.Settings.WEB_SITE);
         AlohaHelper.logClick(AlohaHelper.Settings.WEB_SITE);
@@ -90,13 +92,13 @@ public class AboutFragment extends BaseSettingsFragment
         AlohaHelper.logClick(AlohaHelper.Settings.WEB_BLOG);
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.Url.WEB_BLOG)));
         break;
-
+*/
       case R.id.facebook:
         Statistics.INSTANCE.trackEvent(Statistics.EventName.Settings.FACEBOOK);
         AlohaHelper.logClick(AlohaHelper.Settings.FACEBOOK);
         Utils.showFacebookPage(getActivity());
         break;
-
+/*
       case R.id.twitter:
         Statistics.INSTANCE.trackEvent(Statistics.EventName.Settings.TWITTER);
         AlohaHelper.logClick(AlohaHelper.Settings.TWITTER);
@@ -123,7 +125,7 @@ public class AboutFragment extends BaseSettingsFragment
         AlohaHelper.logClick(AlohaHelper.Settings.TELL_FRIEND);
         ShareOption.ANY.share(getActivity(), getString(R.string.tell_friends_text), R.string.tell_friends);
         break;
-
+*/
       case R.id.copyright:
         Statistics.INSTANCE.trackEvent(Statistics.EventName.Settings.COPYRIGHT);
         AlohaHelper.logClick(AlohaHelper.Settings.COPYRIGHT);

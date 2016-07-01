@@ -1,4 +1,4 @@
-package com.mapswithme.maps.editor;
+/*package com.mapswithme.maps.editor;
 
 import android.support.v4.app.Fragment;
 
@@ -12,3 +12,4 @@ public class ProfileActivity extends BaseMwmFragmentActivity
     return ProfileFragment.class;
   }
 }
+*/

@@ -1,4 +1,4 @@
-package com.mapswithme.maps.editor;
+/*package com.mapswithme.maps.editor;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -80,3 +80,4 @@ public class ProfileFragment extends AuthFragment implements View.OnClickListene
     }
   }
 }
+*/

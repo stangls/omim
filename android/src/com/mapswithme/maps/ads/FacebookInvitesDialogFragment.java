@@ -1,4 +1,4 @@
-package com.mapswithme.maps.ads;
+/*package com.mapswithme.maps.ads;
 
 import android.app.Dialog;
 import android.content.DialogInterface;
@@ -83,3 +83,4 @@ public class FacebookInvitesDialogFragment extends BaseMwmDialogFragment
     }
   }
 }
+*/

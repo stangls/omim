@@ -25,12 +25,13 @@ public enum LikesManager
   */
   public enum LikeType
   {
-    GPLAY_NEW_USERS(RateStoreDialogFragment.class, DIALOG_DELAY_DEFAULT),
-    GPLAY_OLD_USERS(RateStoreDialogFragment.class, DIALOG_DELAY_DEFAULT),
-    GPLUS_NEW_USERS(GooglePlusDialogFragment.class, DIALOG_DELAY_DEFAULT),
-    GPLUS_OLD_USERS(GooglePlusDialogFragment.class, DIALOG_DELAY_DEFAULT),
-    FACEBOOK_INVITE_NEW_USERS(FacebookInvitesDialogFragment.class, DIALOG_DELAY_DEFAULT),
-    FACEBOOK_INVITES_OLD_USERS(FacebookInvitesDialogFragment.class, DIALOG_DELAY_DEFAULT);
+    //GPLAY_NEW_USERS(RateStoreDialogFragment.class, DIALOG_DELAY_DEFAULT),
+    //GPLAY_OLD_USERS(RateStoreDialogFragment.class, DIALOG_DELAY_DEFAULT),
+    //GPLUS_NEW_USERS(GooglePlusDialogFragment.class, DIALOG_DELAY_DEFAULT),
+    //GPLUS_OLD_USERS(GooglePlusDialogFragment.class, DIALOG_DELAY_DEFAULT),
+    //FACEBOOK_INVITE_NEW_USERS(FacebookInvitesDialogFragment.class, DIALOG_DELAY_DEFAULT),
+    //FACEBOOK_INVITES_OLD_USERS(FacebookInvitesDialogFragment.class, DIALOG_DELAY_DEFAULT)
+    ;
 
     public final Class<? extends DialogFragment> clazz;
     public final int delay;
@@ -49,9 +50,9 @@ public enum LikesManager
   private static final SparseArray<LikeType> sNewUsersMapping = new SparseArray<>();
 
   static
-  {
+  {/*
     sOldUsersMapping.put(4, LikeType.GPLAY_OLD_USERS);
-//    sOldUsersMapping.put(4, LikeType.GPLUS_OLD_USERS);
+    sOldUsersMapping.put(4, LikeType.GPLUS_OLD_USERS);
     sOldUsersMapping.put(6, LikeType.FACEBOOK_INVITES_OLD_USERS);
     sOldUsersMapping.put(10, LikeType.GPLAY_OLD_USERS);
     sOldUsersMapping.put(21, LikeType.GPLAY_OLD_USERS);
@@ -68,7 +69,7 @@ public enum LikesManager
     sNewUsersMapping.put(30, LikeType.GPLUS_NEW_USERS);
     sNewUsersMapping.put(35, LikeType.FACEBOOK_INVITE_NEW_USERS);
     sNewUsersMapping.put(50, LikeType.GPLUS_NEW_USERS);
-    sNewUsersMapping.put(55, LikeType.FACEBOOK_INVITE_NEW_USERS);
+    sNewUsersMapping.put(55, LikeType.FACEBOOK_INVITE_NEW_USERS);*/
   }
 
   private final boolean mIsNewUser = (Config.getFirstInstallVersion() == BuildConfig.VERSION_CODE);
