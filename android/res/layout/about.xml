@@ -55,7 +55,7 @@
                 android:drawableLeft="@drawable/ic_website"
                 android:drawableStart="@drawable/ic_website"/>
 
-      <TextView android:id="@+id/blog"
+      <TextView android:id="@+id/portal"
                 style="@style/MwmWidget.TextView.Item"
                 android:text="@string/blog"
                 android:drawableLeft="@drawable/ic_blog"

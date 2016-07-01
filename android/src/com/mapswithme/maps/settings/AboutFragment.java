@@ -21,7 +21,6 @@ import com.mapswithme.maps.widget.ScrollViewShadowController;
 import com.mapswithme.util.Constants;
 import com.mapswithme.util.Graphics;
 import com.mapswithme.util.Utils;
-import com.mapswithme.util.sharing.ShareOption;
 import com.mapswithme.util.statistics.AlohaHelper;
 import com.mapswithme.util.statistics.Statistics;
 
@@ -80,19 +79,19 @@ public class AboutFragment extends BaseSettingsFragment
     {
       switch (v.getId())
       {
-/*
+
       case R.id.web:
         Statistics.INSTANCE.trackEvent(Statistics.EventName.Settings.WEB_SITE);
         AlohaHelper.logClick(AlohaHelper.Settings.WEB_SITE);
         startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.Url.WEB_SITE)));
         break;
 
-      case R.id.blog:
+      case R.id.portal:
         Statistics.INSTANCE.trackEvent(Statistics.EventName.Settings.WEB_BLOG);
         AlohaHelper.logClick(AlohaHelper.Settings.WEB_BLOG);
-        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.Url.WEB_BLOG)));
+        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.Url.WEB_PORTAL)));
         break;
-*/
+
       case R.id.facebook:
         Statistics.INSTANCE.trackEvent(Statistics.EventName.Settings.FACEBOOK);
         AlohaHelper.logClick(AlohaHelper.Settings.FACEBOOK);

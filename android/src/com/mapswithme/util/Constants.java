@@ -21,7 +21,7 @@ public final class Constants
 
     public static final String PLAY_MARKET_HTTPS_APP_PREFIX = "https://play.google.com/store/apps/details?id=";
 
-    public static final String FB_MAPSME_COMMUNITY_HTTP = "http://www.facebook.com/MapsWithMe";
+    public static final String FB_MAPSME_COMMUNITY_HTTP = "http://www.facebook.com/1590537157897033";
     // Profile id is taken from http://graph.facebook.com/MapsWithMe
     public static final String FB_MAPSME_COMMUNITY_NATIVE = "fb://profile/1590537157897033";
     public static final String TWITTER_MAPSME_HTTP = "https://twitter.com/MAPS_ME";
@@ -32,9 +32,9 @@ public final class Constants
     public static final String COPYRIGHT = "file:///android_asset/copyright.html";
     public static final String FAQ = "file:///android_asset/faq.html";
     public static final String OPENING_HOURS_MANUAL = "file:///android_asset/opening_hours_how_to_edit.html";
-
+/*
     public static final String OSM_REGISTER = "https://www.openstreetmap.org/user/new";
-    public static final String OSM_RECOVER_PASSWORD = "https://www.openstreetmap.org/user/forgot-password";
+    public static final String OSM_RECOVER_PASSWORD = "https://www.openstreetmap.org/user/forgot-password";*/
 
     private Url() {}
   }
