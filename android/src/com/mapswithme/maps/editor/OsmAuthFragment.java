@@ -1,4 +1,4 @@
-package com.mapswithme.maps.editor;
+/*package com.mapswithme.maps.editor;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -145,3 +145,4 @@ public class OsmAuthFragment extends BaseMwmToolbarFragment implements View.OnCl
     startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.Url.OSM_RECOVER_PASSWORD)));
   }
 }
+*/

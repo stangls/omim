@@ -50,7 +50,6 @@ import com.mapswithme.maps.downloader.DownloaderFragment;
 import com.mapswithme.maps.downloader.MapManager;
 import com.mapswithme.maps.downloader.MigrationFragment;
 import com.mapswithme.maps.downloader.OnmapDownloader;
-import com.mapswithme.maps.editor.AuthDialogFragment;
 import com.mapswithme.maps.editor.Editor;
 import com.mapswithme.maps.editor.EditorActivity;
 import com.mapswithme.maps.editor.EditorHostFragment;
@@ -1567,7 +1566,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
       return true;
     }
   }
-
+/*
   public static class ShowAuthorizationTask implements MapTask
   {
     @Override
@@ -1578,7 +1577,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
       return true;
     }
   }
-
+*/
   public void adjustCompass(int offsetX, int offsetY)
   {
     if (mMapFragment == null || !mMapFragment.isAdded())

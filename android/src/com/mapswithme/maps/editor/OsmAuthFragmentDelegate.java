@@ -1,4 +1,4 @@
-package com.mapswithme.maps.editor;
+/*package com.mapswithme.maps.editor;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
@@ -196,3 +196,4 @@ public class OsmAuthFragmentDelegate implements View.OnClickListener
     mFragment.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.Url.OSM_REGISTER)));
   }
 }
+*/
