@@ -18,9 +18,6 @@ CustomGeom::CustomGeom(vector<m2::PointF> &outerPoints, dp::Color& color) :
 
 void CustomGeom::CreatePolys(TPolyFun callback)
 {
-    /*LOG(my::LINFO,("creating two polygons"));
-    callback( m_outerRect.LeftTop(), m_outerRect.RightBottom(), m2::PointD(m_outerRect.LeftTop().x, m_outerRect.RightBottom().y));
-    callback( m_outerRect.LeftTop(), m2::PointD(m_outerRect.RightBottom().x, m_outerRect.LeftTop().y),  m_outerRect.RightBottom() );*/
     LOG(my::LINFO,("creating other polygons"));
     if (m_outerPoints.size()<3)
         return;
@@ -32,7 +29,7 @@ void CustomGeom::CreatePolys(TPolyFun callback)
         // iterate
         auto p3=*(it++);
 
-        // compute
+        // logic copied from apply_feature_functors.cpp : ApplyAreaFeature::operator()
         m2::PointD const v1 = p2 - p1;
         m2::PointD const v2 = p3 - p1;
         if (v1.IsAlmostZero() || v2.IsAlmostZero())
