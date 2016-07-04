@@ -48,7 +48,7 @@
       android:layout_marginBottom="@dimen/margin_half"
       android:visibility="gone"
       tools:visibility="visible"/>
-
+<!--
     <com.mapswithme.maps.widget.placepage.PlacePageView
       android:id="@+id/info_box"
       style="@style/MwmWidget.Floating"
@@ -58,6 +58,7 @@
       android:background="?windowBackgroundForced"
       placePage:animationType="left"
       placePage:floating="true"/>
+-->
   </LinearLayout>
 
   <com.mapswithme.maps.widget.FadeView
