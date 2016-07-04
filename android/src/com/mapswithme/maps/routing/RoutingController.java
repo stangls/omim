@@ -158,41 +158,45 @@ public class RoutingController
 
   private final Framework.TourChangeListener mTourChangedListener = new Framework.TourChangeListener() {
     private boolean tourHasFinished = false;
-    private Boolean weAreOnTour = null;
+    private boolean weAreOnTourKnown = false;
+    private boolean weAreOnTour = false;
     private boolean tourWasAlreadyLeftOnce = false;
 
     @Override
     public void onTourChanged(boolean finished, boolean onTour, int idx) {
-      SharedPreferences.Editor editor = MwmApplication.prefs().edit();
-      // handle tour-change
-      if (weAreOnTour==null){
-        weAreOnTour = onTour;
-      }else{
-        if (weAreOnTour != onTour){
-          weAreOnTour=onTour;
-          if (!onTour){
-            tourWasAlreadyLeftOnce=true;
-          }
-          mTourStatusListener.onTourTracking(onTour,tourWasAlreadyLeftOnce);
-        }
-      }
-      // handle finishing of tour
-      if (finished){
-        Log.d(TAG, "onTourChanged: tour finished!");
-        editor.remove(TOUR_FILE_NAME);
-        editor.remove(TOUR_POSITION);
-        cancel();
-        if (!tourHasFinished){
-          tourHasFinished = true;
-          if (mTourStatusListener !=null){
-            mTourStatusListener.onTourFinished();
+      synchronized (this){
+        // handle tour-change
+        if (!weAreOnTourKnown){
+          weAreOnTour = onTour;
+          weAreOnTourKnown=true;
+        }else{
+          if (onTour != weAreOnTour){
+            weAreOnTour=onTour;
+            if (!onTour){
+              tourWasAlreadyLeftOnce=true;
+            }
+            mTourStatusListener.onTourTracking(onTour,tourWasAlreadyLeftOnce);
           }
         }
-      }else{
-        saveTourInfo(null,idx);
-        tourHasFinished = false;
+        // handle finishing of tour or position-update
+        SharedPreferences.Editor editor = MwmApplication.prefs().edit();
+        if (finished){
+          Log.d(TAG, "onTourChanged: tour finished!");
+          editor.remove(TOUR_FILE_NAME);
+          editor.remove(TOUR_POSITION);
+          cancel();
+          if (!tourHasFinished){
+            tourHasFinished = true;
+            if (mTourStatusListener !=null){
+              mTourStatusListener.onTourFinished();
+            }
+          }
+        }else{
+          saveTourInfo(null,idx);
+          tourHasFinished = false;
+        }
+        editor.apply();
       }
-      editor.apply();
     }
   };
 
