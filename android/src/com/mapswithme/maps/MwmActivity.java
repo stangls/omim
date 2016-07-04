@@ -175,6 +175,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
   @Override
   public void onTourFinished() {
+    TtsPlayer.INSTANCE.playNotificationMessage("Sie haben die Tour erfolgreich beendet.");
     new Thread(){public void run(){
       MwmApplication.gps().pauseEmulation();
       try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
