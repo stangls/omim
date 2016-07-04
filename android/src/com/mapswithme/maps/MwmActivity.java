@@ -40,10 +40,7 @@ import com.mapswithme.maps.api.ParsedMwmRequest;
 import com.mapswithme.maps.base.BaseMwmFragmentActivity;
 import com.mapswithme.maps.base.OnBackPressListener;
 import com.mapswithme.maps.bookmarks.data.MapObject;
-import com.mapswithme.maps.downloader.DownloaderActivity;
-import com.mapswithme.maps.downloader.DownloaderFragment;
 import com.mapswithme.maps.downloader.MapManager;
-import com.mapswithme.maps.downloader.MigrationFragment;
 import com.mapswithme.maps.downloader.OnmapDownloader;
 import com.mapswithme.maps.location.LocationHelper;
 import com.mapswithme.maps.location.LocationPredictor;
@@ -112,8 +109,8 @@ public class MwmActivity extends BaseMwmFragmentActivity
   private static final String EXTRA_UPDATE_COUNTRIES = ".extra.update.countries";
 
   private static final String[] DOCKED_FRAGMENTS = { SearchFragment.class.getName(),
-                                                     DownloaderFragment.class.getName(),
-                                                     MigrationFragment.class.getName(),
+                                                     //DownloaderFragment.class.getName(),
+                                                     //MigrationFragment.class.getName(),
                                                      RoutingPlanFragment.class.getName()
                                                      //EditorHostFragment.class.getName(),
                                                      //ReportFragment.class.getName()
@@ -355,6 +352,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
   @Override
   public void showDownloader(boolean openDownloaded)
   {
+    /*
     if (RoutingController.get().checkMigration(this))
       return;
 
@@ -370,6 +368,8 @@ public class MwmActivity extends BaseMwmFragmentActivity
     {
       startActivity(new Intent(this, DownloaderActivity.class).putExtras(args));
     }
+    */
+    Log.w(TAG, "showDownloader: downloading disabled. it seems like map-files are missing!" );
   }
 
   @Override
