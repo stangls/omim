@@ -825,7 +825,7 @@ public class RoutingController
 
         @Override
         public void onLocationUpdated(Location l) {
-          if (counter--<=0){
+          if (MwmApplication.get().isFrameworkInitialized() && counter--<=0){
             Log.d(TAG, "startTour: location known. native load tour");
             triesContinueTour = 10;
             Framework.nativeLoadTour(tourFile.getAbsolutePath(), activeTourPosition, tll);
