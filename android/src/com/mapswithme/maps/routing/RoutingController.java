@@ -165,25 +165,14 @@ public class RoutingController
     @Override
     public void onTourChanged(boolean finished, boolean onTour, int idx) {
       synchronized (this){
-        // handle tour-change
-        if (!weAreOnTourKnown){
-          weAreOnTour = onTour;
-          weAreOnTourKnown=true;
-        }else{
-          if (onTour != weAreOnTour){
-            weAreOnTour=onTour;
-            if (!onTour){
-              tourWasAlreadyLeftOnce=true;
-            }
-            mTourStatusListener.onTourTracking(onTour,tourWasAlreadyLeftOnce);
-          }
-        }
+
         // handle finishing of tour or position-update
-        SharedPreferences.Editor editor = MwmApplication.prefs().edit();
         if (finished){
-          Log.d(TAG, "onTourChanged: tour finished!");
+          Log.i(TAG, "onTourChanged: tour finished!");
+          SharedPreferences.Editor editor = MwmApplication.prefs().edit();
           editor.remove(TOUR_FILE_NAME);
           editor.remove(TOUR_POSITION);
+          editor.apply();
           cancel();
           if (!tourHasFinished){
             tourHasFinished = true;
@@ -194,9 +183,24 @@ public class RoutingController
         }else{
           saveTourInfo(null,idx);
           tourHasFinished = false;
+          // handle tour-change
+          if (!weAreOnTourKnown){
+            weAreOnTour = onTour;
+            weAreOnTourKnown=true;
+          }else{
+            // TODO: Tell developers of Android to fix (true!=true)==true
+            if (Boolean.toString(onTour).intern() != Boolean.toString(weAreOnTour).intern()){
+              if (!onTour){
+                tourWasAlreadyLeftOnce=true;
+              }
+              mTourStatusListener.onTourTracking(onTour,tourWasAlreadyLeftOnce);
+              weAreOnTour=onTour;
+            }
+          }
         }
-        editor.apply();
-      }
+
+
+      } // end synchronized
     }
   };
 
