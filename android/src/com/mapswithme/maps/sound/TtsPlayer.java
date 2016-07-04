@@ -166,10 +166,15 @@ public enum TtsPlayer
 
   private void speak(String textToSpeak)
   {
-    Log.d(TAG, "speak: "+textToSpeak);
+    speak(textToSpeak,0);
+  }
+  private void speak(String textToSpeak, int silenceAtBegin)
+  {
     if (Config.isTtsEnabled())
       try
       {
+        if (silenceAtBegin>0)
+          mTts.playSilence(silenceAtBegin,TextToSpeech.QUEUE_ADD, null);
         //noinspection deprecation
         mTts.speak(textToSpeak, TextToSpeech.QUEUE_ADD, null);
       }
@@ -190,23 +195,20 @@ public enum TtsPlayer
         speak(textToSpeak);
   }
 
-  public void playCustomMessage(String message) {
-    speak(message);
-  }
-
   /**
    * Plays a notification-message with a leading notification-sound.
    * @param message The message to be spoken.
    * @param waitForTts play the notification sound only shortly before the message.
    */
-  public void playNotificationMessage(final String message, boolean waitForTts) {
+  public void playNotificationMessage(final String message, final boolean waitForTts) {
     new Thread(){public void run(){
-      while (mTts.isSpeaking()){
-        try { Thread.sleep(500); } catch (InterruptedException ignored) {}
+      if (waitForTts){
+        while (mTts.isSpeaking()){
+          try { Thread.sleep(500); } catch (InterruptedException ignored) {}
+        }
       }
+      speak(message,500);
       MwmApplication.get().playNotificationSound();
-      try { Thread.sleep(500); } catch (InterruptedException ignored) {}
-      TtsPlayer.INSTANCE.playCustomMessage(message);
     }}.start();
   }
 

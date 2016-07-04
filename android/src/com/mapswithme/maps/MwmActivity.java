@@ -59,7 +59,7 @@ import com.mapswithme.maps.settings.UnitLocale;
 import com.mapswithme.maps.sound.TtsPlayer;
 import com.mapswithme.maps.widget.FadeView;
 import com.mapswithme.maps.widget.menu.MainMenu;
-import com.mapswithme.mx.TourFinishedListener;
+import com.mapswithme.mx.TourStatusListener;
 import com.mapswithme.mx.TourLoadedListener;
 import com.mapswithme.util.Animations;
 import com.mapswithme.util.BottomSheetHelper;
@@ -69,7 +69,6 @@ import com.mapswithme.util.ThemeUtils;
 import com.mapswithme.util.UiUtils;
 import com.mapswithme.util.Utils;
 import com.mapswithme.util.Yota;
-import com.mapswithme.util.concurrency.UiThread;
 import com.mapswithme.util.sharing.ShareOption;
 import com.mapswithme.util.sharing.SharingHelper;
 import com.mapswithme.util.statistics.AlohaHelper;
@@ -98,7 +97,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
                                  OnClickListener,
                                  MapFragment.MapRenderingListener,
                                  CustomNavigateUpListener,
-                                 RoutingController.Container, Framework.PoiVisitedListener, MissionListener, Framework.PossibleTourResumptionListener, TourFinishedListener, TourLoadedListener, ILocationReceiver {
+                                 RoutingController.Container, Framework.PoiVisitedListener, MissionListener, Framework.PossibleTourResumptionListener, TourStatusListener, TourLoadedListener, ILocationReceiver {
 
   private static final String TAG = MwmActivity.class.getName();
 
@@ -176,6 +175,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
   @Override
   public void onTourFinished() {
+    TtsPlayer.INSTANCE.playNotificationMessage("Sie haben die Tour erfolgreich beendet.");
     new Thread(){public void run(){
       MwmApplication.gps().pauseEmulation();
       try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
@@ -183,6 +183,15 @@ public class MwmActivity extends BaseMwmFragmentActivity
         finish();
       }});
     }}.start();
+  }
+
+  @Override
+  public void onTourTracking(boolean tracking, boolean tourWasAlreadyLeftOnce){
+    if (tracking){
+      TtsPlayer.INSTANCE.playNotificationMessage("Sie befinden sich "+(tourWasAlreadyLeftOnce?"wieder":"jetzt")+" auf der Tour.");
+    }else{
+      TtsPlayer.INSTANCE.playNotificationMessage("Sie haben die Tour verlassen.");
+    }
   }
 
   @Override
@@ -1235,7 +1244,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     mediaPlayer.start(); // no need to call prepare(); create() does that for you
 
     // set this activity as active in routing-controller so that when the tour finishes, the activity can be terminated
-    RoutingController.get().setTourFinishedListener(this);
+    RoutingController.get().setTourStatusListener(this);
     /*updateGpsSimulationActive(false);
     MwmApplication.gps().setSimulation(false);*/
   }

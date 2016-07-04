@@ -68,8 +68,8 @@ public:
   typedef function<void(Route const &, IRouter::ResultCode)> TReadyCallback;
   typedef function<void(float)> TProgressCallback;
 
-  // parameters: finished, position_index
-  typedef function<void(bool, size_t)> TTourChangeCallback;
+  // parameters: finished, onTour, position_index
+  typedef function<void(bool, bool, size_t)> TTourChangeCallback;
 
   RoutingSession();
 

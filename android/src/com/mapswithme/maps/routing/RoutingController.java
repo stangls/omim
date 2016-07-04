@@ -27,7 +27,7 @@ import com.mapswithme.maps.R;
 import com.mapswithme.maps.bookmarks.data.MapObject;
 import com.mapswithme.maps.downloader.MapManager;
 import com.mapswithme.maps.location.LocationHelper;
-import com.mapswithme.mx.TourFinishedListener;
+import com.mapswithme.mx.TourStatusListener;
 import com.mapswithme.mx.TourLoadedListener;
 import com.mapswithme.util.Config;
 import com.mapswithme.util.StringUtils;
@@ -103,9 +103,9 @@ public class RoutingController
   private String[] mLastMissingMaps;
   private RoutingInfo mCachedRoutingInfo;
 
-  private TourFinishedListener mTourFinishedListener;
-  public void setTourFinishedListener(TourFinishedListener listener) {
-    this.mTourFinishedListener = listener;
+  private TourStatusListener mTourStatusListener;
+  public void setTourStatusListener(TourStatusListener listener) {
+    this.mTourStatusListener = listener;
   }
 
   @SuppressWarnings("FieldCanBeLocal")
@@ -157,21 +157,50 @@ public class RoutingController
   };
 
   private final Framework.TourChangeListener mTourChangedListener = new Framework.TourChangeListener() {
+    private boolean tourHasFinished = false;
+    private boolean weAreOnTourKnown = false;
+    private boolean weAreOnTour = false;
+    private boolean tourWasAlreadyLeftOnce = false;
+
     @Override
-    public void onTourChanged(boolean finished, int idx) {
-      SharedPreferences.Editor editor = MwmApplication.prefs().edit();
-      if (finished){
-        Log.d(TAG, "onTourChanged: tour finished!");
-        editor.remove(TOUR_FILE_NAME);
-        editor.remove(TOUR_POSITION);
-        cancel();
-        if (mTourFinishedListener !=null){
-          mTourFinishedListener.onTourFinished();
+    public void onTourChanged(boolean finished, boolean onTour, int idx) {
+      synchronized (this){
+
+        // handle finishing of tour or position-update
+        if (finished){
+          Log.i(TAG, "onTourChanged: tour finished!");
+          SharedPreferences.Editor editor = MwmApplication.prefs().edit();
+          editor.remove(TOUR_FILE_NAME);
+          editor.remove(TOUR_POSITION);
+          editor.apply();
+          cancel();
+          if (!tourHasFinished){
+            tourHasFinished = true;
+            if (mTourStatusListener !=null){
+              mTourStatusListener.onTourFinished();
+            }
+          }
+        }else{
+          saveTourInfo(null,idx);
+          tourHasFinished = false;
+          // handle tour-change
+          if (!weAreOnTourKnown){
+            weAreOnTour = onTour;
+            weAreOnTourKnown=true;
+          }else{
+            // TODO: Tell developers of Android to fix (true!=true)==true
+            if (Boolean.toString(onTour).intern() != Boolean.toString(weAreOnTour).intern()){
+              if (!onTour){
+                tourWasAlreadyLeftOnce=true;
+              }
+              mTourStatusListener.onTourTracking(onTour,tourWasAlreadyLeftOnce);
+              weAreOnTour=onTour;
+            }
+          }
         }
-      }else{
-        saveTourInfo(null,idx);
-      }
-      editor.apply();
+
+
+      } // end synchronized
     }
   };
 

@@ -574,8 +574,7 @@ public:
   using TRouteBuildingCallback = function<void(routing::IRouter::ResultCode,
                                                storage::TCountriesVec const &)>;
   using TRouteProgressCallback = function<void(float)>;
-  // parameters: finished, position_index
-  typedef function<void(bool, size_t)> TTourChangeCallback;
+  using TTourChangeCallback = routing::RoutingSession::TTourChangeCallback;
   typedef function<void(string)> TPoiMessageCallback;
   typedef function<void(bool)> TPossibleTourResumptionCallback;
   typedef function<void(string)> TTourLoadedCallback;

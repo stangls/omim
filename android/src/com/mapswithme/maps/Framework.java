@@ -47,7 +47,7 @@ public class Framework
   @SuppressWarnings("unused")
   public interface TourChangeListener
   {
-    void onTourChanged(boolean finished, int idx);
+    void onTourChanged(boolean finished, boolean onTour, int idx);
   }
 
   @SuppressWarnings("unused")
