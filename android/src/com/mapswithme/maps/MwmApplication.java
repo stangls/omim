@@ -323,6 +323,7 @@ public class MwmApplication extends MultiDexApplication {
   private static native void nativeInitCrashlytics();
 
   public void playNotificationSound() {
+    notificationPlayer.stop();
     notificationPlayer.start();
   }
 }
