@@ -61,6 +61,7 @@
         android:text="@string/bookmark" />
     </LinearLayout>
 
+<!--
     <LinearLayout
       android:id="@+id/ll__route"
       style="@style/PlacePageButton">
@@ -74,6 +75,7 @@
         style="@style/PlacePageButtonText"
         android:text="@string/route" />
     </LinearLayout>
+-->
   </LinearLayout>
 
   <LinearLayout

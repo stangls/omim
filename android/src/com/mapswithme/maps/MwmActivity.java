@@ -18,7 +18,6 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
-import android.support.v7.widget.Toolbar;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -40,9 +39,6 @@ import com.mapswithme.maps.ads.LikesManager;
 import com.mapswithme.maps.api.ParsedMwmRequest;
 import com.mapswithme.maps.base.BaseMwmFragmentActivity;
 import com.mapswithme.maps.base.OnBackPressListener;
-import com.mapswithme.maps.bookmarks.BookmarkCategoriesActivity;
-import com.mapswithme.maps.bookmarks.ChooseBookmarkCategoryFragment;
-import com.mapswithme.maps.bookmarks.data.BookmarkManager;
 import com.mapswithme.maps.bookmarks.data.MapObject;
 import com.mapswithme.maps.downloader.DownloaderActivity;
 import com.mapswithme.maps.downloader.DownloaderFragment;
@@ -66,9 +62,6 @@ import com.mapswithme.maps.settings.UnitLocale;
 import com.mapswithme.maps.sound.TtsPlayer;
 import com.mapswithme.maps.widget.FadeView;
 import com.mapswithme.maps.widget.menu.MainMenu;
-import com.mapswithme.maps.widget.placepage.BasePlacePageAnimationController;
-import com.mapswithme.maps.widget.placepage.PlacePageView;
-import com.mapswithme.maps.widget.placepage.PlacePageView.State;
 import com.mapswithme.mx.TourFinishedListener;
 import com.mapswithme.mx.TourLoadedListener;
 import com.mapswithme.util.Animations;
@@ -104,11 +97,10 @@ public class MwmActivity extends BaseMwmFragmentActivity
                       implements LocationHelper.LocationListener,
                                  MapObjectListener,
                                  View.OnTouchListener,
-                                 BasePlacePageAnimationController.OnVisibilityChangedListener,
+                                 //BasePlacePageAnimationController.OnVisibilityChangedListener,
                                  OnClickListener,
                                  MapFragment.MapRenderingListener,
                                  CustomNavigateUpListener,
-                                 ChooseBookmarkCategoryFragment.Listener,
                                  RoutingController.Container, Framework.PoiVisitedListener, MissionListener, Framework.PossibleTourResumptionListener, TourFinishedListener, TourLoadedListener, ILocationReceiver {
 
   private static final String TAG = MwmActivity.class.getName();
@@ -137,7 +129,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
   private View mMapFrame;
 
   private MapFragment mMapFragment;
-  private PlacePageView mPlacePage;
+  //private PlacePageView mPlacePage;
 
   private RoutingPlanInplaceController mRoutingPlanInplaceController;
   private NavigationController mNavigationController;
@@ -310,12 +302,12 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
     mPanelAnimator.show(fragmentClass, args, completionListener);
   }
-
+/*
   private void showBookmarks()
   {
     startActivity(new Intent(this, BookmarkCategoriesActivity.class));
   }
-
+*/
   public void showSearch(String query)
   {
     if (mIsFragmentContainer)
@@ -493,7 +485,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
   {
     initMap();
     initYota();
-    initPlacePage();
+    //initPlacePage();
     initNavigationButtons();
 
     if (!mIsFragmentContainer)
@@ -588,20 +580,20 @@ public class MwmActivity extends BaseMwmFragmentActivity
     mButtonContinueTourHere.setVisibility(View.GONE);
     mButtonContinueTourHere.setOnClickListener(this);
   }
-
+/*
   private void initPlacePage()
   {
     mPlacePage = (PlacePageView) findViewById(R.id.info_box);
     mPlacePage.setOnVisibilityChangedListener(this);
     mPlacePage.findViewById(R.id.ll__route).setOnClickListener(this);
   }
-
+*/
   private void initYota()
   {
     if (Yota.isFirstYota())
       findViewById(R.id.yop_it).setOnClickListener(this);
   }
-
+/*
   private boolean closePlacePage()
   {
     if (mPlacePage.getState() == State.HIDDEN)
@@ -611,7 +603,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     Framework.nativeDeactivatePopup();
     return true;
   }
-
+*/
   public boolean closeSidePanel()
   {
     if (interceptBackPress())
@@ -656,8 +648,8 @@ public class MwmActivity extends BaseMwmFragmentActivity
       {
         RoutingController.get().prepare(endPoint);
 
-        if (mPlacePage.isDocked() || !mPlacePage.isFloating())
-          closePlacePage();
+        /*if (mPlacePage.isDocked() || !mPlacePage.isFloating())
+          closePlacePage();*/
       }
     });
   }
@@ -671,8 +663,8 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
         RoutingController.get().startTour("/storage/emulated/legacy/mobidat/tour.xml", 0, MwmActivity.this);
 
-        if (mPlacePage.isDocked() || !mPlacePage.isFloating())
-          closePlacePage();
+        /*if (mPlacePage.isDocked() || !mPlacePage.isFloating())
+          closePlacePage();*/
       }
     });
   }
@@ -824,8 +816,8 @@ public class MwmActivity extends BaseMwmFragmentActivity
       return;
     }
 
-    if (mPlacePage.isDocked())
-      mPlacePage.setLeftAnimationTrackListener(mMainMenu.getLeftAnimationTrackListener());
+    /*if (mPlacePage.isDocked())
+      mPlacePage.setLeftAnimationTrackListener(mMainMenu.getLeftAnimationTrackListener());*/
   }
 
   private void initOnmapDownloader()
@@ -858,12 +850,12 @@ public class MwmActivity extends BaseMwmFragmentActivity
   @Override
   protected void onSaveInstanceState(Bundle outState)
   {
-    if (mPlacePage.getState() != State.HIDDEN)
+    /*if (mPlacePage.getState() != State.HIDDEN)
     {
       outState.putBoolean(STATE_PP_OPENED, true);
       mPlacePage.saveBookmarkTitle();
       outState.putParcelable(STATE_MAP_OBJECT, mPlacePage.getMapObject());
-    }
+    }*/
     if (!mIsFragmentContainer && RoutingController.get().isPlanning())
       mRoutingPlanInplaceController.onSaveState(outState);
     RoutingController.get().onSaveState();
@@ -875,8 +867,8 @@ public class MwmActivity extends BaseMwmFragmentActivity
   {
     super.onRestoreInstanceState(savedInstanceState);
 
-    if (savedInstanceState.getBoolean(STATE_PP_OPENED))
-      mPlacePage.setState(State.PREVIEW);
+    /*if (savedInstanceState.getBoolean(STATE_PP_OPENED))
+      mPlacePage.setState(State.PREVIEW);*/
 
     if (!mIsFragmentContainer && RoutingController.get().isPlanning())
       mRoutingPlanInplaceController.restoreState(savedInstanceState);
@@ -970,8 +962,8 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
     LocationHelper.onLocationUpdated(location);
 
-    if (mPlacePage.getState() != State.HIDDEN)
-      mPlacePage.refreshLocation(location);
+    /*if (mPlacePage.getState() != State.HIDDEN)
+      mPlacePage.refreshLocation(location);*/
 
     if (!RoutingController.get().isNavigating())
       return;
@@ -992,7 +984,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     mLastCompassData.update(getWindowManager().getDefaultDisplay().getRotation(), magneticNorth, trueNorth);
     MapFragment.nativeCompassUpdated(mLastCompassData.magneticNorth, mLastCompassData.trueNorth, false);
 
-    mPlacePage.refreshAzimuth(mLastCompassData.north);
+    //mPlacePage.refreshAzimuth(mLastCompassData.north);
     mNavigationController.updateNorth(mLastCompassData.north);
   }
 
@@ -1150,7 +1142,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     }
 
     RoutingController.get().restore();
-    mPlacePage.restore();
+    //mPlacePage.restore();
   }
 
   private void adjustZoomButtons()
@@ -1278,7 +1270,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
       return;
     }
 
-    if (!closePlacePage() && !closeSidePanel() &&
+    if (/*!closePlacePage() &&*/ !closeSidePanel() &&
         !RoutingController.get().cancel() /*&& !closePositionChooser()*/)
     {
       MwmApplication.gps().pauseEmulation();
@@ -1366,9 +1358,9 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
     setFullscreen(false);
 
-    mPlacePage.saveBookmarkTitle();
+    /*mPlacePage.saveBookmarkTitle();
     mPlacePage.setMapObject(object, true);
-    mPlacePage.setState(State.PREVIEW);
+    mPlacePage.setState(State.PREVIEW);*/
 
     if (UiUtils.isVisible(mFadeView))
       mFadeView.fadeOut(false);
@@ -1387,7 +1379,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     }
     else
     {
-      mPlacePage.hide();
+      //mPlacePage.hide();
     }
   }
 
@@ -1437,6 +1429,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     }
   }
 
+  /*
   @Override
   public void onPreviewVisibilityChanged(boolean isVisible)
   {
@@ -1470,16 +1463,19 @@ public class MwmActivity extends BaseMwmFragmentActivity
     AlohaHelper.logClick(isVisible ? AlohaHelper.PP_OPEN
                                    : AlohaHelper.PP_CLOSE);
   }
+  */
 
   @Override
   public void onClick(View v)
   {
     switch (v.getId())
     {
+    /*
     case R.id.ll__route:
       mPlacePage.saveBookmarkTitle();
       startLocationToPoint(Statistics.EventName.PP_ROUTE, AlohaHelper.PP_ROUTE, mPlacePage.getMapObject());
       break;
+    */
     case R.id.map_button_plus:
       Statistics.INSTANCE.trackEvent(Statistics.EventName.ZOOM_IN);
       AlohaHelper.logClick(AlohaHelper.ZOOM_IN);
@@ -1502,7 +1498,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
   @Override
   public boolean onTouch(View view, MotionEvent event)
   {
-    return mPlacePage.hideOnTouch() ||
+    return /*mPlacePage.hideOnTouch() ||*/
            mMapFragment.onTouch(view, event);
   }
 
@@ -1591,7 +1587,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
     mMapFragment.setupRuler(offsetX, offsetY, true);
   }
-
+/*
   @Override
   public void onCategoryChanged(int bookmarkId, int newCategoryId)
   {
@@ -1599,7 +1595,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     Framework.nativeOnBookmarkCategoryChanged(newCategoryId, bookmarkId);
     mPlacePage.setMapObject(BookmarkManager.INSTANCE.getBookmark(newCategoryId, bookmarkId), true);
   }
-
+*/
   @Override
   public FragmentActivity getActivity()
   {
@@ -1670,14 +1666,14 @@ public class MwmActivity extends BaseMwmFragmentActivity
         completionListener.run();
     }
 
-    mPlacePage.refreshViews();
+    //mPlacePage.refreshViews();
   }
 
   @Override
   public void showNavigation(boolean show)
   {
     adjustZoomButtons();
-    mPlacePage.refreshViews();
+    //mPlacePage.refreshViews();
     mNavigationController.show(show);
     mOnmapDownloader.updateState(false);
   }
