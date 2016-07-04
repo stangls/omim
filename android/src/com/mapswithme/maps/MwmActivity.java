@@ -1754,15 +1754,11 @@ public class MwmActivity extends BaseMwmFragmentActivity
     }});
   }
 
-  private void showPoiDialogNow(final String message) {
+  private void showPoiDialogNow(String message) {
     synchronized (poiMessages){
       poiDialog.setMessage(message);
       poiDialog.show();
-      new Thread(){public void run(){
-        MwmApplication.get().playNotificationSound();
-        try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
-        TtsPlayer.INSTANCE.playCustomMessage(message);
-      }}.start();
+      TtsPlayer.INSTANCE.playNotificationMessage(message);
     }
   }
 
