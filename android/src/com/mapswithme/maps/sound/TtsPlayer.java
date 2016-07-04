@@ -190,6 +190,10 @@ public enum TtsPlayer
         speak(textToSpeak);
   }
 
+  public void playCustomMessage(String message) {
+    speak(message);
+  }
+
   public void stop()
   {
     if (isReady())
@@ -283,4 +287,5 @@ public enum TtsPlayer
   private native static boolean nativeAreTurnNotificationsEnabled();
   private native static void nativeSetTurnNotificationsLocale(String code);
   private native static String nativeGetTurnNotificationsLocale();
+
 }

@@ -1758,6 +1758,8 @@ public class MwmActivity extends BaseMwmFragmentActivity
     synchronized (poiMessages){
       poiDialog.setMessage(message);
       poiDialog.show();
+      MwmApplication.get().playNotificationSound();
+      TtsPlayer.INSTANCE.playCustomMessage(message);
     }
   }
 
