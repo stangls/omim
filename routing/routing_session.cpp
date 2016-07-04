@@ -441,17 +441,21 @@ void RoutingSession::MatchLocationToRoute(location::GpsInfo & location,
       if (routeMatchingInfo.IsMatched()){
           size_t idx = routeMatchingInfo.GetIndexInRoute();
           // are we on the tour?
+          bool onTour = false, tourFinished=false;
+          size_t indexOnTour = 0;
           if (idx>=m_tourStartIndexInRoute){
+              onTour = true;
               // the index on the route relative to the startpoint of the (remaining) tour on the route.
               // has to be translated to a tour-index (regarding the already processed points of the tour).
               size_t newIndex=m_tourStartIndex+(idx-m_tourStartIndexInRoute)+1;
               if (m_tour->UpdateCurrentPosition(newIndex)){
                   // the new index is propagated to the app-frontend to store it somewehere
-                  m_tourChangeCallback(false,newIndex);
+                  indexOnTour = newIndex;
               }else{
-                  m_tourChangeCallback(true,0);
+                  tourFinished = true;
               }
           }
+          m_tourChangeCallback(tourFinished,onTour,indexOnTour);
       }
   }
 }

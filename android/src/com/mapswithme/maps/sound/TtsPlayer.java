@@ -199,10 +199,12 @@ public enum TtsPlayer
    * @param message The message to be spoken.
    * @param waitForTts play the notification sound only shortly before the message.
    */
-  public void playNotificationMessage(final String message, boolean waitForTts) {
+  public void playNotificationMessage(final String message, final boolean waitForTts) {
     new Thread(){public void run(){
-      while (mTts.isSpeaking()){
-        try { Thread.sleep(500); } catch (InterruptedException ignored) {}
+      if (waitForTts){
+        while (mTts.isSpeaking()){
+          try { Thread.sleep(500); } catch (InterruptedException ignored) {}
+        }
       }
       MwmApplication.get().playNotificationSound();
       try { Thread.sleep(500); } catch (InterruptedException ignored) {}

@@ -27,7 +27,7 @@ import com.mapswithme.maps.R;
 import com.mapswithme.maps.bookmarks.data.MapObject;
 import com.mapswithme.maps.downloader.MapManager;
 import com.mapswithme.maps.location.LocationHelper;
-import com.mapswithme.mx.TourFinishedListener;
+import com.mapswithme.mx.TourStatusListener;
 import com.mapswithme.mx.TourLoadedListener;
 import com.mapswithme.util.Config;
 import com.mapswithme.util.StringUtils;
@@ -103,9 +103,9 @@ public class RoutingController
   private String[] mLastMissingMaps;
   private RoutingInfo mCachedRoutingInfo;
 
-  private TourFinishedListener mTourFinishedListener;
-  public void setTourFinishedListener(TourFinishedListener listener) {
-    this.mTourFinishedListener = listener;
+  private TourStatusListener mTourStatusListener;
+  public void setTourStatusListener(TourStatusListener listener) {
+    this.mTourStatusListener = listener;
   }
 
   @SuppressWarnings("FieldCanBeLocal")
@@ -157,19 +157,40 @@ public class RoutingController
   };
 
   private final Framework.TourChangeListener mTourChangedListener = new Framework.TourChangeListener() {
+    private boolean tourHasFinished = false;
+    private Boolean weAreOnTour = null;
+    private boolean tourWasAlreadyLeftOnce = false;
+
     @Override
-    public void onTourChanged(boolean finished, int idx) {
+    public void onTourChanged(boolean finished, boolean onTour, int idx) {
       SharedPreferences.Editor editor = MwmApplication.prefs().edit();
+      // handle tour-change
+      if (weAreOnTour==null){
+        weAreOnTour = onTour;
+      }else{
+        if (weAreOnTour != onTour){
+          weAreOnTour=onTour;
+          if (!onTour){
+            tourWasAlreadyLeftOnce=true;
+          }
+          mTourStatusListener.onTourTracking(onTour,tourWasAlreadyLeftOnce);
+        }
+      }
+      // handle finishing of tour
       if (finished){
         Log.d(TAG, "onTourChanged: tour finished!");
         editor.remove(TOUR_FILE_NAME);
         editor.remove(TOUR_POSITION);
         cancel();
-        if (mTourFinishedListener !=null){
-          mTourFinishedListener.onTourFinished();
+        if (!tourHasFinished){
+          tourHasFinished = true;
+          if (mTourStatusListener !=null){
+            mTourStatusListener.onTourFinished();
+          }
         }
       }else{
         saveTourInfo(null,idx);
+        tourHasFinished = false;
       }
       editor.apply();
     }
