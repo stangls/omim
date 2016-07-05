@@ -1854,9 +1854,12 @@ public class MwmActivity extends BaseMwmFragmentActivity
   }
   public void gpsStop(View ignored){
     MwmApplication.gps().setSimulation(false);
+    final Handler h = new Handler();
     new Thread(){public void run(){
       try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
-      RoutingController.continueSavedTour(MwmActivity.this);
+      h.post(new Runnable(){public void run(){
+        RoutingController.continueSavedTour(MwmActivity.this);
+      }});
     }}.start();
   }
 
@@ -1891,9 +1894,12 @@ public class MwmActivity extends BaseMwmFragmentActivity
             MwmApplication.gps().useSimulationLog();
           }
           MwmApplication.gps().restartEmulation();
+          final Handler h = new Handler();
           new Thread(){public void run(){
             try { Thread.sleep(3000); } catch (InterruptedException ignored) {}
-            RoutingController.continueSavedTour(MwmActivity.this);
+            h.post(new Runnable(){public void run(){
+              RoutingController.continueSavedTour(MwmActivity.this);
+            }});
           }}.start();
           dialog.dismiss();
         }

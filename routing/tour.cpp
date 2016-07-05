@@ -114,24 +114,7 @@ public:
                 turnDirection=turns::TurnDirection::LeaveRoundAbout;
             }else{
                 //LOG( my::LINFO, ("junction road angle : ",m_roadAngle) );
-                if (m_roadAngle>=175)
-                    turnDirection=TD::UTurnLeft;
-                else if (m_roadAngle>=120)
-                    turnDirection=TD::TurnSharpRight;
-                else if (m_roadAngle>=45)
-                    turnDirection=TD::TurnRight;
-                else if (m_roadAngle>=5)
-                    turnDirection=TD::TurnSlightRight;
-                else if (m_roadAngle<=-175)
-                    turnDirection=TD::UTurnLeft;
-                else if (m_roadAngle<=-120)
-                    turnDirection=TD::TurnSharpLeft;
-                else if (m_roadAngle<=-45)
-                    turnDirection=TD::TurnLeft;
-                else if (m_roadAngle<=-5)
-                    turnDirection=TD::TurnSlightLeft;
-                else
-                    turnDirection=TD::GoStraight;
+                turnDirection = Tour::GetTurnDirectionForAngle(m_roadAngle);
             }
             m_tour.AddTurn(TI(m_tour.GetAllPoints().size()-1,turnDirection,m_roadIndex+1));
             m_roadIndex = -1;
@@ -167,6 +150,26 @@ public:
 };
 } // end anonymous namespace (parser)
 
+TD Tour::GetTurnDirectionForAngle(int roadAngle){
+    if (roadAngle>=175)
+        return TD::UTurnLeft;
+    else if (roadAngle>=120)
+        return TD::TurnSharpRight;
+    else if (roadAngle>=45)
+        return TD::TurnRight;
+    else if (roadAngle>=8)
+        return TD::TurnSlightRight;
+    else if (roadAngle<=-175)
+        return TD::UTurnLeft;
+    else if (roadAngle<=-120)
+        return TD::TurnSharpLeft;
+    else if (roadAngle<=-45)
+        return TD::TurnLeft;
+    else if (roadAngle<=-8)
+        return TD::TurnSlightLeft;
+    else
+        return TD::GoStraight;
+}
 
 Tour::Tour(const string &filePath, TPoiCallback const & poiVisited)
     : m_name("unnamed dummy tour"),
@@ -194,7 +197,7 @@ Tour::Tour(const string &filePath, TPoiCallback const & poiVisited)
         m_turns.pop_back();
     }
     LOG( my::LINFO, ("placing last turndirection") );
-    m_turns.emplace_back(m_points.size()-1,turns::TurnDirection::ReachedYourDestination);
+    m_turns.emplace_back( m_points.size()-1, turns::TurnDirection::ReachedYourDestination );
 
     ASSERT( m_points.size()==m_times.size(), () );
     ASSERT( m_turns.back().m_index == m_points.size()-1, () );

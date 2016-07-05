@@ -48,8 +48,6 @@ void Route::Swap(Route & rhs)
 
 void Route::AppendTurns(vector<turns::TurnItem>::iterator beg, vector<turns::TurnItem>::iterator end, uint32_t index_offset, uint32_t index_start)
 {
-    // TODO: Start-TurnItem
-    // TODO: (Re-)move previous End-TurnItem
     while (beg!=end){
         if ((*beg).m_index >= index_offset){
             turns::TurnItem ti( *beg );

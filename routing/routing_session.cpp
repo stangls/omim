@@ -10,6 +10,8 @@
 
 #include "coding/internal/file_data.hpp"
 
+#include "geometry/angles.hpp"
+
 //#include "3party/Alohalytics/src/alohalytics.h"
 
 using namespace location;
@@ -377,24 +379,46 @@ void RoutingSession::AssignRoute(Route & route, IRouter::ResultCode e)
   {
     if (m_tour!=nullptr){
         route.SetTourStart();
-        auto route_previous_size = route.GetPoly().GetSize();
+        // store infos about the route before appending the tour.
+        auto routePoly = route.GetPoly();
+        size_t route_previous_size = routePoly.GetSize();
+        // the last point of the route is the first point of the tour, so we do not have to append the first point of the tour.
+        size_t tourCurIdx = m_tour->GetCurrentIndex()+1;
+        // append geometries
         {
             auto end = m_tour->GetEndIt();
             auto cur = m_tour->GetCurrentIt();
             ASSERT( cur != end && cur+1 != end, () );
             m_tourStartIndexInRoute = route.AppendGeometry( cur+1, end, false );
         }
+        // append times
         {
             auto end = m_tour->GetTimesEndIt();
             auto cur = m_tour->GetTimesCurrentIt();
             ASSERT( cur != end && cur+1 != end, () );
             route.AppendTimes( cur+1, end );
         }
+        // append turn from route to tour
+        if (route_previous_size>=2){
+            m2::PointD pRouteL1 = routePoly.GetPoint(route_previous_size-1);
+            m2::PointD pRouteL2 = routePoly.GetPoint(route_previous_size-2);
+            m2::PointD p3 = m_tour->GetAllPoints()[tourCurIdx];
+            double angle = my::RadToDeg(math::pi - ang::TwoVectorsAngle(pRouteL1, pRouteL2, p3));
+            LOG(my::LDEBUG,("angle for route->tour notification = ",angle));
+            auto direction = Tour::GetTurnDirectionForAngle(angle);
+            LOG(my::LDEBUG,("placing notification ",direction));
+            //route.AppendTurn( turns::TurnItem(tourCurIdx-1,direction) );
+            route.AppendTurn( turns::TurnItem(route_previous_size,routing::turns::TurnDirection::UTurnLeft));
+        }else{
+            route.AppendTurn( turns::TurnItem(route_previous_size,routing::turns::TurnDirection::GoStraight));
+        }
+        // append turns of tour
         {
             auto end = m_tour->GetTurnsEndIt();
             auto cur = m_tour->GetTurnsCurrentIt();
             ASSERT( cur != end, () );
-            route.AppendTurns( cur, end, m_tour->GetCurrentIndex()+1, route_previous_size );
+            // the offset allows to skip the first turn-notification (if exists).
+            route.AppendTurns( cur, end, tourCurIdx, route_previous_size );
         }
     }
 

@@ -100,6 +100,8 @@ public:
         m_turns.push_back(turnItem);
     }
 
+    static TD GetTurnDirectionForAngle(int roadAngle);
+
 protected:
     void CalculateTimes();
 
