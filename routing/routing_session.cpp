@@ -398,7 +398,8 @@ void RoutingSession::AssignRoute(Route & route, IRouter::ResultCode e)
             ASSERT( cur != end && cur+1 != end, () );
             route.AppendTimes( cur+1, end );
         }
-        // append turn from route to tour
+        // replace finishing-turn with turn from route to tour
+        route.RemoveLastTurn();
         if (route_previous_size>=2){
             m2::PointD pRouteL1 = routePoly.GetPoint(route_previous_size-1);
             m2::PointD pRouteL2 = routePoly.GetPoint(route_previous_size-2);

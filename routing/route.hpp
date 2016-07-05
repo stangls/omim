@@ -87,6 +87,10 @@ public:
   inline void AppendTurn(turns::TurnItem turn){
       m_turns.push_back(turn);
   }
+  inline void RemoveLastTurn(){
+      if (m_turns.size()>0)
+        m_turns.pop_back();
+  }
 
   inline void SetSectionTimes(TTimes & v)
   {
