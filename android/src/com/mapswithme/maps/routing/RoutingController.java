@@ -885,7 +885,7 @@ public class RoutingController
    * <p>The tour will not be started.</p>
    **/
   public static void saveTourInfo(@Nullable String tourFileName, int tourPosition) {
-    Log.d(TAG, "saveTourInfo: "+tourFileName+" @ "+tourPosition);
+    //Log.d(TAG, "saveTourInfo: "+tourFileName+" @ "+tourPosition);
     SharedPreferences prefs = MwmApplication.prefs();
     SharedPreferences.Editor edit = prefs.edit();
     if (tourFileName!=null){

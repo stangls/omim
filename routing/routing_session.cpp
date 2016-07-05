@@ -403,20 +403,30 @@ void RoutingSession::AssignRoute(Route & route, IRouter::ResultCode e)
                     route_previous_size--;
                     pRouteL1 = pRouteL2;
                     pRouteL2 = routePoly.GetPoint(route_previous_size-2);
-                    turns::TurnItem* lastTurn = route.GetLastTurn();
-                    if ( lastTurn!=0 && lastTurn->m_index==route_previous_size ){
-                        route.RemoveLastTurn();
-                    }
+                    do{
+                        turns::TurnItem* lastTurn = route.GetLastTurn();
+                        if ( lastTurn!=0 && lastTurn->m_index>=route_previous_size-1 ){
+                            LOG(my::LDEBUG,("removing turn notification",*lastTurn));
+                            route.RemoveLastTurn();
+                        }else
+                            break;
+                    }while(true);
                 }else{
                     break;
                 }
-            } while(true); // once ⇒ false, multiple times ⇒ true
+            }while(true); // once ⇒ false, multiple times ⇒ true
+
+            turns::TurnItem* lastTurn = route.GetLastTurn();
+            if (lastTurn==0)
+                LOG(my::LDEBUG,("no last turn notification"));
+            else
+                LOG(my::LDEBUG,("last turn notification",(*lastTurn)));
+
             double angle = my::RadToDeg(math::pi - ang::TwoVectorsAngle(pRouteL1, pRouteL2, p3));
             LOG(my::LDEBUG,("angle for route->tour notification = ",angle));
             auto direction = Tour::GetTurnDirectionForAngle(angle);
             LOG(my::LDEBUG,("placing notification ",direction));
-            //route.AppendTurn( turns::TurnItem(tourCurIdx-1,direction) );
-            route.AppendTurn( turns::TurnItem(route_previous_size,routing::turns::TurnDirection::UTurnLeft));
+            route.AppendTurn( turns::TurnItem(route_previous_size,direction) );
         }else{
             route.AppendTurn( turns::TurnItem(route_previous_size,routing::turns::TurnDirection::GoStraight));
         }
