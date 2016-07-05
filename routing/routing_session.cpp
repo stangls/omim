@@ -389,12 +389,12 @@ void RoutingSession::AssignRoute(Route & route, IRouter::ResultCode e)
         if (route_previous_size>=2){
             m2::PointD pRouteL1 = routePoly.GetPoint(route_previous_size-1);
             m2::PointD pRouteL2 = routePoly.GetPoint(route_previous_size-2);
-            m2::PointD p3 = m_tour->GetAllPoints()[tourCurIdx];
+            m2::PointD pTour1 = m_tour->GetAllPoints()[tourCurIdx];
             double maxNoseSize = 10.0; // 10m max nose-size
             do {
                 if (
                     MercatorBounds::DistanceOnEarth(pRouteL2,pRouteL1)>maxNoseSize
-                    || MercatorBounds::DistanceOnEarth(pRouteL1,p3)>maxNoseSize
+                    || MercatorBounds::DistanceOnEarth(pRouteL1,pTour1)>maxNoseSize
                 ){
                     break;
                 }
@@ -406,7 +406,7 @@ void RoutingSession::AssignRoute(Route & route, IRouter::ResultCode e)
                     do{
                         turns::TurnItem* lastTurn = route.GetLastTurn();
                         if ( lastTurn!=0 && lastTurn->m_index>=route_previous_size-1 ){
-                            LOG(my::LDEBUG,("removing turn notification",*lastTurn));
+                            LOG(my::LDEBUG,("removing turn notification of nose:",*lastTurn));
                             route.RemoveLastTurn();
                         }else
                             break;
@@ -416,14 +416,20 @@ void RoutingSession::AssignRoute(Route & route, IRouter::ResultCode e)
                 }
             }while(true); // once ⇒ false, multiple times ⇒ true
 
-            turns::TurnItem* lastTurn = route.GetLastTurn();
-            if (lastTurn==0)
-                LOG(my::LDEBUG,("no last turn notification"));
-            else
-                LOG(my::LDEBUG,("last turn notification",(*lastTurn)));
-
-            double angle = my::RadToDeg(math::pi - ang::TwoVectorsAngle(pRouteL1, pRouteL2, p3));
-            LOG(my::LDEBUG,("angle for route->tour notification = ",angle));
+            double angle = math::pi - ang::TwoVectorsAngle(pRouteL1, pRouteL2, pTour1);
+            LOG(my::LDEBUG,("angle 1 for route-to-tour notification = ",my::RadToDeg(angle)));
+            if (tourCurIdx+1<m_tour->GetMaxIndex()){
+                m2::PointD pTour2 = m_tour->GetAllPoints()[tourCurIdx+1];
+                double angle2 = math::pi -ang::TwoVectorsAngle(pTour1, pRouteL1, pTour2);
+                LOG(my::LDEBUG,("angle 2 for route-to-tour notification = ",my::RadToDeg(angle2)));
+                angle = angle+angle2;
+                if (angle>=math::pi)
+                    angle-=math::pi;
+                else if (angle<-math::pi)
+                    angle+=math::pi;
+            }
+            angle = my::RadToDeg( angle );
+            LOG(my::LDEBUG,("angle for route-to-tour notification = ",angle));
             auto direction = Tour::GetTurnDirectionForAngle(angle);
             LOG(my::LDEBUG,("placing notification ",direction));
             route.AppendTurn( turns::TurnItem(route_previous_size,direction) );
