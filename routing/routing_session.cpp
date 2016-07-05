@@ -384,6 +384,40 @@ void RoutingSession::AssignRoute(Route & route, IRouter::ResultCode e)
         size_t route_previous_size = routePoly.GetSize();
         // the last point of the route is the first point of the tour, so we do not have to append the first point of the tour.
         size_t tourCurIdx = m_tour->GetCurrentIndex()+1;
+        // replace finishing-turn with turn from route to tour
+        route.RemoveLastTurn();
+        if (route_previous_size>=2){
+            m2::PointD pRouteL1 = routePoly.GetPoint(route_previous_size-1);
+            m2::PointD pRouteL2 = routePoly.GetPoint(route_previous_size-2);
+            m2::PointD p3 = m_tour->GetAllPoints()[tourCurIdx];
+            double maxNoseSize = 20.0; // 10m max nose-size
+            do {
+                if (
+                    MercatorBounds::DistanceOnEarth(pRouteL2,pRouteL1)>maxNoseSize
+                    || MercatorBounds::DistanceOnEarth(pRouteL1,p3)>maxNoseSize
+                ){
+                    break;
+                }
+                LOG(my::LDEBUG,("nose detected: ends with small size"));
+                if (route_previous_size>=3){
+                    route_previous_size--;
+                    pRouteL1=pRouteL2;
+                    pRouteL2 = routePoly.GetPoint(route_previous_size-2);
+                    turns::TurnItem* lastTurn = route.GetLastTurn();
+                    if ( lastTurn!=0 && lastTurn->m_index==route_previous_size ){
+                        route.RemoveLastTurn();
+                    }
+                }
+            } while(true); // once ⇒ false, multiple times ⇒ true
+            double angle = my::RadToDeg(math::pi - ang::TwoVectorsAngle(pRouteL1, pRouteL2, p3));
+            LOG(my::LDEBUG,("angle for route->tour notification = ",angle));
+            auto direction = Tour::GetTurnDirectionForAngle(angle);
+            LOG(my::LDEBUG,("placing notification ",direction));
+            //route.AppendTurn( turns::TurnItem(tourCurIdx-1,direction) );
+            route.AppendTurn( turns::TurnItem(route_previous_size,routing::turns::TurnDirection::UTurnLeft));
+        }else{
+            route.AppendTurn( turns::TurnItem(route_previous_size,routing::turns::TurnDirection::GoStraight));
+        }
         // append geometries
         {
             auto end = m_tour->GetEndIt();
@@ -397,21 +431,6 @@ void RoutingSession::AssignRoute(Route & route, IRouter::ResultCode e)
             auto cur = m_tour->GetTimesCurrentIt();
             ASSERT( cur != end && cur+1 != end, () );
             route.AppendTimes( cur+1, end );
-        }
-        // replace finishing-turn with turn from route to tour
-        route.RemoveLastTurn();
-        if (route_previous_size>=2){
-            m2::PointD pRouteL1 = routePoly.GetPoint(route_previous_size-1);
-            m2::PointD pRouteL2 = routePoly.GetPoint(route_previous_size-2);
-            m2::PointD p3 = m_tour->GetAllPoints()[tourCurIdx];
-            double angle = my::RadToDeg(math::pi - ang::TwoVectorsAngle(pRouteL1, pRouteL2, p3));
-            LOG(my::LDEBUG,("angle for route->tour notification = ",angle));
-            auto direction = Tour::GetTurnDirectionForAngle(angle);
-            LOG(my::LDEBUG,("placing notification ",direction));
-            //route.AppendTurn( turns::TurnItem(tourCurIdx-1,direction) );
-            route.AppendTurn( turns::TurnItem(route_previous_size,routing::turns::TurnDirection::UTurnLeft));
-        }else{
-            route.AppendTurn( turns::TurnItem(route_previous_size,routing::turns::TurnDirection::GoStraight));
         }
         // append turns of tour
         {
@@ -473,6 +492,9 @@ void RoutingSession::MatchLocationToRoute(location::GpsInfo & location,
               // the index on the route relative to the startpoint of the (remaining) tour on the route.
               // has to be translated to a tour-index (regarding the already processed points of the tour).
               size_t newIndex=m_tourStartIndex+(idx-m_tourStartIndexInRoute)+1;
+              if (newIndex<m_tour->GetMaxIndex()){
+                  newIndex++;
+              }
               if (m_tour->UpdateCurrentPosition(newIndex)){
                   // the new index is propagated to the app-frontend to store it somewehere
                   indexOnTour = newIndex;

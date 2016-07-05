@@ -87,6 +87,12 @@ public:
   inline void AppendTurn(turns::TurnItem turn){
       m_turns.push_back(turn);
   }
+  inline turns::TurnItem* GetLastTurn(){
+      if (m_turns.size()>0){
+          return &(m_turns.back());
+      }
+      return 0;
+  }
   inline void RemoveLastTurn(){
       if (m_turns.size()>0)
         m_turns.pop_back();

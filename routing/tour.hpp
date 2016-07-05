@@ -60,6 +60,9 @@ public:
     size_t GetCurrentIndex() {
         return m_currentIndex;
     }
+    size_t GetMaxIndex() {
+        return m_points.size();
+    }
 
     const vector<PointD> &GetAllPoints(){
         return m_points;
