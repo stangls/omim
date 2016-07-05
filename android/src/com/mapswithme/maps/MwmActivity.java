@@ -160,6 +160,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
   private TimerThread timerThread = new TimerThread(this);
   private LinkedList<String> poiMessages = new LinkedList<>();
   private AlertDialog poiDialog;
+  private View mSimulationMenu;
   private ImageButton mBreakButton;
   private View mRowMissionActivity;
   private TextView mTextMissionActivity;
@@ -459,6 +460,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
     Log.d(TAG, "onCreate: "+(i++));
 
+    mSimulationMenu = (View)findViewById(R.id.simulationMenu);
     mBreakButton = (ImageButton)findViewById(R.id.breakButton);
     mSimulationPauseButton = (ImageButton)findViewById(R.id.simulationPauseButton);
     mLegend = (View)findViewById(R.id.legend);
@@ -1247,6 +1249,8 @@ public class MwmActivity extends BaseMwmFragmentActivity
     RoutingController.get().setTourStatusListener(this);
     /*updateGpsSimulationActive(false);
     MwmApplication.gps().setSimulation(false);*/
+
+    mSimulationMenu.setVisibility(View.GONE);
   }
 
   public void hideStatusBar() {
@@ -1267,6 +1271,11 @@ public class MwmActivity extends BaseMwmFragmentActivity
   @Override
   public void onBackPressed()
   {
+    if (mSimulationMenu.getVisibility()!=View.GONE){
+      mSimulationMenu.setVisibility(View.GONE);
+      return;
+    }
+
     if (mMainMenu.close(true))
     {
       mFadeView.fadeOut(false);
@@ -1507,6 +1516,10 @@ public class MwmActivity extends BaseMwmFragmentActivity
   @Override
   public boolean onTouch(View view, MotionEvent event)
   {
+    if (mSimulationMenu.getVisibility()!=View.GONE){
+      mSimulationMenu.setVisibility(View.GONE);
+      return true;
+    }
     return /*mPlacePage.hideOnTouch() ||*/
            mMapFragment.onTouch(view, event);
   }
@@ -1826,6 +1839,10 @@ public class MwmActivity extends BaseMwmFragmentActivity
 
   public void legendButtonClicked(View button){
     mLegend.setVisibility( mLegend.getVisibility()==View.GONE?View.VISIBLE:View.GONE );
+  }
+
+  public void simulationMenuButtonClicked(View button){
+    mSimulationMenu.setVisibility(mSimulationMenu.getVisibility()==View.GONE?View.VISIBLE:View.GONE);
   }
 
   public void gpsPause(View ignored){

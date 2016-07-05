@@ -412,7 +412,11 @@ public class RoutingController
     {
       Statistics.INSTANCE.trackEvent(Statistics.EventName.ROUTING_START_SUGGEST_REBUILD);
       AlohaHelper.logClick(AlohaHelper.ROUTING_START_SUGGEST_REBUILD);
-      suggestRebuildRoute();
+      if (triesContinueTour>0){
+        continueSavedTour(tourLoadedListener);
+      }else{
+        suggestRebuildRoute();
+      }
       return;
     }
 
@@ -489,6 +493,8 @@ public class RoutingController
 
     if (mStartButton == null)
       return;
+
+    mStartButton.setVisibility((triesContinueTour>0)?View.INVISIBLE:View.VISIBLE);
 
     mStartButton.setEnabled(mState == State.PREPARE && mBuildState == BuildState.BUILT);
     UiUtils.updateAccentButton(mStartButton);
