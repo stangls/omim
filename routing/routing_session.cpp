@@ -398,7 +398,7 @@ void RoutingSession::AssignRoute(Route & route, IRouter::ResultCode e)
                 ){
                     break;
                 }
-                LOG(my::LDEBUG,("nose detected: ends with small size"));
+                LOG(my::LDEBUG,("nose from route->tour detected"));
                 if (route_previous_size>=3){
                     route_previous_size--;
                     pRouteL1 = pRouteL2;
@@ -407,6 +407,8 @@ void RoutingSession::AssignRoute(Route & route, IRouter::ResultCode e)
                     if ( lastTurn!=0 && lastTurn->m_index==route_previous_size ){
                         route.RemoveLastTurn();
                     }
+                }else{
+                    break;
                 }
             } while(true); // once ⇒ false, multiple times ⇒ true
             double angle = my::RadToDeg(math::pi - ang::TwoVectorsAngle(pRouteL1, pRouteL2, p3));
