@@ -390,7 +390,7 @@ void RoutingSession::AssignRoute(Route & route, IRouter::ResultCode e)
             m2::PointD pRouteL1 = routePoly.GetPoint(route_previous_size-1);
             m2::PointD pRouteL2 = routePoly.GetPoint(route_previous_size-2);
             m2::PointD p3 = m_tour->GetAllPoints()[tourCurIdx];
-            double maxNoseSize = 20.0; // 10m max nose-size
+            double maxNoseSize = 10.0; // 10m max nose-size
             do {
                 if (
                     MercatorBounds::DistanceOnEarth(pRouteL2,pRouteL1)>maxNoseSize
@@ -401,7 +401,7 @@ void RoutingSession::AssignRoute(Route & route, IRouter::ResultCode e)
                 LOG(my::LDEBUG,("nose detected: ends with small size"));
                 if (route_previous_size>=3){
                     route_previous_size--;
-                    pRouteL1=pRouteL2;
+                    pRouteL1 = pRouteL2;
                     pRouteL2 = routePoly.GetPoint(route_previous_size-2);
                     turns::TurnItem* lastTurn = route.GetLastTurn();
                     if ( lastTurn!=0 && lastTurn->m_index==route_previous_size ){
