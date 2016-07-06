@@ -145,6 +145,9 @@ public:
             if (prevTag=="poi" && currTag=="message"){
                 m_poiText=value;
             }
+            if (prevTag=="section" && currTag=="name"){
+                m_tour.AddStreetname(value);
+            }
         }
     }
 };
@@ -201,6 +204,11 @@ Tour::Tour(const string &filePath, TPoiCallback const & poiVisited)
 
     ASSERT( m_points.size()==m_times.size(), () );
     ASSERT( m_turns.back().m_index == m_points.size()-1, () );
+
+    if (m_streets.size()>0){
+        LOG( my::LINFO, ("placing last streetname") );
+        AddStreetname(m_streets.back().second);
+    }
 }
 
 Tour::~Tour()
@@ -272,6 +280,23 @@ void Tour::AddPoint(double lat, double lon)
 void Tour::AddPoi(const string & message, double lat, double lon)
 {
     m_pois.emplace_back(message,lat,lon,m_points.size());
+}
+
+void Tour::AddStreetname(string name){
+    size_t nextIndex = 0;
+    if (m_streets.size()>0){
+        nextIndex = m_points.size()-1;
+        size_t lastIndex = m_streets.back().first;
+        string lastName = m_streets.back().second;
+        unsigned int step = 40;
+        LOG(my::LDEBUG,("for loop from ",lastIndex,"+",step,"=",lastIndex+step," to ",nextIndex," by ",step));
+        for (size_t i=lastIndex+step; i<nextIndex; i+=step){
+            LOG(my::LDEBUG,("adding street",lastName,"at",i));
+            m_streets.emplace_back(i,lastName);
+        }
+    }
+    LOG(my::LDEBUG,("adding final street",name,"at",nextIndex));
+    m_streets.emplace_back(nextIndex,name);
 }
 
 

@@ -458,6 +458,12 @@ void RoutingSession::AssignRoute(Route & route, IRouter::ResultCode e)
             // the offset allows to skip the first turn-notification (if exists).
             route.AppendTurns( cur, end, tourCurIdx, route_previous_size );
         }
+        // append street-names of tour
+        {
+            auto end = m_tour->GetStreetnamesEndIt();
+            auto cur = m_tour->GetStreetnamesCurrentIt();
+            route.AppendStreetNames( cur, end, tourCurIdx, route_previous_size );
+        }
     }
 
     if (route.IsValid()){

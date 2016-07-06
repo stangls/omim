@@ -105,6 +105,20 @@ public:
 
     static TD GetTurnDirectionForAngle(int roadAngle);
 
+    Route::TStreets::iterator GetStreetnamesCurrentIt(){
+        auto it = m_streets.begin();
+        while (it!=m_streets.end()){
+            if ((*it).first>=m_currentIndex)
+                break;
+            it++;
+        }
+        return it;
+    }
+    Route::TStreets::iterator GetStreetnamesEndIt(){
+        return m_streets.end();
+    }
+    void AddStreetname( string name );
+
 protected:
     void CalculateTimes();
 
@@ -113,6 +127,7 @@ protected:
     pvec m_points;
     vector<double> m_times;
     vector<TI> m_turns;
+    Route::TStreets m_streets;
     vector<Poi> m_pois;
     size_t m_nextPoiIndex = 0;
     TPoiCallback m_poiVisitedCallback;

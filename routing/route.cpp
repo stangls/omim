@@ -54,9 +54,9 @@ void Route::AppendTurns(vector<turns::TurnItem>::iterator beg, vector<turns::Tur
             ti.m_index+=index_start;
             ti.m_index-=index_offset;
             m_turns.push_back( ti );
-        }else{
+        }/*else{
             LOG(my::LINFO,("skipping turn with index",(*beg).m_index,"because index_offset is",index_offset));
-        }
+        }*/
         beg++;
     }
 }
@@ -74,6 +74,23 @@ void Route::AppendTimes(vector<double>::iterator beg, vector<double>::iterator e
         cnt++;
         time+=*beg-offset;
         m_times.emplace_back( cnt, time );
+        beg++;
+    }
+}
+
+void Route::AppendStreetNames(TStreets::iterator beg, TStreets::iterator end, uint32_t index_offset, uint32_t index_start)
+{
+    while (beg!=end){
+        TStreetItem si( *beg );
+        if ((*beg).first >= index_offset){
+            LOG(my::LDEBUG,("adding street",si.second,"with index",si.first));
+            si.first += index_start;
+            si.first -= index_offset;
+            LOG(my::LDEBUG,("  new index of ",si.second," is ",si.first));
+            m_streets.push_back( si );
+        }else{
+            LOG(my::LDEBUG,("skipping street",si.second,"with index",si.first,"because index_offset is",index_offset));
+        }
         beg++;
     }
 }
@@ -191,11 +208,15 @@ void Route::GetCurrentStreetName(string & name) const
 
 void Route::GetStreetNameAfterIdx(uint32_t idx, string & name) const
 {
+  //LOG(my::LDEBUG,("trying to find name for index",idx));
   name.clear();
   auto polyIter = m_poly.GetIterToIndex(idx);
   auto it = GetCurrentStreetNameIterAfter(polyIter);
-  if (it == m_streets.cend())
+  if (it == m_streets.cend()){
+      //LOG(my::LDEBUG,("found none"));
     return;
+  }
+  //LOG(my::LDEBUG,("found one:",it->second));
   for (;it != m_streets.cend(); ++it)
     if (!it->second.empty())
     {

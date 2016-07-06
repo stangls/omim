@@ -108,6 +108,7 @@ public:
   {
     swap(m_streets, v);
   }
+  void AppendStreetNames( TStreets::iterator beg, TStreets::iterator end, uint32_t index_offset, uint32_t index_start );
 
   uint32_t GetTotalTimeSec() const;
   uint32_t GetCurrentTimeToEndSec() const;
