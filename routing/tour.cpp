@@ -289,7 +289,7 @@ void Tour::AddStreetname(string name){
         size_t lastIndex = m_streets.back().first;
         string lastName = m_streets.back().second;
         unsigned int step = MIN_STREETNAME_DIST/MIN_POINT_DIST;
-        LOG(my::LDEBUG,("for loop from ",lastIndex,"+",step,"=",lastIndex+step," to ",nextIndex," by ",step));
+        //LOG(my::LDEBUG,("for loop from ",lastIndex,"+",step,"=",lastIndex+step," to ",nextIndex," by ",step));
         for (size_t i=lastIndex+step; i<nextIndex; i+=step){
             LOG(my::LDEBUG,("adding street",lastName,"at",i));
             m_streets.emplace_back(i,lastName);
