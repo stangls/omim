@@ -156,11 +156,12 @@ public class RoutingController
     }
   };
 
+  private boolean weAreOnTourKnown = false;
+  private boolean tourWasAlreadyLeftOnce = false;
+
   private final Framework.TourChangeListener mTourChangedListener = new Framework.TourChangeListener() {
     private boolean tourHasFinished = false;
-    private boolean weAreOnTourKnown = false;
     private boolean weAreOnTour = false;
-    private boolean tourWasAlreadyLeftOnce = false;
 
     @Override
     public void onTourChanged(boolean finished, boolean onTour, int idx) {
@@ -176,6 +177,8 @@ public class RoutingController
           cancel();
           if (!tourHasFinished){
             tourHasFinished = true;
+            weAreOnTourKnown = false;
+            tourWasAlreadyLeftOnce = false;
             if (mTourStatusListener !=null){
               mTourStatusListener.onTourFinished();
             }
@@ -893,6 +896,10 @@ public class RoutingController
     }
     edit.putInt(TOUR_POSITION,tourPosition);
     edit.apply();
+    // if tour starts at begin, we reset information about previous tour.
+    if (tourPosition==0){
+      resetTourNotificationInfo();
+    }
   }
 
   public static boolean continueSavedTour(TourLoadedListener tourLoadedListener) {
@@ -900,9 +907,17 @@ public class RoutingController
     String tourFileName = prefs.getString(TOUR_FILE_NAME, null);
     if (tourFileName!=null){
       int tourPosition = prefs.getInt(TOUR_POSITION, 0);
+      if (tourPosition==0){
+        resetTourNotificationInfo();
+      }
       return RoutingController.get().startTour(tourFileName,tourPosition,tourLoadedListener);
     }
     return false;
+  }
+
+  private static void resetTourNotificationInfo() {
+    get().tourWasAlreadyLeftOnce=false;
+    get().weAreOnTourKnown=false;
   }
 
 }
