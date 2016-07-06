@@ -134,6 +134,7 @@ protected:
 
     const double MIN_POINT_DIST = 5; // meters
     const double MAX_POI_DIST = 25; // meters
+    const double MIN_STREETNAME_DIST = 600; // meters
 };
 
 }  // end namespace routing
