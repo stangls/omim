@@ -83,14 +83,14 @@ void Route::AppendStreetNames(TStreets::iterator beg, TStreets::iterator end, ui
     while (beg!=end){
         TStreetItem si( *beg );
         if ((*beg).first >= index_offset){
-            LOG(my::LDEBUG,("adding street",si.second,"with index",si.first));
+            //LOG(my::LDEBUG,("adding street",si.second,"with index",si.first));
             si.first += index_start;
             si.first -= index_offset;
-            LOG(my::LDEBUG,("  new index of ",si.second," is ",si.first));
+            //LOG(my::LDEBUG,("  new index of ",si.second," is ",si.first));
             m_streets.push_back( si );
-        }else{
+        }/*else{
             LOG(my::LDEBUG,("skipping street",si.second,"with index",si.first,"because index_offset is",index_offset));
-        }
+        }*/
         beg++;
     }
 }
@@ -208,15 +208,11 @@ void Route::GetCurrentStreetName(string & name) const
 
 void Route::GetStreetNameAfterIdx(uint32_t idx, string & name) const
 {
-  //LOG(my::LDEBUG,("trying to find name for index",idx));
   name.clear();
   auto polyIter = m_poly.GetIterToIndex(idx);
   auto it = GetCurrentStreetNameIterAfter(polyIter);
-  if (it == m_streets.cend()){
-      //LOG(my::LDEBUG,("found none"));
+  if (it == m_streets.cend())
     return;
-  }
-  //LOG(my::LDEBUG,("found one:",it->second));
   for (;it != m_streets.cend(); ++it)
     if (!it->second.empty())
     {

@@ -291,11 +291,11 @@ void Tour::AddStreetname(string name){
         unsigned int step = MIN_STREETNAME_DIST/MIN_POINT_DIST;
         //LOG(my::LDEBUG,("for loop from ",lastIndex,"+",step,"=",lastIndex+step," to ",nextIndex," by ",step));
         for (size_t i=lastIndex+step; i<nextIndex; i+=step){
-            LOG(my::LDEBUG,("adding street",lastName,"at",i));
+            //LOG(my::LDEBUG,("adding street",lastName,"at",i));
             m_streets.emplace_back(i,lastName);
         }
     }
-    LOG(my::LDEBUG,("adding final street",name,"at",nextIndex));
+    //LOG(my::LDEBUG,("adding final street",name,"at",nextIndex));
     m_streets.emplace_back(nextIndex,name);
 }
 
