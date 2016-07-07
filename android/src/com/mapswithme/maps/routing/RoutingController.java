@@ -232,11 +232,12 @@ public class RoutingController
     if (triesContinueTour-->0){
       if (
         mLastResultCode == ResultCodesHelper.NO_POSITION ||
-        mLastResultCode == ResultCodesHelper.START_POINT_NOT_FOUND
+        mLastResultCode == ResultCodesHelper.START_POINT_NOT_FOUND ||
+        mLastResultCode == ResultCodesHelper.INTERNAL_ERROR
       ) {
         final Handler h = new Handler();
         new Thread(){public void run(){
-          try { Thread.sleep(1000); } catch (InterruptedException e) {}
+          try { Thread.sleep(500); } catch (InterruptedException e) {}
           Log.d(TAG, "trying to continue tour");
           h.post(new Runnable() {
                    @Override

@@ -2151,7 +2151,10 @@ void Framework::BuildRoute(m2::PointD const & finish, uint32_t timeoutSec)
 
 void Framework::LoadTour(string const & filePath , int position, const TTourLoadedCallback &tourLoadedCallback){
     ASSERT_THREAD_CHECKER(m_threadChecker, ("LoadTour",filePath));
-    ASSERT(m_drapeEngine != nullptr, ());
+    if(m_drapeEngine == nullptr){
+        CallRouteBuilded(IRouter::InternalError, storage::TCountriesVec());
+        return;
+    }
 
     if (IsRoutingActive())
         CloseRouting();
