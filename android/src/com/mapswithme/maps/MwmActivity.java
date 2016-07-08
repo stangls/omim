@@ -484,6 +484,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
         try { Thread.sleep(1000); } catch (InterruptedException ignored) {}
       }
       timerThread.start();
+      updateActivityDisplay(MissionAccess.missionStatus);
     }}.start();
 
     Log.d(TAG, "onCreate: "+(i++));

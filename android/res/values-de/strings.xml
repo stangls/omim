@@ -902,7 +902,7 @@
 	<string name="mission_activity_break">Unterbrechung</string>
 	<string name="activityNotFound_missionRecording">Einsatzaufzeichnung nicht installiert!?</string>
 	<string name="title_missionrecording">Einsatzdauer:</string>
-	<string name="title_missionActivity">Aktivität:</string>
+	<string name="title_missionActivity">Unterbrechung:</string>
 	<string name="tour_continue">Tour hier fortführen</string>
 	<string name="gps_simulation_pause">GPS-Simulation pausieren</string>
 	<string name="gps_simulation_stop">GPS-Simulation stoppen</string>

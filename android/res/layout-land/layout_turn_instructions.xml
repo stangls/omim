@@ -130,13 +130,14 @@
           android:layout_marginRight="10dp"
           android:singleLine="true"
           android:gravity="right"
+          android:textAppearance="@style/MwmTextAppearance.RoutingNumber"
           android:layout_gravity="bottom"/>
       <TextView
           android:id="@+id/textTourName"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:gravity="center_vertical"
-          android:textAppearance="@style/MwmTextAppearance.RoutingNumber"
+          android:textAppearance="@style/MwmTextAppearance.ValueField"
           android:text="Meine geniale Tour"
           android:layout_gravity="right"/>
     </TableRow>
@@ -149,6 +150,7 @@
           android:text="@string/title_tour_remaining_length"
           android:layout_marginRight="10dp"
           android:singleLine="true"
+          android:textAppearance="@style/MwmTextAppearance.RoutingNumber"
           android:gravity="right"
           android:layout_gravity="bottom"/>
 
@@ -157,7 +159,7 @@
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
           android:gravity="center_vertical"
-          android:textAppearance="@style/MwmTextAppearance.RoutingNumber"
+          android:textAppearance="@style/MwmTextAppearance.ValueField"
           tools:text="1.4 km"
           android:layout_gravity="right"/>
 
@@ -172,6 +174,7 @@
           android:layout_marginRight="10dp"
           android:singleLine="true"
           android:gravity="right"
+          android:textAppearance="@style/MwmTextAppearance.RoutingNumber"
           android:layout_gravity="bottom"/>
 
       <TextView
@@ -180,7 +183,7 @@
           android:layout_height="wrap_content"
           android:gravity="center_vertical"
           tools:text="00:00:00"
-          android:textAppearance="@style/MwmTextAppearance.RoutingNumber"
+          android:textAppearance="@style/MwmTextAppearance.ValueField"
           android:layout_gravity="right"
           />
 
@@ -197,6 +200,7 @@
           android:layout_marginRight="10dp"
           android:singleLine="true"
           android:gravity="right"
+          android:textAppearance="@style/MwmTextAppearance.RoutingNumber"
           android:layout_gravity="bottom"/>
 
       <TextView
@@ -205,7 +209,7 @@
           android:layout_height="wrap_content"
           android:gravity="center_vertical"
           tools:text="Traumkontrolle"
-          android:textAppearance="@style/MwmTextAppearance.RoutingNumber"
+          android:textAppearance="@style/MwmTextAppearance.ValueField"
           android:layout_gravity="right"
           />
 

@@ -107,6 +107,11 @@
     <item name="android:textStyle">bold</item>
   </style>
 
+  <style name="MwmTextAppearance.ValueField">
+    <item name="android:textSize">@dimen/text_size_routing_number</item>
+    <item name="android:textColor">?colorAccent</item>
+  </style>
+
   <style name="MwmTextAppearance.RoutingDetail">
     <item name="android:textSize">@dimen/text_size_routing_plan_detail</item>
     <item name="android:fontFamily" tools:ignore="NewApi">@string/robotoMedium</item>
