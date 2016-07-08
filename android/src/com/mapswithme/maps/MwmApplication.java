@@ -120,7 +120,6 @@ public class MwmApplication extends MultiDexApplication {
     mBackgroundTracker = new AppBackgroundTracker();
     TrackRecorder.init();
     //Editor.init();
-    notificationPlayer = MediaPlayer.create(this, R.raw.notification);
   }
 
   public void initNativeCore()
@@ -323,9 +322,10 @@ public class MwmApplication extends MultiDexApplication {
   private static native void nativeInitCrashlytics();
 
   public void playNotificationSound() {
-    if (notificationPlayer.isPlaying()){
-      notificationPlayer.stop();
+    if (notificationPlayer!=null){
+      notificationPlayer.release();
     }
+    notificationPlayer = MediaPlayer.create(this, R.raw.notification);
     notificationPlayer.start();
   }
 }

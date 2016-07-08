@@ -1765,6 +1765,8 @@ public class MwmActivity extends BaseMwmFragmentActivity
   @Override
   public void onPoiVisited(final String message) {
     runOnUiThread(new Runnable() {public void run() {
+      // play sound + message as early as possible!
+      TtsPlayer.INSTANCE.playNotificationMessage(message,false);
       // show dialog if not yet visible otherwise save to list of poi-messages
       synchronized (poiMessages){
         if (poiDialog.isShowing() || poiMessages.size()>0){
@@ -1780,7 +1782,6 @@ public class MwmActivity extends BaseMwmFragmentActivity
     synchronized (poiMessages){
       poiDialog.setMessage(message);
       poiDialog.show();
-      TtsPlayer.INSTANCE.playNotificationMessage(message,false);
     }
   }
 
