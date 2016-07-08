@@ -11,6 +11,7 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,7 +25,6 @@ import com.mapswithme.maps.R;
 import com.mapswithme.maps.base.BaseMwmFragment;
 import com.mapswithme.maps.base.OnBackPressListener;
 import com.mapswithme.maps.bookmarks.data.MapObject;
-import com.mapswithme.maps.downloader.CountrySuggestFragment;
 import com.mapswithme.maps.downloader.MapManager;
 import com.mapswithme.maps.location.LocationHelper;
 import com.mapswithme.maps.routing.RoutingController;
@@ -40,6 +40,7 @@ public class SearchFragment extends BaseMwmFragment
                                     SearchToolbarController.Container,
                                     CategoriesAdapter.OnCategorySelectedListener
 {
+  private static final String TAG = SearchFragment.class.getSimpleName();
   private long mLastQueryTimestamp;
 
   private static class LastPosition
@@ -160,6 +161,7 @@ public class SearchFragment extends BaseMwmFragment
 
   private void showDownloadSuggest()
   {
+    /*
     final FragmentManager fm = getChildFragmentManager();
     final String fragmentName = CountrySuggestFragment.class.getName();
     Fragment fragment = fm.findFragmentByTag(fragmentName);
@@ -171,16 +173,21 @@ public class SearchFragment extends BaseMwmFragment
         .add(R.id.download_suggest_frame, fragment, fragmentName)
         .commit();
     }
+    */
+    Log.w(TAG, "showDownloadSuggest: maps dowdloading disabled, are maps missing?" );
   }
 
   private void hideDownloadSuggest()
   {
+    /*
     final FragmentManager manager = getChildFragmentManager();
     final Fragment fragment = manager.findFragmentByTag(CountrySuggestFragment.class.getName());
     if (fragment != null && !fragment.isDetached() && !fragment.isRemoving())
       manager.beginTransaction()
              .remove(fragment)
              .commit();
+     */
+    Log.w(TAG, "hideDownloadSuggest: maps dowdloading disabled, are maps missing?" );
   }
 
   private void updateFrames()

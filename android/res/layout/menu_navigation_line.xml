@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
+<RelativeLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+>
+  <LinearLayout
     android:layout_width="match_parent"
     android:layout_height="@dimen/menu_line_height"
     android:orientation="horizontal"
@@ -12,70 +16,15 @@
     android:layout_height="match_parent"
     tools:background="#4000F000"/>
 
-  <GridLayout
+  <Button
       android:layout_width="wrap_content"
-      android:layout_height="@dimen/menu_line_height">
+      android:layout_height="wrap_content"
+      android:textAppearance="?android:attr/textAppearanceMedium"
+      android:text="GPS\nSimulation"
+      android:background="@android:color/transparent"
+      android:onClick="simulationMenuButtonClicked"
+      android:layout_gravity="bottom"/>
 
-    <ImageButton
-        android:src="@android:drawable/ic_media_pause"
-        android:onClick="gpsPause"
-        android:layout_width="@dimen/menu_line_button_width"
-        android:layout_height="@dimen/menu_line_height_minusText"
-        android:contentDescription="@string/gps_simulation_pause"
-        style="@style/MwmTheme.Menu.Line.Button"
-        android:layout_row="3"
-        android:layout_column="0"
-        android:alpha="0.6"
-        android:id="@+id/simulationPauseButton"
-      />
-
-    <ImageButton
-        android:src="@android:drawable/ic_menu_close_clear_cancel"
-        android:onClick="gpsStop"
-        android:layout_width="@dimen/menu_line_button_width"
-        android:layout_height="@dimen/menu_line_height_minusText"
-        android:contentDescription="@string/gps_simulation_stop"
-        style="@style/MwmTheme.Menu.Line.Button"
-        android:layout_row="3"
-        android:layout_column="1"
-        android:alpha="0.6"
-      />
-
-    <ImageButton
-        style="@style/MwmTheme.Menu.Line.Button"
-        android:src="@android:drawable/ic_menu_rotate"
-        android:onClick="gpsRestart"
-        android:layout_width="@dimen/menu_line_button_width"
-        android:layout_height="@dimen/menu_line_height_minusText"
-        android:contentDescription="@string/gps_simulation_restart"
-        android:layout_row="3"
-        android:layout_column="2"
-      />
-
-    <View
-        android:background="@android:color/darker_gray"
-        android:layout_height="1px"
-        android:layout_row="2"
-        android:layout_column="0"
-        android:layout_columnSpan="3"
-        android:layout_width="@dimen/menu_line_button_width_double"
-        android:layout_gravity="center_horizontal"
-        />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="@dimen/menu_line_subText_height"
-        android:text="GPS-Simulation"
-        android:id="@+id/textView2"
-        android:layout_row="1"
-        android:layout_column="0"
-        android:layout_columnSpan="3"
-        android:layout_gravity="center_horizontal"
-        android:textColor="@android:color/darker_gray"
-        />
-
-  </GridLayout>
 
   <TextView
       android:id="@+id/current_place"
@@ -134,4 +83,5 @@
     tools:background="#4000F000"
       android:visibility="gone"/>
 
-</LinearLayout>
+  </LinearLayout>
+</RelativeLayout>

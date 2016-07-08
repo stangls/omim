@@ -93,6 +93,8 @@ private:
   /// Distance from m_current on the polyline where surely no crossing of the line
   /// with itself occurs. Is being set by UpdateProjection.
   mutable double m_lastNonCrossingDistance;
+  /// Number of possible forward-jumps (outside of non-ff-geometries) which have not been done.
+  mutable unsigned int m_couldHaveJumped = 0;
   /// Precalculated info for fast projection finding.
   vector<m2::ProjectionToSection<m2::PointD>> m_segProj;
   /// Accumulated cache of segments length in meters.

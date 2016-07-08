@@ -114,24 +114,7 @@ public:
                 turnDirection=turns::TurnDirection::LeaveRoundAbout;
             }else{
                 //LOG( my::LINFO, ("junction road angle : ",m_roadAngle) );
-                if (m_roadAngle>=175)
-                    turnDirection=TD::UTurnLeft;
-                else if (m_roadAngle>=120)
-                    turnDirection=TD::TurnSharpRight;
-                else if (m_roadAngle>=45)
-                    turnDirection=TD::TurnRight;
-                else if (m_roadAngle>=5)
-                    turnDirection=TD::TurnSlightRight;
-                else if (m_roadAngle<=-175)
-                    turnDirection=TD::UTurnLeft;
-                else if (m_roadAngle<=-120)
-                    turnDirection=TD::TurnSharpLeft;
-                else if (m_roadAngle<=-45)
-                    turnDirection=TD::TurnLeft;
-                else if (m_roadAngle<=-5)
-                    turnDirection=TD::TurnSlightLeft;
-                else
-                    turnDirection=TD::GoStraight;
+                turnDirection = Tour::GetTurnDirectionForAngle(m_roadAngle);
             }
             m_tour.AddTurn(TI(m_tour.GetAllPoints().size()-1,turnDirection,m_roadIndex+1));
             m_roadIndex = -1;
@@ -162,11 +145,34 @@ public:
             if (prevTag=="poi" && currTag=="message"){
                 m_poiText=value;
             }
+            if (prevTag=="section" && currTag=="name"){
+                m_tour.AddStreetname(value);
+            }
         }
     }
 };
 } // end anonymous namespace (parser)
 
+TD Tour::GetTurnDirectionForAngle(int roadAngle){
+    if (roadAngle>=175)
+        return TD::UTurnLeft;
+    else if (roadAngle>=120)
+        return TD::TurnSharpRight;
+    else if (roadAngle>=45)
+        return TD::TurnRight;
+    else if (roadAngle>=8)
+        return TD::TurnSlightRight;
+    else if (roadAngle<=-175)
+        return TD::UTurnLeft;
+    else if (roadAngle<=-120)
+        return TD::TurnSharpLeft;
+    else if (roadAngle<=-45)
+        return TD::TurnLeft;
+    else if (roadAngle<=-8)
+        return TD::TurnSlightLeft;
+    else
+        return TD::GoStraight;
+}
 
 Tour::Tour(const string &filePath, TPoiCallback const & poiVisited)
     : m_name("unnamed dummy tour"),
@@ -194,10 +200,15 @@ Tour::Tour(const string &filePath, TPoiCallback const & poiVisited)
         m_turns.pop_back();
     }
     LOG( my::LINFO, ("placing last turndirection") );
-    m_turns.emplace_back(m_points.size()-1,turns::TurnDirection::ReachedYourDestination);
+    m_turns.emplace_back( m_points.size()-1, turns::TurnDirection::ReachedYourDestination );
 
     ASSERT( m_points.size()==m_times.size(), () );
     ASSERT( m_turns.back().m_index == m_points.size()-1, () );
+
+    if (m_streets.size()>0){
+        LOG( my::LINFO, ("placing last streetname") );
+        AddStreetname(m_streets.back().second);
+    }
 }
 
 Tour::~Tour()
@@ -269,6 +280,23 @@ void Tour::AddPoint(double lat, double lon)
 void Tour::AddPoi(const string & message, double lat, double lon)
 {
     m_pois.emplace_back(message,lat,lon,m_points.size());
+}
+
+void Tour::AddStreetname(string name){
+    size_t nextIndex = 0;
+    if (m_streets.size()>0){
+        nextIndex = m_points.size()-1;
+        size_t lastIndex = m_streets.back().first;
+        string lastName = m_streets.back().second;
+        unsigned int step = MIN_STREETNAME_DIST/MIN_POINT_DIST;
+        //LOG(my::LDEBUG,("for loop from ",lastIndex,"+",step,"=",lastIndex+step," to ",nextIndex," by ",step));
+        for (size_t i=lastIndex+step; i<nextIndex; i+=step){
+            //LOG(my::LDEBUG,("adding street",lastName,"at",i));
+            m_streets.emplace_back(i,lastName);
+        }
+    }
+    //LOG(my::LDEBUG,("adding final street",name,"at",nextIndex));
+    m_streets.emplace_back(nextIndex,name);
 }
 
 

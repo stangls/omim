@@ -2,6 +2,7 @@ package com.mapswithme.maps;
 
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.media.MediaPlayer;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
@@ -77,6 +78,7 @@ public class MwmApplication extends MultiDexApplication {
     @Override
     public void onProgress(String countryId, long localSize, long remoteSize) {}
   };
+  private MediaPlayer notificationPlayer;
 
   public MwmApplication()
   {
@@ -319,4 +321,11 @@ public class MwmApplication extends MultiDexApplication {
   @UiThread
   private static native void nativeInitCrashlytics();
 
+  public void playNotificationSound() {
+    if (notificationPlayer!=null){
+      notificationPlayer.release();
+    }
+    notificationPlayer = MediaPlayer.create(this, R.raw.notification);
+    notificationPlayer.start();
+  }
 }

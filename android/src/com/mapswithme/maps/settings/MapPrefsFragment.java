@@ -1,7 +1,6 @@
 package com.mapswithme.maps.settings;
 
 import android.app.Activity;
-import android.content.Intent;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.Preference;
@@ -13,7 +12,6 @@ import java.util.List;
 import com.mapswithme.maps.Framework;
 import com.mapswithme.maps.R;
 import com.mapswithme.maps.downloader.MapManager;
-import com.mapswithme.maps.location.TrackRecorder;
 import com.mapswithme.util.Config;
 import com.mapswithme.util.ThemeSwitcher;
 import com.mapswithme.util.Yota;
@@ -92,7 +90,7 @@ public class MapPrefsFragment extends BaseXmlSettingsFragment
         return true;
       }
     });
-
+/*
     pref = findPreference(getString(R.string.pref_show_zoom_buttons));
     ((TwoStatePreference)pref).setChecked(Config.showZoomButtons());
     pref.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener()
@@ -105,7 +103,7 @@ public class MapPrefsFragment extends BaseXmlSettingsFragment
         return true;
       }
     });
-
+*/
     String curTheme = Config.getUiThemeSettings();
     final ListPreference stylePref = (ListPreference)findPreference(getString(R.string.pref_map_style));
     stylePref.setValue(curTheme);
@@ -151,7 +149,7 @@ public class MapPrefsFragment extends BaseXmlSettingsFragment
         return true;
       }
     });
-
+/*
     pref = findPreference(getString(R.string.pref_yota));
     if (Yota.isFirstYota())
       pref.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener()
@@ -191,7 +189,7 @@ public class MapPrefsFragment extends BaseXmlSettingsFragment
         });
         return true;
       }
-    });
+    });*/
   }
 
   @Override

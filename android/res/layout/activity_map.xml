@@ -50,16 +50,25 @@
     android:visibility="gone"/>
 
   <include
+      layout="@layout/simulation_menu"
+      android:layout_above="@+id/menu_frame"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentStart="true"
+      android:layout_marginLeft="48dp"/>
+
+  <include
     android:id="@+id/menu_frame"
     layout="@layout/menu"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_alignParentBottom="true"/>
-
+<!--
   <com.mapswithme.maps.widget.placepage.PlacePageView
     android:id="@+id/info_box"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_alignParentBottom="true"
     placePage:animationType="bottom"/>
+    -->
 </RelativeLayout>

@@ -14,13 +14,13 @@
     android:entries="@array/measument_units"
     android:entryValues="@array/measument_units_values"
     android:order="2"/>
-
+<!--
   <CheckBoxPreference
     android:key="@string/pref_show_zoom_buttons"
     android:title="@string/pref_zoom_title"
     android:summary="@string/pref_zoom_summary"
     android:order="3"/>
-
+-->
   <ListPreference
     android:key="@string/pref_map_style"
     android:title="@string/pref_map_style_title"
@@ -32,7 +32,7 @@
     android:key="@string/pref_3d_buildings"
     android:title="@string/pref_map_3d_buildings_title"
     android:order="5"/>
-
+<!--
   <Preference
     android:key="@string/pref_yota"
     android:title="@string/yopme_pref_title"
@@ -45,4 +45,5 @@
     android:entries="@array/track_length"
     android:entryValues="@array/track_length_values"
     android:order="7"/>
+    -->
 </PreferenceScreen>

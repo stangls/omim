@@ -161,10 +161,10 @@ string GetDirectionTextId(Notification const & notification)
     case TurnDirection::TakeTheExit:
     case TurnDirection::NoTurn:
     case TurnDirection::Count:
-      ASSERT(false, ());
+      ASSERT(false, ("invalid turn direction",notification.m_turnDir));
       return string();
   }
-  ASSERT(false, ());
+  ASSERT(false, ("invalid turn direction",notification.m_turnDir));
   return string();
 }
 }  // namespace sound

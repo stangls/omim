@@ -32,8 +32,10 @@ public class RoutingErrorDialogFragment extends BaseRoutingErrorDialogFragment
     builder.setTitle(titleMessage.first);
     mMessage = titleMessage.second;
 
+    /*
     if (ResultCodesHelper.isDownloadable(mResultCode))
       builder.setPositiveButton(R.string.download, null);
+    */
   }
 
   private View addMessage(View frame)
@@ -53,7 +55,7 @@ public class RoutingErrorDialogFragment extends BaseRoutingErrorDialogFragment
   {
     return addMessage(super.buildMultipleMapView());
   }
-
+/*
   private void startDownload()
   {
     if (mMissingMaps.isEmpty())
@@ -82,7 +84,7 @@ public class RoutingErrorDialogFragment extends BaseRoutingErrorDialogFragment
       }
     });
   }
-
+*/
   @Override
   public void onStart()
   {
@@ -92,7 +94,7 @@ public class RoutingErrorDialogFragment extends BaseRoutingErrorDialogFragment
     Button button = dlg.getButton(AlertDialog.BUTTON_POSITIVE);
     if (button == null)
       return;
-
+    /*
     button.setOnClickListener(new View.OnClickListener()
     {
       @Override
@@ -101,6 +103,7 @@ public class RoutingErrorDialogFragment extends BaseRoutingErrorDialogFragment
         startDownload();
       }
     });
+    */
   }
 
   @Override

@@ -60,6 +60,9 @@ public:
     size_t GetCurrentIndex() {
         return m_currentIndex;
     }
+    size_t GetMaxIndex() {
+        return m_points.size();
+    }
 
     const vector<PointD> &GetAllPoints(){
         return m_points;
@@ -100,6 +103,22 @@ public:
         m_turns.push_back(turnItem);
     }
 
+    static TD GetTurnDirectionForAngle(int roadAngle);
+
+    Route::TStreets::iterator GetStreetnamesCurrentIt(){
+        auto it = m_streets.begin();
+        while (it!=m_streets.end()){
+            if ((*it).first>=m_currentIndex)
+                break;
+            it++;
+        }
+        return it;
+    }
+    Route::TStreets::iterator GetStreetnamesEndIt(){
+        return m_streets.end();
+    }
+    void AddStreetname( string name );
+
 protected:
     void CalculateTimes();
 
@@ -108,12 +127,14 @@ protected:
     pvec m_points;
     vector<double> m_times;
     vector<TI> m_turns;
+    Route::TStreets m_streets;
     vector<Poi> m_pois;
     size_t m_nextPoiIndex = 0;
     TPoiCallback m_poiVisitedCallback;
 
     const double MIN_POINT_DIST = 5; // meters
     const double MAX_POI_DIST = 25; // meters
+    const double MIN_STREETNAME_DIST = 600; // meters
 };
 
 }  // end namespace routing

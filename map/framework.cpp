@@ -358,10 +358,10 @@ Framework::Framework()
   routing::RouterDelegate::TPointCheckCallback const routingVisualizerFn = nullptr;
 #endif
 
-  auto const tourChangeCallbackFn = [this](bool finished,size_t idx)
+  auto const tourChangeCallbackFn = [this](bool finished,bool onTour,size_t idx)
   {
     if (m_tourChangeListener!=0){
-        m_tourChangeListener(finished,idx);
+        m_tourChangeListener(finished, onTour, idx);
     }else{
         LOG(LWARNING, ("Tour change can not be sent to app: No callback function set!"));
     }
@@ -2151,7 +2151,10 @@ void Framework::BuildRoute(m2::PointD const & finish, uint32_t timeoutSec)
 
 void Framework::LoadTour(string const & filePath , int position, const TTourLoadedCallback &tourLoadedCallback){
     ASSERT_THREAD_CHECKER(m_threadChecker, ("LoadTour",filePath));
-    ASSERT(m_drapeEngine != nullptr, ());
+    if(m_drapeEngine == nullptr){
+        CallRouteBuilded(IRouter::InternalError, storage::TCountriesVec());
+        return;
+    }
 
     if (IsRoutingActive())
         CloseRouting();
@@ -2378,7 +2381,7 @@ void Framework::CheckLocationForRouting(GpsInfo const & info)
   }
   if (state == RoutingSession::RouteFinished){
       if (m_tourChangeListener!=0){
-          m_tourChangeListener(true,0);
+          m_tourChangeListener(true,true,0);
       }
   }
 }

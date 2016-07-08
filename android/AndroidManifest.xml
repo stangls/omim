@@ -100,18 +100,18 @@
         android:configChanges="keyboardHidden|orientation|screenSize"
         android:windowSoftInputMode="stateAlwaysHidden|adjustPan"/>
 
+<!--
     <activity
         android:name="com.mapswithme.maps.downloader.DownloaderActivity"
         android:configChanges="orientation|screenLayout|screenSize"
         android:label="@string/download_maps"
         android:parentActivityName="com.mapswithme.maps.MwmActivity">
-      <!-- The meta-data element is needed for versions lower than 4.1 -->
+      <!-x- The meta-data element is needed for versions lower than 4.1 -x->
       <meta-data
           android:name="android.support.PARENT_ACTIVITY"
           android:value="com.mapswithme.maps.MwmActivity"/>
     </activity>
 
-    <!--
     <activity
         android:name="com.mapswithme.maps.search.SearchActivity"
         android:configChanges="orientation|screenLayout|screenSize"
@@ -123,7 +123,7 @@
           android:name="android.support.PARENT_ACTIVITY"
           android:value="com.mapswithme.maps.MwmActivity"/>
     </activity>
-    -->
+-->
 
     <activity
         android:name="com.mapswithme.maps.settings.SettingsActivity"

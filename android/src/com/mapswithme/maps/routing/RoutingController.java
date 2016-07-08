@@ -27,7 +27,7 @@ import com.mapswithme.maps.R;
 import com.mapswithme.maps.bookmarks.data.MapObject;
 import com.mapswithme.maps.downloader.MapManager;
 import com.mapswithme.maps.location.LocationHelper;
-import com.mapswithme.mx.TourFinishedListener;
+import com.mapswithme.mx.TourStatusListener;
 import com.mapswithme.mx.TourLoadedListener;
 import com.mapswithme.util.Config;
 import com.mapswithme.util.StringUtils;
@@ -103,9 +103,9 @@ public class RoutingController
   private String[] mLastMissingMaps;
   private RoutingInfo mCachedRoutingInfo;
 
-  private TourFinishedListener mTourFinishedListener;
-  public void setTourFinishedListener(TourFinishedListener listener) {
-    this.mTourFinishedListener = listener;
+  private TourStatusListener mTourStatusListener;
+  public void setTourStatusListener(TourStatusListener listener) {
+    this.mTourStatusListener = listener;
   }
 
   @SuppressWarnings("FieldCanBeLocal")
@@ -156,22 +156,54 @@ public class RoutingController
     }
   };
 
+  private boolean weAreOnTourKnown = false;
+  private boolean tourWasAlreadyLeftOnce = false;
+
   private final Framework.TourChangeListener mTourChangedListener = new Framework.TourChangeListener() {
+    private boolean tourHasFinished = false;
+    private boolean weAreOnTour = false;
+
     @Override
-    public void onTourChanged(boolean finished, int idx) {
-      SharedPreferences.Editor editor = MwmApplication.prefs().edit();
-      if (finished){
-        Log.d(TAG, "onTourChanged: tour finished!");
-        editor.remove(TOUR_FILE_NAME);
-        editor.remove(TOUR_POSITION);
-        cancel();
-        if (mTourFinishedListener !=null){
-          mTourFinishedListener.onTourFinished();
+    public void onTourChanged(boolean finished, boolean onTour, int idx) {
+      synchronized (this){
+
+        // handle finishing of tour or position-update
+        if (finished){
+          Log.i(TAG, "onTourChanged: tour finished!");
+          SharedPreferences.Editor editor = MwmApplication.prefs().edit();
+          editor.remove(TOUR_FILE_NAME);
+          editor.remove(TOUR_POSITION);
+          editor.apply();
+          cancel();
+          if (!tourHasFinished){
+            tourHasFinished = true;
+            weAreOnTourKnown = false;
+            tourWasAlreadyLeftOnce = false;
+            if (mTourStatusListener !=null){
+              mTourStatusListener.onTourFinished();
+            }
+          }
+        }else{
+          saveTourInfo(null,idx);
+          tourHasFinished = false;
+          // handle tour-change
+          if (!weAreOnTourKnown){
+            weAreOnTour = onTour;
+            weAreOnTourKnown=true;
+          }else{
+            // TODO: Tell developers of Android to fix (true!=true)==true
+            if (Boolean.toString(onTour).intern() != Boolean.toString(weAreOnTour).intern()){
+              if (!onTour){
+                tourWasAlreadyLeftOnce=true;
+              }
+              mTourStatusListener.onTourTracking(onTour,tourWasAlreadyLeftOnce);
+              weAreOnTour=onTour;
+            }
+          }
         }
-      }else{
-        saveTourInfo(null,idx);
-      }
-      editor.apply();
+
+
+      } // end synchronized
     }
   };
 
@@ -200,11 +232,12 @@ public class RoutingController
     if (triesContinueTour-->0){
       if (
         mLastResultCode == ResultCodesHelper.NO_POSITION ||
-        mLastResultCode == ResultCodesHelper.START_POINT_NOT_FOUND
+        mLastResultCode == ResultCodesHelper.START_POINT_NOT_FOUND ||
+        mLastResultCode == ResultCodesHelper.INTERNAL_ERROR
       ) {
         final Handler h = new Handler();
         new Thread(){public void run(){
-          try { Thread.sleep(1000); } catch (InterruptedException e) {}
+          try { Thread.sleep(500); } catch (InterruptedException e) {}
           Log.d(TAG, "trying to continue tour");
           h.post(new Runnable() {
                    @Override
@@ -383,7 +416,11 @@ public class RoutingController
     {
       Statistics.INSTANCE.trackEvent(Statistics.EventName.ROUTING_START_SUGGEST_REBUILD);
       AlohaHelper.logClick(AlohaHelper.ROUTING_START_SUGGEST_REBUILD);
-      suggestRebuildRoute();
+      if (triesContinueTour>0){
+        continueSavedTour(tourLoadedListener);
+      }else{
+        suggestRebuildRoute();
+      }
       return;
     }
 
@@ -460,6 +497,8 @@ public class RoutingController
 
     if (mStartButton == null)
       return;
+
+    mStartButton.setVisibility((triesContinueTour>0)?View.INVISIBLE:View.VISIBLE);
 
     mStartButton.setEnabled(mState == State.PREPARE && mBuildState == BuildState.BUILT);
     UiUtils.updateAccentButton(mStartButton);
@@ -825,7 +864,7 @@ public class RoutingController
 
         @Override
         public void onLocationUpdated(Location l) {
-          if (counter--<=0){
+          if (MwmApplication.get().isFrameworkInitialized() && counter--<=0){
             Log.d(TAG, "startTour: location known. native load tour");
             triesContinueTour = 10;
             Framework.nativeLoadTour(tourFile.getAbsolutePath(), activeTourPosition, tll);
@@ -850,14 +889,18 @@ public class RoutingController
    * <p>The tour will not be started.</p>
    **/
   public static void saveTourInfo(@Nullable String tourFileName, int tourPosition) {
+    //Log.d(TAG, "saveTourInfo: "+tourFileName+" @ "+tourPosition);
     SharedPreferences prefs = MwmApplication.prefs();
     SharedPreferences.Editor edit = prefs.edit();
     if (tourFileName!=null){
       edit.putString(TOUR_FILE_NAME,tourFileName);
-      Log.d(TAG, "saveTourInfo: "+tourFileName+" @ "+tourPosition);
     }
     edit.putInt(TOUR_POSITION,tourPosition);
     edit.apply();
+    // if tour starts at begin, we reset information about previous tour.
+    if (tourPosition==0){
+      resetTourNotificationInfo();
+    }
   }
 
   public static boolean continueSavedTour(TourLoadedListener tourLoadedListener) {
@@ -865,9 +908,17 @@ public class RoutingController
     String tourFileName = prefs.getString(TOUR_FILE_NAME, null);
     if (tourFileName!=null){
       int tourPosition = prefs.getInt(TOUR_POSITION, 0);
+      if (tourPosition==0){
+        resetTourNotificationInfo();
+      }
       return RoutingController.get().startTour(tourFileName,tourPosition,tourLoadedListener);
     }
     return false;
+  }
+
+  private static void resetTourNotificationInfo() {
+    get().tourWasAlreadyLeftOnce=false;
+    get().weAreOnTourKnown=false;
   }
 
 }

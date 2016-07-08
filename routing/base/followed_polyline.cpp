@@ -123,8 +123,12 @@ Iter FollowedPolyline::GetClosestProjection(
   size_t cur = m_current.m_ind;
   size_t const count = m_poly.GetSize() - 1;
   bool jumpableFastForward = false;
+  int fwdCnt = 0;
+  int resFwdCnt = -1;
+  bool couldJump=false; // this has to do with route-jumping (not tour-jumping, ie. not with nonff-geometry-intervals)
   for (size_t i = cur; i < count; ++i)
   {
+    fwdCnt++;
 
     // check if we are inside the rect
     m2::PointD const pt = m_segProj[i](currPos);
@@ -152,8 +156,9 @@ Iter FollowedPolyline::GetClosestProjection(
                 if (doContinueTourHere){
                     LOG( my::LINFO, ("continuing tour at",i,"instead of",cur) );
                     doContinueTourHere=false;
-                    // a possible previous continuation-point has to be ignored!
+                    // a possible previous continuation-point has to be ignored! reset variables as if there was no previous point!
                     minDist = numeric_limits<double>::max();
+                    resFwdCnt = -1;
                 }else{
                     //LOG(my::LINFO,("not fast-forwarding ",(i-cur)," steps (>"+maxFastForward+") since ",nonFF.min,"<=",i,"<",nonFF.max));
                     skipTo=nonFF.max;
@@ -174,10 +179,19 @@ Iter FollowedPolyline::GetClosestProjection(
 
     Iter it(pt, i);
     double const dp = distFn(it);
-    if (dp < minDist)
-    {
-      res = it;
-      minDist = dp;
+    if ( dp < minDist ) {
+      // do only jump forward by a maximum of 2 or if we could have jumped forward for quite some time now.
+      // or if this is the first available point (i.e. resFwdCnt<0)
+      if (resFwdCnt<0 || fwdCnt<=resFwdCnt+2 || m_couldHaveJumped>=5) {
+          //LOG(my::LINFO,("jumping forward from",resFwdCnt,"to",fwdCnt,". could have jumped before:",m_couldHaveJumped));
+          m_couldHaveJumped = 0;
+          resFwdCnt = fwdCnt;
+          res = it;
+          minDist = dp;
+      }else{
+          //LOG(my::LINFO,("not jumping forward from",resFwdCnt,"to",fwdCnt,". could have jumped before:",m_couldHaveJumped));
+          couldJump=true;
+      }
     }
   }
   //LOG(my::LINFO,("GetClosestProjection done"));
@@ -189,6 +203,7 @@ Iter FollowedPolyline::GetClosestProjection(
       }
   }/*else
       LOG( my::LINFO, ("tour resumption is not possible!") );*/
+  if (couldJump) m_couldHaveJumped++;
   return res;
 }
 

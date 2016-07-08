@@ -166,10 +166,15 @@ public enum TtsPlayer
 
   private void speak(String textToSpeak)
   {
-    Log.d(TAG, "speak: "+textToSpeak);
+    speak(textToSpeak,0);
+  }
+  private void speak(String textToSpeak, int silenceAtBegin)
+  {
     if (Config.isTtsEnabled())
       try
       {
+        if (silenceAtBegin>0)
+          mTts.playSilence(silenceAtBegin,TextToSpeech.QUEUE_ADD, null);
         //noinspection deprecation
         mTts.speak(textToSpeak, TextToSpeech.QUEUE_ADD, null);
       }
@@ -188,6 +193,27 @@ public enum TtsPlayer
     if (turnNotifications != null && isReady())
       for (String textToSpeak : turnNotifications)
         speak(textToSpeak);
+  }
+
+  /**
+   * Plays a notification-message with a leading notification-sound.
+   * @param message The message to be spoken.
+   * @param waitForTts play the notification sound only shortly before the message.
+   */
+  public void playNotificationMessage(final String message, final boolean waitForTts) {
+    new Thread(){public void run(){
+      if (waitForTts){
+        while (mTts.isSpeaking()){
+          try { Thread.sleep(500); } catch (InterruptedException ignored) {}
+        }
+      }
+      speak(message,500);
+      MwmApplication.get().playNotificationSound();
+    }}.start();
+  }
+
+  public void playNotificationMessage(final String message) {
+    playNotificationMessage(message,true);
   }
 
   public void stop()
@@ -283,4 +309,5 @@ public enum TtsPlayer
   private native static boolean nativeAreTurnNotificationsEnabled();
   private native static void nativeSetTurnNotificationsLocale(String code);
   private native static String nativeGetTurnNotificationsLocale();
+
 }
