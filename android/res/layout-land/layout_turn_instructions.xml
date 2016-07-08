@@ -76,17 +76,17 @@
     tools:text="300 m"/>
 
   <TextView
-    android:id="@+id/tv__next_street"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_alignLeft="@id/tv__turn_distance"
-    android:layout_alignParentRight="false"
-    android:layout_below="@id/tv__turn_distance"
-    android:maxLines="2"
-    android:textAppearance="@style/MwmTextAppearance.Body2"
-    android:textSize="@dimen/text_size_title"
-    tools:text="Oxford str."
-    tools:visibility="visible"/>
+      android:id="@+id/tv__next_street"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignLeft="@id/tv__turn_distance"
+      android:layout_below="@id/tv__turn_distance"
+      android:maxLines="2"
+      android:textAppearance="@style/MwmTextAppearance.Body2"
+      android:textSize="@dimen/text_size_title"
+      tools:text="Oxford str."
+      tools:visibility="visible"
+      android:layout_toStartOf="@+id/relativeLayout"/>
 
   <TextView
       android:id="@+id/tv__total_time"
