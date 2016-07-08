@@ -159,10 +159,6 @@ public class Framework
   public static native void nativeSetRoutingListener(RoutingListener listener);
 
   public static native void nativeSetRouteProgressListener(RoutingProgressListener listener);
-  public static native void nativeSetTourChangeListener(TourChangeListener listener);
-  public static native void nativeSetPoiVisitedListener(PoiVisitedListener listener);
-  public static native void nativeSetPossibleTourResumptionListener(PossibleTourResumptionListener listener);
-  public static native void nativeDoContinueTourHere();
 
   public static native void nativeShowCountry(String countryId, boolean zoomToDownloadButton);
 
@@ -203,8 +199,15 @@ public class Framework
 
   public native static void nativeLoadTour(String filePath, int activeTourPosition, TourLoadedListener tll);
   public native static boolean nativeIsTourRouting();
+  public static native void nativeSetTourChangeListener(TourChangeListener listener);
+  public static native void nativeSetPoiVisitedListener(PoiVisitedListener listener);
+  public static native void nativeSetPossibleTourResumptionListener(PossibleTourResumptionListener listener);
+  public static native void nativeDoContinueTourHere();
 
   /////////////////// end TOUR routing
+  /////////////////// other MX-functions
+  public native static void nativeLoadGeomsXml(String filePath);
+  /////////////////// end other MX-functions
 
   /**
    * Determines if currently is day or night at the given location. Used to switch day/night styles.

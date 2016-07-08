@@ -649,6 +649,7 @@ public:
   bool IsTourRouting(){
       return m_routingSession.hasTour();
   }
+  void LoadGeomsXml( string const & filePath );
 
   void Allow3dMode(bool allow3d, bool allow3dBuildings);
   void Save3dMode(bool allow3d, bool allow3dBuildings);

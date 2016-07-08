@@ -30,6 +30,7 @@ import com.mapswithme.util.ThemeSwitcher;
 import com.mapswithme.util.UiUtils;
 import com.mapswithme.util.Yota;
 import com.mapswithme.util.statistics.Statistics;
+import com.mobidat.wp2.configuration.Parameter;
 import com.mobidat.wp2.remotelogging.RemoteLogging;
 import com.parse.Parse;
 import com.parse.ParseException;
@@ -135,6 +136,7 @@ public class MwmApplication extends MultiDexApplication {
     BookmarkManager.nativeLoadBookmarks();
     TtsPlayer.INSTANCE.init(this);
     ThemeSwitcher.restart();
+    Framework.nativeLoadGeomsXml(Parameter.getGlobalDirectory()+"/geometries.xml");
     mIsFrameworkInitialized = true;
   }
 

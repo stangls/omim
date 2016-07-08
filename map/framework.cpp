@@ -26,6 +26,7 @@
 #include "drape_frontend/visual_params.hpp"
 #include "drape_frontend/watch/cpu_drawer.hpp"
 #include "drape_frontend/watch/feature_processor.hpp"
+#include "drape_frontend/custom_geometries.h"
 
 #include "indexer/categories_holder.hpp"
 #include "indexer/classificator.hpp"
@@ -76,6 +77,7 @@
 #include "api/src/c/api-client.h"
 
 //#include "3party/Alohalytics/src/alohalytics.h"
+
 
 #define KMZ_EXTENSION ".kmz"
 
@@ -2182,6 +2184,13 @@ void Framework::LoadTour(string const & filePath , int position, const TTourLoad
         LOG(my::LINFO,("tour name: ",name));
         tourLoadedCallback(name);
     }
+}
+
+void Framework::LoadGeomsXml(const string &filePath)
+{
+    df::CustomGeometries* cg = df::CustomGeometries::GetInstance();
+    cg->SetGeomsXmlFile(filePath);
+    cg->ReloadGeometries();
 }
 
 void Framework::BuildRoute(m2::PointD const & start, m2::PointD const & finish, uint32_t timeoutSec)

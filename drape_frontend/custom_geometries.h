@@ -15,18 +15,34 @@ using TPolyFun = function<void (m2::PointF,m2::PointF,m2::PointF)>;
 class CustomGeom
 {
 public:
-    CustomGeom(vector<m2::PointF> &outerPoints, dp::Color &color );
 
     dp::Color GetColor() const { return m_color; }
     m2::RectF GetBoundingBox() const { return m_outerRect; }
-    void CreatePolys(TPolyFun callback );
+    virtual void CreatePolys(TPolyFun callback ) = 0;
 
-private:
-    vector<m2::PointF> m_outerPoints;
+protected:
     m2::RectF m_outerRect;
     dp::Color m_color;
 };
 
+class ConvexGeom : CustomGeom
+{
+public:
+    ConvexGeom(vector<m2::PointF> &outerPoints, dp::Color &color );
+    void CreatePolys(TPolyFun callback );
+private:
+    vector<m2::PointF> m_outerPoints;
+};
+
+class TriangleGeom : CustomGeom
+{
+public:
+    TriangleGeom(vector<m2::PointF> &points, vector<size_t> triangles, dp::Color &color );
+    void CreatePolys( TPolyFun callback );
+private:
+    vector<m2::PointF> m_points;
+    vector<size_t> m_triangles;
+};
 
 inline string DebugPrint(CustomGeom const & c)
 {
@@ -38,22 +54,29 @@ inline string DebugPrint(CustomGeom const & c)
 
 class CustomGeometries
 {
-private:
-    static CustomGeometries* s_inst;
-    CustomGeometries();
-    CustomGeometries( const CustomGeometries& ); // no copy constructor
-    ~CustomGeometries () { }
-
-    vector<shared_ptr<CustomGeom>> m_geoms;
 public:
+    using Geoms = vector<shared_ptr<CustomGeom>>;
     static CustomGeometries* GetInstance() {
         if (!s_inst){
             s_inst=new CustomGeometries();
         }
         return s_inst;
     }
+    inline void SetGeomsXmlFile(string fileName){
+        m_geomsXmlFile = fileName;
+    }
+
     vector<shared_ptr<CustomGeom>> const GetGeometries(m2::RectD rectangle );
     void ReloadGeometries();
+
+private:
+    static CustomGeometries* s_inst;
+    CustomGeometries();
+    CustomGeometries( const CustomGeometries& ); // no copy constructor
+    ~CustomGeometries () { }
+
+    Geoms m_geoms;
+    string m_geomsXmlFile = "";
 };
 
 } // end namespace df
