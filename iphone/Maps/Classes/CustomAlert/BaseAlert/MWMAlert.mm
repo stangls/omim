@@ -7,7 +7,6 @@
 #import "MWMFacebookAlert.h"
 #import "MWMLocationAlert.h"
 #import "MWMOsmAuthAlert.h"
-#import "MWMPedestrianShareAlert.h"
 #import "MWMPlaceDoesntExistAlert.h"
 #import "MWMRateAlert.h"
 #import "MWMRoutingDisclaimerAlert.h"
@@ -37,6 +36,11 @@
 + (MWMAlert *)routingDisclaimerAlertWithInitialOrientation:(UIInterfaceOrientation)orientation
 {
   return [MWMRoutingDisclaimerAlert alertWithInitialOrientation:orientation];
+}
+
++ (MWMAlert *)routingBicycleDisclaimerAlert
+{
+  return [MWMDefaultAlert routingBicycleDisclaimerAlert];
 }
 
 + (MWMAlert *)disabledLocationAlert
@@ -124,11 +128,6 @@
   }
 }
 
-+ (MWMAlert *)pedestrianToastShareAlert:(BOOL)isFirstLaunch
-{
-  return [MWMPedestrianShareAlert alert:isFirstLaunch];
-}
-
 + (MWMAlert *)incorrectFeauturePositionAlert
 {
   return [MWMDefaultAlert incorrectFeauturePositionAlert];
@@ -197,6 +196,16 @@
 + (MWMAlert *)osmAuthAlert
 {
   return [MWMOsmAuthAlert alert];
+}
+
++ (MWMAlert *)personalInfoWarningAlertWithBlock:(TMWMVoidBlock)block
+{
+  return [MWMDefaultAlert personalInfoWarningAlertWithBlock:block];
+}
+
++ (MWMAlert *)trackWarningAlertWithCancelBlock:(TMWMVoidBlock)block
+{
+  return [MWMDefaultAlert trackWarningAlertWithCancelBlock:block];
 }
 
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)orientation

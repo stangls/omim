@@ -1,69 +1,55 @@
-#import "LocationManager.h"
-#import "MapsAppDelegate.h"
-#import "MapViewController.h"
 #import "MWMFirstLaunchController.h"
+#import "MWMLocationManager.h"
 #import "MWMPageController.h"
+#import "MapViewController.h"
+#import "MapsAppDelegate.h"
 
 #include "Framework.h"
 
-@interface MWMFirstLaunchController () <LocationObserver>
+@interface MWMLocationManager ()
 
-@property (weak, nonatomic) IBOutlet UIView * containerView;
-@property (weak, nonatomic) IBOutlet UIImageView * image;
-@property (weak, nonatomic) IBOutlet UILabel * alertTitle;
-@property (weak, nonatomic) IBOutlet UILabel * alertText;
-@property (weak, nonatomic) IBOutlet UIButton * nextPageButton;
-@property (weak, nonatomic) IBOutlet NSLayoutConstraint * containerWidth;
-@property (weak, nonatomic) IBOutlet NSLayoutConstraint * containerHeight;
+@property(nonatomic) BOOL started;
++ (MWMLocationManager *)manager;
 
-@property (weak, nonatomic) IBOutlet NSLayoutConstraint * imageMinHeight;
-@property (weak, nonatomic) IBOutlet NSLayoutConstraint * imageHeight;
+@end
 
-@property (weak, nonatomic) IBOutlet NSLayoutConstraint * titleTopOffset;
-@property (weak, nonatomic) IBOutlet NSLayoutConstraint * titleImageOffset;
+@interface MWMFirstLaunchController ()
 
-@property (nonatomic) BOOL locationError;
+@property(weak, nonatomic) IBOutlet UIView * containerView;
+@property(weak, nonatomic) IBOutlet UIImageView * image;
+@property(weak, nonatomic) IBOutlet UILabel * alertTitle;
+@property(weak, nonatomic) IBOutlet UILabel * alertText;
+@property(weak, nonatomic) IBOutlet UIButton * nextPageButton;
+@property(weak, nonatomic) IBOutlet NSLayoutConstraint * containerWidth;
+@property(weak, nonatomic) IBOutlet NSLayoutConstraint * containerHeight;
+
+@property(weak, nonatomic) IBOutlet NSLayoutConstraint * imageMinHeight;
+@property(weak, nonatomic) IBOutlet NSLayoutConstraint * imageHeight;
+
+@property(weak, nonatomic) IBOutlet NSLayoutConstraint * titleTopOffset;
+@property(weak, nonatomic) IBOutlet NSLayoutConstraint * titleImageOffset;
 
 @end
 
 namespace
 {
-void requestNotifications()
-{
-  UIApplication * app = [UIApplication sharedApplication];
-  UIUserNotificationType userNotificationTypes =
-      (UIUserNotificationTypeAlert | UIUserNotificationTypeBadge | UIUserNotificationTypeSound);
-  if ([app respondsToSelector:@selector(registerUserNotificationSettings:)])
-  {
-    UIUserNotificationSettings * settings =
-        [UIUserNotificationSettings settingsForTypes:userNotificationTypes categories:nil];
-    [app registerUserNotificationSettings:settings];
-    [app registerForRemoteNotifications];
-  }
-  else
-  {
-    [app registerForRemoteNotificationTypes:userNotificationTypes];
-  }
-}
-
+void requestNotifications() { [MapsAppDelegate initPushNotificationsWithLaunchOptions:nil]; }
 void zoomToCurrentPosition()
 {
   auto & f = GetFramework();
   f.SwitchMyPositionNextMode();
-  LocationManager * locationManager = MapsAppDelegate.theApp.locationManager;
-  if (![locationManager lastLocationIsValid])
+  CLLocation * lastLocation = [MWMLocationManager lastLocation];
+  if (!lastLocation)
     return;
-  m2::PointD const centerPt = locationManager.lastLocation.mercator;
   int const zoom = 13;
-  f.SetViewportCenter(centerPt, zoom);
+  f.SetViewportCenter(lastLocation.mercator, zoom);
 }
 
 NSInteger constexpr kRequestLocationPage = 2;
 NSInteger constexpr kRequestNotificationsPage = 3;
 
 NSArray<TMWMWelcomeConfigBlock> * pagesConfigBlocks = @[
-  [^(MWMFirstLaunchController * controller)
-  {
+  [^(MWMFirstLaunchController * controller) {
     controller.image.image = [UIImage imageNamed:@"img_onboarding_offline_maps"];
     controller.alertTitle.text = L(@"onboarding_offline_maps_title");
     controller.alertText.text = L(@"onboarding_offline_maps_message");
@@ -72,8 +58,7 @@ NSArray<TMWMWelcomeConfigBlock> * pagesConfigBlocks = @[
                                   action:@selector(nextPage)
                         forControlEvents:UIControlEventTouchUpInside];
   } copy],
-  [^(MWMFirstLaunchController * controller)
-  {
+  [^(MWMFirstLaunchController * controller) {
     controller.image.image = [UIImage imageNamed:@"img_onboarding_geoposition"];
     controller.alertTitle.text = L(@"onboarding_location_title");
     controller.alertText.text = L(@"onboarding_location_message");
@@ -82,8 +67,7 @@ NSArray<TMWMWelcomeConfigBlock> * pagesConfigBlocks = @[
                                   action:@selector(nextPage)
                         forControlEvents:UIControlEventTouchUpInside];
   } copy],
-  [^(MWMFirstLaunchController * controller)
-  {
+  [^(MWMFirstLaunchController * controller) {
     controller.image.image = [UIImage imageNamed:@"img_onboarding_notification"];
     controller.alertTitle.text = L(@"onboarding_notifications_title");
     controller.alertText.text = L(@"onboarding_notifications_message");
@@ -92,8 +76,7 @@ NSArray<TMWMWelcomeConfigBlock> * pagesConfigBlocks = @[
                                   action:@selector(nextPage)
                         forControlEvents:UIControlEventTouchUpInside];
   } copy],
-  [^(MWMFirstLaunchController * controller)
-  {
+  [^(MWMFirstLaunchController * controller) {
     controller.image.image = [UIImage imageNamed:@"img_onboarding_done"];
     controller.alertTitle.text = L(@"first_launch_congrats_title");
     controller.alertText.text = L(@"first_launch_congrats_text");
@@ -103,30 +86,12 @@ NSArray<TMWMWelcomeConfigBlock> * pagesConfigBlocks = @[
                         forControlEvents:UIControlEventTouchUpInside];
   } copy]
 ];
-} // namespace
+}  // namespace
 
 @implementation MWMFirstLaunchController
 
-+ (NSString *)udWelcomeWasShownKey
-{
-  return @"FirstLaunchWelcomeWasShown";
-}
-
-+ (NSArray<TMWMWelcomeConfigBlock> *)pagesConfig
-{
-  return pagesConfigBlocks;
-}
-
-- (void)viewDidLoad
-{
-  [super viewDidLoad];
-  if (self.pageIndex == kRequestLocationPage)
-    [[NSNotificationCenter defaultCenter] addObserver:self
-                                             selector:@selector(appWillEnterForeground:)
-                                                 name:UIApplicationWillEnterForegroundNotification
-                                               object:nil];
-}
-
++ (NSString *)udWelcomeWasShownKey { return @"FirstLaunchWelcomeWasShown"; }
++ (NSArray<TMWMWelcomeConfigBlock> *)pagesConfig { return pagesConfigBlocks; }
 - (void)viewWillAppear:(BOOL)animated
 {
   [super viewWillAppear:animated];
@@ -136,47 +101,11 @@ NSArray<TMWMWelcomeConfigBlock> * pagesConfigBlocks = @[
     requestNotifications();
 }
 
-- (void)viewDidDisappear:(BOOL)animated
-{
-  [super viewDidDisappear:animated];
-  if (self.locationError)
-    [MapsAppDelegate.theApp.locationManager reset];
-}
-
-- (void)dealloc
-{
-  [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
-- (void)requestLocation
-{
-  MapsAppDelegate * app = MapsAppDelegate.theApp;
-  LocationManager * lm = app.locationManager;
-  [lm onForeground];
-  [lm start:self];
-}
-
+- (void)requestLocation { [MWMLocationManager manager].started = YES; }
 - (void)close
 {
   [self.pageController close];
   zoomToCurrentPosition();
-}
-
-- (void)appWillEnterForeground:(NSNotification *)notification
-{
-  [self requestLocation];
-}
-
-#pragma mark - LocationManager Callbacks
-
-- (void)onLocationUpdate:(location::GpsInfo const &)info
-{
-}
-
-- (void)onLocationError:(location::TLocationError)errorCode
-{
-  if (errorCode == location::EDenied)
-    self.locationError = YES;
 }
 
 #pragma mark - Properties
@@ -188,7 +117,8 @@ NSArray<TMWMWelcomeConfigBlock> * pagesConfigBlocks = @[
   CGFloat const width = newSize.width;
   CGFloat const height = newSize.height;
   BOOL const hideImage = (self.imageHeight.multiplier * height <= self.imageMinHeight.constant);
-  self.titleImageOffset.priority = hideImage ? UILayoutPriorityDefaultLow : UILayoutPriorityDefaultHigh;
+  self.titleImageOffset.priority =
+      hideImage ? UILayoutPriorityDefaultLow : UILayoutPriorityDefaultHigh;
   self.image.hidden = hideImage;
   self.containerWidth.constant = width;
   self.containerHeight.constant = height;

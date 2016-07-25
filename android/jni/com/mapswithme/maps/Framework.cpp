@@ -458,6 +458,11 @@ place_page::Info & Framework::GetPlacePageInfo()
   return m_info;
 }
 
+void Framework::RequestBookingMinPrice(string const & hotelId, string const & currencyCode, function<void(string const &, string const &)> const & callback)
+{
+  return m_work.GetBookingApi().GetMinPrice(hotelId, currencyCode, callback);
+}
+
 bool Framework::HasSpaceForMigration()
 {
   return m_work.IsEnoughSpaceForMigrate();
@@ -603,8 +608,8 @@ Java_com_mapswithme_maps_Framework_nativeGetDistanceAndAzimuthFromLatLon(
 JNIEXPORT jobject JNICALL
 Java_com_mapswithme_maps_Framework_nativeFormatLatLon(JNIEnv * env, jclass, jdouble lat, jdouble lon, jboolean useDMSFormat)
 {
-  return jni::ToJavaString(env, (useDMSFormat ? MeasurementUtils::FormatLatLonAsDMS(lat, lon, 2)
-                                              : MeasurementUtils::FormatLatLon(lat, lon, 6)));
+  return jni::ToJavaString(env, (useDMSFormat ? measurement_utils::FormatLatLonAsDMS(lat, lon, 2)
+                                              : measurement_utils::FormatLatLon(lat, lon, 6)));
 }
 
 JNIEXPORT jobjectArray JNICALL
@@ -612,9 +617,9 @@ Java_com_mapswithme_maps_Framework_nativeFormatLatLonToArr(JNIEnv * env, jclass,
 {
   string slat, slon;
   if (useDMSFormat)
-    MeasurementUtils::FormatLatLonAsDMS(lat, lon, slat, slon, 2);
+    measurement_utils::FormatLatLonAsDMS(lat, lon, slat, slon, 2);
   else
-    MeasurementUtils::FormatLatLon(lat, lon, slat, slon, 6);
+    measurement_utils::FormatLatLon(lat, lon, slat, slon, 6);
 
   static jclass const klass = jni::GetGlobalClassRef(env, "java/lang/String");
   jobjectArray arr = env->NewObjectArray(2, klass, 0);
@@ -628,13 +633,13 @@ Java_com_mapswithme_maps_Framework_nativeFormatLatLonToArr(JNIEnv * env, jclass,
 JNIEXPORT jobject JNICALL
 Java_com_mapswithme_maps_Framework_nativeFormatAltitude(JNIEnv * env, jclass, jdouble alt)
 {
-  return jni::ToJavaString(env,  MeasurementUtils::FormatAltitude(alt));
+  return jni::ToJavaString(env, measurement_utils::FormatAltitude(alt));
 }
 
 JNIEXPORT jobject JNICALL
 Java_com_mapswithme_maps_Framework_nativeFormatSpeed(JNIEnv * env, jclass, jdouble speed)
 {
-  return jni::ToJavaString(env,  MeasurementUtils::FormatSpeed(speed));
+  return jni::ToJavaString(env, measurement_utils::FormatSpeedWithDeviceUnits(speed));
 }
 
 JNIEXPORT jobject JNICALL
@@ -722,7 +727,7 @@ Java_com_mapswithme_maps_Framework_nativeSetWritableDir(JNIEnv * env, jclass, js
 {
   string newPath = jni::ToNativeString(env, jNewPath);
   g_framework->RemoveLocalMaps();
-  android::Platform::Instance().SetStoragePath(newPath);
+  android::Platform::Instance().SetWritableDir(newPath);
   g_framework->AddLocalMaps();
 }
 
@@ -993,6 +998,23 @@ Java_com_mapswithme_maps_Framework_nativeGet3dMode(JNIEnv * env, jclass, jobject
   env->SetBooleanField(result, buildingsField, buildings);
 }
 
+JNIEXPORT void JNICALL
+Java_com_mapswithme_maps_Framework_nativeSetAutoZoomEnabled(JNIEnv * env, jclass, jboolean enabled)
+{
+  bool const autoZoomEnabled = static_cast<bool>(enabled);
+  frm()->SaveAutoZoom(autoZoomEnabled);
+  g_framework->PostDrapeTask([autoZoomEnabled]()
+  {
+    frm()->AllowAutoZoom(autoZoomEnabled);
+  });
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_mapswithme_maps_Framework_nativeGetAutoZoomEnabled(JNIEnv * env, jclass)
+{
+  return frm()->LoadAutoZoom();
+}
+
 // static void nativeZoomToPoint(double lat, double lon, int zoom, boolean animate);
 JNIEXPORT void JNICALL
 Java_com_mapswithme_maps_Framework_nativeZoomToPoint(JNIEnv * env, jclass, jdouble lat, jdouble lon, jint zoom, jboolean animate)
@@ -1046,33 +1068,6 @@ JNIEXPORT jstring JNICALL
 Java_com_mapswithme_maps_Framework_nativeGetActiveObjectFormattedCuisine(JNIEnv * env, jclass)
 {
   return jni::ToJavaString(env, g_framework->GetPlacePageInfo().FormatCuisines());
-}
-
-JNIEXPORT jboolean JNICALL
-Java_com_mapswithme_maps_Framework_nativeIsActiveObjectABuilding(JNIEnv * env, jclass)
-{
-  return g_framework->GetPlacePageInfo().IsBuilding();
-}
-
-JNIEXPORT jboolean JNICALL
-Java_com_mapswithme_maps_Framework_nativeCanAddPlaceFromPlacePage(JNIEnv * env, jclass clazz)
-{
-  return g_framework->GetPlacePageInfo().ShouldShowAddPlace();
-}
-
-JNIEXPORT jobject JNICALL
-Java_com_mapswithme_maps_Framework_nativeGetSponsoredHotelInfo(JNIEnv * env, jclass clazz)
-{
-  place_page::Info const & ppInfo = g_framework->GetPlacePageInfo();
-  if (!ppInfo.m_isSponsoredHotel)
-    return nullptr;
-
-  static jclass const infoClass = jni::GetGlobalClassRef(env, "com/mapswithme/maps/widget/placepage/SponsoredHotelInfo");
-  static jmethodID const infoCtor = jni::GetConstructorID(env, infoClass, "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;)V");
-
-  return env->NewObject(infoClass, infoCtor, jni::ToJavaString(env, ppInfo.GetRatingFormatted()),
-                                             jni::ToJavaString(env, ppInfo.GetApproximatePricing()),
-                                             jni::ToJavaString(env, ppInfo.GetWebsite()));
 }
 
 } // extern "C"

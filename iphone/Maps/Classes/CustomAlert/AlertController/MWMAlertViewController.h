@@ -5,6 +5,8 @@
 
 @interface MWMAlertViewController : UIViewController
 
++ (nonnull MWMAlertViewController *)activeAlertController;
+
 @property (weak, nonatomic, readonly) UIViewController * _Null_unspecified ownerViewController;
 
 - (nonnull instancetype)initWithViewController:(nonnull UIViewController *)viewController;
@@ -19,6 +21,7 @@
 - (void)presentFacebookAlert;
 - (void)presentPoint2PointAlertWithOkBlock:(nonnull TMWMVoidBlock)okBlock needToRebuild:(BOOL)needToRebuild;
 - (void)presentRoutingDisclaimerAlert;
+- (void)presentBicycleRoutingDisclaimerAlert;
 - (void)presentDisabledLocationAlert;
 - (void)presentLocationAlert;
 - (void)presentLocationServiceNotSupportedAlert;
@@ -28,7 +31,6 @@
 - (void)presentDeleteMapProhibitedAlert;
 - (void)presentUnsavedEditsAlertWithOkBlock:(nonnull TMWMVoidBlock)okBlock;
 - (void)presentNoWiFiAlertWithOkBlock:(nullable TMWMVoidBlock)okBlock;
-- (void)presentPedestrianToastAlert:(BOOL)isFirstLaunch;
 - (void)presentIncorrectFeauturePositionAlert;
 - (void)presentInternalErrorAlert;
 - (void)presentNotEnoughSpaceAlert;
@@ -43,6 +45,8 @@
 - (void)presentDeleteFeatureAlertWithBlock:(nonnull TMWMVoidBlock)block;
 - (void)presentEditorViralAlert;
 - (void)presentOsmAuthAlert;
+- (void)presentPersonalInfoWarningAlertWithBlock:(nonnull TMWMVoidBlock)block;
+- (void)presentTrackWarningAlertWithCancelBlock:(nonnull TMWMVoidBlock)block;
 - (void)closeAlert;
 
 - (nonnull instancetype)init __attribute__((unavailable("call -initWithViewController: instead!")));

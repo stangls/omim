@@ -213,6 +213,10 @@ namespace
     static const uint32_t roundabout = classif().GetTypeByPath({ "junction", "roundabout" });
     static const uint32_t hwtag = classif().GetTypeByPath({ "hwtag" });
     static const uint32_t psurface = classif().GetTypeByPath({ "psurface" });
+    static const uint32_t wheelchair = classif().GetTypeByPath({ "wheelchair" });
+
+    // Caching type length to exclude generic [wheelchair].
+    uint8_t const typeLength = ftype::GetLevel(type);
 
     if (g == GEOM_LINE || g == GEOM_UNDEFINED)
     {
@@ -226,6 +230,11 @@ namespace
       if (hwtag == type || psurface == type)
         return true;
     }
+
+    // We're okay with the type being already truncated above.
+    ftype::TruncValue(type, 1);
+    if (wheelchair == type && typeLength == 2)
+      return true;
 
     return false;
   }

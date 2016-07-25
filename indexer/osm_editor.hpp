@@ -17,6 +17,7 @@
 #include "std/ctime.hpp"
 #include "std/function.hpp"
 #include "std/map.hpp"
+#include "std/mutex.hpp"
 #include "std/string.hpp"
 #include "std/vector.hpp"
 
@@ -46,11 +47,13 @@ public:
 
   enum class FeatureStatus
   {
-    Untouched,
-    Deleted,
-    Obsolete,  // The feature is obsolete when is marked for deletion via note.
-    Modified,
-    Created
+    Untouched,  // The feature hasn't been saved in the editor.
+    Deleted,    // The feature has been marked as deleted.
+    Obsolete,   // The feature has been marked for deletion via note.
+    Modified,   // The feature has been saved in the editor and differs from the original one.
+    Created     // The feature was created by a user and has been saved in the editor.
+                // Note: If a feature was created by a user but hasn't been saved in the editor yet
+                // its status is Untouched.
   };
 
   static Editor & Instance();
@@ -70,6 +73,8 @@ public:
   {
     LoadMapEdits();
   }
+
+  void OnMapDeregistered(platform::LocalCountryFile const & localFile) override;
 
   using TFeatureIDFunctor = function<void(FeatureID const &)>;
   void ForEachFeatureInMwmRectAndScale(MwmSet::MwmId const & id,
@@ -110,7 +115,9 @@ public:
   {
     NothingWasChanged,
     SavedSuccessfully,
-    NoFreeSpaceError
+    NoFreeSpaceError,
+    NoUnderlyingMapError,
+    SavingError
   };
   /// Editor checks internally if any feature params were actually edited.
   SaveResult SaveEditedFeature(EditableMapObject const & emo);
@@ -162,12 +169,15 @@ public:
   // Use GetFeatureStatus(fid) instead. This function is used when a feature is
   // not yet saved and we have to know if it was modified or created.
   static bool IsCreatedFeature(FeatureID const & fid);
+  // Returns true if the original feature has default name.
+  bool OriginalFeatureHasDefaultName(FeatureID const & fid) const;
 
 private:
   // TODO(AlexZ): Synchronize Save call/make it on a separate thread.
   /// @returns false if fails.
   bool Save(string const & fullFilePath) const;
   void RemoveFeatureFromStorageIfExists(MwmSet::MwmId const & mwmId, uint32_t index);
+  void RemoveFeatureFromStorageIfExists(FeatureID const & fid);
   /// Notify framework that something has changed and should be redisplayed.
   void Invalidate();
 
@@ -215,6 +225,8 @@ private:
 
   /// Notes to be sent to osm.
   shared_ptr<editor::Notes> m_notes;
+  // Mutex which locks OnMapDeregistered method
+  mutex m_mapDeregisteredMutex;
 };  // class Editor
 
 string DebugPrint(Editor::FeatureStatus fs);

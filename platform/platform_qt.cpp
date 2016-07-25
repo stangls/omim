@@ -1,5 +1,5 @@
-
 #include "platform/constants.hpp"
+#include "platform/measurement_utils.hpp"
 #include "platform/platform.hpp"
 #include "platform/settings.hpp"
 
@@ -74,12 +74,12 @@ Platform::EError Platform::MkDir(string const & dirName) const
 
 void Platform::SetupMeasurementSystem() const
 {
-  settings::Units u;
-  if (settings::Get(settings::kMeasurementUnits, u))
+  auto units = measurement_utils::Units::Metric;
+  if (settings::Get(settings::kMeasurementUnits, units))
     return;
   bool const isMetric = QLocale::system().measurementSystem() == QLocale::MetricSystem;
-  u = isMetric ? settings::Metric : settings::Foot;
-  settings::Set(settings::kMeasurementUnits, u);
+  units = isMetric ? measurement_utils::Units::Metric : measurement_utils::Units::Imperial;
+  settings::Set(settings::kMeasurementUnits, units);
 }
 
 #if defined(OMIM_OS_LINUX)
@@ -94,6 +94,18 @@ void Platform::RunOnGuiThread(TFunctor const & fn)
 void Platform::RunAsync(TFunctor const & fn, Priority p)
 {
   async(fn);
+}
+
+void Platform::SendPushWooshTag(string const & tag)
+{
+}
+
+void Platform::SendPushWooshTag(string const & tag, string const & value)
+{
+}
+
+void Platform::SendPushWooshTag(string const & tag, vector<string> const & values)
+{
 }
 #endif  // defined(OMIM_OS_LINUX)
 

@@ -32,11 +32,12 @@ private:
 public:
   explicit MwmContext(MwmSet::MwmHandle handle);
 
+  inline bool IsAlive() const { return m_handle.IsAlive(); }
   inline MwmSet::MwmId const & GetId() const { return m_handle.GetId(); }
   inline string const & GetName() const { return GetInfo()->GetCountryName(); }
   inline shared_ptr<MwmInfo> const & GetInfo() const { return GetId().GetInfo(); }
 
-  template <class TFn>
+  template <typename TFn>
   void ForEachIndex(covering::IntervalsT const & intervals, uint32_t scale, TFn && fn) const
   {
     ForEachIndexImpl(intervals, scale, [&](uint32_t index)
@@ -48,7 +49,16 @@ public:
                      });
   }
 
-  template <class TFn>
+  template <typename TFn>
+  void ForEachIndex(m2::RectD const & rect, TFn && fn) const
+  {
+    uint32_t const scale = m_value.GetHeader().GetLastScale();
+    covering::IntervalsT intervals;
+    CoverRect(rect, scale, intervals);
+    ForEachIndex(intervals, scale, forward<TFn>(fn));
+  }
+
+  template <typename TFn>
   void ForEachFeature(m2::RectD const & rect, TFn && fn) const
   {
     uint32_t const scale = m_value.GetHeader().GetLastScale();
@@ -90,5 +100,4 @@ private:
 
   DISALLOW_COPY_AND_MOVE(MwmContext);
 };
-
 }  // namespace search

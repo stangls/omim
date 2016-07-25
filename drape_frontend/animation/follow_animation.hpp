@@ -9,18 +9,12 @@ namespace df
 class MapFollowAnimation : public Animation
 {
 public:
-  MapFollowAnimation(m2::PointD const & globalPosition,
+  MapFollowAnimation(ScreenBase const & screen,
+                     m2::PointD const & globalUserPosition,
+                     m2::PointD const & endPixelPosition,
                      double startScale, double endScale,
                      double startAngle, double endAngle,
-                     m2::PointD const & startPixelPosition,
-                     m2::PointD const & endPixelPosition,
-                     m2::RectD const & pixelRect);
-
-  static m2::PointD CalculateCenter(ScreenBase const & screen, m2::PointD const & userPos,
-                                    m2::PointD const & pixelPos, double azimuth);
-
-  static m2::PointD CalculateCenter(double scale, m2::RectD const & pixelRect,
-                                    m2::PointD const & userPos, m2::PointD const & pixelPos, double azimuth);
+                     bool isAutoZoom);
 
   Animation::Type GetType() const override { return Animation::MapFollow; }
 
@@ -47,6 +41,8 @@ public:
   bool GetProperty(TObject object, TProperty property, PropertyValue & value) const override;
   bool GetTargetProperty(TObject object, TProperty property, PropertyValue & value) const override;
 
+  bool IsAutoZoom() const { return m_isAutoZoom; }
+
   bool HasScale() const;
   bool HasPixelOffset() const;
 
@@ -54,11 +50,15 @@ private:
   bool GetProperty(TObject object, TProperty property, bool targetValue, PropertyValue & value) const;
   double CalculateDuration() const;
 
+  bool m_isAutoZoom;
   ScaleInterpolator m_scaleInterpolator;
-  PositionInterpolator m_pixelPosInterpolator;
   AngleInterpolator m_angleInterpolator;
+  PositionInterpolator m_offsetInterpolator;
 
   m2::PointD const m_globalPosition;
+  m2::PointD const m_endPixelPosition;
+
+  m2::PointD m_offset;
 
   TObjectProperties m_properties;
   TAnimObjects m_objects;

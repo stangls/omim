@@ -91,7 +91,7 @@ public:
     size_t m_numThreads;
   };
 
-  // Doesn't take ownership of index. Takes ownership of categoriesR.
+  // Doesn't take ownership of index and categories.
   Engine(Index & index, CategoriesHolder const & categories,
          storage::CountryInfoGetter const & infoGetter, unique_ptr<ProcessorFactory> factory,
          Params const & params);
@@ -144,10 +144,6 @@ private:
   };
 
   // *ALL* following methods are executed on the m_threads threads.
-  void SetRankPivot(SearchParams const & params, m2::RectD const & viewport, bool viewportSearch,
-                    Processor & processor);
-
-  void EmitResults(SearchParams const & params, Results const & res);
 
   // This method executes tasks from a common pool (|tasks|) in a FIFO
   // manner.  |broadcast| contains per-thread tasks, but nevertheless
@@ -161,7 +157,6 @@ private:
   void DoSearch(SearchParams const & params, m2::RectD const & viewport,
                 shared_ptr<ProcessorHandle> handle, Processor & processor);
 
-  CategoriesHolder const & m_categories;
   vector<Suggest> m_suggests;
 
   bool m_shutdown;

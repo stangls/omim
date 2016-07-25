@@ -43,7 +43,7 @@ public:
   {
     m2::PointD pivot = TBase::GetPivot(screen, false);
     if (perspective)
-      pivot = screen.PtoP3d(pivot - m_offset, -m_pivotZ / screen.GetScale()) + m_offset;
+      pivot = screen.PtoP3d(pivot - m_offset, -m_pivotZ) + m_offset;
     return pivot;
   }
 
@@ -54,7 +54,7 @@ public:
       if (IsBillboard())
       {
         m2::PointD const pxPivot = screen.GtoP(m_pivot);
-        m2::PointD const pxPivotPerspective = screen.PtoP3d(pxPivot, -m_pivotZ / screen.GetScale());
+        m2::PointD const pxPivotPerspective = screen.PtoP3d(pxPivot, -m_pivotZ);
 
         m2::RectD pxRectPerspective = GetPixelRect(screen, false);
         pxRectPerspective.Offset(-pxPivot);
@@ -122,15 +122,16 @@ private:
 
 } // namespace
 
-TextShape::TextShape(m2::PointF const & basePoint, TextViewParams const & params,
-                     bool hasPOI, size_t textIndex, bool affectedByZoomPriority,
-                     int displacementMode)
+TextShape::TextShape(m2::PointF const & basePoint, TextViewParams const & params, bool hasPOI,
+                     size_t textIndex, bool affectedByZoomPriority, int displacementMode,
+                     uint16_t specialModePriority)
   : m_basePoint(basePoint)
   , m_params(params)
   , m_hasPOI(hasPOI)
   , m_affectedByZoomPriority(affectedByZoomPriority)
   , m_textIndex(textIndex)
   , m_displacementMode(displacementMode)
+  , m_specialModePriority(specialModePriority)
 {}
 
 void TextShape::Draw(ref_ptr<dp::Batcher> batcher, ref_ptr<dp::TextureManager> textures) const
@@ -281,10 +282,14 @@ void TextShape::DrawSubStringOutlined(StraightTextLayout const & layout, dp::Fon
 
 uint64_t TextShape::GetOverlayPriority() const
 {
-  // Set up maximum priority for shapes which created by user in the editor, in case of disabling displacement,
-  // in case of a special displacement mode.
-  if (m_params.m_createdByEditor || m_disableDisplacing || (m_displacementMode & dp::displacement::kDefaultMode) == 0)
+  // Set up maximum priority for shapes which created by user in the editor and in case of disabling
+  // displacement.
+  if (m_params.m_createdByEditor || m_disableDisplacing)
     return dp::kPriorityMaskAll;
+
+  // Special displacement mode.
+  if ((m_displacementMode & dp::displacement::kDefaultMode) == 0)
+    return dp::CalculateSpecialModePriority(m_specialModePriority);
 
   // Set up minimal priority for shapes which belong to areas
   if (m_params.m_hasArea)

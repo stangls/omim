@@ -34,9 +34,9 @@ bool OsmFeatureHasTags(pugi::xml_node const & osmFt)
   return osmFt.child("tag");
 }
 
-vector<string> const static kMainTags = {"amenity", "shop",      "tourism", "historic",
-                                         "craft",   "emergency", "barrier", "highway",
-                                         "office",  "entrance",  "building"};
+vector<string> const static kMainTags = {"amenity",   "shop",    "tourism", "historic", "craft",
+                                         "emergency", "barrier", "highway", "office",   "leisure",
+                                         "waterway",  "natural", "place",   "entrance", "building"};
 
 string GetTypeForFeature(XMLFeature const & node)
 {
@@ -49,6 +49,9 @@ string GetTypeForFeature(XMLFeature const & node)
         return key;
       else if (key == "shop" || key == "office" || key == "building" || key == "entrance")
         return value + " " + key;  // "convenience shop"
+      else if (!value.empty() && value.back() == 's')
+        // Remove 's' from the tail: "toilets" -> "toilet".
+        return value.substr(0, value.size() - 1);
       else
         return value;
     }
@@ -98,8 +101,7 @@ namespace osm
 {
 ChangesetWrapper::ChangesetWrapper(TKeySecret const & keySecret,
                                    ServerApi06::TKeyValueTags const & comments) noexcept
-    : m_changesetComments(comments),
-      m_api(OsmOAuth::ServerAuth(keySecret))
+  : m_changesetComments(comments), m_api(OsmOAuth::ServerAuth(keySecret))
 {
 }
 
@@ -120,7 +122,8 @@ ChangesetWrapper::~ChangesetWrapper()
   }
 }
 
-void ChangesetWrapper::LoadXmlFromOSM(ms::LatLon const & ll, pugi::xml_document & doc, double radiusInMeters)
+void ChangesetWrapper::LoadXmlFromOSM(ms::LatLon const & ll, pugi::xml_document & doc,
+                                      double radiusInMeters)
 {
   auto const response = m_api.GetXmlFeaturesAtLatLon(ll.lat, ll.lon, radiusInMeters);
   if (response.first != OsmOAuth::HTTP::OK)
@@ -132,7 +135,8 @@ void ChangesetWrapper::LoadXmlFromOSM(ms::LatLon const & ll, pugi::xml_document 
         ("Can't parse OSM server response for GetXmlFeaturesAtLatLon request", response.second));
 }
 
-void ChangesetWrapper::LoadXmlFromOSM(ms::LatLon const & min, ms::LatLon const & max, pugi::xml_document & doc)
+void ChangesetWrapper::LoadXmlFromOSM(ms::LatLon const & min, ms::LatLon const & max,
+                                      pugi::xml_document & doc)
 {
   auto const response = m_api.GetXmlFeaturesInRect(min.lat, min.lon, max.lat, max.lon);
   if (response.first != OsmOAuth::HTTP::OK)
@@ -301,10 +305,22 @@ string ChangesetWrapper::TypeCountToString(TTypeCount const & typeCount)
 
     // Format a count: "a shop" for single shop, "4 shops" for multiple.
     if (currentPair.second == 1)
-      ss << "a ";
+    {
+      switch (currentPair.first.front())
+      {
+      case 'a':
+      case 'e':
+      case 'i':
+      case 'y':
+      case 'o': ss << "an"; break;
+      default: ss << "a";
+      }
+    }
     else
-      ss << currentPair.second << ' ';
-    ss << currentPair.first;
+    {
+      ss << currentPair.second;
+    }
+    ss << ' ' << currentPair.first;
     if (currentPair.second > 1)
       ss << 's';
   }

@@ -3,6 +3,8 @@
 #include "com/mapswithme/core/jni_helper.hpp"
 #include "com/mapswithme/maps/Framework.hpp"
 
+#include "coding/multilang_utf8_string.hpp"
+
 #include "base/assert.hpp"
 #include "base/logging.hpp"
 #include "base/string_utils.hpp"
@@ -31,6 +33,9 @@ jclass g_localStreetClazz;
 jmethodID g_localStreetCtor;
 jfieldID g_localStreetFieldDef;
 jfieldID g_localStreetFieldLoc;
+jclass g_namesDataSourceClassID;
+jmethodID g_namesDataSourceConstructorID;
+
 
 jobject ToJavaFeatureCategory(JNIEnv * env, osm::NewFeatureCategories::TName const & category)
 {
@@ -83,6 +88,9 @@ Java_com_mapswithme_maps_editor_Editor_nativeInit(JNIEnv * env, jclass)
   g_localStreetCtor = jni::GetConstructorID(env, g_localStreetClazz, "(Ljava/lang/String;Ljava/lang/String;)V");
   g_localStreetFieldDef = env->GetFieldID(g_localStreetClazz, "defaultName", "Ljava/lang/String;");
   g_localStreetFieldLoc = env->GetFieldID(g_localStreetClazz, "localizedName", "Ljava/lang/String;");
+
+  g_namesDataSourceClassID = jni::GetGlobalClassRef(env, "com/mapswithme/maps/editor/data/NamesDataSource");
+  g_namesDataSourceConstructorID = jni::GetConstructorID(env, g_namesDataSourceClassID, "([Lcom/mapswithme/maps/editor/data/LocalizedName;I)V");
 }
 
 JNIEXPORT jstring JNICALL
@@ -244,9 +252,21 @@ Java_com_mapswithme_maps_editor_Editor_nativeSaveEditedFeature(JNIEnv *, jclass)
 }
 
 JNIEXPORT jboolean JNICALL
-Java_com_mapswithme_maps_editor_Editor_nativeIsFeatureEditable(JNIEnv *, jclass)
+Java_com_mapswithme_maps_editor_Editor_nativeShouldShowEditPlace(JNIEnv *, jclass)
 {
-  return g_framework->GetPlacePageInfo().IsEditable();
+  return g_framework->GetPlacePageInfo().ShouldShowEditPlace();
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_mapswithme_maps_editor_Editor_nativeShouldShowAddPlace(JNIEnv *, jclass)
+{
+  return g_framework->GetPlacePageInfo().ShouldShowAddPlace();
+}
+
+JNIEXPORT jboolean JNICALL
+Java_com_mapswithme_maps_editor_Editor_nativeShouldShowAddBusiness(JNIEnv *, jclass)
+{
+  return g_framework->GetPlacePageInfo().ShouldShowAddBusiness();
 }
 
 JNIEXPORT jintArray JNICALL
@@ -281,26 +301,19 @@ Java_com_mapswithme_maps_editor_Editor_nativeIsBuilding(JNIEnv * env, jclass cla
   return g_editableMapObject.IsBuilding();
 }
 
-JNIEXPORT jstring JNICALL
-Java_com_mapswithme_maps_editor_Editor_nativeGetDefaultName(JNIEnv * env, jclass)
+JNIEXPORT jobject JNICALL
+Java_com_mapswithme_maps_editor_Editor_nativeGetNamesDataSource(JNIEnv * env, jclass)
 {
-  return jni::ToJavaString(env, g_editableMapObject.GetDefaultName());
+  auto const namesDataSource = g_editableMapObject.GetNamesDataSource();
+
+  jobjectArray names = jni::ToJavaArray(env, g_localNameClazz, namesDataSource.names, ToJavaName);
+  jint mandatoryNamesCount = namesDataSource.mandatoryNamesCount;
+
+  return env->NewObject(g_namesDataSourceClassID, g_namesDataSourceConstructorID, names, mandatoryNamesCount);
 }
 
 JNIEXPORT void JNICALL
-Java_com_mapswithme_maps_editor_Editor_nativeSetDefaultName(JNIEnv * env, jclass, jstring name)
-{
-  g_editableMapObject.SetName(jni::ToNativeString(env, name), StringUtf8Multilang::kDefaultCode);
-}
-
-JNIEXPORT jobjectArray JNICALL
-Java_com_mapswithme_maps_editor_Editor_nativeGetLocalizedNames(JNIEnv * env, jclass)
-{
-  return jni::ToJavaArray(env, g_localNameClazz, g_editableMapObject.GetLocalizedNames(), ToJavaName);
-}
-
-JNIEXPORT void JNICALL
-Java_com_mapswithme_maps_editor_Editor_nativeSetLocalizedNames(JNIEnv * env, jclass, jobjectArray names)
+Java_com_mapswithme_maps_editor_Editor_nativeSetNames(JNIEnv * env, jclass, jobjectArray names)
 {
   int const length = env->GetArrayLength(names);
   for (int i = 0; i < length; i++)
@@ -332,13 +345,18 @@ Java_com_mapswithme_maps_editor_Editor_nativeGetNearbyStreets(JNIEnv * env, jcla
 JNIEXPORT jobjectArray JNICALL
 Java_com_mapswithme_maps_editor_Editor_nativeGetSupportedLanguages(JNIEnv * env, jclass clazz)
 {
-  // TODO (yunikkk) implement
+  using TLang = StringUtf8Multilang::Lang;
   //public Language(@NonNull String code, @NonNull String name)
-//  static jclass const langClass = jni::GetGlobalClassRef(env, "com/mapswithme/maps/editor/data/Language");
-//  static jmethodID const langCtor = jni::GetConstructorID(env, langClass, "(Ljava/lang/String;Ljava/lang/String;)V");
+  static jclass const langClass = jni::GetGlobalClassRef(env, "com/mapswithme/maps/editor/data/Language");
+  static jmethodID const langCtor = jni::GetConstructorID(env, langClass, "(Ljava/lang/String;Ljava/lang/String;)V");
 
-//  return jni::ToJavaArray(env, langClass, g_editableMapObject.GetBuildingLevels(), );
-  return nullptr;
+  return jni::ToJavaArray(env, langClass, StringUtf8Multilang::GetSupportedLanguages(),
+                          [](JNIEnv * env, TLang const & lang)
+                          {
+                            jni::TScopedLocalRef const code(env, jni::ToJavaString(env, lang.m_code));
+                            jni::TScopedLocalRef const name(env, jni::ToJavaString(env, lang.m_name));
+                            return env->NewObject(langClass, langCtor, code.get(), name.get());
+                          });
 }
 
 JNIEXPORT jstring JNICALL
@@ -517,6 +535,41 @@ Java_com_mapswithme_maps_editor_Editor_nativeIsLevelValid(JNIEnv * env, jclass c
   return osm::EditableMapObject::ValidateBuildingLevels(jni::ToNativeString(env, level));
 }
 
+// static boolean nativeIsFlatValid(String flats)
+JNIEXPORT jboolean JNICALL
+Java_com_mapswithme_maps_editor_Editor_nativeIsFlatValid(JNIEnv * env, jclass clazz, jstring flats)
+{
+  return osm::EditableMapObject::ValidateFlats(jni::ToNativeString(env, flats));
+}
+
+// static boolean nativeIsPostCodeValid(String zipCode)
+JNIEXPORT jboolean JNICALL
+Java_com_mapswithme_maps_editor_Editor_nativeIsZipcodeValid(JNIEnv * env, jclass clazz, jstring zipCode)
+{
+  return osm::EditableMapObject::ValidatePostCode(jni::ToNativeString(env, zipCode));
+}
+
+// static boolean nativeIsPhoneValid(String phone)
+JNIEXPORT jboolean JNICALL
+Java_com_mapswithme_maps_editor_Editor_nativeIsPhoneValid(JNIEnv * env, jclass clazz, jstring phone)
+{
+  return osm::EditableMapObject::ValidatePhone(jni::ToNativeString(env, phone));
+}
+
+// static boolean nativeIsWebsiteValid(String website)
+JNIEXPORT jboolean JNICALL
+Java_com_mapswithme_maps_editor_Editor_nativeIsWebsiteValid(JNIEnv * env, jclass clazz, jstring website)
+{
+  return osm::EditableMapObject::ValidateWebsite(jni::ToNativeString(env, website));
+}
+
+// static boolean nativeIsEmailValid(String email)
+JNIEXPORT jboolean JNICALL
+Java_com_mapswithme_maps_editor_Editor_nativeIsEmailValid(JNIEnv * env, jclass clazz, jstring email)
+{
+  return osm::EditableMapObject::ValidateEmail(jni::ToNativeString(env, email));
+}
+
 JNIEXPORT jstring JNICALL
 Java_com_mapswithme_maps_editor_Editor_nativeGetCategory(JNIEnv * env, jclass clazz)
 {
@@ -535,5 +588,13 @@ JNIEXPORT jboolean JNICALL
 Java_com_mapswithme_maps_editor_Editor_nativeIsMapObjectUploaded(JNIEnv * env, jclass clazz)
 {
   return osm::Editor::Instance().IsFeatureUploaded(g_editableMapObject.GetID().m_mwmId, g_editableMapObject.GetID().m_index);
+}
+
+// static nativeMakeLocalizedName(String langCode, String name);
+JNIEXPORT jobject JNICALL
+Java_com_mapswithme_maps_editor_Editor_nativeMakeLocalizedName(JNIEnv * env, jclass clazz, jstring code, jstring name)
+{
+  osm::LocalizedName localizedName(jni::ToNativeString(env, code), jni::ToNativeString(env, name));
+  return ToJavaName(env, localizedName);
 }
 } // extern "C"

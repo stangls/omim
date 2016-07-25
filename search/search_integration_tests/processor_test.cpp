@@ -491,15 +491,14 @@ UNIT_CLASS_TEST(ProcessorTest, TestPostcodes)
 
   // Tests that postcode is added to the search index.
   {
-    auto handle = m_engine.GetMwmHandleById(countryId);
-    TEST(handle.IsAlive(), ());
+    MwmContext context(m_engine.GetMwmHandleById(countryId));
+    TEST(context.IsAlive(), ());
     my::Cancellable cancellable;
 
     QueryParams params;
     params.m_tokens.emplace_back();
     params.m_tokens.back().push_back(strings::MakeUniString("141702"));
-    auto * value = handle.GetValue<MwmValue>();
-    auto features = RetrievePostcodeFeatures(countryId, *value, cancellable,
+    auto features = RetrievePostcodeFeatures(context, cancellable,
                                              TokenSlice(params, 0, params.m_tokens.size()));
     TEST_EQUAL(1, features->PopCount(), ());
 
@@ -509,7 +508,7 @@ UNIT_CLASS_TEST(ProcessorTest, TestPostcodes)
 
     Index::FeaturesLoaderGuard loader(m_engine, countryId);
     FeatureType ft;
-    loader.GetFeatureByIndex(index, ft);
+    TEST(loader.GetFeatureByIndex(index, ft), ());
 
     auto rule = ExactMatch(countryId, building31);
     TEST(rule->Matches(ft), ());
@@ -567,7 +566,7 @@ UNIT_CLASS_TEST(ProcessorTest, TestCategories)
   TestPOI nonameAtm(m2::PointD(0, 0), "", "en");
   nonameAtm.SetTypes({{"amenity", "atm"}});
 
-  TestPOI namedAtm(m2::PointD(0.0001, 0.0001), "ATM", "en");
+  TestPOI namedAtm(m2::PointD(0.3, 0.3), "ATM", "en");
   namedAtm.SetTypes({{"amenity", "atm"}});
 
   TestPOI busStop(m2::PointD(0.00005, 0.0005), "ATM Bus Stop", "en");
@@ -606,7 +605,7 @@ UNIT_CLASS_TEST(ProcessorTest, TestCategories)
     {
       Index::FeaturesLoaderGuard loader(m_engine, wonderlandId);
       FeatureType ft;
-      loader.GetFeatureByIndex(result.GetFeatureID().m_index, ft);
+      TEST(loader.GetFeatureByIndex(result.GetFeatureID().m_index, ft), ());
 
       auto const & info = result.GetRankingInfo();
 

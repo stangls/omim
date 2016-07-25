@@ -12,7 +12,7 @@
 #include "search/ranking_utils.hpp"
 #include "search/region.hpp"
 #include "search/search_index_values.hpp"
-#include "search/string_intersection.hpp"
+#include "search/utils.hpp"
 
 #include "storage/country_info_getter.hpp"
 #include "storage/index.hpp"
@@ -41,6 +41,7 @@
 #include "coding/multilang_utf8_string.hpp"
 #include "coding/reader_wrapper.hpp"
 
+#include "base/assert.hpp"
 #include "base/logging.hpp"
 #include "base/macros.hpp"
 #include "base/scope_guard.hpp"
@@ -53,12 +54,7 @@
 #include "std/iterator.hpp"
 #include "std/limits.hpp"
 
-#define LONG_OP(op)    \
-  {                    \
-    if (IsCancelled()) \
-      return;          \
-    op;                \
-  }
+#include "3party/Alohalytics/src/alohalytics.h"
 
 namespace search
 {
@@ -84,24 +80,6 @@ pair<int, int> GetLangIndex(int id)
   return make_pair(g_arrLang1[id], g_arrLang2[id]);
 }
 
-ftypes::Type GetLocalityIndex(feature::TypesHolder const & types)
-{
-  using namespace ftypes;
-
-  // Inner logic of SearchAddress expects COUNTRY, STATE and CITY only.
-  Type const type = IsLocalityChecker::Instance().GetType(types);
-  switch (type)
-  {
-  case NONE:
-  case COUNTRY:
-  case STATE:
-  case CITY: return type;
-  case TOWN: return CITY;
-  case VILLAGE: return NONE;
-  case LOCALITY_COUNT: return type;
-  }
-}
-
 m2::RectD NormalizeViewport(m2::RectD viewport)
 {
   m2::RectD minViewport = MercatorBounds::RectByCenterXYAndSizeInMeters(
@@ -120,41 +98,55 @@ m2::RectD GetRectAroundPosition(m2::PointD const & position)
   return MercatorBounds::RectByCenterXYAndSizeInMeters(position, kMaxPositionRadiusM);
 }
 
-inline bool IsHashtagged(strings::UniString const & s) { return !s.empty() && s[0] == '#'; }
-
-inline strings::UniString RemoveHashtag(strings::UniString const & s)
+void SendStatistics(SearchParams const & params, m2::RectD const & viewport, Results const & res)
 {
-  if (IsHashtagged(s))
-    return strings::UniString(s.begin() + 1, s.end());
-  return s;
+  size_t const kMaxNumResultsToSend = 10;
+
+  size_t const numResultsToSend = min(kMaxNumResultsToSend, res.GetCount());
+  string resultString = strings::to_string(numResultsToSend);
+  for (size_t i = 0; i < numResultsToSend; ++i)
+    resultString.append("\t" + res.GetResult(i).ToStringForStats());
+
+  string posX, posY;
+  if (params.IsValidPosition())
+  {
+    posX = strings::to_string(MercatorBounds::LonToX(params.m_lon));
+    posY = strings::to_string(MercatorBounds::LatToY(params.m_lat));
+  }
+
+  alohalytics::TStringMap const stats = {
+      {"posX", posX},
+      {"posY", posY},
+      {"viewportMinX", strings::to_string(viewport.minX())},
+      {"viewportMinY", strings::to_string(viewport.minY())},
+      {"viewportMaxX", strings::to_string(viewport.maxX())},
+      {"viewportMaxY", strings::to_string(viewport.maxY())},
+      {"query", params.m_query},
+      {"locale", params.m_inputLocale},
+      {"results", resultString},
+  };
+  alohalytics::LogEvent("searchEmitResultsAndCoords", stats);
 }
 }  // namespace
 
 // static
-size_t const Processor::kPreResultsCount;
+size_t const Processor::kPreResultsCount = 200;
 
 // static
 double const Processor::kMinViewportRadiusM = 5.0 * 1000;
 double const Processor::kMaxViewportRadiusM = 50.0 * 1000;
 
-Processor::Processor(Index & index, CategoriesHolder const & categories,
+Processor::Processor(Index const & index, CategoriesHolder const & categories,
                      vector<Suggest> const & suggests,
                      storage::CountryInfoGetter const & infoGetter)
-  : m_index(index)
-  , m_categories(categories)
-  , m_suggests(suggests)
+  : m_categories(categories)
   , m_infoGetter(infoGetter)
-#ifdef FIND_LOCALITY_TEST
-  , m_locality(&index)
-#endif
   , m_position(0, 0)
   , m_mode(Mode::Everywhere)
-  , m_worldSearch(true)
   , m_suggestsEnabled(true)
-  , m_preRanker(kPreResultsCount)
-  , m_ranker(m_preRanker, *this)
-  , m_geocoder(index, infoGetter, static_cast<my::Cancellable const &>(*this))
-  , m_reverseGeocoder(index)
+  , m_preRanker(index, m_ranker, kPreResultsCount)
+  , m_ranker(index, infoGetter, categories, suggests, static_cast<my::Cancellable const &>(*this))
+  , m_geocoder(index, infoGetter, m_preRanker, static_cast<my::Cancellable const &>(*this))
 {
   // Initialize keywords scorer.
   // Note! This order should match the indexes arrays above.
@@ -164,7 +156,7 @@ Processor::Processor(Index & index, CategoriesHolder const & categories,
       {StringUtf8Multilang::kInternationalCode, StringUtf8Multilang::kEnglishCode},
       {StringUtf8Multilang::kDefaultCode}};
 
-  m_keywordsScorer.SetLanguages(langPriorities);
+  m_ranker.SetLanguages(langPriorities);
 
   SetPreferredLocale("en");
 }
@@ -173,8 +165,7 @@ void Processor::Init(bool viewportSearch)
 {
   m_tokens.clear();
   m_prefix.clear();
-  m_preRanker.Clear();
-  m_ranker.Init(viewportSearch);
+  m_preRanker.SetViewportSearch(viewportSearch);
 }
 
 void Processor::SetViewport(m2::RectD const & viewport, bool forceUpdate)
@@ -186,7 +177,7 @@ void Processor::SetPreferredLocale(string const & locale)
 {
   ASSERT(!locale.empty(), ());
 
-  LOG(LINFO, ("New preffered locale:", locale));
+  LOG(LINFO, ("New preferred locale:", locale));
 
   int8_t const code = StringUtf8Multilang::GetLangIndex(languages::Normalize(locale));
   SetLanguage(LANG_CURRENT, code);
@@ -196,10 +187,7 @@ void Processor::SetPreferredLocale(string const & locale)
   // Default initialization.
   // If you want to reset input language, call SetInputLocale before search.
   SetInputLocale(locale);
-
-#ifdef FIND_LOCALITY_TEST
-  m_locality.SetLanguage(code);
-#endif
+  m_ranker.SetLocalityFinderLanguage(code);
 }
 
 void Processor::SetInputLocale(string const & locale)
@@ -269,15 +257,15 @@ void Processor::SetQuery(string const & query)
     m_tokens.resize(maxTokensCount);
 
   // Assign tokens and prefix to scorer.
-  m_keywordsScorer.SetKeywords(m_tokens.data(), m_tokens.size(), m_prefix);
+  m_ranker.SetKeywords(m_tokens.data(), m_tokens.size(), m_prefix);
 
-  // get preffered types to show in results
-  m_prefferedTypes.clear();
+  // get preferred types to show in results
+  m_preferredTypes.clear();
   ForEachCategoryType(QuerySliceOnRawStrings<decltype(m_tokens)>(m_tokens, m_prefix),
-                       [&](size_t, uint32_t t)
-                       {
-                         m_prefferedTypes.insert(t);
-                       });
+                      [&](size_t, uint32_t t)
+                      {
+                        m_preferredTypes.insert(t);
+                      });
 }
 
 void Processor::SetRankPivot(m2::PointD const & pivot)
@@ -294,20 +282,21 @@ void Processor::SetRankPivot(m2::PointD const & pivot)
 
 void Processor::SetLanguage(int id, int8_t lang)
 {
-  m_keywordsScorer.SetLanguage(GetLangIndex(id), lang);
+  m_ranker.SetLanguage(GetLangIndex(id), lang);
 }
 
 int8_t Processor::GetLanguage(int id) const
 {
-  return m_keywordsScorer.GetLanguage(GetLangIndex(id));
+  return m_ranker.GetLanguage(GetLangIndex(id));
 }
-
 m2::PointD Processor::GetPivotPoint() const
 {
+  bool const viewportSearch = m_mode == Mode::Viewport;
+
   m2::RectD const & viewport = m_viewport[CURRENT_V];
-  if (viewport.IsPointInside(GetPosition()))
-    return GetPosition();
-  return viewport.Center();
+  if (viewportSearch || !viewport.IsPointInside(GetPosition()))
+    return viewport.Center();
+  return GetPosition();
 }
 
 m2::RectD Processor::GetPivotRect() const
@@ -360,82 +349,106 @@ void Processor::SetViewportByIndex(m2::RectD const & viewport, size_t idx, bool 
 
 void Processor::ClearCache(size_t ind) { m_viewport[ind].MakeEmpty(); }
 
-int Processor::GetCategoryLocales(int8_t(&arr)[3]) const
+TLocales Processor::GetCategoryLocales() const
 {
   static int8_t const enLocaleCode = CategoriesHolder::MapLocaleToInteger("en");
+  TLocales result;
 
   // Prepare array of processing locales. English locale is always present for category matching.
-  int count = 0;
   if (m_currentLocaleCode != -1)
-    arr[count++] = m_currentLocaleCode;
+    result.push_back(m_currentLocaleCode);
   if (m_inputLocaleCode != -1 && m_inputLocaleCode != m_currentLocaleCode)
-    arr[count++] = m_inputLocaleCode;
+    result.push_back(m_inputLocaleCode);
   if (enLocaleCode != m_currentLocaleCode && enLocaleCode != m_inputLocaleCode)
-    arr[count++] = enLocaleCode;
+    result.push_back(enLocaleCode);
 
-  return count;
+  return result;
 }
 
-void Processor::ForEachCategoryType(StringSliceBase const & slice,
-                                     function<void(size_t, uint32_t)> const & fn) const
+template <typename ToDo>
+void Processor::ForEachCategoryType(StringSliceBase const & slice, ToDo && todo) const
 {
-  int8_t arrLocales[3];
-  int const localesCount = GetCategoryLocales(arrLocales);
+  ::search::ForEachCategoryType(slice, GetCategoryLocales(), m_categories, forward<ToDo>(todo));
+}
 
-  for (size_t i = 0; i < slice.Size(); ++i)
+void Processor::Search(SearchParams const & params, m2::RectD const & viewport)
+{
+  bool const viewportSearch = m_mode == Mode::Viewport;
+
+  bool rankPivotIsSet = false;
+  if (!viewportSearch && params.IsValidPosition())
   {
-    auto token = RemoveHashtag(slice.Get(i));
-    for (int j = 0; j < localesCount; ++j)
-      m_categories.ForEachTypeByName(arrLocales[j], token, bind<void>(fn, i, _1));
-    ProcessEmojiIfNeeded(token, i, fn);
+    m2::PointD const pos = MercatorBounds::FromLatLon(params.m_lat, params.m_lon);
+    if (m2::Inflate(viewport, viewport.SizeX() / 4.0, viewport.SizeY() / 4.0).IsPointInside(pos))
+    {
+      SetRankPivot(pos);
+      rankPivotIsSet = true;
+    }
   }
-}
+  if (!rankPivotIsSet)
+    SetRankPivot(viewport.Center());
 
-// template <class ToDo>
-void Processor::ProcessEmojiIfNeeded(strings::UniString const & token, size_t index,
-                                     function<void(size_t, uint32_t)> const & fn) const
-{
-  // Special process of 2 codepoints emoji (e.g. black guy on a bike).
-  // Only emoji synonyms can have one codepoint.
-  if (token.size() > 1)
+  if (params.IsValidPosition())
+    SetPosition(MercatorBounds::FromLatLon(params.m_lat, params.m_lon));
+  else
+    SetPosition(viewport.Center());
+
+  SetMode(params.GetMode());
+  SetSuggestsEnabled(params.GetSuggestsEnabled());
+  SetInputLocale(params.m_inputLocale);
+
+  ASSERT(!params.m_query.empty(), ());
+  SetQuery(params.m_query);
+  SetViewport(viewport, true /* forceUpdate */);
+  SetOnResults(params.m_onResults);
+
+  Geocoder::Params geocoderParams;
+  InitGeocoder(geocoderParams);
+
+  InitPreRanker(geocoderParams);
+  InitRanker(geocoderParams);
+
+  try
   {
-    static int8_t const enLocaleCode = CategoriesHolder::MapLocaleToInteger("en");
-
-    m_categories.ForEachTypeByName(enLocaleCode, strings::UniString(1, token[0]),
-                                   bind<void>(fn, index, _1));
+    SearchCoordinates(m_ranker.GetResults());
   }
-}
+  catch (CancelException const &)
+  {
+    LOG(LDEBUG, ("Search has been cancelled."));
+  }
 
-void Processor::Search(Results & results, size_t limit)
-{
-  if (m_tokens.empty())
-    SuggestStrings(results);
+  try
+  {
+    if (params.m_onStarted)
+      params.m_onStarted();
 
-  Geocoder::Params params;
+    if (viewportSearch)
+    {
+      m_geocoder.GoInViewport();
+    }
+    else
+    {
+      if (m_tokens.empty())
+        m_ranker.SuggestStrings(m_ranker.GetResults());
 
-  InitParams(params);
-  params.m_mode = m_mode;
-  params.m_pivot = GetPivotRect();
-  params.m_accuratePivotCenter = GetPivotPoint();
-  m_geocoder.SetParams(params);
+      m_geocoder.GoEverywhere();
+    }
 
-  m_geocoder.GoEverywhere(m_preRanker);
+    m_ranker.FlushResults();
 
-  m_ranker.FlushResults(params, results, limit);
-}
+    if (!IsCancelled())
+      params.m_onResults(m_ranker.GetResults());
+  }
+  catch (CancelException const &)
+  {
+    LOG(LDEBUG, ("Search has been cancelled."));
+  }
 
-void Processor::SearchViewportPoints(Results & results)
-{
-  Geocoder::Params params;
+  if (!viewportSearch && !IsCancelled())
+    SendStatistics(params, viewport, m_ranker.GetResults());
 
-  InitParams(params);
-  params.m_pivot = m_viewport[CURRENT_V];
-  params.m_accuratePivotCenter = params.m_pivot.Center();
-  m_geocoder.SetParams(params);
-
-  m_geocoder.GoInViewport(m_preRanker);
-
-  m_ranker.FlushViewportResults(params, results);
+  // Emit finish marker to client.
+  params.m_onResults(Results::GetEndMarker(IsCancelled()));
 }
 
 void Processor::SearchCoordinates(Results & res) const
@@ -444,210 +457,10 @@ void Processor::SearchCoordinates(Results & res) const
   if (MatchLatLonDegree(m_query, lat, lon))
   {
     ASSERT_EQUAL(res.GetCount(), 0, ());
-    res.AddResultNoChecks(MakeResult(PreResult2(lat, lon)));
+    // Note that ranker's locale is not set up here but
+    // it is never used when making lat-lon results anyway.
+    res.AddResultNoChecks(m_ranker.MakeResult(PreResult2(lat, lon)));
   }
-}
-
-void Processor::RemoveStringPrefix(string const & str, string & res) const
-{
-  search::Delimiters delims;
-  // Find start iterator of prefix in input query.
-  using TIter = utf8::unchecked::iterator<string::const_iterator>;
-  TIter iter(str.end());
-  while (iter.base() != str.begin())
-  {
-    TIter prev = iter;
-    --prev;
-
-    if (delims(*prev))
-      break;
-    else
-      iter = prev;
-  }
-
-  // Assign result with input string without prefix.
-  res.assign(str.begin(), iter.base());
-}
-
-void Processor::GetSuggestion(string const & name, string & suggest) const
-{
-  // Splits result's name.
-  search::Delimiters delims;
-  vector<strings::UniString> tokens;
-  SplitUniString(NormalizeAndSimplifyString(name), MakeBackInsertFunctor(tokens), delims);
-
-  // Finds tokens that are already present in the input query.
-  vector<bool> tokensMatched(tokens.size());
-  bool prefixMatched = false;
-  bool fullPrefixMatched = false;
-
-  for (size_t i = 0; i < tokens.size(); ++i)
-  {
-    auto const & token = tokens[i];
-
-    if (find(m_tokens.begin(), m_tokens.end(), token) != m_tokens.end())
-    {
-      tokensMatched[i] = true;
-    }
-    else if (StartsWith(token, m_prefix))
-    {
-      prefixMatched = true;
-      fullPrefixMatched = token.size() == m_prefix.size();
-    }
-  }
-
-  // When |name| does not match prefix or when prefix equals to some
-  // token of the |name| (for example, when user entered "Moscow"
-  // without space at the end), we should not suggest anything.
-  if (!prefixMatched || fullPrefixMatched)
-    return;
-
-  RemoveStringPrefix(m_query, suggest);
-
-  // Appends unmatched result's tokens to the suggestion.
-  for (size_t i = 0; i < tokens.size(); ++i)
-  {
-    if (tokensMatched[i])
-      continue;
-    suggest.append(strings::ToUtf8(tokens[i]));
-    suggest.push_back(' ');
-  }
-}
-
-void Processor::ProcessSuggestions(vector<IndexedValue> & vec, Results & res) const
-{
-  if (m_prefix.empty() || !m_suggestsEnabled)
-    return;
-
-  int added = 0;
-  for (auto i = vec.begin(); i != vec.end();)
-  {
-    PreResult2 const & r = **i;
-
-    ftypes::Type const type = GetLocalityIndex(r.GetTypes());
-    if ((type == ftypes::COUNTRY || type == ftypes::CITY) || r.IsStreet())
-    {
-      string suggest;
-      GetSuggestion(r.GetName(), suggest);
-      if (!suggest.empty() && added < MAX_SUGGESTS_COUNT)
-      {
-        if (res.AddResult((Result(MakeResult(r), suggest))))
-          ++added;
-
-        i = vec.erase(i);
-        continue;
-      }
-    }
-    ++i;
-  }
-}
-
-class BestNameFinder
-{
-  KeywordLangMatcher::ScoreT m_score;
-  string & m_name;
-  KeywordLangMatcher const & m_keywordsScorer;
-
-public:
-  BestNameFinder(string & name, KeywordLangMatcher const & keywordsScorer)
-    : m_score(), m_name(name), m_keywordsScorer(keywordsScorer)
-  {
-  }
-
-  bool operator()(int8_t lang, string const & name)
-  {
-    KeywordLangMatcher::ScoreT const score = m_keywordsScorer.Score(lang, name);
-    if (m_score < score)
-    {
-      m_score = score;
-      m_name = name;
-    }
-    return true;
-  }
-};
-
-void Processor::GetBestMatchName(FeatureType const & f, string & name) const
-{
-  BestNameFinder finder(name, m_keywordsScorer);
-  UNUSED_VALUE(f.ForEachName(finder));
-}
-
-/// Makes continuous range for tokens and prefix.
-template <class TIter, class ValueT>
-class CombinedIter
-{
-  TIter m_i, m_end;
-  ValueT const * m_val;
-
-public:
-  CombinedIter(TIter i, TIter end, ValueT const * val) : m_i(i), m_end(end), m_val(val) {}
-
-  ValueT const & operator*() const
-  {
-    ASSERT(m_val != 0 || m_i != m_end, ("dereferencing of empty iterator"));
-    if (m_i != m_end)
-      return *m_i;
-
-    return *m_val;
-  }
-
-  CombinedIter & operator++()
-  {
-    if (m_i != m_end)
-      ++m_i;
-    else
-      m_val = 0;
-    return *this;
-  }
-
-  bool operator==(CombinedIter const & other) const
-  {
-    return m_val == other.m_val && m_i == other.m_i;
-  }
-
-  bool operator!=(CombinedIter const & other) const
-  {
-    return m_val != other.m_val || m_i != other.m_i;
-  }
-};
-
-class AssignHighlightRange
-{
-  Result & m_res;
-
-public:
-  AssignHighlightRange(Result & res) : m_res(res) {}
-
-  void operator()(pair<uint16_t, uint16_t> const & range) { m_res.AddHighlightRange(range); }
-};
-
-Result Processor::MakeResult(PreResult2 const & r) const
-{
-  Result res = r.GenerateFinalResult(m_infoGetter, &m_categories, &m_prefferedTypes,
-                                     m_currentLocaleCode, &m_reverseGeocoder);
-  MakeResultHighlight(res);
-#ifdef FIND_LOCALITY_TEST
-  if (ftypes::IsLocalityChecker::Instance().GetType(r.GetTypes()) == ftypes::NONE)
-  {
-    string city;
-    m_locality.GetLocality(res.GetFeatureCenter(), city);
-    res.AppendCity(city);
-  }
-#endif
-
-  res.SetRankingInfo(r.GetRankingInfo());
-  return res;
-}
-
-void Processor::MakeResultHighlight(Result & res) const
-{
-  using TIter = buffer_vector<strings::UniString, 32>::const_iterator;
-  using TCombinedIter = CombinedIter<TIter, strings::UniString>;
-
-  TCombinedIter beg(m_tokens.begin(), m_tokens.end(), m_prefix.empty() ? 0 : &m_prefix);
-  TCombinedIter end(m_tokens.end(), m_tokens.end(), 0);
-
-  SearchStringTokensIntersectionRanges(res.GetString(), beg, end, AssignHighlightRange(res));
 }
 
 namespace
@@ -852,46 +665,66 @@ void Processor::InitParams(QueryParams & params)
     params.m_langs.insert(GetLanguage(i));
 }
 
+void Processor::InitGeocoder(Geocoder::Params & params)
+{
+  bool const viewportSearch = m_mode == Mode::Viewport;
+
+  InitParams(params);
+  params.m_mode = m_mode;
+  if (viewportSearch)
+    params.m_pivot = m_viewport[CURRENT_V];
+  else
+    params.m_pivot = GetPivotRect();
+  m_geocoder.SetParams(params);
+}
+
+void Processor::InitPreRanker(Geocoder::Params const & geocoderParams)
+{
+  PreRanker::Params params;
+
+  params.m_accuratePivotCenter = GetPivotPoint();
+  params.m_scale = geocoderParams.m_scale;
+  m_preRanker.Init(params);
+}
+
+void Processor::InitRanker(Geocoder::Params const & geocoderParams)
+{
+  size_t const kResultsCount = 30;
+  bool const viewportSearch = m_mode == Mode::Viewport;
+  Ranker::Params params;
+
+  params.m_currentLocaleCode = m_currentLocaleCode;
+  if (viewportSearch)
+  {
+    params.m_viewport = GetViewport();
+    params.m_limit = kPreResultsCount;
+  }
+  else
+  {
+    params.m_limit = kResultsCount;
+  }
+  params.m_position = GetPosition();
+  params.m_pivotRegion = GetPivotRegion();
+  params.m_preferredTypes = m_preferredTypes;
+  params.m_suggestsEnabled = m_suggestsEnabled;
+  params.m_query = m_query;
+  params.m_tokens = m_tokens;
+  params.m_prefix = m_prefix;
+  params.m_categoryLocales = GetCategoryLocales();
+  params.m_accuratePivotCenter = GetPivotPoint();
+  params.m_viewportSearch = viewportSearch;
+  params.m_onResults = m_onResults;
+  m_ranker.Init(params, geocoderParams);
+}
+
 void Processor::ClearCaches()
 {
   for (size_t i = 0; i < COUNT_V; ++i)
     ClearCache(i);
 
-  m_locality.ClearCache();
   m_geocoder.ClearCaches();
-}
-
-void Processor::SuggestStrings(Results & res)
-{
-  if (m_prefix.empty() || !m_suggestsEnabled)
-    return;
-  int8_t arrLocales[3];
-  int const localesCount = GetCategoryLocales(arrLocales);
-
-  string prolog;
-  RemoveStringPrefix(m_query, prolog);
-
-  for (int i = 0; i < localesCount; ++i)
-    MatchForSuggestionsImpl(m_prefix, arrLocales[i], prolog, res);
-}
-
-void Processor::MatchForSuggestionsImpl(strings::UniString const & token, int8_t locale,
-                                        string const & prolog, Results & res)
-{
-  for (auto const & suggest : m_suggests)
-  {
-    strings::UniString const & s = suggest.m_name;
-    if ((suggest.m_prefixLength <= token.size()) &&
-        (token != s) &&                  // do not push suggestion if it already equals to token
-        (suggest.m_locale == locale) &&  // push suggestions only for needed language
-        StartsWith(s.begin(), s.end(), token.begin(), token.end()))
-    {
-      string const utf8Str = strings::ToUtf8(s);
-      Result r(utf8Str, prolog + utf8Str + " ");
-      MakeResultHighlight(r);
-      res.AddResult(move(r));
-    }
-  }
+  m_preRanker.ClearCaches();
+  m_ranker.ClearCaches();
 }
 
 m2::RectD const & Processor::GetViewport(ViewportID vID /*= DEFAULT_V*/) const

@@ -1,26 +1,25 @@
+#import "MWMMapViewControlsManager.h"
+
 #include "Framework.h"
 
 @class MWMPlacePageEntity, MWMPlacePageNavigationBar, MWMViewController;
-@protocol MWMPlacePageViewManagerProtocol;
 
 @interface MWMPlacePageViewManager : NSObject
 
-@property (weak, nonatomic, readonly) MWMViewController * ownerViewController;
-@property (nonatomic, readonly) MWMPlacePageEntity * entity;
-@property (nonatomic) MWMPlacePageNavigationBar * iPhoneNavigationBar;
-@property (nonatomic) CGFloat topBound;
-@property (nonatomic) CGFloat leftBound;
-@property (nonatomic, readonly) BOOL isDirectionViewShown;
+@property(weak, nonatomic, readonly) MWMViewController * ownerViewController;
+@property(nonatomic, readonly) MWMPlacePageEntity * entity;
+@property(nonatomic) MWMPlacePageNavigationBar * iPhoneNavigationBar;
+@property(nonatomic) CGFloat topBound;
+@property(nonatomic) CGFloat leftBound;
+@property(nonatomic, readonly) BOOL isDirectionViewShown;
 
-- (instancetype)initWithViewController:(MWMViewController *)viewController
-                              delegate:(id<MWMPlacePageViewManagerProtocol>)delegate;
+- (instancetype)initWithViewController:(MWMViewController *)viewController;
 - (void)showPlacePage:(place_page::Info const &)info;
 - (void)refreshPlacePage;
 - (void)mwm_refreshUI;
 - (BOOL)hasPlacePage;
 - (void)dismissPlacePage;
 - (void)hidePlacePage;
-- (void)buildRoute;
 - (void)routeFrom;
 - (void)routeTo;
 - (void)share;
@@ -29,6 +28,8 @@
 - (void)addPlace;
 - (void)addBookmark;
 - (void)removeBookmark;
+- (void)book:(BOOL)isDecription;
+- (void)call;
 - (void)apiBack;
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)orientation;
 - (void)viewWillTransitionToSize:(CGSize)size

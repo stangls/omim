@@ -22,7 +22,6 @@ extern char const * kStatisticsEnabledSettingsKey;
 char const * kAdForbiddenSettingsKey = "AdForbidden";
 char const * kAdServerForbiddenKey = "AdServerForbidden";
 char const * kAutoDownloadEnabledKey = "AutoDownloadEnabled";
-extern NSString * const kTTSStatusWasChangedNotification = @"TTFStatusWasChangedFromSettingsNotification";
 
 typedef NS_ENUM(NSUInteger, Section)
 {
@@ -74,7 +73,7 @@ typedef NS_ENUM(NSUInteger, Section)
   case SectionMetrics:
     return 2;
   case SectionRouting:
-    return 3;
+    return 4;
   case SectionMap:
     return 5;
   }
@@ -88,8 +87,8 @@ typedef NS_ENUM(NSUInteger, Section)
   case SectionMetrics:
   {
     cell = [tableView dequeueReusableCellWithIdentifier:[SelectableCell className]];
-    settings::Units units = settings::Metric;
-    (void)settings::Get(settings::kMeasurementUnits, units);
+    auto units = measurement_utils::Units::Metric;
+    UNUSED_VALUE(settings::Get(settings::kMeasurementUnits, units));
     BOOL const selected = units == unitsForIndex(indexPath.row);
     SelectableCell * customCell = (SelectableCell *)cell;
     customCell.accessoryType = selected ? UITableViewCellAccessoryCheckmark : UITableViewCellAccessoryNone;
@@ -187,18 +186,28 @@ typedef NS_ENUM(NSUInteger, Section)
       customCell.switchButton.on = on;
       break;
     }
-    // Enable TTS
+    // Allow autozoom
     case 1:
     {
       cell = [tableView dequeueReusableCellWithIdentifier:[SwitchCell className]];
+      SwitchCell * customCell = static_cast<SwitchCell *>(cell);
+      customCell.switchButton.on = GetFramework().LoadAutoZoom();
+      customCell.titleLabel.text = L(@"pref_map_auto_zoom");
+      customCell.delegate = self;
+      break;
+    }
+    // Enable TTS
+    case 2:
+    {
+      cell = [tableView dequeueReusableCellWithIdentifier:[SwitchCell className]];
       SwitchCell * customCell = (SwitchCell *)cell;
-      customCell.switchButton.on = [[MWMTextToSpeech tts] isNeedToEnable];
+      customCell.switchButton.on = [MWMTextToSpeech isTTSEnabled];
       customCell.titleLabel.text = L(@"pref_tts_enable_title");
       customCell.delegate = self;
       break;
     }
     // Change TTS language
-    case 2:
+    case 3:
     {
       cell = [tableView dequeueReusableCellWithIdentifier:[LinkCell className]];
       LinkCell * customCell = (LinkCell *)cell;
@@ -289,7 +298,7 @@ typedef NS_ENUM(NSUInteger, Section)
         [Statistics logEvent:kStatEventName(kStatSettings, kStatToggleZoomButtonsVisibility)
             withParameters:@{kStatValue : (value ? kStatVisible : kStatHidden)}];
         settings::Set("ZoomButtonsEnabled", static_cast<bool>(value));
-        [MapsAppDelegate theApp].mapViewController.controlsManager.zoomHidden = !value;
+        [MapViewController controller].controlsManager.zoomHidden = !value;
         break;
       }
     }
@@ -314,14 +323,21 @@ typedef NS_ENUM(NSUInteger, Section)
       f.Save3dMode(is3d, _);
       f.Allow3dMode(is3d, _);
     }
-    // Enable TTS
+    // Enable autozoom
     else if (indexPath.row == 1)
+    {
+      [Statistics logEvent:kStatEventName(kStatSettings, kStatAutoZoom)
+                       withParameters:@{kStatValue : value ? kStatOn : kStatOff}];
+      auto & f = GetFramework();
+      f.AllowAutoZoom(value);
+      f.SaveAutoZoom(value);
+    }
+    // Enable TTS
+    else if (indexPath.row == 2)
     {
       [Statistics logEvent:kStatEventName(kStatSettings, kStatTTS)
                        withParameters:@{kStatValue : value ? kStatOn : kStatOff}];
-      [[MWMTextToSpeech tts] setNeedToEnable:value];
-      [[NSNotificationCenter defaultCenter] postNotificationName:kTTSStatusWasChangedNotification
-                                                          object:nil userInfo:@{@"on" : @(value)}];
+      [MWMTextToSpeech setTTSEnabled:value];
     }
     break;
 
@@ -330,9 +346,9 @@ typedef NS_ENUM(NSUInteger, Section)
   }
 }
 
-settings::Units unitsForIndex(NSInteger index)
+measurement_utils::Units unitsForIndex(NSInteger index)
 {
-  return index == 0 ? settings::Metric : settings::Foot;
+  return index == 0 ? measurement_utils::Units::Metric : measurement_utils::Units::Imperial;
 }
 
 - (void)tableView:(UITableView *)tableView didSelectRowAtIndexPath:(NSIndexPath *)indexPath
@@ -341,9 +357,11 @@ settings::Units unitsForIndex(NSInteger index)
   {
   case SectionMetrics:
   {
-    settings::Units units = unitsForIndex(indexPath.row);
+    auto const units = unitsForIndex(indexPath.row);
     [Statistics logEvent:kStatEventName(kStatSettings, kStatChangeMeasureUnits)
-        withParameters:@{kStatValue : (units == settings::Units::Metric ? kStatKilometers : kStatMiles)}];
+          withParameters:@{
+            kStatValue : (units == measurement_utils::Units::Metric ? kStatKilometers : kStatMiles)
+          }];
     settings::Set(settings::kMeasurementUnits, units);
     [tableView reloadSections:[NSIndexSet indexSetWithIndex:SectionMetrics] withRowAnimation:UITableViewRowAnimationFade];
     GetFramework().SetupMeasurementSystem();
@@ -351,7 +369,7 @@ settings::Units unitsForIndex(NSInteger index)
   }
   case SectionRouting:
     // Change TTS language
-    if (indexPath.row == 2)
+    if (indexPath.row == 3)
     {
       [Statistics logEvent:kStatEventName(kStatSettings, kStatTTS)
                      withParameters:@{kStatAction : kStatChangeLanguage}];

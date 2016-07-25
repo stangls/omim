@@ -1,11 +1,11 @@
+#import "MapViewController.h"
+#import <MyTargetSDKCorp/MTRGManager_Corp.h>
 #import "BookmarksRootVC.h"
 #import "BookmarksVC.h"
 #import "Common.h"
 #import "EAGLView.h"
-#import "MapsAppDelegate.h"
-#import "MapViewController.h"
-#import "MWMAlertViewController.h"
 #import "MWMAPIBar.h"
+#import "MWMAlertViewController.h"
 #import "MWMAuthorizationCommon.h"
 #import "MWMAuthorizationLoginViewController.h"
 #import "MWMAuthorizationWebViewLoginViewController.h"
@@ -14,21 +14,23 @@
 #import "MWMFirstLaunchController.h"
 #import "MWMFrameworkListener.h"
 #import "MWMFrameworkObservers.h"
+#import "MWMLocationHelpers.h"
+#import "MWMLocationManager.h"
 #import "MWMMapDownloadDialog.h"
 #import "MWMMapDownloaderViewController.h"
 #import "MWMMapViewControlsManager.h"
 #import "MWMPageController.h"
 #import "MWMPlacePageEntity.h"
+#import "MWMRouter.h"
 #import "MWMStorage.h"
 #import "MWMTableViewController.h"
-#import "MWMTextToSpeech.h"
-#import "MWMWhatsNewEditorController.h"
+#import "MWMWhatsNewBookingBicycleRoutingController.h"
+#import "MapsAppDelegate.h"
 #import "RouteState.h"
 #import "Statistics.h"
 #import "UIColor+MapsMeColor.h"
 #import "UIFont+MapsMeFonts.h"
 #import "UIViewController+Navigation.h"
-#import <MyTargetSDKCorp/MTRGManager_Corp.h>
 
 #import "3party/Alohalytics/src/alohalytics_objc.h"
 
@@ -47,7 +49,8 @@
 #include "platform/platform.hpp"
 #include "platform/settings.hpp"
 
-// If you have a "missing header error" here, then please run configure.sh script in the root repo folder.
+// If you have a "missing header error" here, then please run configure.sh script in the root repo
+// folder.
 #import "../../../private.h"
 
 extern NSString * const kAlohalyticsTapEventKey = @"$onClick";
@@ -57,15 +60,7 @@ extern NSString * const kMap2GoogleLoginSegue = @"Map2GoogleLogin";
 extern char const * kAdForbiddenSettingsKey;
 extern char const * kAdServerForbiddenKey;
 
-typedef NS_ENUM(NSUInteger, ForceRoutingStateChange)
-{
-  ForceRoutingStateChangeNone,
-  ForceRoutingStateChangeRestoreRoute,
-  ForceRoutingStateChangeStartFollowing
-};
-
-typedef NS_ENUM(NSUInteger, UserTouchesAction)
-{
+typedef NS_ENUM(NSUInteger, UserTouchesAction) {
   UserTouchesActionNone,
   UserTouchesActionDrag,
   UserTouchesActionScale
@@ -78,13 +73,14 @@ NSString * const kMigrationSegue = @"Map2MigrationSegue";
 NSString * const kEditorSegue = @"Map2EditorSegue";
 NSString * const kUDViralAlertWasShown = @"ViralAlertWasShown";
 
-// The first launch after process started. Used to skip "Not follow, no position" state and to run locator.
+// The first launch after process started. Used to skip "Not follow, no position" state and to run
+// locator.
 BOOL gIsFirstMyPositionMode = YES;
-} // namespace
+}  // namespace
 
 @interface NSValueWrapper : NSObject
 
--(NSValue *)getInnerValue;
+- (NSValue *)getInnerValue;
 
 @end
 
@@ -93,12 +89,8 @@ BOOL gIsFirstMyPositionMode = YES;
   NSValue * m_innerValue;
 }
 
--(NSValue *)getInnerValue
-{
-  return m_innerValue;
-}
-
--(id)initWithValue:(NSValue *)value
+- (NSValue *)getInnerValue { return m_innerValue; }
+- (id)initWithValue:(NSValue *)value
 {
   self = [super init];
   if (self)
@@ -106,108 +98,31 @@ BOOL gIsFirstMyPositionMode = YES;
   return self;
 }
 
--(BOOL)isEqual:(id)anObject
-{
-  return [anObject isMemberOfClass:[NSValueWrapper class]];
-}
-
+- (BOOL)isEqual:(id)anObject { return [anObject isMemberOfClass:[NSValueWrapper class]]; }
 @end
 
-@interface MapViewController ()<MTRGNativeAppwallAdDelegate, MWMFrameworkRouteBuilderObserver,
-                                MWMFrameworkDrapeObserver, MWMFrameworkStorageObserver,
-                                MWMPageControllerProtocol>
+@interface MapViewController ()<MTRGNativeAppwallAdDelegate, MWMFrameworkDrapeObserver,
+                                MWMFrameworkStorageObserver, MWMPageControllerProtocol>
 
-@property (nonatomic, readwrite) MWMMapViewControlsManager * controlsManager;
-@property (nonatomic) MWMBottomMenuState menuRestoreState;
+@property(nonatomic, readwrite) MWMMapViewControlsManager * controlsManager;
+@property(nonatomic) MWMBottomMenuState menuRestoreState;
 
-@property (nonatomic) ForceRoutingStateChange forceRoutingStateChange;
-@property (nonatomic) BOOL disableStandbyOnLocationStateMode;
+@property(nonatomic) BOOL disableStandbyOnLocationStateMode;
 
-@property (nonatomic) UserTouchesAction userTouchesAction;
-@property (nonatomic) MWMPageController * pageViewController;
-@property (nonatomic) MWMMapDownloadDialog * downloadDialog;
+@property(nonatomic) UserTouchesAction userTouchesAction;
+@property(nonatomic) MWMPageController * pageViewController;
+@property(nonatomic) MWMMapDownloadDialog * downloadDialog;
 
-@property (nonatomic) BOOL skipForceTouch;
+@property(nonatomic) BOOL skipForceTouch;
 
 @end
 
 @implementation MapViewController
 
-#pragma mark - LocationManager Callbacks
-
-- (void)onLocationError:(location::TLocationError)errorCode
-{
-  GetFramework().OnLocationError(errorCode);
-
-  switch (errorCode)
-  {
-    case location::EDenied:
-    {
-      [self.alertController presentLocationAlert];
-      [[MapsAppDelegate theApp].locationManager stop:self];
-      break;
-    }
-    case location::ENotSupported:
-    {
-      [self.alertController presentLocationServiceNotSupportedAlert];
-      [[MapsAppDelegate theApp].locationManager stop:self];
-      break;
-    }
-    default:
-      break;
-  }
-}
-
-- (void)onLocationUpdate:(location::GpsInfo const &)info
-{
-  if (info.m_source != location::EPredictor)
-    [m_predictor reset:info];
-  Framework & frm = GetFramework();
-  frm.OnLocationUpdate(info);
-  LOG_MEMORY_INFO();
-
-  [self updateRoutingInfo];
-
-  if (self.forceRoutingStateChange == ForceRoutingStateChangeRestoreRoute)
-    [self restoreRoute];
-}
-
-- (void)updateRoutingInfo
-{
-  Framework & frm = GetFramework();
-  if (!frm.IsRoutingActive())
-    return;
-
-  location::FollowingInfo res;
-  frm.GetRouteFollowingInfo(res);
-
-  if (res.IsValid())
-    [self.controlsManager setupRoutingDashboard:res];
-
-  if (frm.IsOnRoute())
-    [[MWMTextToSpeech tts] playTurnNotifications];
-}
-
-- (void)onCompassUpdate:(location::CompassInfo const &)info
-{
-  GetFramework().OnCompassUpdate(info);
-}
-
-#pragma mark - Restore route
-
-- (void)restoreRoute
-{
-  self.forceRoutingStateChange = ForceRoutingStateChangeStartFollowing;
-  [self.controlsManager restoreRouteTo:self.restoreRouteDestination];
-}
-
++ (MapViewController *)controller { return [MapsAppDelegate theApp].mapViewController; }
 #pragma mark - Map Navigation
 
-- (void)dismissPlacePage
-{
-  [self.controlsManager dismissPlacePage];
-}
-
+- (void)dismissPlacePage { [self.controlsManager dismissPlacePage]; }
 - (void)onMapObjectDeselected:(bool)switchFullScreenMode
 {
   [self dismissPlacePage];
@@ -238,7 +153,9 @@ BOOL gIsFirstMyPositionMode = YES;
     e.SetSecondMaskedPointer(pointerIndex);
 }
 
-- (void)sendTouchType:(df::TouchEvent::ETouchType)type withTouches:(NSSet *)touches andEvent:(UIEvent *)event
+- (void)sendTouchType:(df::TouchEvent::ETouchType)type
+          withTouches:(NSSet *)touches
+             andEvent:(UIEvent *)event
 {
   NSArray * allTouches = [[event allTouches] allObjects];
   if ([allTouches count] < 1)
@@ -305,14 +222,10 @@ BOOL gIsFirstMyPositionMode = YES;
 
 #pragma mark - ViewController lifecycle
 
-- (void)dealloc
+- (void)dealloc { [[NSNotificationCenter defaultCenter] removeObserver:self]; }
+- (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation
 {
-  [[NSNotificationCenter defaultCenter] removeObserver:self];
-}
-
-- (BOOL)shouldAutorotateToInterfaceOrientation: (UIInterfaceOrientation)interfaceOrientation
-{
-  return YES; // We support all orientations
+  return YES;  // We support all orientations
 }
 
 - (void)willRotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation
@@ -325,9 +238,10 @@ BOOL gIsFirstMyPositionMode = YES;
 - (void)viewWillTransitionToSize:(CGSize)size
        withTransitionCoordinator:(id<UIViewControllerTransitionCoordinator>)coordinator
 {
-  [self.alertController willRotateToInterfaceOrientation:(size.width > size.height) ?
-                    UIInterfaceOrientationLandscapeLeft : UIInterfaceOrientationPortrait
-                                                                        duration:kDefaultAnimationDuration];
+  [self.alertController willRotateToInterfaceOrientation:(size.width > size.height)
+                                                             ? UIInterfaceOrientationLandscapeLeft
+                                                             : UIInterfaceOrientationPortrait
+                                                duration:kDefaultAnimationDuration];
   [self.controlsManager viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
   [self.pageViewController viewWillTransitionToSize:size withTransitionCoordinator:coordinator];
 }
@@ -338,41 +252,14 @@ BOOL gIsFirstMyPositionMode = YES;
   [super didReceiveMemoryWarning];
 }
 
-- (void)onTerminate
-{
-  [(EAGLView *)self.view deallocateNative];
-}
-
-- (void)onEnterBackground
-{
-  // Save state and notify about entering background.
-  GetFramework().EnterBackground();
-}
-
-- (void)setMapStyle:(MapStyle)mapStyle
-{
-  GetFramework().SetMapStyle(mapStyle);
-}
-
-- (void)onEnterForeground
-{
-  if (MapsAppDelegate.theApp.isDaemonMode)
-    return;
-  // Notify about entering foreground (should be called on the first launch too).
-  GetFramework().EnterForeground();
-}
-
-- (void)onGetFocus:(BOOL)isOnFocus
-{
-  [(EAGLView *)self.view setPresentAvailable:isOnFocus];
-}
-
+- (void)onTerminate { [(EAGLView *)self.view deallocateNative]; }
+- (void)onGetFocus:(BOOL)isOnFocus { [(EAGLView *)self.view setPresentAvailable:isOnFocus]; }
 - (void)viewWillAppear:(BOOL)animated
 {
   [super viewWillAppear:animated];
-  if (MapsAppDelegate.theApp.isDaemonMode)
-    return;
-  [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:nil];
+  [[NSNotificationCenter defaultCenter] removeObserver:self
+                                                  name:UIDeviceOrientationDidChangeNotification
+                                                object:nil];
 
   self.controlsManager.menuState = self.menuRestoreState;
 
@@ -393,8 +280,6 @@ BOOL gIsFirstMyPositionMode = YES;
 - (void)viewDidLoad
 {
   [super viewDidLoad];
-  if (MapsAppDelegate.theApp.isDaemonMode)
-    return;
   self.view.clipsToBounds = YES;
   [MTRGManager setMyCom:YES];
   [self processMyPositionStateModeEvent:location::PendingPosition];
@@ -413,15 +298,18 @@ BOOL gIsFirstMyPositionMode = YES;
   if (isIOS7)
     return;
 
-  Class<MWMWelcomeControllerProtocol> whatsNewClass = [MWMWhatsNewEditorController class];
+  Class<MWMWelcomeControllerProtocol> whatsNewClass =
+      [MWMWhatsNewBookingBicycleRoutingController class];
   BOOL const isFirstSession = [Alohalytics isFirstSession];
-  Class<MWMWelcomeControllerProtocol> welcomeClass = isFirstSession ? [MWMFirstLaunchController class] : whatsNewClass;
+  Class<MWMWelcomeControllerProtocol> welcomeClass =
+      isFirstSession ? [MWMFirstLaunchController class] : whatsNewClass;
 
   NSUserDefaults * ud = [NSUserDefaults standardUserDefaults];
   if ([ud boolForKey:[welcomeClass udWelcomeWasShownKey]])
     return;
 
-  self.pageViewController = [MWMPageController pageControllerWithParent:self welcomeClass:welcomeClass];
+  self.pageViewController =
+      [MWMPageController pageControllerWithParent:self welcomeClass:welcomeClass];
   [self.pageViewController show];
 
   [ud setBool:YES forKey:[whatsNewClass udWelcomeWasShownKey]];
@@ -440,7 +328,8 @@ BOOL gIsFirstMyPositionMode = YES;
   NSUserDefaults * ud = [NSUserDefaults standardUserDefaults];
 
   using namespace osm_auth_ios;
-  if (!AuthorizationIsNeedCheck() || [ud objectForKey:kUDViralAlertWasShown] || !AuthorizationHaveCredentials())
+  if (!AuthorizationIsNeedCheck() || [ud objectForKey:kUDViralAlertWasShown] ||
+      !AuthorizationHaveCredentials())
     return;
 
   if (osm::Editor::Instance().GetStats().m_edits.size() != 2)
@@ -459,7 +348,10 @@ BOOL gIsFirstMyPositionMode = YES;
 {
   [super viewWillDisappear:animated];
   self.menuRestoreState = self.controlsManager.menuState;
-  [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(orientationChanged:) name:UIDeviceOrientationDidChangeNotification object:nil];
+  [[NSNotificationCenter defaultCenter] addObserver:self
+                                           selector:@selector(orientationChanged:)
+                                               name:UIDeviceOrientationDidChangeNotification
+                                             object:nil];
 }
 
 - (void)presentViewController:(UIViewController *)viewControllerToPresent
@@ -476,33 +368,18 @@ BOOL gIsFirstMyPositionMode = YES;
   [self willRotateToInterfaceOrientation:self.interfaceOrientation duration:0.];
 }
 
-- (BOOL)prefersStatusBarHidden
-{
-  return self.apiBar.isVisible;
-}
-
+- (BOOL)prefersStatusBarHidden { return self.apiBar.isVisible; }
 - (UIStatusBarStyle)preferredStatusBarStyle
 {
-  BOOL const isNightMode = [UIColor isNightMode];
-  BOOL const isLight = !self.controlsManager.searchHidden ||
-                       self.controlsManager.menuState == MWMBottomMenuStateActive ||
-                       self.controlsManager.isDirectionViewShown ||
-                       (isNightMode &&
-                       self.controlsManager.navigationState != MWMNavigationDashboardStateHidden) ||
-                       MapsAppDelegate.theApp.routingPlaneMode != MWMRoutingPlaneModeNone;
-  return (isLight || (!isLight && isNightMode)) ? UIStatusBarStyleLightContent : UIStatusBarStyleDefault;
+  return [self.controlsManager preferredStatusBarStyle];
 }
 
-- (void)updateStatusBarStyle
-{
-  [self setNeedsStatusBarAppearanceUpdate];
-}
-
+- (void)updateStatusBarStyle { [self setNeedsStatusBarAppearanceUpdate]; }
 - (id)initWithCoder:(NSCoder *)coder
 {
   NSLog(@"MapViewController initWithCoder Started");
   self = [super initWithCoder:coder];
-  if (self && !MapsAppDelegate.theApp.isDaemonMode)
+  if (self)
     [self initialize];
 
   NSLog(@"MapViewController initWithCoder Ended");
@@ -513,19 +390,17 @@ BOOL gIsFirstMyPositionMode = YES;
 {
   Framework & f = GetFramework();
   // TODO: Review and improve this code.
-  f.SetMapSelectionListeners([self](place_page::Info const & info) { [self onMapObjectSelected:info]; },
-                             [self](bool switchFullScreen) { [self onMapObjectDeselected:switchFullScreen]; });
+  f.SetMapSelectionListeners(
+      [self](place_page::Info const & info) { [self onMapObjectSelected:info]; },
+      [self](bool switchFullScreen) { [self onMapObjectDeselected:switchFullScreen]; });
   // TODO: Review and improve this code.
-  f.SetMyPositionModeListener([self](location::EMyPositionMode mode, bool routingActive)
-  {
+  f.SetMyPositionModeListener([self](location::EMyPositionMode mode, bool routingActive) {
     // TODO: Two global listeners are subscribed to the same event from the core.
     // Probably it's better to subscribe only wnen needed and usubscribe in other cases.
     // May be better solution would be multiobservers support in the C++ core.
     [self processMyPositionStateModeEvent:mode];
   });
 
-  m_predictor = [[LocationPredictor alloc] initWithObserver:self];
-  self.forceRoutingStateChange = ForceRoutingStateChangeNone;
   self.userTouchesAction = UserTouchesActionNone;
   self.menuRestoreState = MWMBottomMenuStateInactive;
   GetFramework().LoadBookmarks();
@@ -534,15 +409,12 @@ BOOL gIsFirstMyPositionMode = YES;
 
 #pragma mark - Open controllers
 
-- (void)openMigration
-{
-  [self performSegueWithIdentifier:kMigrationSegue sender:self];
-}
-
+- (void)openMigration { [self performSegueWithIdentifier:kMigrationSegue sender:self]; }
 - (void)openBookmarks
 {
   BOOL const oneCategory = (GetFramework().GetBmCategoriesCount() == 1);
-  MWMTableViewController * vc = oneCategory ? [[BookmarksVC alloc] initWithCategory:0] : [[BookmarksRootVC alloc] init];
+  MWMTableViewController * vc =
+      oneCategory ? [[BookmarksVC alloc] initWithCategory:0] : [[BookmarksRootVC alloc] init];
   [self.navigationController pushViewController:vc animated:YES];
 }
 
@@ -557,100 +429,45 @@ BOOL gIsFirstMyPositionMode = YES;
   using namespace osm_auth_ios;
   auto const & featureID = self.controlsManager.placePageEntity.info.GetID();
 
-  [Statistics logEvent:kStatEditorEditStart withParameters:@{kStatEditorIsAuthenticated : @(AuthorizationHaveCredentials()),
-                                                             kStatIsOnline : Platform::IsConnected() ? kStatYes : kStatNo,
-                                                        kStatEditorMWMName : @(featureID.GetMwmName().c_str()),
-                                                     kStatEditorMWMVersion : @(featureID.GetMwmVersion())}];
+  [Statistics logEvent:kStatEditorEditStart
+        withParameters:@{
+          kStatEditorIsAuthenticated : @(AuthorizationHaveCredentials()),
+          kStatIsOnline : Platform::IsConnected() ? kStatYes : kStatNo,
+          kStatEditorMWMName : @(featureID.GetMwmName().c_str()),
+          kStatEditorMWMVersion : @(featureID.GetMwmVersion())
+        }];
   [self performSegueWithIdentifier:kEditorSegue sender:self.controlsManager.placePageEntity];
 }
 
 - (void)processMyPositionStateModeEvent:(location::EMyPositionMode)mode
 {
-  [m_predictor setMode:mode];
-
-  LocationManager * lm = [MapsAppDelegate theApp].locationManager;
-  [lm processMyPositionStateModeEvent:mode];
+  [MWMLocationManager setMyPositionMode:mode];
   [self.controlsManager processMyPositionStateModeEvent:mode];
+  self.disableStandbyOnLocationStateMode = NO;
   switch (mode)
   {
-    case location::PendingPosition:
-      self.disableStandbyOnLocationStateMode = NO;
-      [lm start:self];
-      break;
-    case location::NotFollowNoPosition:
-      if (gIsFirstMyPositionMode && ![Alohalytics isFirstSession])
+  case location::NotFollowNoPosition:
+    if (gIsFirstMyPositionMode && ![Alohalytics isFirstSession])
+    {
+      GetFramework().SwitchMyPositionNextMode();
+    }
+    else
+    {
+      BOOL const isMapVisible = (self.navigationController.visibleViewController == self);
+      if (isMapVisible && !location_helpers::isLocationProhibited())
       {
-        GetFramework().SwitchMyPositionNextMode();
+        [self.alertController presentLocationNotFoundAlertWithOkBlock:^{
+          GetFramework().SwitchMyPositionNextMode();
+        }];
       }
-      else
-      {
-        self.disableStandbyOnLocationStateMode = NO;
-        BOOL const isMapVisible = (self.navigationController.visibleViewController == self);
-        if (isMapVisible && lm.isStarted)
-        {
-          [lm stop:self];
-          BOOL  const isLocationProhibited =
-              lm.lastLocationError == location::TLocationError::EDenied ||
-              lm.lastLocationError == location::TLocationError::EGPSIsOff;
-          if (!isLocationProhibited)
-          {
-            [self.alertController presentLocationNotFoundAlertWithOkBlock:^
-            {
-              GetFramework().SwitchMyPositionNextMode();
-            }];
-          }
-        }
-      }
-      break;
-    case location::NotFollow:
-      self.disableStandbyOnLocationStateMode = NO;
-      break;
-    case location::Follow:
-    case location::FollowAndRotate:
-      self.disableStandbyOnLocationStateMode = YES;
-      break;
+    }
+    break;
+  case location::PendingPosition:
+  case location::NotFollow: break;
+  case location::Follow:
+  case location::FollowAndRotate: self.disableStandbyOnLocationStateMode = YES; break;
   }
   gIsFirstMyPositionMode = NO;
-}
-
-#pragma mark - MWMFrameworkRouteBuilderObserver
-
-- (void)processRouteBuilderEvent:(routing::IRouter::ResultCode)code
-                       countries:(storage::TCountriesVec const &)absentCountries
-{
-  switch (code)
-  {
-    case routing::IRouter::ResultCode::NoError:
-    {
-      GetFramework().DeactivateMapSelection(true);
-      if (self.forceRoutingStateChange == ForceRoutingStateChangeStartFollowing)
-        [self.controlsManager routingNavigation];
-      else
-        [self.controlsManager routingReady];
-      [self updateRoutingInfo];
-      bool isDisclaimerApproved = false;
-      (void)settings::Get("IsDisclaimerApproved", isDisclaimerApproved);
-      if (!isDisclaimerApproved)
-      {
-        [self presentRoutingDisclaimerAlert];
-        settings::Set("IsDisclaimerApproved", true);
-      }
-      break;
-    }
-    case routing::IRouter::RouteFileNotExist:
-    case routing::IRouter::InconsistentMWMandRoute:
-    case routing::IRouter::NeedMoreMaps:
-    case routing::IRouter::FileTooOld:
-    case routing::IRouter::RouteNotFound:
-      [self presentDownloaderAlert:code countries:absentCountries];
-      break;
-    case routing::IRouter::Cancelled:
-      break;
-    default:
-      [self presentDefaultAlert:code];
-      break;
-  }
-  self.forceRoutingStateChange = ForceRoutingStateChangeNone;
 }
 
 #pragma mark - MWMFrameworkDrapeObserver
@@ -670,17 +487,16 @@ BOOL gIsFirstMyPositionMode = YES;
     return;
   switch (nodeStatuses.m_error)
   {
-    case NodeErrorCode::NoError:
-      break;
-    case NodeErrorCode::UnknownError:
-      [Statistics logEvent:kStatDownloaderMapError withParameters:@{kStatType : kStatUnknownError}];
-      break;
-    case NodeErrorCode::OutOfMemFailed:
-      [Statistics logEvent:kStatDownloaderMapError withParameters:@{kStatType : kStatNoSpace}];
-      break;
-    case NodeErrorCode::NoInetConnection:
-      [Statistics logEvent:kStatDownloaderMapError withParameters:@{kStatType : kStatNoConnection}];
-      break;
+  case NodeErrorCode::NoError: break;
+  case NodeErrorCode::UnknownError:
+    [Statistics logEvent:kStatDownloaderMapError withParameters:@{kStatType : kStatUnknownError}];
+    break;
+  case NodeErrorCode::OutOfMemFailed:
+    [Statistics logEvent:kStatDownloaderMapError withParameters:@{kStatType : kStatNoSpace}];
+    break;
+  case NodeErrorCode::NoInetConnection:
+    [Statistics logEvent:kStatDownloaderMapError withParameters:@{kStatType : kStatNoConnection}];
+    break;
   }
 }
 
@@ -696,7 +512,7 @@ BOOL gIsFirstMyPositionMode = YES;
     if (!Platform::IsConnected())
       return;
     [Statistics logEvent:kStatEventName(kStatPlacePage, kStatEditTime)
-                     withParameters:@{kStatValue : kStatAuthorization}];
+          withParameters:@{kStatValue : kStatAuthorization}];
     [self.alertController presentOsmAuthAlert];
   }
 }
@@ -707,20 +523,13 @@ BOOL gIsFirstMyPositionMode = YES;
 {
   [self.navigationController popToRootViewControllerAnimated:NO];
   self.controlsManager.searchHidden = YES;
-  [self.controlsManager routingHidden];
+  [[MWMRouter router] stop];
   if ([action isEqualToString:@"me.maps.3daction.bookmarks"])
-  {
     [self openBookmarks];
-  }
   else if ([action isEqualToString:@"me.maps.3daction.search"])
-  {
     self.controlsManager.searchHidden = NO;
-  }
   else if ([action isEqualToString:@"me.maps.3daction.route"])
-  {
-    [MapsAppDelegate theApp].routingPlaneMode = MWMRoutingPlaneModePlacePage;
-    [self.controlsManager routingPrepare];
-  }
+    [self.controlsManager onRoutePrepare];
 }
 
 #pragma mark - myTarget
@@ -738,14 +547,15 @@ BOOL gIsFirstMyPositionMode = YES;
   }
   if (self.isAppWallAdActive)
     return;
-  self.appWallAd = [[MTRGNativeAppwallAd alloc]initWithSlotId:@(MY_TARGET_KEY)];
+  self.appWallAd = [[MTRGNativeAppwallAd alloc] initWithSlotId:@(MY_TARGET_KEY)];
   self.appWallAd.handleLinksInApp = YES;
   self.appWallAd.closeButtonTitle = L(@"close");
   self.appWallAd.delegate = self;
   [self.appWallAd load];
 }
 
-- (void)onLoadWithAppwallBanners:(NSArray *)appwallBanners appwallAd:(MTRGNativeAppwallAd *)appwallAd
+- (void)onLoadWithAppwallBanners:(NSArray *)appwallBanners
+                       appwallAd:(MTRGNativeAppwallAd *)appwallAd
 {
   if (![appwallAd isEqual:self.appWallAd])
     return;
@@ -770,74 +580,10 @@ BOOL gIsFirstMyPositionMode = YES;
   return _apiBar;
 }
 
-- (void)showAPIBar
-{
-  self.apiBar.isVisible = YES;
-}
-
+- (void)showAPIBar { self.apiBar.isVisible = YES; }
 #pragma mark - ShowDialog callback
 
-- (void)presentDownloaderAlert:(routing::IRouter::ResultCode)code
-                     countries:(storage::TCountriesVec const &)countries
-{
-  if (platform::migrate::NeedMigrate())
-  {
-    [self.alertController presentRoutingMigrationAlertWithOkBlock:^
-    {
-      [Statistics logEvent:kStatDownloaderMigrationDialogue
-            withParameters:@{kStatFrom : kStatRouting}];
-      [self openMigration];
-    }];
-  }
-  else if (!countries.empty())
-  {
-    [self.alertController presentDownloaderAlertWithCountries:countries
-        code:code
-        cancelBlock:^
-        {
-          if (code != routing::IRouter::NeedMoreMaps)
-            [self.controlsManager routingHidden];
-        }
-        downloadBlock:^(storage::TCountriesVec const & downloadCountries, TMWMVoidBlock onSuccess)
-        {
-          [MWMStorage downloadNodes:downloadCountries
-                    alertController:self.alertController
-                          onSuccess:onSuccess];
-        }
-        downloadCompleteBlock:^
-        {
-          [self.controlsManager buildRoute];
-        }];
-  }
-  else
-  {
-    [self presentDefaultAlert:code];
-  }
-}
-
-- (void)presentDisabledLocationAlert
-{
-  [self.alertController presentDisabledLocationAlert];
-}
-
-- (void)presentDefaultAlert:(routing::IRouter::ResultCode)type
-{
-  [self.alertController presentAlert:type];
-}
-
-- (void)presentRoutingDisclaimerAlert
-{
-  [self.alertController presentRoutingDisclaimerAlert];
-}
-
-#pragma mark - Private methods
-
-- (void)setRestoreRouteDestination:(m2::PointD)restoreRouteDestination
-{
-  _restoreRouteDestination = restoreRouteDestination;
-  self.forceRoutingStateChange = ForceRoutingStateChangeRestoreRoute;
-}
-
+- (void)presentDisabledLocationAlert { [self.alertController presentDisabledLocationAlert]; }
 - (void)setDisableStandbyOnLocationStateMode:(BOOL)disableStandbyOnLocationStateMode
 {
   if (_disableStandbyOnLocationStateMode == disableStandbyOnLocationStateMode)
@@ -862,7 +608,8 @@ BOOL gIsFirstMyPositionMode = YES;
   {
     MWMMapDownloaderViewController * dvc = segue.destinationViewController;
     NSNumber * mode = sender;
-    [dvc setParentCountryId:@(GetFramework().Storage().GetRootId().c_str()) mode:static_cast<mwm::DownloaderMode>(mode.integerValue)];
+    [dvc setParentCountryId:@(GetFramework().Storage().GetRootId().c_str())
+                       mode:static_cast<mwm::DownloaderMode>(mode.integerValue)];
   }
   else if ([segue.identifier isEqualToString:kMap2FBLoginSegue])
   {
@@ -911,11 +658,7 @@ BOOL gIsFirstMyPositionMode = YES;
   return haveAppWall && haveBanners;
 }
 
-- (BOOL)hasNavigationBar
-{
-  return NO;
-}
-
+- (BOOL)hasNavigationBar { return NO; }
 - (MWMMapDownloadDialog *)downloadDialog
 {
   if (!_downloadDialog)

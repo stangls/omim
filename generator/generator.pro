@@ -9,12 +9,14 @@ ROOT_DIR = ..
 include($$ROOT_DIR/common.pri)
 
 INCLUDEPATH *= $$ROOT_DIR/3party/gflags/src \
-               $$ROOT_DIR/3party/osrm/osrm-backend/include
+               $$ROOT_DIR/3party/osrm/osrm-backend/include \
+               $$ROOT_DIR/3party/jansson/src
 
 QT *= core
 
 SOURCES += \
     booking_dataset.cpp \
+    booking_scoring.cpp \
     borders_generator.cpp \
     borders_loader.cpp \
     check_model.cpp \
@@ -29,6 +31,7 @@ SOURCES += \
     osm_element.cpp \
     osm_id.cpp \
     osm_source.cpp \
+    region_meta.cpp \
     routing_generator.cpp \
     search_index_builder.cpp \
     srtm_parser.cpp \
@@ -39,6 +42,7 @@ SOURCES += \
 
 HEADERS += \
     booking_dataset.hpp \
+    booking_scoring.hpp \
     borders_generator.hpp \
     borders_loader.hpp \
     check_model.hpp \
@@ -61,6 +65,7 @@ HEADERS += \
     osm_translator.hpp \
     osm_xml_source.hpp \
     polygonizer.hpp \
+    region_meta.hpp \
     routing_generator.hpp \
     search_index_builder.hpp \
     srtm_parser.hpp \
@@ -71,4 +76,3 @@ HEADERS += \
     unpack_mwm.hpp \
     ways_merger.hpp \
     world_map_generator.hpp \
-

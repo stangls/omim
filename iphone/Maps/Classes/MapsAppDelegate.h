@@ -8,16 +8,15 @@
 @class MapViewController;
 @class LocationManager;
 
-typedef NS_ENUM(NSUInteger, MWMRoutingPlaneMode)
-{
+typedef NS_ENUM(NSUInteger, MWMRoutingPlaneMode) {
   MWMRoutingPlaneModeNone,
   MWMRoutingPlaneModePlacePage,
   MWMRoutingPlaneModeSearchSource,
   MWMRoutingPlaneModeSearchDestination
 };
 
-@interface MapsAppDelegate : UIResponder<UIApplicationDelegate, UIAlertViewDelegate,
-                                         DownloadIndicatorProtocol>
+@interface MapsAppDelegate
+    : UIResponder<UIApplicationDelegate, UIAlertViewDelegate, DownloadIndicatorProtocol>
 {
   NSInteger m_activeDownloadsCounter;
   UIBackgroundTaskIdentifier m_backgroundTask;
@@ -25,14 +24,15 @@ typedef NS_ENUM(NSUInteger, MWMRoutingPlaneMode)
   UIAlertView * m_loadingAlertView;
 }
 
-@property (nonatomic) UIWindow * window;
-@property (nonatomic) MWMRoutingPlaneMode routingPlaneMode;
+@property(nonatomic) UIWindow * window;
+@property(nonatomic) MWMRoutingPlaneMode routingPlaneMode;
 
-@property (nonatomic, readonly) MapViewController * mapViewController;
-@property (nonatomic, readonly) LocationManager * locationManager;
-@property (nonatomic, readonly) BOOL isDaemonMode;
+@property(nonatomic, readonly) MapViewController * mapViewController;
+@property(nonatomic, readonly) BOOL isDrapeEngineCreated;
 
 + (MapsAppDelegate *)theApp;
+
++ (void)initPushNotificationsWithLaunchOptions:(NSDictionary *)launchOptions;
 
 - (void)enableStandby;
 - (void)disableStandby;

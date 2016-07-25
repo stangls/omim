@@ -78,17 +78,17 @@ void RoutingSession::BuildRoute(m2::PointD const & startPoint, m2::PointD const 
   m_router->ClearState();
   m_isFollowing = false;
   m_routingRebuildCount = -1; // -1 for the first rebuild.
-  RebuildRoute(startPoint, readyCallback, progressCallback, timeoutSec);
+  RebuildRoute(startPoint, readyCallback, progressCallback, timeoutSec, RouteBuilding);
 }
 
 void RoutingSession::RebuildRoute(m2::PointD const & startPoint,
     TReadyCallback const & readyCallback,
-    TProgressCallback const & progressCallback, uint32_t timeoutSec)
+    TProgressCallback const & progressCallback, uint32_t timeoutSec, State routeRebuildingState)
 {
   ASSERT(m_router != nullptr, ());
   ASSERT_NOT_EQUAL(m_endPoint, m2::PointD::Zero(), ("End point was not set"));
   RemoveRoute();
-  SetState(RouteBuilding);
+  SetState(routeRebuildingState);
   m_routingRebuildCount++;
   m_lastCompletionPercent = 0;
 
@@ -159,8 +159,9 @@ RoutingSession::State RoutingSession::OnLocationPositionChanged(GpsInfo const & 
   ASSERT(m_state != RoutingNotActive, ());
   ASSERT(m_router != nullptr, ());
 
-  if (m_state == RouteNeedRebuild || m_state == RouteFinished || m_state == RouteBuilding ||
-      m_state == RouteNotReady || m_state == RouteNoFollowing)
+  if (m_state == RouteNeedRebuild || m_state == RouteFinished
+      || m_state == RouteBuilding || m_state == RouteRebuilding
+      || m_state == RouteNotReady || m_state == RouteNoFollowing)
     return m_state;
 
   threads::MutexGuard guard(m_routeSessionMutex);
@@ -246,7 +247,7 @@ void RoutingSession::GetRouteFollowingInfo(FollowingInfo & info) const
   auto formatDistFn = [](double dist, string & value, string & suffix)
   {
     /// @todo Make better formatting of distance and units.
-    MeasurementUtils::FormatDistance(dist, value);
+    UNUSED_VALUE(measurement_utils::FormatDistance(dist, value));
 
     size_t const delim = value.find(' ');
     ASSERT(delim != string::npos, ());
@@ -456,7 +457,7 @@ bool RoutingSession::AreTurnNotificationsEnabled() const
   return m_turnNotificationsMgr.IsEnabled();
 }
 
-void RoutingSession::SetTurnNotificationsUnits(settings::Units const units)
+void RoutingSession::SetTurnNotificationsUnits(measurement_utils::Units const units)
 {
   threads::MutexGuard guard(m_routeSessionMutex);
   UNUSED_VALUE(guard);
@@ -534,6 +535,7 @@ string DebugPrint(RoutingSession::State state)
   case RoutingSession::RouteNeedRebuild: return "RouteNeedRebuild";
   case RoutingSession::RouteFinished: return "RouteFinished";
   case RoutingSession::RouteNoFollowing: return "RouteNoFollowing";
+  case RoutingSession::RouteRebuilding: return "RouteRebuilding";
   }
 }
 }  // namespace routing

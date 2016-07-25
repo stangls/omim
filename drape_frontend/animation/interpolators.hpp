@@ -15,6 +15,7 @@ public:
   virtual void Finish();
 
   bool IsActive() const;
+  void SetActive(bool active);
 
   bool IsFinished() const;
   void SetMaxDuration(double maxDuration);
@@ -24,7 +25,6 @@ public:
 protected:
   double GetT() const;
   double GetElapsedTime() const;
-  void SetActive(bool active);
 
 private:
   double m_elapsedTime;
@@ -40,25 +40,29 @@ class PositionInterpolator: public Interpolator
 public:
   PositionInterpolator();
   PositionInterpolator(double duration, double delay,
-                       m2::PointD const & startPosition,
-                       m2::PointD const & endPosition);
-  PositionInterpolator(m2::PointD const & startPosition,
-                       m2::PointD const & endPosition,
-                       ScreenBase const & convertor);
-  PositionInterpolator(double delay, m2::PointD const & startPosition,
-                       m2::PointD const & endPosition,
-                       ScreenBase const & convertor);
-  PositionInterpolator(m2::PointD const & startPxPosition,
-                       m2::PointD const & endPxPosition,
-                       m2::RectD const & pixelRect);
-  PositionInterpolator(double delay, m2::PointD const & startPxPosition,
-                       m2::PointD const & endPxPosition,
-                       m2::RectD const & pixelRect);
+                       m2::PointD const & startPosition, m2::PointD const & endPosition);
 
-  static double GetMoveDuration(m2::PointD const & startPosition,
-                                m2::PointD const & endPosition, ScreenBase const & convertor);
-  static double GetPixelMoveDuration(m2::PointD const & startPosition,
-                                     m2::PointD const & endPosition, m2::RectD const & pixelRect);
+  PositionInterpolator(m2::PointD const & startPosition, m2::PointD const & endPosition,
+                       ScreenBase const & convertor);
+
+  PositionInterpolator(double delay,
+                       m2::PointD const & startPosition, m2::PointD const & endPosition,
+                       ScreenBase const & convertor);
+
+  PositionInterpolator(m2::PointD const & startPosition, m2::PointD const & endPosition,
+                       m2::RectD const & viewportRect, double scale);
+
+  PositionInterpolator(double delay,
+                       m2::PointD const & startPosition, m2::PointD const & endPosition,
+                       m2::RectD const & viewportRect, double scale);
+
+  static double GetMoveDuration(double globalDistance, m2::RectD const & viewportRect, double scale);
+
+  static double GetMoveDuration(m2::PointD const & startPosition, m2::PointD const & endPosition,
+                                m2::RectD const & viewportRect, double scale);
+
+  static double GetMoveDuration(m2::PointD const & startPosition, m2::PointD const & endPosition,
+                                ScreenBase const & convertor);
 
   // Interpolator overrides:
   void Advance(double elapsedSeconds) override;
@@ -79,16 +83,17 @@ class ScaleInterpolator: public Interpolator
 
 public:
   ScaleInterpolator();
-  ScaleInterpolator(double startScale, double endScale);
-  ScaleInterpolator(double delay, double startScale, double endScale);
+  ScaleInterpolator(double startScale, double endScale, bool isAutoZoom);
+  ScaleInterpolator(double delay, double startScale, double endScale, bool isAutoZoom);
 
-  static double GetScaleDuration(double startScale, double endScale);
+  static double GetScaleDuration(double startScale, double endScale, bool isAutoZoom);
 
   // Interpolator overrides:
   void Advance(double elapsedSeconds) override;
   void Finish() override;
 
   double GetScale() const { return m_scale; }
+  double GetStartScale() const { return m_startScale; }
   double GetTargetScale() const { return m_endScale; }
 
 private:
@@ -114,6 +119,7 @@ public:
   void Finish() override;
 
   double GetAngle() const { return m_angle; }
+  double GetStartAngle() const { return m_startAngle; }
   double GetTargetAngle() const { return m_endAngle; }
 
 private:

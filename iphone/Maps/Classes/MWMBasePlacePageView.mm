@@ -1,10 +1,10 @@
 #import "Common.h"
-#import "LocationManager.h"
 #import "MapsAppDelegate.h"
 #import "MapViewController.h"
 #import "MWMBasePlacePageView.h"
 #import "MWMCircularProgress.h"
 #import "MWMFrameworkListener.h"
+#import "MWMLocationHelpers.h"
 #import "MWMPlacePage.h"
 #import "MWMPlacePageActionBar.h"
 #import "MWMPlacePageBookmarkCell.h"
@@ -28,7 +28,7 @@
 namespace
 {
 CGFloat const kDownloadProgressViewLeftOffset = 12.;
-CGFloat const kDownloadProgressViewTopOffset = 10.;
+CGFloat const kDownloadProgressViewTopOffset = 4.;
 CGFloat const kLabelsBetweenMainOffset = 8.;
 CGFloat const kLabelsBetweenSmallOffset = 4.;
 CGFloat const kBottomPlacePageOffset = 16.;
@@ -229,11 +229,35 @@ using namespace storage;
 
   BOOL const isMyPosition = entity.isMyPosition;
   self.addressLabel.text = entity.address;
-  self.bookingPriceLabel.text = entity.bookingPrice;
+
+  if (!entity.bookingOnlinePrice.length)
+  {
+    self.bookingPriceLabel.text = entity.bookingPrice;
+    [entity onlinePricingWithCompletionBlock:^
+    {
+      if (!entity.bookingOnlinePrice.length)
+        return;
+      self.bookingPriceLabel.text = entity.bookingOnlinePrice;
+      [self setNeedsLayout];
+      [UIView animateWithDuration:kDefaultAnimationDuration animations:^
+      {
+        [self layoutIfNeeded];
+      }];
+    }
+    failure:^
+    {
+      // TODO(Vlad): Process an error.
+    }];
+  }
+  else
+  {
+    self.bookingPriceLabel.text = entity.bookingOnlinePrice;
+  }
+
   self.bookingRatingLabel.text = entity.bookingRating;
   self.bookingView.hidden = !entity.bookingPrice.length && !entity.bookingRating.length;
   BOOL const isHeadingAvaible = [CLLocationManager headingAvailable];
-  BOOL const noLocation = MapsAppDelegate.theApp.locationManager.isLocationPendingOrNoPosition;
+  BOOL const noLocation = location_helpers::isMyPositionPendingOrNoPosition();
   self.distanceLabel.hidden = noLocation || isMyPosition;
   BOOL const hideDirection = noLocation || isMyPosition || !isHeadingAvaible;
   self.directionArrow.hidden = hideDirection;
@@ -257,6 +281,7 @@ using namespace storage;
   else
   {
     self.downloadProgressView.hidden = NO;
+    [self setNeedsLayout];
     NodeAttrs nodeAttrs;
     GetFramework().Storage().GetNodeAttrs(countryId, nodeAttrs);
     MWMCircularProgress * progress = self.mapDownloadProgress;
@@ -268,7 +293,7 @@ using namespace storage;
         MWMCircularProgressStateVec const affectedStates = {MWMCircularProgressStateNormal,
           MWMCircularProgressStateSelected};
         [progress setImage:[UIImage imageNamed:@"ic_download"] forStates:affectedStates];
-        [progress setColoring:MWMButtonColoringBlack forStates:affectedStates];
+        [progress setColoring:MWMButtonColoringBlue forStates:affectedStates];
         progress.state = MWMCircularProgressStateNormal;
         break;
       }
@@ -286,19 +311,11 @@ using namespace storage;
         progress.state = MWMCircularProgressStateFailed;
         break;
       case NodeStatus::OnDisk:
+      case NodeStatus::OnDiskOutOfDate:
       {
         self.downloadProgressView.hidden = YES;
         [self setNeedsLayout];
         [UIView animateWithDuration:kDefaultAnimationDuration animations:^{ [self layoutIfNeeded]; }];
-        break;
-      }
-      case NodeStatus::OnDiskOutOfDate:
-      {
-        MWMCircularProgressStateVec const affectedStates = {MWMCircularProgressStateNormal,
-          MWMCircularProgressStateSelected};
-        [progress setImage:[UIImage imageNamed:@"ic_update"] forStates:affectedStates];
-        [progress setColoring:MWMButtonColoringOther forStates:affectedStates];
-        progress.state = MWMCircularProgressStateNormal;
         break;
       }
     }
@@ -669,7 +686,7 @@ using namespace storage;
     case MWMPlacePageCellTypeAddBusinessButton:
     case MWMPlacePageCellTypeAddPlaceButton:
     case MWMPlacePageCellTypeBookingMore:
-      [static_cast<MWMPlacePageButtonCell *>(cell) config:self.ownerPlacePage forType:cellType];
+      [static_cast<MWMPlacePageButtonCell *>(cell) config:self.ownerPlacePage.manager forType:cellType];
       break;
     default:
     {

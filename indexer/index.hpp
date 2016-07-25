@@ -51,6 +51,7 @@ public:
   void SetTable(MwmInfoEx & info);
 
   inline feature::DataHeader const & GetHeader() const { return m_factory.GetHeader(); }
+  inline feature::RegionData const & GetRegionData() const { return m_factory.GetRegionData(); }
   inline version::MwmVersion const & GetMwmVersion() const { return m_factory.GetMwmVersion(); }
   inline string const & GetCountryFileName() const { return m_file.GetCountryFile().GetName(); }
 };
@@ -272,20 +273,21 @@ public:
   class FeaturesLoaderGuard
   {
   public:
-    FeaturesLoaderGuard(Index const & parent, MwmId const & id);
+    FeaturesLoaderGuard(Index const & index, MwmId const & id);
 
     inline MwmSet::MwmId const & GetId() const { return m_handle.GetId(); }
     string GetCountryFileName() const;
     bool IsWorld() const;
+
     /// Everyone, except Editor core, should use this method.
-    void GetFeatureByIndex(uint32_t index, FeatureType & ft) const;
+    WARN_UNUSED_RESULT bool GetFeatureByIndex(uint32_t index, FeatureType & ft) const;
+
     /// Editor core only method, to get 'untouched', original version of feature.
-    void GetOriginalFeatureByIndex(uint32_t index, FeatureType & ft) const;
-    inline FeaturesVector const & GetFeaturesVector() const { return m_vector; }
+    WARN_UNUSED_RESULT bool GetOriginalFeatureByIndex(uint32_t index, FeatureType & ft) const;
 
   private:
     MwmHandle m_handle;
-    FeaturesVector m_vector;
+    unique_ptr<FeaturesVector> m_vector;
     osm::Editor & m_editor = osm::Editor::Instance();
   };
 

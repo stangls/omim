@@ -519,6 +519,9 @@
 /* Settings «Map» category: «Record track» title */
 "pref_track_record_title" = "Senaste resväg";
 
+/* Settings «Map» category: «Auto zoom» title */
+"pref_map_auto_zoom" = "Auto zoom";
+
 "duration_disabled" = "Av";
 
 "duration_1_hour" = "1 timme";
@@ -1138,6 +1141,8 @@
 
 "autodownload" = "Automatisk nedladdning";
 
+"disable_autodownload" = "Avaktivera automatisk nedladdning";
+
 /* Place Page opening hours text */
 "closed_now" = "Stängt just nu";
 
@@ -1208,8 +1213,6 @@
 "edit_place" = "Ändra platsen";
 
 "place_name" = "Platsens namn";
-
-"place_name_caption" = "Ange namnet som på skylten eller på namnbrickan";
 
 /* title above languages list cells in the editor, below editable name text field. */
 "other_languages" = "Övriga språk";
@@ -1283,7 +1286,7 @@
 
 "editor_login_with_osm" = "Logga in med OpenStreetMap";
 
-"editor_profile_changes" = "Ändringar:";
+"editor_profile_changes" = "Verifierade ändringar";
 
 "editor_profile_unsent_changes" = "Inte skickade:";
 
@@ -1400,8 +1403,6 @@
 
 "editor_no_local_edits_description" = "Detta visar antalet föreslagna förändringar på kartan som som endast är tillgängliga på din enhet.";
 
-"editor_international_names_subtitle" = "Namn på andra språk";
-
 "editor_send_to_osm" = "Skicka till OSM";
 
 "editor_remove" = "Ta bord";
@@ -1473,7 +1474,7 @@
 
 "placepage_open_24_7" = "Døgnet rundt";
 
-"placepage_place_rating" = "Betyg:";
+"place_page_booking_rating" = "Betyg: %s";
 
 "place_page_starting_from" = "från %s";
 
@@ -1513,14 +1514,32 @@
 
 "editor_place_doesnt_exist" = "Platsen finns inte";
 
-"place_page_booking_rating" = "Rating: %s";
+"text_more_button" = "…mer";
 
-"text_more_button" = "… more";
+"error_enter_correct_phone" = "Ange telefonnummer utan bokstäver";
 
-"error_enter_correct_phone" = "Enter a valid phone number";
+"error_enter_correct_web" = "Ange en giltig webadress";
 
-"error_enter_correct_web" = "Enter a valid web address";
+"error_enter_correct_email" = "Ange en giltig e-postadress";
 
-"error_enter_correct_email" = "Enter a valid email";
+"error_enter_correct" = "Ange ett giltigt värde";
 
-"error_enter_correct" = "Enter a valid value";
+"editor_profile_changes_for_next_place" = "Ändringar av nästa plats: %d";
+
+"editor_profile_rating_place" = "Rankning";
+
+"booking_dialog_not_connect_header" = "Var vänlig aktivera din internetanslutning för att göra hotellbokningen";
+
+"whatsnew_booking_header" = "Boka ett hotell från appen";
+
+"whatsnew_booking_message" = "När du letar efter ett hotell kommer kartan visa hotellets priskategori och bedömning.";
+
+"button_try" = "Prova det";
+
+"whatsnew_cycle_navigation_header" = "Cykelnavigering (betaversion)";
+
+"whatsnew_cycle_navigation_message" = "Vi testar cykelnavigeringen för den nya säsongen. Testa din favoritcykelrutt med MAPS.ME och berätta för oss vad du tycker.";
+
+"refresh" = "Uppdatera";
+
+"last_update" = "Senast uppdaterad: %s";

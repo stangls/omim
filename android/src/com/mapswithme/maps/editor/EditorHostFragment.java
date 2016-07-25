@@ -16,6 +16,8 @@ import com.mapswithme.maps.MwmActivity;
 import com.mapswithme.maps.R;
 import com.mapswithme.maps.base.BaseMwmToolbarFragment;
 import com.mapswithme.maps.base.OnBackPressListener;
+import com.mapswithme.maps.editor.data.Language;
+import com.mapswithme.maps.editor.data.LocalizedName;
 import com.mapswithme.maps.editor.data.LocalizedStreet;
 import com.mapswithme.maps.widget.SearchToolbarController;
 import com.mapswithme.maps.widget.ToolbarController;
@@ -23,9 +25,13 @@ import com.mapswithme.util.ConnectionState;
 import com.mapswithme.util.UiUtils;
 import com.mapswithme.util.Utils;
 import com.mapswithme.util.statistics.Statistics;
+import com.mapswithme.maps.editor.data.NamesDataSource;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class EditorHostFragment extends BaseMwmToolbarFragment
-                             implements OnBackPressListener, View.OnClickListener
+                             implements OnBackPressListener, View.OnClickListener, LanguagesFragment.Listener
 {
   private boolean mIsNewObject;
 
@@ -39,6 +45,60 @@ public class EditorHostFragment extends BaseMwmToolbarFragment
   }
 
   private Mode mMode;
+
+  /**
+   * A list of localized names added by a user and those that were in metadata.
+   */
+  private static final List<LocalizedName> sNames = new ArrayList<>();
+  /**
+   * Count of names which should always be shown.
+   */
+  private int mMandatoryNamesCount = 0;
+
+  /**
+   *   Used in MultilanguageAdapter to show, select and remove items.
+   */
+  List<LocalizedName> getNames()
+  {
+    return sNames;
+  }
+
+  public LocalizedName[] getNamesAsArray()
+  {
+    return sNames.toArray(new LocalizedName[sNames.size()]);
+  }
+
+  void setNames(LocalizedName[] names)
+  {
+    sNames.clear();
+    for (LocalizedName name : names)
+    {
+      addName(name);
+    }
+  }
+
+  /**
+   * Sets .name of an index item to name.
+   */
+  void setName(String name, int index)
+  {
+    sNames.get(index).name = name;
+  }
+
+  void addName(LocalizedName name)
+  {
+    sNames.add(name);
+  }
+
+  public int getMandatoryNamesCount()
+  {
+    return mMandatoryNamesCount;
+  }
+
+  public void setMandatoryNamesCount(int mandatoryNamesCount)
+  {
+    mMandatoryNamesCount = mandatoryNamesCount;
+  }
 
   @Nullable
   @Override
@@ -65,6 +125,9 @@ public class EditorHostFragment extends BaseMwmToolbarFragment
       mIsNewObject = getArguments().getBoolean(EditorActivity.EXTRA_NEW_OBJECT, false);
     mToolbarController.setTitle(getTitle());
 
+    NamesDataSource namesDataSource = Editor.nativeGetNamesDataSource();
+    setNames(namesDataSource.getNames());
+    setMandatoryNamesCount(namesDataSource.getMandatoryNamesCount());
     editMapObject();
   }
 
@@ -95,6 +158,7 @@ public class EditorHostFragment extends BaseMwmToolbarFragment
     case OPENING_HOURS:
     case STREET:
     case CUISINE:
+    case LANGUAGE:
       editMapObject();
       break;
     default:
@@ -105,10 +169,18 @@ public class EditorHostFragment extends BaseMwmToolbarFragment
 
   protected void editMapObject()
   {
+    editMapObject(false /* focusToLastName */);
+  }
+
+  protected void editMapObject(boolean focusToLastName)
+  {
     mMode = Mode.MAP_OBJECT;
     ((SearchToolbarController) mToolbarController).showControls(false);
     mToolbarController.setTitle(getTitle());
-    final Fragment editorFragment = Fragment.instantiate(getActivity(), EditorFragment.class.getName());
+    Bundle args = new Bundle();
+    if (focusToLastName)
+      args.putInt(EditorFragment.LAST_INDEX_OF_NAMES_ARRAY, sNames.size() - 1);
+    final Fragment editorFragment = Fragment.instantiate(getActivity(), EditorFragment.class.getName(), args);
     getChildFragmentManager().beginTransaction()
                              .replace(R.id.fragment_container, editorFragment, EditorFragment.class.getName())
                              .commit();
@@ -131,9 +203,14 @@ public class EditorHostFragment extends BaseMwmToolbarFragment
     editWithFragment(Mode.CUISINE, R.string.select_cuisine, null, CuisineFragment.class, true);
   }
 
-  protected void addLocalizedLanguage()
+  protected void addLanguage()
   {
-    editWithFragment(Mode.LANGUAGE, R.string.choose_language, null, LanguagesFragment.class, false);
+    Bundle args = new Bundle();
+    ArrayList<String> languages = new ArrayList<>(sNames.size());
+    for (LocalizedName name : sNames)
+      languages.add(name.lang);
+    args.putStringArrayList(LanguagesFragment.EXISTING_LOCALIZED_NAMES, languages);
+    editWithFragment(Mode.LANGUAGE, R.string.choose_language, args, LanguagesFragment.class, false);
   }
 
   private void editWithFragment(Mode newMode, @StringRes int toolbarTitle, @Nullable Bundle args, Class<? extends Fragment> fragmentClass, boolean showSearch)
@@ -248,5 +325,12 @@ public class EditorHostFragment extends BaseMwmToolbarFragment
   public boolean addingNewObject()
   {
     return mIsNewObject;
+  }
+
+  @Override
+  public void onLanguageSelected(Language lang)
+  {
+    addName(Editor.nativeMakeLocalizedName(lang.code, ""));
+    editMapObject(true /* focusToLastName */);
   }
 }

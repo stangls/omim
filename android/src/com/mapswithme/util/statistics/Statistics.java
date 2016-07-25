@@ -2,13 +2,16 @@ package com.mapswithme.util.statistics;
 
 import android.app.Activity;
 import android.content.Context;
+import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.facebook.appevents.AppEventsLogger;
@@ -260,6 +263,25 @@ public enum Statistics
     }
   }
 
+  public void trackEvent(@NonNull String name, Location location, @NonNull Map<String, String> params)
+  {
+    if (mEnabled)
+    {
+      List<String> eventDictionary = new ArrayList<String>();
+      for (Map.Entry<String, String> entry : params.entrySet())
+      {
+        eventDictionary.add(entry.getKey());
+        eventDictionary.add(entry.getValue());
+      }
+
+      org.alohalytics.Statistics.logEvent(name, eventDictionary.toArray(new String[0]), location);
+
+      params.put("lat", (location == null ? "N/A" : String.valueOf(location.getLatitude())));
+      params.put("lon", (location == null ? "N/A" : String.valueOf(location.getLongitude())));
+      FlurryAgent.logEvent(name, params);
+    }
+  }
+
   public void trackEvent(@NonNull String name, @NonNull ParameterBuilder builder)
   {
     trackEvent(name, builder.get());
@@ -358,10 +380,13 @@ public enum Statistics
     }
   }
 
-  public void trackRouteBuild(String from, String to)
+  public void trackRouteBuild(int routerType, MapObject from, MapObject to)
   {
-    trackEvent(EventName.ROUTING_BUILD, params().add(EventParam.FROM, from)
-                                                .add(EventParam.TO, to));
+    trackEvent(EventName.ROUTING_BUILD, params().add(EventParam.FROM, Statistics.getPointType(from))
+        .add(EventParam.TO, Statistics.getPointType(to)));
+
+    boolean isP2P = !MapObject.isOfType(MapObject.MY_POSITION, from) && !MapObject.isOfType(MapObject.MY_POSITION, to);
+    PushwooshHelper.get().sendTag(PushwooshHelper.getRoutingTag(routerType, isP2P));
   }
 
   public void trackEditorLaunch(boolean newObject)
@@ -369,6 +394,8 @@ public enum Statistics
     trackEvent(newObject ? EventName.EDITOR_START_CREATE : EventName.EDITOR_START_EDIT,
                editorMwmParams().add(EventParam.IS_AUTHENTICATED, String.valueOf(OsmOAuth.isAuthorized()))
                                 .add(EventParam.IS_ONLINE, String.valueOf(ConnectionState.isConnected())));
+
+    PushwooshHelper.get().sendTag(newObject ? PushwooshHelper.ADD_MAP_OBJECT : PushwooshHelper.EDIT_MAP_OBJECT);
   }
 
   public void trackEditorSuccess(boolean newObject)

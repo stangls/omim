@@ -30,6 +30,10 @@
 + (UIFont *)bold14;
 + (UIFont *)bold16;
 + (UIFont *)bold17;
++ (UIFont *)bold22;
++ (UIFont *)bold24;
++ (UIFont *)bold28;
++ (UIFont *)bold36;
 + (UIFont *)bold48;
 
 + (UIFont *)fontWithName:(NSString *)fontName;

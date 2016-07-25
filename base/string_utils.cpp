@@ -24,12 +24,14 @@ SimpleDelimiter::SimpleDelimiter(char const * delims)
     m_delims.push_back(utf8::unchecked::next(it));
 }
 
+SimpleDelimiter::SimpleDelimiter(char delim)
+{
+  m_delims.push_back(delim);
+}
+
 bool SimpleDelimiter::operator()(UniChar c) const
 {
-  for (UniString::const_iterator it = m_delims.begin(); it != m_delims.end(); ++it)
-    if (*it == c)
-      return true;
-  return false;
+  return find(m_delims.begin(), m_delims.end(), c) != m_delims.end();
 }
 
 UniChar LastUniChar(string const & s)
@@ -324,6 +326,22 @@ bool AlmostEqual(string const & str1, string const & str2, size_t mismatchedCoun
       ++mis.second;
   }
   return false;
+}
+
+void ParseCSVRow(string const & s, char const delimiter, vector<string> & target)
+{
+  target.clear();
+  using It = TokenizeIterator<SimpleDelimiter, string::const_iterator, true>;
+  for (It it(s, SimpleDelimiter(delimiter)); it; ++it)
+  {
+    string column = *it;
+    strings::Trim(column);
+    target.push_back(move(column));
+  }
+
+  // Special case: if the string is empty, return an empty array instead of {""}.
+  if (target.size() == 1 && target[0].empty())
+    target.clear();
 }
 
 }  // namespace strings

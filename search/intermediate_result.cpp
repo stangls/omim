@@ -26,7 +26,8 @@ namespace search
 /// All constants in meters.
 double const DIST_EQUAL_RESULTS = 100.0;
 double const DIST_SAME_STREET = 5000.0;
-
+char const * const kEmptyRatingSymbol = "-";
+char const * const kPricingSymbol = "$";
 
 void ProcessMetadata(FeatureType const & ft, Result::Metadata & meta)
 {
@@ -52,9 +53,26 @@ void ProcessMetadata(FeatureType const & ft, Result::Metadata & meta)
     meta.m_stars = my::clamp(meta.m_stars, 0, 5);
   else
     meta.m_stars = 0;
-  
-  meta.m_isSponsoredHotel = ftypes::IsBookingChecker::Instance()(ft);
-  
+
+  bool const isSponsoredHotel = ftypes::IsBookingChecker::Instance()(ft);
+  meta.m_isSponsoredHotel = isSponsoredHotel;
+
+  if (isSponsoredHotel)
+  {
+    auto const r = src.Get(feature::Metadata::FMD_RATING);
+    char const * const rating = r.empty() ? kEmptyRatingSymbol : r.c_str();
+    meta.m_hotelRating = rating;
+
+    int pricing;
+    strings::to_int(src.Get(feature::Metadata::FMD_PRICE_RATE), pricing);
+    string pricingStr;
+    CHECK_GREATER_OR_EQUAL(pricing, 0, ("Pricing must be positive!"));
+    for (auto i = 0; i < pricing; i++)
+      pricingStr.append(kPricingSymbol);
+
+    meta.m_hotelApproximatePricing = pricingStr;
+  }
+
   meta.m_isInitialized = true;
 }
 
@@ -100,8 +118,7 @@ PreResult2::PreResult2(FeatureType const & f, PreResult1 const * p, m2::PointD c
 }
 
 PreResult2::PreResult2(double lat, double lon)
-  : m_str("(" + MeasurementUtils::FormatLatLon(lat, lon) + ")"),
-    m_resultType(RESULT_LATLON)
+  : m_str("(" + measurement_utils::FormatLatLon(lat, lon) + ")"), m_resultType(RESULT_LATLON)
 {
   m_region.SetParams(string(), MercatorBounds::FromLatLon(lat, lon));
 }
@@ -176,12 +193,18 @@ Result PreResult2::GenerateFinalResult(storage::CountryInfoGetter const & infoGe
                                        set<uint32_t> const * pTypes, int8_t locale,
                                        ReverseGeocoder const * coder) const
 {
+  ReverseGeocoder::Address addr;
+  bool addrComputed = false;
+
   string name = m_str;
   if (coder && name.empty())
   {
     // Insert exact address (street and house number) instead of empty result name.
-    ReverseGeocoder::Address addr;
-    coder->GetNearbyAddress(GetCenter(), addr);
+    if (!addrComputed)
+    {
+      coder->GetNearbyAddress(GetCenter(), addr);
+      addrComputed = true;
+    }
     if (addr.GetDistance() == 0)
       name = FormatStreetAndHouse(addr);
   }
@@ -195,8 +218,11 @@ Result PreResult2::GenerateFinalResult(storage::CountryInfoGetter const & infoGe
     address = GetRegionName(infoGetter, type);
     if (ftypes::IsAddressObjectChecker::Instance()(m_types))
     {
-      ReverseGeocoder::Address addr;
-      coder->GetNearbyAddress(GetCenter(), addr);
+      if (!addrComputed)
+      {
+        coder->GetNearbyAddress(GetCenter(), addr);
+        addrComputed = true;
+      }
       address = FormatFullAddress(addr, address);
     }
   }

@@ -411,12 +411,6 @@ UNIT_TEST(SimpleTokenizer)
     tokens.assign(&s[0], &s[0] + ARRAY_SIZE(s));
     TestIter("/1/2/", "/", tokens);
   }
-  {
-    using strings::SimpleTokenizer;
-    string const str("a,b,c");
-    TEST_EQUAL(vector<string>(SimpleTokenizer(str, ","), SimpleTokenizer()),
-               (vector<string>{"a", "b", "c"}), ());
-  }
 
   {
     string const s = "";
@@ -734,4 +728,18 @@ UNIT_TEST(NormalizeDigits_UniString)
   TEST_EQUAL(nd("z12345／／"), "z12345／／", ());
   TEST_EQUAL(nd("a０１9２ "), "a0192 ", ());
   TEST_EQUAL(nd("３４５６７８９"), "3456789", ());
+}
+
+UNIT_TEST(CSV)
+{
+  vector<string> target;
+  strings::ParseCSVRow(",Test\\,проверка,0,", ',', target);
+  vector<string> expected({"", "Test\\", "проверка", "0", ""});
+  TEST_EQUAL(target, expected, ());
+  strings::ParseCSVRow("and there  was none", ' ', target);
+  vector<string> expected2({"and", "there", "", "was", "none"});
+  TEST_EQUAL(target, expected2, ());
+  strings::ParseCSVRow("", 'q', target);
+  vector<string> expected3;
+  TEST_EQUAL(target, expected3, ());
 }

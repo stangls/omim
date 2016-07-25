@@ -144,8 +144,6 @@
 			</dict>
 		</dict>
 	</dict>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string></string>
 	<key>UIApplicationShortcutItems</key>
 	<array>
 		<dict>
@@ -175,6 +173,7 @@
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>
+		<string>audio</string>
 		<string>fetch</string>
 		<string>location</string>
 		<string>remote-notification</string>
@@ -245,5 +244,7 @@
 			</dict>
 		</dict>
 	</array>
+	<key>PW_USE_GPS</key>
+	<true/>
 </dict>
 </plist>

@@ -11,7 +11,7 @@ MapLinearAnimation::MapLinearAnimation(m2::PointD const & startPos, m2::PointD c
   : Animation(true /* couldBeInterrupted */, false /* couldBeBlended */)
   , m_angleInterpolator(startAngle, endAngle)
   , m_positionInterpolator(startPos, endPos, convertor)
-  , m_scaleInterpolator(startScale, endScale)
+  , m_scaleInterpolator(startScale, endScale, false /* isAutoZoom */)
 {
   m_objects.insert(Animation::MapPlane);
 
@@ -39,6 +39,14 @@ void MapLinearAnimation::SetMove(m2::PointD const & startPos, m2::PointD const &
     m_properties.insert(Animation::Position);
 }
 
+void MapLinearAnimation::SetMove(m2::PointD const & startPos, m2::PointD const & endPos,
+                                 m2::RectD const & viewportRect, double scale)
+{
+  m_positionInterpolator = PositionInterpolator(startPos, endPos, viewportRect, scale);
+  if (m_positionInterpolator.IsActive())
+    m_properties.insert(Animation::Position);
+}
+
 void MapLinearAnimation::SetRotate(double startAngle, double endAngle)
 {
   m_angleInterpolator = AngleInterpolator(startAngle, endAngle);
@@ -48,7 +56,7 @@ void MapLinearAnimation::SetRotate(double startAngle, double endAngle)
 
 void MapLinearAnimation::SetScale(double startScale, double endScale)
 {
-  m_scaleInterpolator = ScaleInterpolator(startScale, endScale);
+  m_scaleInterpolator = ScaleInterpolator(startScale, endScale, false /* isAutoZoom */);
   if (m_scaleInterpolator.IsActive())
     m_properties.insert(Animation::Scale);
 }

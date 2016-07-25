@@ -1,6 +1,8 @@
 #import "MWMBottomMenuViewController.h"
 #import "MWMNavigationDashboardManager.h"
-#import "MWMRoutingProtocol.h"
+#import "MWMSearchManager.h"
+
+#include "MWMRoutePoint.h"
 
 #include "map/user_mark.hpp"
 #include "platform/location.hpp"
@@ -8,17 +10,22 @@
 @class MapViewController;
 @class MWMPlacePageEntity;
 
-@interface MWMMapViewControlsManager : NSObject <MWMRoutingProtocol>
+@interface MWMMapViewControlsManager : NSObject
 
-@property (nonatomic) BOOL hidden;
-@property (nonatomic) BOOL zoomHidden;
-@property (nonatomic) MWMBottomMenuState menuState;
-@property (nonatomic, readonly) MWMNavigationDashboardState navigationState;
-@property (nonatomic, readonly) MWMPlacePageEntity * placePageEntity;
-@property (nonatomic) BOOL searchHidden;
++ (MWMMapViewControlsManager *)manager;
+
+@property(nonatomic) BOOL hidden;
+@property(nonatomic) BOOL zoomHidden;
+@property(nonatomic) BOOL sideButtonsHidden;
+@property(nonatomic) MWMBottomMenuState menuState;
+@property(nonatomic, readonly) MWMNavigationDashboardState navigationState;
+@property(nonatomic, readonly) MWMPlacePageEntity * placePageEntity;
+@property(nonatomic) BOOL searchHidden;
 
 - (instancetype)init __attribute__((unavailable("init is not available")));
 - (instancetype)initWithParentController:(MapViewController *)controller;
+
+- (UIStatusBarStyle)preferredStatusBarStyle;
 
 #pragma mark - Layout
 
@@ -32,22 +39,31 @@
 
 #pragma mark - MWMPlacePageViewManager
 
-@property (nonatomic, readonly) BOOL isDirectionViewShown;
+@property(nonatomic, readonly) BOOL isDirectionViewShown;
 
 - (void)dismissPlacePage;
 - (void)showPlacePage:(place_page::Info const &)info;
+- (void)addPlacePageViews:(NSArray *)views;
+- (void)addPlace:(BOOL)isBusiness hasPoint:(BOOL)hasPoint point:(m2::PointD const &)point;
+- (void)dragPlacePage:(CGRect)frame;
 
 #pragma mark - MWMNavigationDashboardManager
 
-- (void)setupRoutingDashboard:(location::FollowingInfo const &)info;
-- (void)restoreRouteTo:(m2::PointD const &)to;
-- (void)routingHidden;
-- (void)routingReady;
-- (void)routingPrepare;
-- (void)routingNavigation;
-- (void)handleRoutingError;
-- (void)buildRoute;
+- (void)onRoutePrepare;
+- (void)onRouteRebuild;
+- (void)onRouteError;
+- (void)onRouteReady;
+- (void)onRouteStart;
+- (void)onRouteStop;
 
 - (void)processMyPositionStateModeEvent:(location::EMyPositionMode)mode;
+
+- (void)navigationDashBoardDidUpdate;
+
+#pragma mark - MWMSearchManager
+
+- (void)searchViewDidEnterState:(MWMSearchManagerState)state;
+- (void)actionDownloadMaps:(mwm::DownloaderMode)mode;
+- (void)searchFrameUpdated:(CGRect)frame;
 
 @end

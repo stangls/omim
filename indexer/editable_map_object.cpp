@@ -1,6 +1,7 @@
+#include "indexer/editable_map_object.hpp"
 #include "indexer/classificator.hpp"
 #include "indexer/cuisines.hpp"
-#include "indexer/editable_map_object.hpp"
+#include "indexer/osm_editor.hpp"
 #include "indexer/postcodes_matcher.hpp"
 
 #include "base/macros.hpp"
@@ -9,8 +10,72 @@
 #include "std/cctype.hpp"
 #include "std/cmath.hpp"
 
+
+namespace
+{
+bool ExtractName(StringUtf8Multilang const & names, int8_t const langCode,
+                 vector<osm::LocalizedName> & result)
+{
+  if (StringUtf8Multilang::kUnsupportedLanguageCode == langCode ||
+      StringUtf8Multilang::kDefaultCode == langCode)
+  {
+    return false;
+  }
+
+  // Exclude languages that are already present.
+  auto const it =
+      find_if(result.begin(), result.end(), [langCode](osm::LocalizedName const & localizedName) {
+        return localizedName.m_code == langCode;
+      });
+
+  if (result.end() != it)
+    return false;
+  
+  string name;
+  names.GetString(langCode, name);
+  result.emplace_back(langCode, name);
+
+  return true;
+}
+
+size_t PushMwmLanguages(StringUtf8Multilang const & names, vector<int8_t> const & mwmLanguages,
+                        vector<osm::LocalizedName> & result)
+{
+  size_t count = 0;
+  static size_t const kMaxCountMwmLanguages = 2;
+
+  for (size_t i = 0; i < mwmLanguages.size() && count < kMaxCountMwmLanguages; ++i)
+  {
+    if (ExtractName(names, mwmLanguages[i], result))
+      ++count;
+  }
+  
+  return count;
+}
+}  // namespace
+
 namespace osm
 {
+// LocalizedName -----------------------------------------------------------------------------------
+
+LocalizedName::LocalizedName(int8_t const code, string const & name)
+  : m_code(code)
+  , m_lang(StringUtf8Multilang::GetLangByCode(code))
+  , m_langName(StringUtf8Multilang::GetLangNameByCode(code))
+  , m_name(name)
+{
+}
+
+LocalizedName::LocalizedName(string const & langCode, string const & name)
+  : m_code(StringUtf8Multilang::GetLangIndex(langCode))
+  , m_lang(StringUtf8Multilang::GetLangByCode(m_code))
+  , m_langName(StringUtf8Multilang::GetLangNameByCode(m_code))
+  , m_name(name)
+{
+}
+
+// EditableMapObject -------------------------------------------------------------------------------
+
 // static
 int8_t const EditableMapObject::kMaximumLevelsEditableByUsers = 25;
 
@@ -29,15 +94,54 @@ vector<feature::Metadata::EType> const & EditableMapObject::GetEditableFields() 
 
 StringUtf8Multilang const & EditableMapObject::GetName() const { return m_name; }
 
-vector<LocalizedName> EditableMapObject::GetLocalizedNames() const
+NamesDataSource EditableMapObject::GetNamesDataSource() const
 {
-  vector<LocalizedName> result;
-  m_name.ForEach([&result](int8_t code, string const & name) -> bool
-                 {
-                   result.push_back({code, StringUtf8Multilang::GetLangByCode(code),
-                                     StringUtf8Multilang::GetLangNameByCode(code), name});
-                   return true;
-                 });
+  const auto mwmInfo = GetID().m_mwmId.GetInfo();
+
+  if (!mwmInfo)
+    return NamesDataSource();
+
+  vector<int8_t> mwmLanguages;
+  mwmInfo->GetRegionData().GetLanguages(mwmLanguages);
+
+  auto const userLangCode = StringUtf8Multilang::GetLangIndex(languages::GetCurrentNorm());
+
+  return GetNamesDataSource(m_name, mwmLanguages, userLangCode);
+}
+
+// static
+NamesDataSource EditableMapObject::GetNamesDataSource(StringUtf8Multilang const & source,
+                                                      vector<int8_t> const & mwmLanguages,
+                                                      int8_t const userLangCode)
+{
+  NamesDataSource result;
+  auto & names = result.names;
+  auto & mandatoryCount = result.mandatoryNamesCount;
+  // Push Mwm languages.
+  mandatoryCount = PushMwmLanguages(source, mwmLanguages, names);
+
+  // Push user's language.
+  if (ExtractName(source, userLangCode, names))
+    ++mandatoryCount;
+
+  // Push other languages.
+  source.ForEach([&names, mandatoryCount](int8_t const code, string const & name) -> bool {
+    // Exclude default name.
+    if (StringUtf8Multilang::kDefaultCode == code)
+      return true;
+    
+    auto const mandatoryNamesEnd = names.begin() + mandatoryCount;
+    // Exclude languages which are already in container (languages with top priority).
+    auto const it = find_if(
+        names.begin(), mandatoryNamesEnd,
+        [code](LocalizedName const & localizedName) { return localizedName.m_code == code; });
+
+    if (mandatoryNamesEnd == it)
+      names.emplace_back(code, name);
+    
+    return true;
+  });
+
   return result;
 }
 
@@ -61,10 +165,45 @@ void EditableMapObject::SetEditableProperties(osm::EditableProperties const & pr
 
 void EditableMapObject::SetName(StringUtf8Multilang const & name) { m_name = name; }
 
-void EditableMapObject::SetName(string const & name, int8_t langCode)
+void EditableMapObject::SetName(string name, int8_t langCode)
 {
-  if (!name.empty())
-    m_name.AddString(langCode, name);
+  strings::Trim(name);
+  if (name.empty())
+    return;
+
+  ASSERT_NOT_EQUAL(StringUtf8Multilang::kDefaultCode, langCode,
+                   ("Direct editing of default name is deprecated."));
+
+  if (!Editor::Instance().OriginalFeatureHasDefaultName(GetID()))
+  {
+    const auto mwmInfo = GetID().m_mwmId.GetInfo();
+
+    if (mwmInfo)
+    {
+      vector<int8_t> mwmLanguages;
+      mwmInfo->GetRegionData().GetLanguages(mwmLanguages);
+
+      if (CanUseAsDefaultName(langCode, mwmLanguages))
+        m_name.AddString(StringUtf8Multilang::kDefaultCode, name);
+    }
+  }
+
+  m_name.AddString(langCode, name);
+}
+
+// static
+bool EditableMapObject::CanUseAsDefaultName(int8_t const lang, vector<int8_t> const & mwmLanguages)
+{
+  for (auto const & mwmLang : mwmLanguages)
+  {
+    if (StringUtf8Multilang::kUnsupportedLanguageCode == mwmLang)
+      continue;
+
+    if (lang == mwmLang)
+      return true;
+  }
+
+  return false;
 }
 
 void EditableMapObject::SetMercator(m2::PointD const & center) { m_mercator = center; }
@@ -195,10 +334,14 @@ void EditableMapObject::SetPointType() { m_geomType = feature::EGeomType::GEOM_P
 // static
 bool EditableMapObject::ValidateBuildingLevels(string const & buildingLevels)
 {
-  if (buildingLevels.size() > 18 /* max number of digits in uint_64 */)
-    return false;
   if (buildingLevels.empty())
     return true;
+
+  if (buildingLevels.size() > 18 /* max number of digits in uint_64 */)
+    return false;
+
+  if ('0' == buildingLevels.front())
+    return false;
 
   uint64_t levels;
   return strings::to_uint64(buildingLevels, levels) && levels > 0 && levels <= kMaximumLevelsEditableByUsers;
@@ -207,7 +350,7 @@ bool EditableMapObject::ValidateBuildingLevels(string const & buildingLevels)
 // static
 bool EditableMapObject::ValidateHouseNumber(string const & houseNumber)
 {
-  // TODO(mgsergio): Make a better validation, use real samples for example.
+  // TODO(mgsergio): Use LooksLikeHouseNumber!
 
   if (houseNumber.empty())
     return true;
@@ -232,12 +375,14 @@ bool EditableMapObject::ValidateHouseNumber(string const & houseNumber)
 // static
 bool EditableMapObject::ValidateFlats(string const & flats)
 {
-  auto it = strings::SimpleTokenizer(flats, ";");
-  for (; it != strings::SimpleTokenizer(); ++it)
+  for (auto it = strings::SimpleTokenizer(flats, ";"); it; ++it)
   {
     auto token = *it;
     strings::Trim(token);
-    vector<string> range(strings::SimpleTokenizer(token, "-"), strings::SimpleTokenizer());
+
+    vector<string> range;
+    for (auto i = strings::SimpleTokenizer(token, "-"); i; ++i)
+      range.push_back(*i);
     if (range.empty() || range.size() > 2)
       return false;
 
@@ -253,6 +398,8 @@ bool EditableMapObject::ValidateFlats(string const & flats)
 // static
 bool EditableMapObject::ValidatePostCode(string const & postCode)
 {
+  if (postCode.empty())
+    return true;
   return search::LooksLikePostcode(postCode, false /* IsPrefix */);
 }
 
@@ -292,9 +439,14 @@ bool EditableMapObject::ValidateWebsite(string const & site)
   if (site.empty())
     return true;
 
-  auto const dotPos = find(begin(site), end(site), '.');
-  // Site should contain at least one dot but not at the begining/and.
-  if (dotPos == end(site) || site.front() == '.' || site.back() == '.')
+  // Site should contain at least one dot but not at the begining/end.
+  if ('.' == site.front() || '.' == site.back())
+    return false;
+
+  if (string::npos == site.find("."))
+    return false;
+
+  if (string::npos != site.find(".."))
     return false;
 
   return true;
@@ -306,6 +458,15 @@ bool EditableMapObject::ValidateEmail(string const & email)
   if (email.empty())
     return true;
 
+  if (strings::IsASCIIString(email))
+    return regex_match(email, regex(R"([^@\s]+@[a-zA-Z0-9-]+(\.[a-zA-Z0-9-]+)+$)"));
+
+  if ('@' == email.front() || '@' == email.back())
+    return false;
+
+  if ('.' == email.back())
+    return false;
+
   auto const atPos = find(begin(email), end(email), '@');
   if (atPos == end(email))
     return false;
@@ -314,12 +475,8 @@ bool EditableMapObject::ValidateEmail(string const & email)
   if (find(next(atPos), end(email), '@') != end(email))
     return false;
 
-  // There should be at least one '.' sign after '@' ...
+  // There should be at least one '.' sign after '@'
   if (find(next(atPos), end(email), '.') == end(email))
-    return false;
-
-  // ... not in the end.
-  if (email.back() == '.')
     return false;
 
   return true;

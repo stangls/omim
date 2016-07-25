@@ -133,7 +133,9 @@ public:
   void AddRelation(TKey id, RelationElement const & e)
   {
     string const & relationType = e.GetType();
-    if (!(relationType == "multipolygon" || relationType == "route" || relationType == "boundary"))
+    if (!(relationType == "multipolygon" || relationType == "route" ||
+          relationType == "boundary" || relationType == "associatedStreet" ||
+          relationType == "building"))
       return;
 
     m_relations.Write(id, e);
@@ -512,9 +514,11 @@ bool GenerateFeaturesImpl(feature::GenerateInfo & info)
     TagAdmixer tagAdmixer(info.GetIntermediateFileName("ways", ".csv"),
                           info.GetIntermediateFileName("towns", ".csv"));
     TagReplacer tagReplacer(GetPlatform().ResourcesDir() + REPLACED_TAGS_FILE);
-    
+    OsmTagMixer osmTagMixer(GetPlatform().ResourcesDir() + MIXED_TAGS_FILE);
+
     // If info.m_bookingDatafileName is empty then no data will be loaded.
-    generator::BookingDataset bookingDataset(info.m_bookingDatafileName);
+    generator::BookingDataset bookingDataset(info.m_bookingDatafileName,
+                                             info.m_bookingReferenceDir);
 
     stringstream skippedElements;
     
@@ -523,6 +527,7 @@ bool GenerateFeaturesImpl(feature::GenerateInfo & info)
     {
       tagReplacer(e);
       tagAdmixer(e);
+      osmTagMixer(e);
 
       if (bookingDataset.BookingFilter(*e))
       {

@@ -58,6 +58,7 @@ NSArray<UIImage *> * animationImages(NSString * animationTemplate, NSUInteger im
     self.sideView.topBound = 0.0;
     self.sideView.bottomBound = view.height;
     self.zoomSwipeEnabled = NO;
+    self.zoomHidden = NO;
   }
   return self;
 }
@@ -96,6 +97,7 @@ NSArray<UIImage *> * animationImages(NSString * animationTemplate, NSUInteger im
 - (void)processMyPositionStateModeEvent:(location::EMyPositionMode)mode
 {
   UIButton * locBtn = self.locationButton;
+  locBtn.hidden = GetFramework().IsOnRoute() && mode == location::FollowAndRotate;
   [locBtn.imageView stopAnimating];
 
   NSArray<UIImage *> * images =
@@ -154,7 +156,7 @@ NSArray<UIImage *> * animationImages(NSString * animationTemplate, NSUInteger im
         case location::PendingPosition:
         {
           NSArray<UIImage *> * images = animationImages(@"btn_pending", 12);
-          locBtn.imageView.animationDuration = 0.8;
+          locBtn.imageView.animationDuration = 1.2;
           locBtn.imageView.animationImages = images;
           locBtn.imageView.animationRepeatCount = 0;
           locBtn.imageView.image = images.lastObject;
@@ -223,17 +225,24 @@ NSArray<UIImage *> * animationImages(NSString * animationTemplate, NSUInteger im
   return zoomButtonsEnabled;
 }
 
+- (BOOL)zoomHidden
+{
+  return self.sideView.zoomHidden;
+}
+
+- (void)setZoomHidden:(BOOL)zoomHidden
+{
+  self.sideView.zoomHidden = [self isZoomEnabled] ? zoomHidden : YES;
+}
+
 - (BOOL)hidden
 {
-  return self.isZoomEnabled ? self.sideView.hidden : YES;
+  return self.sideView.hidden;
 }
 
 - (void)setHidden:(BOOL)hidden
 {
-  if (self.isZoomEnabled)
-    [self.sideView setHidden:hidden animated:YES];
-  else
-    self.sideView.hidden = YES;
+  [self.sideView setHidden:hidden animated:YES];
 }
 
 @end

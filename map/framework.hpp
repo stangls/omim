@@ -1,6 +1,7 @@
 #pragma once
 
 #include "map/api_mark_point.hpp"
+#include "map/booking_api.hpp"
 #include "map/bookmark.hpp"
 #include "map/bookmark_manager.hpp"
 #include "map/place_page_info.hpp"
@@ -139,6 +140,8 @@ protected:
 
   BookmarkManager m_bmManager;
 
+  BookingApi m_bookingApi;
+
   bool m_isRenderingEnabled;
 
   /// This function will be called by m_storage when latest local files
@@ -163,6 +166,10 @@ protected:
 public:
   Framework();
   virtual ~Framework();
+
+  /// Get access to booking api helpers
+  BookingApi & GetBookingApi() { return m_bookingApi; }
+  BookingApi const & GetBookingApi() const { return m_bookingApi; }
 
   /// Migrate to new version of very different data.
   bool IsEnoughSpaceForMigrate() const;
@@ -424,8 +431,6 @@ public:
   bool SearchInDownloader(storage::DownloaderSearchParams const & params);
   bool GetCurrentPosition(double & lat, double & lon) const;
 
-  void LoadSearchResultMetadata(search::Result & res) const;
-
   void ShowSearchResult(search::Result const & res);
   size_t ShowSearchResults(search::Results const & results);
 
@@ -534,7 +539,7 @@ public:
   /// Set parse to false if you don't need all feature fields ready.
   /// TODO(AlexZ): Refactor code which uses this method to get rid of it.
   /// FeatureType instances shoud not be used outside ForEach* core methods.
-  unique_ptr<FeatureType> GetFeatureByID(FeatureID const & fid, bool parse = true) const;
+  WARN_UNUSED_RESULT bool GetFeatureByID(FeatureID const & fid, FeatureType & ft) const;
 
   void MemoryWarning();
   void EnterBackground();
@@ -572,7 +577,7 @@ public:
   //@{
   bool IsDataVersionUpdated();
   void UpdateSavedDataVersion();
-  int64_t GetCurrentDataVersion();
+  int64_t GetCurrentDataVersion() const;
   //@}
 
 public:
@@ -587,8 +592,14 @@ public:
   bool IsRoutingActive() const { return m_routingSession.IsActive(); }
   bool IsRouteBuilt() const { return m_routingSession.IsBuilt(); }
   bool IsRouteBuilding() const { return m_routingSession.IsBuilding(); }
+  bool IsRouteBuildingOnly() const { return m_routingSession.IsBuildingOnly(); }
+  bool IsRouteRebuildingOnly() const { return m_routingSession.IsRebuildingOnly(); }
+  bool IsRouteNotReady() const { return m_routingSession.IsNotReady(); }
+  bool IsRouteFinished() const { return m_routingSession.IsFinished(); }
+  bool IsRouteNoFollowing() const { return m_routingSession.IsNoFollowing(); }
   bool IsOnRoute() const { return m_routingSession.IsOnRoute(); }
   bool IsRouteNavigable() const { return m_routingSession.IsNavigable(); }
+
   void BuildRoute(m2::PointD const & finish, uint32_t timeoutSec);
   void BuildRoute(m2::PointD const & start, m2::PointD const & finish, uint32_t timeoutSec);
   // FollowRoute has a bug where the router follows the route even if the method hads't been called.
@@ -643,11 +654,17 @@ public:
   void Save3dMode(bool allow3d, bool allow3dBuildings);
   void Load3dMode(bool & allow3d, bool & allow3dBuildings);
 
+  bool LoadAutoZoom();
+  void AllowAutoZoom(bool allowAutoZoom);
+  void SaveAutoZoom(bool allowAutoZoom);
+
 public:
   /// @name Editor interface.
   //@{
   /// Initializes feature for Create Object UI.
   /// @returns false in case when coordinate is in the ocean or mwm is not downloaded.
+  bool CanEditMap() const;
+
   bool CreateMapObject(m2::PointD const & mercator, uint32_t const featureType, osm::EditableMapObject & emo) const;
   /// @returns false if feature is invalid or can't be edited.
   bool GetEditableMapObject(FeatureID const & fid, osm:: EditableMapObject & emo) const;
@@ -686,10 +703,10 @@ public:
   }
 
   // Reads user stats from server or gets it from cache calls |fn| on success.
-  void UpdateUserStats(string const & userName,
+  void UpdateUserStats(string const & userName, editor::UserStatsLoader::UpdatePolicy policy,
                        editor::UserStatsLoader::TOnUpdateCallback fn)
   {
-    m_userStatsLoader.Update(userName, fn);
+    m_userStatsLoader.Update(userName, policy, fn);
   }
 
   void DropUserStats(string const & userName) { m_userStatsLoader.DropStats(userName); }
@@ -698,5 +715,9 @@ private:
   editor::UserStatsLoader m_userStatsLoader;
   //@}
 
+public:
+  bool OriginalFeatureHasDefaultName(FeatureID const & fid) const;
+
+private:
   DECLARE_THREAD_CHECKER(m_threadChecker);
 };

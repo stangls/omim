@@ -142,6 +142,7 @@ public:
   void ChangeModelView(m2::RectD const & rect) override;
   void ChangeModelView(m2::PointD const & userPos, double azimuth,
                        m2::PointD const & pxZero, int preferredZoomLevel) override;
+  void ChangeModelView(double autoScale, m2::PointD const & userPos, double azimuth, m2::PointD const & pxZero) override;
 
 protected:
   void AcceptMessage(ref_ptr<Message> message) override;
@@ -174,7 +175,6 @@ private:
   TTilesCollection ResolveTileKeys(ScreenBase const & screen);
   void ResolveZoomLevel(ScreenBase const & screen);
   void UpdateDisplacementEnabled();
-  void CheckPerspectiveMinScale();
   void CheckIsometryMinScale(ScreenBase const & screen);
 
   void DisablePerspective();
@@ -195,7 +195,6 @@ private:
   void OnScaleEnded() override;
   void OnAnimatedScaleEnded() override;
   void OnAnimationStarted(ref_ptr<Animation> anim) override;
-  void OnPerspectiveSwitchRejected() override;
   void OnTouchMapAction() override;
 
   class Routine : public threads::IRoutine
@@ -223,8 +222,7 @@ private:
   using TRenderGroupRemovePredicate = function<bool(drape_ptr<RenderGroup> const &)>;
   void RemoveRenderGroupsLater(TRenderGroupRemovePredicate const & predicate);
 
-  void FollowRoute(int preferredZoomLevel, int preferredZoomLevelIn3d,
-                   double rotationAngle, double angleFOV);
+  void FollowRoute(int preferredZoomLevel, int preferredZoomLevelIn3d, bool enableAutoZoom);
   void InvalidateRect(m2::RectD const & gRect);
   bool CheckTileGenerations(TileKey const & tileKey);
   void UpdateCanBeDeletedStatus();
@@ -296,8 +294,6 @@ private:
   TTilesCollection m_notFinishedTiles;
 
   int m_currentZoomLevel = -1;
-
-  bool m_perspectiveDiscarded = false;
   
   ref_ptr<RequestedTiles> m_requestedTiles;
   uint64_t m_maxGeneration;
@@ -307,18 +303,15 @@ private:
   {
     FollowRouteData(int preferredZoomLevel,
                     int preferredZoomLevelIn3d,
-                    double rotationAngle,
-                    double angleFOV)
+                    bool enableAutoZoom)
       : m_preferredZoomLevel(preferredZoomLevel)
       , m_preferredZoomLevelIn3d(preferredZoomLevelIn3d)
-      , m_rotationAngle(rotationAngle)
-      , m_angleFOV(angleFOV)
+      , m_enableAutoZoom(enableAutoZoom)
     {}
 
     int m_preferredZoomLevel;
     int m_preferredZoomLevelIn3d;
-    double m_rotationAngle;
-    double m_angleFOV;
+    bool m_enableAutoZoom;
   };
 
   unique_ptr<FollowRouteData> m_pendingFollowRoute;

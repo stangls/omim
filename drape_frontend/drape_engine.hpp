@@ -116,7 +116,7 @@ public:
   void SetUserPositionListener(TUserPositionChangedFn && fn);
 
   FeatureID GetVisiblePOI(m2::PointD const & glbPoint);
-  void SelectObject(SelectionShape::ESelectedObject obj, m2::PointD const & pt, bool isAnim);
+  void SelectObject(SelectionShape::ESelectedObject obj, m2::PointD const & pt, FeatureID const & featureID, bool isAnim);
   void DeselectObject();
   bool GetMyPosition(m2::PointD & myPosition);
   SelectionShape::ESelectedObject GetSelectedObject();
@@ -124,14 +124,16 @@ public:
   void AddRoute(m2::PolylineD const & routePolyline, vector<double> const & turns,
                 df::ColorConstant color, df::RoutePattern pattern = df::RoutePattern());
   void RemoveRoute(bool deactivateFollowing);
-  void FollowRoute(int preferredZoomLevel, int preferredZoomLevel3d, double rotationAngle, double angleFOV);
+  void FollowRoute(int preferredZoomLevel, int preferredZoomLevel3d, bool enableAutoZoom);
   void DeactivateRouteFollowing();
   void SetRoutePoint(m2::PointD const & position, bool isStart, bool isValid);
 
   void SetWidgetLayout(gui::TWidgetsLayoutInfo && info);
 
-  void Allow3dMode(bool allowPerspectiveInNavigation, bool allow3dBuildings, double rotationAngle, double angleFOV);
-  void EnablePerspective(double rotationAngle, double angleFOV);
+  void AllowAutoZoom(bool allowAutoZoom);
+
+  void Allow3dMode(bool allowPerspectiveInNavigation, bool allow3dBuildings);
+  void EnablePerspective();
 
   void UpdateGpsTrackPoints(vector<df::GpsTrackPoint> && toAdd, vector<uint32_t> && toRemove);
   void ClearGpsTrackPoints();

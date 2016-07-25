@@ -1,16 +1,20 @@
-#import "LocationManager.h"
-#import "MapsAppDelegate.h"
+#import "MWMSearchManager.h"
 #import "MWMConsole.h"
 #import "MWMFrameworkListener.h"
+#import "MWMLocationManager.h"
+#import "MWMMapViewControlsManager.h"
 #import "MWMNoMapsViewController.h"
-#import "MWMRoutingProtocol.h"
-#import "MWMSearchManager.h"
-#import "MWMSearchTabbedViewController.h"
+#import "MWMRouter.h"
+#import "MWMSearch.h"
 #import "MWMSearchTabButtonsView.h"
+#import "MWMSearchTabbedViewController.h"
 #import "MWMSearchTableViewController.h"
+#import "MapsAppDelegate.h"
 #import "Statistics.h"
 
 #import "3party/Alohalytics/src/alohalytics_objc.h"
+
+#include "MWMRoutePoint.h"
 
 #include "storage/storage_helpers.hpp"
 
@@ -22,34 +26,31 @@ extern NSString * const kSearchStateKey = @"SearchStateKey";
 
 @interface MWMSearchManager ()<MWMSearchTableViewProtocol, MWMSearchTabbedViewProtocol,
                                MWMSearchTabButtonsViewProtocol, UITextFieldDelegate,
-                               MWMFrameworkStorageObserver, MWMNoMapsViewControllerProtocol>
+                               MWMFrameworkStorageObserver>
 
-@property (weak, nonatomic) UIView * parentView;
-@property (nonatomic) IBOutlet MWMSearchView * rootView;
-@property (weak, nonatomic) IBOutlet UIView * contentView;
+@property(weak, nonatomic) UIView * parentView;
+@property(nonatomic) IBOutlet MWMSearchView * rootView;
+@property(weak, nonatomic) IBOutlet UIView * contentView;
 
-@property (nonatomic) IBOutletCollection(MWMSearchTabButtonsView) NSArray * tabButtons;
-@property (weak, nonatomic) IBOutlet NSLayoutConstraint * scrollIndicatorOffset;
-@property (weak, nonatomic) IBOutlet UIView * scrollIndicator;
+@property(nonatomic) IBOutletCollection(MWMSearchTabButtonsView) NSArray * tabButtons;
+@property(weak, nonatomic) IBOutlet NSLayoutConstraint * scrollIndicatorOffset;
+@property(weak, nonatomic) IBOutlet UIView * scrollIndicator;
 
-@property (nonatomic) UINavigationController * navigationController;
-@property (nonatomic) MWMSearchTabbedViewController * tabbedController;
-@property (nonatomic) MWMSearchTableViewController * tableViewController;
-@property (nonatomic) MWMNoMapsViewController * noMapsController;
+@property(nonatomic) UINavigationController * navigationController;
+@property(nonatomic) MWMSearchTabbedViewController * tabbedController;
+@property(nonatomic) MWMSearchTableViewController * tableViewController;
+@property(nonatomic) MWMNoMapsViewController * noMapsController;
 
 @end
 
 @implementation MWMSearchManager
 
 - (nullable instancetype)initWithParentView:(nonnull UIView *)view
-                                   delegate:(nonnull id<MWMSearchManagerProtocol, MWMSearchViewProtocol, MWMRoutingProtocol>)delegate
 {
   self = [super init];
   if (self)
   {
     [NSBundle.mainBundle loadNibNamed:@"MWMSearchView" owner:self options:nil];
-    self.delegate = delegate;
-    self.rootView.delegate = delegate;
     self.parentView = view;
     self.state = MWMSearchManagerStateHidden;
   }
@@ -69,17 +70,14 @@ extern NSString * const kSearchStateKey = @"SearchStateKey";
 {
   if (self.state == MWMSearchManagerStateDefault)
     self.state = MWMSearchManagerStateTableSearch;
-  self.searchTextField.isSearching = YES;
 }
 
 - (void)endSearch
 {
-  GetFramework().CancelInteractiveSearch();
   if (self.state != MWMSearchManagerStateHidden)
     self.state = MWMSearchManagerStateDefault;
-  self.searchTextField.isSearching = NO;
   self.searchTextField.text = @"";
-  [self.tableViewController searchText:@"" forInputLocale:nil];
+  [MWMSearch clear];
 }
 
 #pragma mark - Actions
@@ -92,7 +90,7 @@ extern NSString * const kSearchStateKey = @"SearchStateKey";
 
 - (IBAction)textFieldDidEndEditing:(UITextField *)textField
 {
-  if (textField.text.length == 0)
+  if (textField.text.length == 0 && self.state != MWMSearchManagerStateHidden)
     [self endSearch];
 }
 
@@ -108,8 +106,7 @@ extern NSString * const kSearchStateKey = @"SearchStateKey";
     else
     {
       [self beginSearch];
-      [self.tableViewController searchText:text
-                            forInputLocale:textField.textInputMode.primaryLanguage];
+      [MWMSearch searchQuery:text forInputLocale:textField.textInputMode.primaryLanguage];
     }
   }
   else
@@ -167,17 +164,17 @@ extern NSString * const kSearchStateKey = @"SearchStateKey";
   [self beginSearch];
   self.searchTextField.text = text;
   NSString * inputLocale = locale ? locale : self.searchTextField.textInputMode.primaryLanguage;
-  [self.tableViewController searchText:text forInputLocale:inputLocale];
+  [MWMSearch searchQuery:text forInputLocale:inputLocale];
 }
 
 - (void)tapMyPositionFromHistory
 {
   MapsAppDelegate * a = MapsAppDelegate.theApp;
-  MWMRoutePoint const p = MWMRoutePoint::MWMRoutePoint(a.locationManager.lastLocation.mercator);
+  MWMRoutePoint const p = MWMRoutePoint::MWMRoutePoint([MWMLocationManager lastLocation].mercator);
   if (a.routingPlaneMode == MWMRoutingPlaneModeSearchSource)
-    [self.delegate buildRouteFrom:p];
+    [[MWMRouter router] buildFromPoint:p bestRouter:YES];
   else if (a.routingPlaneMode == MWMRoutingPlaneModeSearchDestination)
-    [self.delegate buildRouteTo:p];
+    [[MWMRouter router] buildToPoint:p bestRouter:YES];
   else
     NSAssert(false, @"Incorrect state for process my position tap");
   if (!IPAD)
@@ -185,19 +182,24 @@ extern NSString * const kSearchStateKey = @"SearchStateKey";
   self.state = MWMSearchManagerStateHidden;
 }
 
-- (void)processSearchWithResult:(search::Result const &)result query:(search::QuerySaver::TSearchRequest const &)query
+- (void)processSearchWithResult:(search::Result const &)result
 {
-  auto & f = GetFramework();
-  f.SaveSearchQuery(query);
   MapsAppDelegate * a = MapsAppDelegate.theApp;
   MWMRoutingPlaneMode const m = a.routingPlaneMode;
-  MWMRoutePoint const p = {result.GetFeatureCenter(), @(result.GetString().c_str())};
   if (m == MWMRoutingPlaneModeSearchSource)
-    [self.delegate buildRouteFrom:p];
+  {
+    MWMRoutePoint const p = { result.GetFeatureCenter(), @(result.GetString().c_str()) };
+    [[MWMRouter router] buildFromPoint:p bestRouter:YES];
+  }
   else if (m == MWMRoutingPlaneModeSearchDestination)
-     [self.delegate buildRouteTo:p];
+  {
+    MWMRoutePoint const p = { result.GetFeatureCenter(), @(result.GetString().c_str()) };
+    [[MWMRouter router] buildToPoint:p bestRouter:YES];
+  }
   else
-    f.ShowSearchResult(result);
+  {
+    [MWMSearch showResult:result];
+  }
   if (!IPAD && a.routingPlaneMode != MWMRoutingPlaneModeNone)
     a.routingPlaneMode = MWMRoutingPlaneModePlacePage;
   self.state = MWMSearchManagerStateHidden;
@@ -213,20 +215,14 @@ extern NSString * const kSearchStateKey = @"SearchStateKey";
   if (nodeStatuses.m_status != NodeStatus::OnDisk)
     return;
   [self updateTopController];
-  if (self.state == MWMSearchManagerStateTableSearch || self.state == MWMSearchManagerStateMapSearch)
+  if (self.state == MWMSearchManagerStateTableSearch ||
+      self.state == MWMSearchManagerStateMapSearch)
   {
     NSString * text = self.searchTextField.text;
-    if (text.length > 0)
-      [self.tableViewController searchText:text
-                            forInputLocale:self.searchTextField.textInputMode.primaryLanguage];
+    if (text.length != 0)
+      [MWMSearch searchQuery:text
+              forInputLocale:self.searchTextField.textInputMode.primaryLanguage];
   }
-}
-
-#pragma mark - MWMNoMapsViewControllerProtocol
-
-- (void)handleDownloadMapsAction
-{
-  [self.delegate actionDownloadMaps:mwm::DownloaderMode::Available];
 }
 
 #pragma mark - State changes
@@ -268,24 +264,26 @@ extern NSString * const kSearchStateKey = @"SearchStateKey";
 {
   self.rootView.compact = NO;
   self.rootView.tabBarIsVisible = NO;
-  self.tableViewController.searchOnMap = NO;
+  [MWMSearch setSearchOnMap:NO];
   if (![self.navigationController.viewControllers containsObject:self.tableViewController])
     [self.navigationController pushViewController:self.tableViewController animated:NO];
 }
 
 - (void)changeToMapSearchState
 {
-  auto & f = GetFramework();
-  UITextField * textField = self.searchTextField;
-
-  string const locale = textField.textInputMode.primaryLanguage ?
-            textField.textInputMode.primaryLanguage.UTF8String :
-            self.tableViewController.searchParams.m_inputLocale;
-  f.SaveSearchQuery(make_pair(locale, textField.text.precomposedStringWithCompatibilityMapping.UTF8String));
-  f.DeactivateMapSelection(true);
+  GetFramework().DeactivateMapSelection(true);
   [self.searchTextField resignFirstResponder];
   self.rootView.compact = YES;
-  self.tableViewController.searchOnMap = YES;
+  [MWMSearch setSearchOnMap:YES];
+
+  if ([MWMNavigationDashboardManager manager].state == MWMNavigationDashboardStateNavigation)
+  {
+    self.searchTextField.text = @"";
+    [self.tabbedController resetSelectedTab];
+    self.tableViewController = nil;
+    self.noMapsController = nil;
+    self.rootView.isVisible = NO;
+  }
 }
 
 #pragma mark - Properties
@@ -294,7 +292,8 @@ extern NSString * const kSearchStateKey = @"SearchStateKey";
 {
   if (!_navigationController)
   {
-    _navigationController = [[UINavigationController alloc] initWithRootViewController:self.topController];
+    _navigationController =
+        [[UINavigationController alloc] initWithRootViewController:self.topController];
     [self.contentView addSubview:_navigationController.view];
     _navigationController.navigationBarHidden = YES;
   }
@@ -303,7 +302,8 @@ extern NSString * const kSearchStateKey = @"SearchStateKey";
 
 - (UIViewController *)topController
 {
-  if (self.state == MWMSearchManagerStateHidden || GetFramework().Storage().HaveDownloadedCountries())
+  if (self.state == MWMSearchManagerStateHidden ||
+      GetFramework().Storage().HaveDownloadedCountries())
   {
     return self.tabbedController;
   }
@@ -311,9 +311,10 @@ extern NSString * const kSearchStateKey = @"SearchStateKey";
   {
     if (!self.noMapsController)
     {
-      UIStoryboard * storyboard = [UIStoryboard storyboardWithName:@"Mapsme" bundle:[NSBundle mainBundle]];
-      self.noMapsController = [storyboard instantiateViewControllerWithIdentifier:@"MWMNoMapsViewController"];
-      self.noMapsController.delegate = self;
+      UIStoryboard * storyboard =
+          [UIStoryboard storyboardWithName:@"Mapsme" bundle:[NSBundle mainBundle]];
+      self.noMapsController =
+          [storyboard instantiateViewControllerWithIdentifier:@"MWMNoMapsViewController"];
     }
     return self.noMapsController;
   }
@@ -392,12 +393,8 @@ extern NSString * const kSearchStateKey = @"SearchStateKey";
     [self changeToMapSearchState];
     break;
   }
-  [self.delegate searchViewDidEnterState:state];
+  [[MWMMapViewControlsManager manager] searchViewDidEnterState:state];
 }
 
-- (UIView *)view
-{
-  return self.rootView;
-}
-
+- (UIView *)view { return self.rootView; }
 @end

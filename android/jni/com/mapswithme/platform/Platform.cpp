@@ -22,9 +22,7 @@ string Platform::UniqueClientId() const
     jclass uuidClass = env->FindClass("java/util/UUID");
     ASSERT(uuidClass, ("Can't find java class java/util/UUID"));
 
-    jmethodID randomUUIDId = env->GetStaticMethodID(uuidClass, "randomUUID", "()Ljava/util/UUID;");
-    ASSERT(randomUUIDId, ("Can't find static java/util/UUID.randomUUIDId() method"));
-
+    jmethodID randomUUIDId = jni::GetStaticMethodID(env, uuidClass, "randomUUID", "()Ljava/util/UUID;");
     jobject uuidInstance = env->CallStaticObjectMethod(uuidClass, randomUUIDId);
     ASSERT(uuidInstance, ("UUID.randomUUID() returned NULL"));
 
@@ -59,9 +57,7 @@ string Platform::GetMemoryInfo() const
   static shared_ptr<jobject> classMemLogging = jni::make_global_ref(env->FindClass("com/mapswithme/util/log/MemLogging"));
   ASSERT(classMemLogging, ());
 
-  static jmethodID const getMemoryInfoId = env->GetStaticMethodID(static_cast<jclass>(*classMemLogging), "getMemoryInfo", "()Ljava/lang/String;");
-  ASSERT(getMemoryInfoId, ());
-
+  static jmethodID const getMemoryInfoId = jni::GetStaticMethodID(env, static_cast<jclass>(*classMemLogging), "getMemoryInfo", "()Ljava/lang/String;");
   jstring const memInfoString = (jstring)env->CallStaticObjectMethod(static_cast<jclass>(*classMemLogging), getMemoryInfoId);
   ASSERT(memInfoString, ());
 
@@ -73,6 +69,21 @@ void Platform::RunOnGuiThread(TFunctor const & fn)
   android::Platform::Instance().RunOnGuiThread(fn);
 }
 
+void Platform::SendPushWooshTag(string const & tag)
+{
+  SendPushWooshTag(tag, vector<string>{ "1" });
+}
+
+void Platform::SendPushWooshTag(string const & tag, string const & value)
+{
+  SendPushWooshTag(tag, vector<string>{ value });
+}
+
+void Platform::SendPushWooshTag(string const & tag, vector<string> const & values)
+{
+  android::Platform::Instance().SendPushWooshTag(tag, values);
+}
+
 Platform::EConnectionType Platform::ConnectionStatus()
 {
   JNIEnv * env = jni::GetEnv();
@@ -82,9 +93,7 @@ Platform::EConnectionType Platform::ConnectionStatus()
   static shared_ptr<jobject> clazzConnectionState = jni::make_global_ref(env->FindClass("com/mapswithme/util/ConnectionState"));
   ASSERT(clazzConnectionState, ());
 
-  static jmethodID const getConnectionMethodId = env->GetStaticMethodID(static_cast<jclass>(*clazzConnectionState), "getConnectionState", "()B");
-  ASSERT(getConnectionMethodId, ());
-
+  static jmethodID const getConnectionMethodId = jni::GetStaticMethodID(env, static_cast<jclass>(*clazzConnectionState), "getConnectionState", "()B");
   return static_cast<Platform::EConnectionType>(env->CallStaticByteMethod(static_cast<jclass>(*clazzConnectionState), getConnectionMethodId));
 }
 
@@ -100,6 +109,7 @@ namespace android
     m_functorProcessObject = env->NewGlobalRef(functorProcessObject);
     jclass const functorProcessClass = env->GetObjectClass(functorProcessObject);
     m_functorProcessMethod = env->GetMethodID(functorProcessClass, "forwardToMainThread", "(J)V");
+    m_sendPushWooshTagsMethod = env->GetMethodID(functorProcessClass, "sendPushWooshTags", "(Ljava/lang/String;[Ljava/lang/String;)V");
 
     string const flavor = jni::ToNativeString(env, flavorName);
     string const build = jni::ToNativeString(env, buildType);
@@ -117,13 +127,8 @@ namespace android
 
     m_isTablet = isTablet;
     m_resourcesDir = jni::ToNativeString(env, apkPath);
-    // Settings file should be in a one place always (default external storage).
-    m_settingsDir = jni::ToNativeString(env, storagePath);
     m_tmpDir = jni::ToNativeString(env, tmpPath);
-
-    // Custom storage isn't set. Use primary storage.
-    if (!settings::Get("StoragePath", m_writableDir))
-      m_writableDir = m_settingsDir;
+    m_writableDir = jni::ToNativeString(env, storagePath);
 
     string const obbPath = jni::ToNativeString(env, obbGooglePath);
     Platform::FilesList files;
@@ -135,7 +140,6 @@ namespace android
     LOG(LINFO, ("Apk path = ", m_resourcesDir));
     LOG(LINFO, ("Writable path = ", m_writableDir));
     LOG(LINFO, ("Temporary path = ", m_tmpDir));
-    LOG(LINFO, ("Settings path = ", m_settingsDir));
     LOG(LINFO, ("OBB Google path = ", obbPath));
     LOG(LINFO, ("OBB Google files = ", files));
 
@@ -165,10 +169,17 @@ namespace android
     return m_writableDir.substr(0, i);
   }
 
-  void Platform::SetStoragePath(string const & path)
+  void Platform::SetWritableDir(string const & dir)
   {
-    m_writableDir = path;
+    m_writableDir = dir;
     settings::Set("StoragePath", m_writableDir);
+    LOG(LINFO, ("Writable path = ", m_writableDir));
+  }
+
+  void Platform::SetSettingsDir(string const & dir)
+  {
+    m_settingsDir = dir;
+    LOG(LINFO, ("Settings path = ", m_settingsDir));
   }
 
   bool Platform::HasAvailableSpaceForWriting(uint64_t size) const
@@ -188,7 +199,18 @@ namespace android
     TFunctor * functor = new TFunctor(fn);
     jni::GetEnv()->CallVoidMethod(m_functorProcessObject, m_functorProcessMethod, reinterpret_cast<jlong>(functor));
   }
-}
+
+  void Platform::SendPushWooshTag(string const & tag, vector<string> const & values)
+  {
+    if (values.empty())
+      return;
+
+    JNIEnv * env = jni::GetEnv();
+    env->CallVoidMethod(m_functorProcessObject, m_sendPushWooshTagsMethod,
+                        jni::TScopedLocalRef(env, jni::ToJavaString(env, tag)).get(),
+                        jni::TScopedLocalObjectArrayRef(env, jni::ToJavaStringArray(env, values)).get());
+  }
+} // namespace android
 
 Platform & GetPlatform()
 {

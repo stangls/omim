@@ -1,8 +1,8 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 # coding: utf8
 from __future__ import print_function
 
-from collections import namedtuple, defaultdict
+from collections import defaultdict
 from datetime import datetime
 import argparse
 import base64
@@ -13,13 +13,12 @@ import pickle
 import time
 import urllib2
 
-# init logging
+# Initialize logging.
 logging.basicConfig(level=logging.DEBUG, format='[%(asctime)s] %(levelname)s: %(message)s')
 
-Hotel = namedtuple('Hotel',
-                   ['id', 'lat', 'lon', 'name', 'address',
-                    'stars', 'priceCategory', 'ratingBooking',
-                    'ratingUser', 'descUrl'])
+# Names starting with '.' are calculated in get_hotel_field() below.
+HOTEL_FIELDS = ('hotel_id', '.lat', '.lon', 'name', 'address', 'class', '.rate', 'ranking', 'review_score', 'url', 'hoteltype_id', '.trans')
+
 
 class BookingApi:
     def __init__(self, login, password):
@@ -70,21 +69,6 @@ class BookingApi:
             return None
 
 
-def make_record(src, rate):
-    return Hotel(
-        unicode(src['hotel_id']),
-        unicode(src['location']['latitude']),
-        unicode(src['location']['longitude']),
-        unicode(src['name']),
-        unicode(src['address']),
-        unicode(src['class']),
-        unicode(rate),
-        unicode(src['ranking']),
-        unicode(src['review_score']),
-        unicode(src['url'])
-    )
-
-
 def download(user, password, path):
     '''
     Downloads all hotels from booking.com and stores them in a bunch of .pkl files.
@@ -97,36 +81,56 @@ def download(user, password, path):
         countrycode = country['countrycode']
         logging.info(u'Download[{0}]: {1}'.format(countrycode, country['name']))
 
-        allhotels = []
+        allhotels = {}
         while True:
             hotels = api.call('getHotels',
                               dict(new_hotel_type=1, offset=len(allhotels), rows=maxrows, countrycodes=countrycode))
 
             # Check for error.
-            if not hotels:
+            if hotels is None:
                 exit(1)
 
-            allhotels.extend(hotels)
+            for h in hotels:
+                allhotels[h['hotel_id']] = h
 
             # If hotels in answer less then maxrows, we reach end of data.
             if len(hotels) < maxrows:
                 break
 
-        logging.info('Num of hotels: {0}'.format(len(allhotels)))
+        # Now the same for hotel translations
+        offset = 0
+        while True:
+            hotels = api.call('getHotelTranslations', dict(offset=offset, rows=maxrows, countrycodes=countrycode))
+            if hotels is None:
+                exit(1)
+
+            # Add translations for each hotel
+            for h in hotels:
+                if h['hotel_id'] in allhotels:
+                    if 'translations' not in allhotels[h['hotel_id']]:
+                        allhotels[h['hotel_id']]['translations'] = {}
+                    allhotels[h['hotel_id']]['translations'][h['languagecode']] = {'name': h['name'], 'address': h['address']}
+
+            offset += len(hotels)
+            if len(hotels) < maxrows:
+                break
+
+        logging.info('Num of hotels: {0}, translations: {1}'.format(len(allhotels), offset))
         filename = os.path.join(path,
                                 '{0} - {1}.pkl'.format(country['area'].encode('utf8'), country['name'].encode('utf8')))
         with open(filename, 'wb') as fd:
-            pickle.dump(allhotels, fd, pickle.HIGHEST_PROTOCOL)
+            pickle.dump(allhotels.values(), fd, pickle.HIGHEST_PROTOCOL)
 
 
 def translate(source, output):
     '''
     Reads *.pkl files and produces a single list of hotels as tab separated values.
     '''
-    files = [filename for filename in os.listdir(source) if filename.endswith('.pkl')]
+    files = [os.path.join(source, filename)
+             for filename in os.listdir(source) if filename.endswith('.pkl')]
 
     data = []
-    for filename in files:
+    for filename in sorted(files):
         logging.info('Processing {0}'.format(filename))
         with open(filename, 'rb') as fd:
             data += pickle.load(fd)
@@ -150,6 +154,27 @@ def translate(source, output):
     # Price rate ranges, relative to the median price for a city
     rates = (0.7, 1.3)
 
+    def get_hotel_field(hotel, field, rate):
+        if field == '.lat':
+            return hotel['location']['latitude']
+        elif field == '.lon':
+            return hotel['location']['longitude']
+        elif field == '.rate':
+            return rate
+        elif field == '.trans':
+            # Translations are packed into a single column: lang1|name1|address1|lang2|name2|address2|...
+            if 'translations' in hotel:
+                tr_list = []
+                for tr_lang, tr_values in hotel['translations'].items():
+                    tr_list.append(tr_lang)
+                    tr_list.extend([tr_values[e] for e in ('name', 'address')])
+                return '|'.join([s.replace('|', ';') for s in tr_list])
+            else:
+                return ''
+        elif field in hotel:
+            return hotel[field]
+        raise ValueError('Unknown hotel field: {0}'.format(field))
+
     with open(output, 'w') as fd:
         for hotel in data:
             rate = 0
@@ -160,9 +185,8 @@ def translate(source, output):
                 # Find a range that contains the price
                 while rate <= len(rates) and price > avg * rates[rate - 1]:
                     rate += 1
-            cur = make_record(hotel, rate)
-            l = [e.encode('utf8') for e in cur]
-            print('\t'.join(l), file=fd)
+            l = [get_hotel_field(hotel, e, rate) for e in HOTEL_FIELDS]
+            print('\t'.join([unicode(f).encode('utf8').replace('\t', ' ').replace('\n', ' ').replace('\r', '') for f in l]), file=fd)
 
 
 def process_options():
@@ -184,6 +208,7 @@ def process_options():
     if not options.download and not options.translate:
         parser.print_help()
 
+    # TODO(mgsergio): implpement it with argparse facilities.
     if options.translate and not options.output:
         print("--output isn't set")
         parser.print_help()

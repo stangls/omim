@@ -94,7 +94,7 @@ using namespace osm_auth_ios;
   self.accountView.hidden = NO;
 
   self.navigationItem.rightBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"•••" style:UIBarButtonItemStylePlain target:self action:@selector(showActionSheet)];
-  [self refresh];
+  [self refresh:NO];
 }
 
 - (void)configNoAuth
@@ -158,24 +158,30 @@ using namespace osm_auth_ios;
 - (void)logout
 {
   [Statistics logEvent:kStatEventName(kStatAuthorization, kStatLogout)];
-  GetFramework().DropUserStats(OSMUserName().UTF8String);
+  NSString * osmUserName = OSMUserName();
+  if (osmUserName.length > 0)
+    GetFramework().DropUserStats(osmUserName.UTF8String);
   AuthorizationStoreCredentials({});
   [self.navigationController popViewControllerAnimated:YES];
 }
 
-- (void)refresh
+- (void)refresh:(BOOL)force
 {
   [self updateUI];
   __weak auto weakSelf = self;
-  GetFramework().UpdateUserStats(OSMUserName().UTF8String, ^
-  {
-    [weakSelf updateUI];
-  });
+  auto const policy = force ? editor::UserStatsLoader::UpdatePolicy::Force
+                            : editor::UserStatsLoader::UpdatePolicy::Lazy;
+  NSString * osmUserName = OSMUserName();
+  if (osmUserName.length > 0)
+    GetFramework().UpdateUserStats(osmUserName.UTF8String, policy, ^{ [weakSelf updateUI]; });
 }
 
 - (void)updateUI
 {
-  editor::UserStats stats = GetFramework().GetUserStats(OSMUserName().UTF8String);
+  NSString * osmUserName = OSMUserName();
+  if (osmUserName.length == 0)
+    return;
+  editor::UserStats stats = GetFramework().GetUserStats(osmUserName.UTF8String);
   if (!stats)
     return;
   int32_t changesCount;
@@ -204,7 +210,7 @@ using namespace osm_auth_ios;
                     dateStyle:NSDateFormatterShortStyle
                     timeStyle:NSDateFormatterShortStyle];
   self.lastUpdateLabel.text =
-      [NSString stringWithFormat:@"%@ %@", L(@"last_update"), lastUploadDate];
+      [NSString stringWithFormat:L(@"last_update"), lastUploadDate.UTF8String];
 }
 
 #pragma mark - ActionSheet
@@ -221,7 +227,7 @@ using namespace osm_auth_ios;
     UIAlertController * alertController = [UIAlertController alertControllerWithTitle:nil message:nil preferredStyle:UIAlertControllerStyleActionSheet];
     [alertController addAction:[UIAlertAction actionWithTitle:kRefresh style:UIAlertActionStyleDefault handler:^(UIAlertAction * action)
     {
-      [self refresh];
+      [self refresh:YES];
     }]];
     [alertController addAction:[UIAlertAction actionWithTitle:kLogout style:UIAlertActionStyleDestructive handler:^(UIAlertAction * action)
     {
@@ -245,7 +251,7 @@ using namespace osm_auth_ios;
   if (actionSheet.destructiveButtonIndex == buttonIndex)
     [self logout];
   else if ([[actionSheet buttonTitleAtIndex:buttonIndex] isEqualToString:kRefresh])
-    [self refresh];
+    [self refresh:YES];
 }
 
 #pragma mark - Segue

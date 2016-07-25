@@ -17,8 +17,9 @@ namespace jni
 JNIEnv * GetEnv();
 JavaVM * GetJVM();
 
-jmethodID GetMethodID(JNIEnv * env, jobject obj, char const * fn, char const * sig);
-jmethodID GetConstructorID(JNIEnv * env, jclass clazz, char const * sig);
+jmethodID GetMethodID(JNIEnv * env, jobject obj, char const * name, char const * signature);
+jmethodID GetStaticMethodID(JNIEnv * env, jclass clazz, char const * name, char const * signature);
+jmethodID GetConstructorID(JNIEnv * env, jclass clazz, char const * signature);
 
 // Result value should be DeleteGlobalRef`ed by caller
 jclass GetGlobalClassRef(JNIEnv * env, char const * s);
@@ -50,20 +51,28 @@ jobject GetNewParcelablePointD(JNIEnv * env, m2::PointD const & point);
 jobject GetNewPoint(JNIEnv * env, m2::PointD const & point);
 jobject GetNewPoint(JNIEnv * env, m2::PointI const & point);
 
-template<typename TValue, typename TToJavaFn>
-jobjectArray ToJavaArray(JNIEnv * env, jclass clazz, vector<TValue> const & src, TToJavaFn && toJavaFn)
+template<typename TIt, typename TToJavaFn>
+jobjectArray ToJavaArray(JNIEnv * env, jclass clazz, TIt begin, TIt end, size_t const size, TToJavaFn && toJavaFn)
 {
-  size_t const size = src.size();
   jobjectArray jArray = env->NewObjectArray((jint) size, clazz, 0);
-  for (size_t i = 0; i < size; i++)
+  size_t i = 0;
+  for (auto it = begin; it != end; ++it)
   {
-    TScopedLocalRef jItem(env, toJavaFn(env, src[i]));
+    TScopedLocalRef jItem(env, toJavaFn(env, *it));
     env->SetObjectArrayElement(jArray, i, jItem.get());
+    ++i;
   }
 
   return jArray;
 }
+
+template<typename TContainer, typename TToJavaFn>
+jobjectArray ToJavaArray(JNIEnv * env, jclass clazz, TContainer const & src, TToJavaFn && toJavaFn)
+{
+  return ToJavaArray(env, clazz, begin(src), end(src), src.size(), forward<TToJavaFn>(toJavaFn));
+}
+
 jobjectArray ToJavaStringArray(JNIEnv * env, vector<string> const & src);
 
 void DumpDalvikReferenceTables();
-}
+}  // namespace jni

@@ -519,6 +519,9 @@
 /* Settings «Map» category: «Record track» title */
 "pref_track_record_title" = "最近的軌跡";
 
+/* Settings «Map» category: «Auto zoom» title */
+"pref_map_auto_zoom" = "Auto zoom";
+
 "duration_disabled" = "關閉";
 
 "duration_1_hour" = "1小時";
@@ -1138,6 +1141,8 @@
 
 "autodownload" = "自動下載";
 
+"disable_autodownload" = "停用自動下載";
+
 /* Place Page opening hours text */
 "closed_now" = "現在關門";
 
@@ -1208,8 +1213,6 @@
 "edit_place" = "編輯地點";
 
 "place_name" = "地點名稱";
-
-"place_name_caption" = "輸入標識或名牌上的名稱";
 
 /* title above languages list cells in the editor, below editable name text field. */
 "other_languages" = "其他語言";
@@ -1283,7 +1286,7 @@
 
 "editor_login_with_osm" = "使用 OpenStreetMap 進行登入";
 
-"editor_profile_changes" = "更改：";
+"editor_profile_changes" = "已驗證的變更";
 
 "editor_profile_unsent_changes" = "未發送：";
 
@@ -1400,8 +1403,6 @@
 
 "editor_no_local_edits_description" = "這顯示了對目前僅可在您的裝置上存取的地圖的建議修改數量。";
 
-"editor_international_names_subtitle" = "其他語言的名稱";
-
 "editor_send_to_osm" = "傳送至 OSM";
 
 "editor_remove" = "移除";
@@ -1473,9 +1474,9 @@
 
 "placepage_open_24_7" = "全天候";
 
-"placepage_place_rating" = "評價：";
+"place_page_booking_rating" = "評分： %s";
 
-"place_page_starting_from" = "從 %s";
+"place_page_starting_from" = "從%s";
 
 "meter" = "m";
 
@@ -1513,14 +1514,32 @@
 
 "editor_place_doesnt_exist" = "位置不存在";
 
-"place_page_booking_rating" = "Rating: %s";
+"text_more_button" = "…更多";
 
-"text_more_button" = "… more";
+"error_enter_correct_phone" = "輸入無字母的電話號碼";
 
-"error_enter_correct_phone" = "Enter a valid phone number";
+"error_enter_correct_web" = "輸入有效網址";
 
-"error_enter_correct_web" = "Enter a valid web address";
+"error_enter_correct_email" = "輸入有效電子郵箱";
 
-"error_enter_correct_email" = "Enter a valid email";
+"error_enter_correct" = "輸入有效值";
 
-"error_enter_correct" = "Enter a valid value";
+"editor_profile_changes_for_next_place" = "對下一個地點的變更：%d";
+
+"editor_profile_rating_place" = "排名位置";
+
+"booking_dialog_not_connect_header" = "要預訂酒店，請啟用您的網際網路連線";
+
+"whatsnew_booking_header" = "從應用程式預訂酒店";
+
+"whatsnew_booking_message" = "當您尋找酒店時，此地圖可以顯示該酒店的價格類型與評比。";
+
+"button_try" = "試用";
+
+"whatsnew_cycle_navigation_header" = "自行車導航（beta 版）";
+
+"whatsnew_cycle_navigation_message" = "我們正在為新的一季測試自行車導航功能。請使用 MAPS.ME 嘗試您最喜愛的自行車路徑，並將您的意見與我們分享。";
+
+"refresh" = "更新";
+
+"last_update" = "上次更新於：%s";

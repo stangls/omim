@@ -1,4 +1,3 @@
-#import "LocationManager.h"
 #import "MapsAppDelegate.h"
 #import "MapViewController.h"
 #import "MWMAlertViewController.h"
@@ -341,6 +340,17 @@ static NSString * const kDefaultAlertNibName = @"MWMDefaultAlert";
   return alert;
 }
 
++ (instancetype)routingBicycleDisclaimerAlert
+{
+  kStatisticsEvent = @"Routing Bicycle Disclaimer Alert";
+  MWMDefaultAlert * alert = [self defaultAlertWithTitle:@"whatsnew_cycle_navigation_header"
+                                                message:@"whatsnew_cycle_navigation_message"
+                                       rightButtonTitle:@"ok"
+                                        leftButtonTitle:nil
+                                      rightButtonAction:nil];
+  return alert;
+}
+
 + (instancetype)resetChangesAlertWithBlock:(TMWMVoidBlock)block
 {
   kStatisticsEvent = @"Reset changes alert";
@@ -359,6 +369,29 @@ static NSString * const kDefaultAlertNibName = @"MWMDefaultAlert";
                                                 message:nil
                                        rightButtonTitle:@"editor_remove_place_button"
                                         leftButtonTitle:@"cancel"
+                                      rightButtonAction:block];
+  return alert;
+}
+
++ (instancetype)personalInfoWarningAlertWithBlock:(TMWMVoidBlock)block
+{
+  kStatisticsEvent = @"Personal info warning alert";
+  NSString * message = [NSString stringWithFormat:@"%@\n%@", L(@"editor_share_to_all_dialog_message_1"), L(@"editor_share_to_all_dialog_message_2")];
+  MWMDefaultAlert * alert = [self defaultAlertWithTitle:@"editor_share_to_all_dialog_title"
+                                                message:message
+                                       rightButtonTitle:@"editor_report_problem_send_button"
+                                        leftButtonTitle:@"cancel"
+                                      rightButtonAction:block];
+  return alert;
+}
+
++ (instancetype)trackWarningAlertWithCancelBlock:(TMWMVoidBlock)block
+{
+  kStatisticsEvent = @"Track warning alert";
+  MWMDefaultAlert * alert = [self defaultAlertWithTitle:@"recent_track_background_dialog_title"
+                                                message:@"recent_track_background_dialog_message"
+                                       rightButtonTitle:@"off_recent_track_background_button"
+                                        leftButtonTitle:@"continue_download"
                                       rightButtonAction:block];
   return alert;
 }

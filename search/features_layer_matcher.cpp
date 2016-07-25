@@ -13,7 +13,7 @@ namespace search
 /// even if there is no exact street written for this house.
 int constexpr kMaxApproxStreetDistanceM = 100;
 
-FeaturesLayerMatcher::FeaturesLayerMatcher(Index & index, my::Cancellable const & cancellable)
+FeaturesLayerMatcher::FeaturesLayerMatcher(Index const & index, my::Cancellable const & cancellable)
   : m_context(nullptr)
   , m_postcodes(nullptr)
   , m_reverseGeocoder(index)
@@ -34,7 +34,7 @@ void FeaturesLayerMatcher::SetContext(MwmContext * context)
   m_loader.SetContext(context);
 }
 
-void FeaturesLayerMatcher::SetPostcodes(coding::CompressedBitVector const * postcodes)
+void FeaturesLayerMatcher::SetPostcodes(CBV const * postcodes)
 {
   m_postcodes = postcodes;
 }

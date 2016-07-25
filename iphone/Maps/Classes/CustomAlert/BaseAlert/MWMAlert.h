@@ -19,6 +19,7 @@ using TMWMDownloadBlock = void (^)(storage::TCountriesVec const &, TMWMVoidBlock
 + (MWMAlert *)facebookAlert;
 + (MWMAlert *)locationAlert;
 + (MWMAlert *)routingDisclaimerAlertWithInitialOrientation:(UIInterfaceOrientation)orientation;
++ (MWMAlert *)routingBicycleDisclaimerAlert;
 + (MWMAlert *)disabledLocationAlert;
 + (MWMAlert *)noWiFiAlertWithOkBlock:(TMWMVoidBlock)okBlock;
 + (MWMAlert *)noConnectionAlert;
@@ -27,7 +28,6 @@ using TMWMDownloadBlock = void (^)(storage::TCountriesVec const &, TMWMVoidBlock
 + (MWMAlert *)unsavedEditsAlertWithOkBlock:(TMWMVoidBlock)okBlock;
 + (MWMAlert *)locationServiceNotSupportedAlert;
 + (MWMAlert *)locationNotFoundAlertWithOkBlock:(TMWMVoidBlock)okBlock;
-+ (MWMAlert *)pedestrianToastShareAlert:(BOOL)isFirstLaunch;
 + (MWMAlert *)incorrectFeauturePositionAlert;
 + (MWMAlert *)internalErrorAlert;
 + (MWMAlert *)notEnoughSpaceAlert;
@@ -43,6 +43,8 @@ using TMWMDownloadBlock = void (^)(storage::TCountriesVec const &, TMWMVoidBlock
 + (MWMAlert *)deleteFeatureAlertWithBlock:(TMWMVoidBlock)block;
 + (MWMAlert *)editorViralAlert;
 + (MWMAlert *)osmAuthAlert;
++ (MWMAlert *)personalInfoWarningAlertWithBlock:(TMWMVoidBlock)block;
++ (MWMAlert *)trackWarningAlertWithCancelBlock:(TMWMVoidBlock)block;
 - (void)close;
 
 - (void)setNeedsCloseAlertAfterEnterBackground;

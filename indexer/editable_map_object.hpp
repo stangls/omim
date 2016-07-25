@@ -35,6 +35,9 @@ struct EditableProperties
 
 struct LocalizedName
 {
+  LocalizedName(int8_t code, string const & name);
+  LocalizedName(string const & langCode, string const & name);
+
   // m_code, m_lang and m_langName are defined in StringUtf8Multilang.
   int8_t const m_code;
   // Non-owning pointers to internal static char const * array.
@@ -43,6 +46,17 @@ struct LocalizedName
   string const m_name;
 };
 
+// Class which contains vector of localized names with following priority:
+//  1. Names for Mwm languages
+//  2. User`s language name
+//  3. Other names
+// and mandatoryNamesCount - count of names which should be always shown.
+struct NamesDataSource
+{
+  vector<LocalizedName> names;
+  size_t mandatoryNamesCount = 0;
+};
+  
 struct LocalizedStreet
 {
   string m_defaultName;
@@ -64,7 +78,8 @@ public:
   vector<feature::Metadata::EType> const & GetEditableFields() const;
 
   StringUtf8Multilang const & GetName() const;
-  vector<LocalizedName> GetLocalizedNames() const;
+  // See comment for NamesDataSource class.
+  NamesDataSource GetNamesDataSource() const;
   LocalizedStreet const & GetStreet() const;
   vector<LocalizedStreet> const & GetNearbyStreets() const;
   string const & GetHouseNumber() const;
@@ -74,7 +89,7 @@ public:
   void SetEditableProperties(osm::EditableProperties const & props);
   //  void SetFeatureID(FeatureID const & fid);
   void SetName(StringUtf8Multilang const & name);
-  void SetName(string const & name, int8_t langCode = StringUtf8Multilang::kDefaultCode);
+  void SetName(string name, int8_t langCode = StringUtf8Multilang::kDefaultCode);
   void SetMercator(m2::PointD const & center);
   void SetType(uint32_t featureType);
   void SetID(FeatureID const & fid);
@@ -113,6 +128,14 @@ public:
   static bool ValidatePhone(string const & phone);
   static bool ValidateWebsite(string const & site);
   static bool ValidateEmail(string const & email);
+
+  // Check whether langCode can be used as default name.
+  static bool CanUseAsDefaultName(int8_t const langCode, vector<int8_t> const & nativeMwmLanguages);
+
+  // See comment for NamesDataSource class.
+  static NamesDataSource GetNamesDataSource(StringUtf8Multilang const & source,
+                                            vector<int8_t> const & nativeMwmLanguages,
+                                            int8_t const userLanguage);
 
 private:
   string m_houseNumber;

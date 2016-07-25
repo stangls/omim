@@ -28,7 +28,10 @@
 + (instancetype)downloaderInternalErrorAlertWithOkBlock:(TMWMVoidBlock)okBlock cancelBlock:(TMWMVoidBlock)cancelBlock;
 + (instancetype)downloaderNeedUpdateAlertWithOkBlock:(TMWMVoidBlock)okBlock;
 + (instancetype)routingMigrationAlertWithOkBlock:(TMWMVoidBlock)okBlock;
++ (instancetype)routingBicycleDisclaimerAlert;
 + (instancetype)resetChangesAlertWithBlock:(TMWMVoidBlock)block;
 + (instancetype)deleteFeatureAlertWithBlock:(TMWMVoidBlock)block;
++ (instancetype)personalInfoWarningAlertWithBlock:(TMWMVoidBlock)block;
++ (instancetype)trackWarningAlertWithCancelBlock:(TMWMVoidBlock)block;
 
 @end

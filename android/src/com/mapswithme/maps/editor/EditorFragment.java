@@ -12,10 +12,12 @@ import android.support.design.widget.TextInputLayout;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
+import android.text.InputType;
 import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -36,62 +38,71 @@ import org.solovyev.android.views.llm.LinearLayoutManager;
 
 public class EditorFragment extends BaseMwmFragment implements View.OnClickListener, EditTextDialogFragment.OnTextSaveListener
 {
+  final static String LAST_INDEX_OF_NAMES_ARRAY = "LastIndexOfNamesArray";
+
   private TextView mCategory;
-  private View mCardName;
   private View mCardAddress;
   private View mCardMetadata;
-  private EditText mName;
 
-  private RecyclerView mLocalizedNames;
-  private final RecyclerView.AdapterDataObserver mLocalizedNamesObserver = new RecyclerView.AdapterDataObserver()
+  private RecyclerView mNamesView;
+
+  private final RecyclerView.AdapterDataObserver mNamesObserver = new RecyclerView.AdapterDataObserver()
   {
     @Override
     public void onChanged()
     {
-      refreshLocalizedNames();
+      refreshNamesCaption();
     }
 
     @Override
     public void onItemRangeChanged(int positionStart, int itemCount)
     {
-      refreshLocalizedNames();
+      refreshNamesCaption();
     }
 
     @Override
     public void onItemRangeInserted(int positionStart, int itemCount)
     {
-      refreshLocalizedNames();
+      refreshNamesCaption();
     }
 
     @Override
     public void onItemRangeRemoved(int positionStart, int itemCount)
     {
-      refreshLocalizedNames();
+      refreshNamesCaption();
     }
 
     @Override
     public void onItemRangeMoved(int fromPosition, int toPosition, int itemCount)
     {
-      refreshLocalizedNames();
+      refreshNamesCaption();
     }
   };
-  private MultilanguageAdapter mLocalizedNamesAdapter;
-  private TextView mLocalizedShow;
-  private boolean mIsLocalizedShown;
+
+  private MultilanguageAdapter mNamesAdapter;
+  private TextView mNamesCaption;
+  private TextView mAddLanguage;
+  private TextView mMoreLanguages;
 
   private TextView mStreet;
   private EditText mHouseNumber;
   private EditText mZipcode;
   private View mBlockLevels;
   private EditText mBuildingLevels;
-  private TextInputLayout mInputHouseNumber;
-  private TextInputLayout mInputBuildingLevels;
   private EditText mPhone;
   private EditText mWebsite;
   private EditText mEmail;
   private TextView mCuisine;
   private EditText mOperator;
   private SwitchCompat mWifi;
+
+  private TextInputLayout mInputHouseNumber;
+  private TextInputLayout mInputBuildingLevels;
+  private TextInputLayout mInputZipcode;
+  private TextInputLayout mInputPhone;
+  private TextInputLayout mInputWebsite;
+  private TextInputLayout mInputEmail;
+
   private View mEmptyOpeningHours;
   private TextView mOpeningHours;
   private View mEditOpeningHours;
@@ -118,7 +129,6 @@ public class EditorFragment extends BaseMwmFragment implements View.OnClickListe
     initViews(view);
 
     mCategory.setText(Editor.nativeGetCategory());
-    mName.setText(Editor.nativeGetDefaultName());
     final LocalizedStreet street = Editor.nativeGetStreet();
     mStreet.setText(street.defaultName);
 
@@ -133,6 +143,15 @@ public class EditorFragment extends BaseMwmFragment implements View.OnClickListe
     });
 
     mZipcode.setText(Editor.nativeGetZipCode());
+    mZipcode.addTextChangedListener(new StringUtils.SimpleTextWatcher()
+    {
+      @Override
+      public void onTextChanged(CharSequence s, int start, int before, int count)
+      {
+        UiUtils.setInputError(mInputZipcode, Editor.nativeIsZipcodeValid(s.toString()) ? 0 : R.string.error_enter_correct_zip_code);
+      }
+    });
+
     mBuildingLevels.setText(Editor.nativeGetBuildingLevels());
     mBuildingLevels.addTextChangedListener(new StringUtils.SimpleTextWatcher()
     {
@@ -144,8 +163,35 @@ public class EditorFragment extends BaseMwmFragment implements View.OnClickListe
     });
 
     mPhone.setText(Editor.nativeGetPhone());
+    mPhone.addTextChangedListener(new StringUtils.SimpleTextWatcher()
+    {
+      @Override
+      public void onTextChanged(CharSequence s, int start, int before, int count)
+      {
+        UiUtils.setInputError(mInputPhone, Editor.nativeIsPhoneValid(s.toString()) ? 0 : R.string.error_enter_correct_phone);
+      }
+    });
+
     mWebsite.setText(Editor.nativeGetWebsite());
+    mWebsite.addTextChangedListener(new StringUtils.SimpleTextWatcher()
+    {
+      @Override
+      public void onTextChanged(CharSequence s, int start, int before, int count)
+      {
+        UiUtils.setInputError(mInputWebsite, Editor.nativeIsWebsiteValid(s.toString()) ? 0 : R.string.error_enter_correct_web);
+      }
+    });
+
     mEmail.setText(Editor.nativeGetEmail());
+    mEmail.addTextChangedListener(new StringUtils.SimpleTextWatcher()
+    {
+      @Override
+      public void onTextChanged(CharSequence s, int start, int before, int count)
+      {
+        UiUtils.setInputError(mInputEmail, Editor.nativeIsEmailValid(s.toString()) ? 0 : R.string.error_enter_correct_email);
+      }
+    });
+
     mCuisine.setText(Editor.nativeGetFormattedCuisine());
     mOperator.setText(Editor.nativeGetOperator());
     mWifi.setChecked(Editor.nativeHasWifi());
@@ -166,7 +212,6 @@ public class EditorFragment extends BaseMwmFragment implements View.OnClickListe
     if (!validateFields())
       return false;
 
-    Editor.nativeSetDefaultName(mName.getText().toString());
     Editor.nativeSetHouseNumber(mHouseNumber.getText().toString());
     Editor.nativeSetZipCode(mZipcode.getText().toString());
     Editor.nativeSetBuildingLevels(mBuildingLevels.getText().toString());
@@ -175,7 +220,7 @@ public class EditorFragment extends BaseMwmFragment implements View.OnClickListe
     Editor.nativeSetEmail(mEmail.getText().toString());
     Editor.nativeSetHasWifi(mWifi.isChecked());
     Editor.nativeSetOperator(mOperator.getText().toString());
-    // TODO set localizated names
+    Editor.nativeSetNames(mParent.getNamesAsArray());
 
     return true;
   }
@@ -188,17 +233,48 @@ public class EditorFragment extends BaseMwmFragment implements View.OnClickListe
 
   private boolean validateFields()
   {
-    if (!Editor.nativeIsHouseValid(mHouseNumber.getText().toString()))
+    if (Editor.nativeIsAddressEditable())
     {
-      mHouseNumber.requestFocus();
-      InputUtils.showKeyboard(mHouseNumber);
+      if (!Editor.nativeIsHouseValid(mHouseNumber.getText().toString()))
+      {
+        mHouseNumber.requestFocus();
+        InputUtils.showKeyboard(mHouseNumber);
+        return false;
+      }
+
+      if (!Editor.nativeIsLevelValid(mBuildingLevels.getText().toString()))
+      {
+        mBuildingLevels.requestFocus();
+        InputUtils.showKeyboard(mBuildingLevels);
+        return false;
+      }
+    }
+
+    if (!Editor.nativeIsZipcodeValid(mZipcode.getText().toString()))
+    {
+      mZipcode.requestFocus();
+      InputUtils.showKeyboard(mZipcode);
       return false;
     }
 
-    if (!Editor.nativeIsLevelValid(mBuildingLevels.getText().toString()))
+    if (!Editor.nativeIsPhoneValid(mPhone.getText().toString()))
     {
-      mBuildingLevels.requestFocus();
-      InputUtils.showKeyboard(mBuildingLevels);
+      mPhone.requestFocus();
+      InputUtils.showKeyboard(mPhone);
+      return false;
+    }
+
+    if (!Editor.nativeIsWebsiteValid(mWebsite.getText().toString()))
+    {
+      mWebsite.requestFocus();
+      InputUtils.showKeyboard(mWebsite);
+      return false;
+    }
+
+    if (!Editor.nativeIsEmailValid(mEmail.getText().toString()))
+    {
+      mEmail.requestFocus();
+      InputUtils.showKeyboard(mEmail);
       return false;
     }
 
@@ -207,7 +283,6 @@ public class EditorFragment extends BaseMwmFragment implements View.OnClickListe
 
   private void refreshEditableFields()
   {
-    UiUtils.showIf(Editor.nativeIsNameEditable(), mCardName);
     UiUtils.showIf(Editor.nativeIsAddressEditable(), mCardAddress);
     UiUtils.showIf(Editor.nativeIsBuilding(), mBlockLevels);
 
@@ -250,6 +325,55 @@ public class EditorFragment extends BaseMwmFragment implements View.OnClickListe
     }
   }
 
+  private void initNamesView(final View view)
+  {
+    mNamesCaption = (TextView) view.findViewById(R.id.show_additional_names);
+    mNamesCaption.setOnClickListener(this);
+
+    mAddLanguage = (TextView) view.findViewById(R.id.add_langs);
+    mAddLanguage.setOnClickListener(this);
+
+    mMoreLanguages = (TextView) view.findViewById(R.id.more_names);
+    mMoreLanguages.setOnClickListener(this);
+
+    mNamesView = (RecyclerView) view.findViewById(R.id.recycler);
+    mNamesView.setNestedScrollingEnabled(false);
+    mNamesView.setLayoutManager(new LinearLayoutManager(getActivity()));
+    mNamesAdapter = new MultilanguageAdapter(mParent);
+    mNamesView.setAdapter(mNamesAdapter);
+    mNamesAdapter.registerAdapterDataObserver(mNamesObserver);
+
+    final Bundle args = getArguments();
+    if (args == null || !args.containsKey(LAST_INDEX_OF_NAMES_ARRAY))
+    {
+      showAdditionalNames(false);
+      return;
+    }
+    showAdditionalNames(true);
+    UiUtils.waitLayout(mNamesView, new ViewTreeObserver.OnGlobalLayoutListener()
+    {
+      @Override
+      public void onGlobalLayout()
+      {
+        LinearLayoutManager lm = (LinearLayoutManager) mNamesView.getLayoutManager();
+        int position = args.getInt(LAST_INDEX_OF_NAMES_ARRAY);
+
+        View nameItem = lm.findViewByPosition(position);
+
+        int cvNameTop = view.findViewById(R.id.cv__name).getTop();
+        int nameItemTop = nameItem.getTop();
+
+        view.scrollTo(0, cvNameTop + nameItemTop);
+
+        // TODO(mgsergio): Uncomment if focus and keyboard are required.
+        // TODO(mgsergio): Keyboard doesn't want to hide. Only pressing back button works.
+        // View nameItemInput = nameItem.findViewById(R.id.input);
+        // nameItemInput.requestFocus();
+        // InputUtils.showKeyboard(nameItemInput);
+      }
+    });
+  }
+
   private void initViews(View view)
   {
     final View categoryBlock = view.findViewById(R.id.category);
@@ -257,22 +381,10 @@ public class EditorFragment extends BaseMwmFragment implements View.OnClickListe
     // TODO show icon and fill it when core will implement that
     UiUtils.hide(categoryBlock.findViewById(R.id.icon));
     mCategory = (TextView) categoryBlock.findViewById(R.id.name);
-    mCardName = view.findViewById(R.id.cv__name);
     mCardAddress = view.findViewById(R.id.cv__address);
     mCardMetadata = view.findViewById(R.id.cv__metadata);
-    mName = findInput(mCardName);
-    // TODO uncomment and finish localized name
-    //    view.findViewById(R.id.add_langs).setOnClickListener(this);
-    UiUtils.hide(view.findViewById(R.id.add_langs));
-    mLocalizedShow = (TextView) view.findViewById(R.id.show_langs);
-    mLocalizedShow.setOnClickListener(this);
-    mLocalizedNames = (RecyclerView) view.findViewById(R.id.recycler);
-    mLocalizedNames.setLayoutManager(new LinearLayoutManager(getActivity()));
-    mLocalizedNamesAdapter = new MultilanguageAdapter(Editor.nativeGetLocalizedNames());
-    mLocalizedNames.setAdapter(mLocalizedNamesAdapter);
-    mLocalizedNamesAdapter.registerAdapterDataObserver(mLocalizedNamesObserver);
-    refreshLocalizedNames();
-    showLocalizedNames(false);
+    initNamesView(view);
+
     // Address
     view.findViewById(R.id.block_street).setOnClickListener(this);
     mStreet = (TextView) view.findViewById(R.id.street);
@@ -281,17 +393,25 @@ public class EditorFragment extends BaseMwmFragment implements View.OnClickListe
     mInputHouseNumber = (TextInputLayout) blockHouseNumber.findViewById(R.id.custom_input);
     View blockZipcode = view.findViewById(R.id.block_zipcode);
     mZipcode = findInputAndInitBlock(blockZipcode, 0, R.string.editor_zip_code);
-    mBlockLevels = view.findViewById(R.id.block_levels);
-    mInputBuildingLevels = (TextInputLayout) mBlockLevels.findViewById(R.id.custom_input);
-    // TODO set level limits from core
-    mBuildingLevels = findInputAndInitBlock(mBlockLevels, 0, getString(R.string.editor_storey_number, 25));
+    mInputZipcode = (TextInputLayout) blockZipcode.findViewById(R.id.custom_input);
+
     // Details
+    mBlockLevels = view.findViewById(R.id.block_levels);
+    mBuildingLevels = findInputAndInitBlock(mBlockLevels, 0, getString(R.string.editor_storey_number, 25));
+    mBuildingLevels.setInputType(InputType.TYPE_CLASS_NUMBER);
+    mInputBuildingLevels = (TextInputLayout) mBlockLevels.findViewById(R.id.custom_input);
     View blockPhone = view.findViewById(R.id.block_phone);
     mPhone = findInputAndInitBlock(blockPhone, R.drawable.ic_phone, R.string.phone);
+    mPhone.setInputType(InputType.TYPE_CLASS_PHONE);
+    mInputPhone = (TextInputLayout) blockPhone.findViewById(R.id.custom_input);
     View blockWeb = view.findViewById(R.id.block_website);
     mWebsite = findInputAndInitBlock(blockWeb, R.drawable.ic_website, R.string.website);
+    mWebsite.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_URI);
+    mInputWebsite = (TextInputLayout) blockWeb.findViewById(R.id.custom_input);
     View blockEmail = view.findViewById(R.id.block_email);
     mEmail = findInputAndInitBlock(blockEmail, R.drawable.ic_email, R.string.email);
+    mEmail.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_EMAIL_ADDRESS);
+    mInputEmail = (TextInputLayout) blockEmail.findViewById(R.id.custom_input);
     View blockCuisine = view.findViewById(R.id.block_cuisine);
     blockCuisine.setOnClickListener(this);
     mCuisine = (TextView) view.findViewById(R.id.cuisine);
@@ -362,11 +482,12 @@ public class EditorFragment extends BaseMwmFragment implements View.OnClickListe
     case R.id.category:
       mParent.editCategory();
       break;
-    case R.id.show_langs:
-      showLocalizedNames(!mIsLocalizedShown);
+    case R.id.more_names:
+    case R.id.show_additional_names:
+      showAdditionalNames(!mNamesAdapter.areAdditionalLanguagesShown());
       break;
     case R.id.add_langs:
-      mParent.addLocalizedLanguage();
+      mParent.addLanguage();
       break;
     case R.id.about_osm:
       startActivity(new Intent((Intent.ACTION_VIEW), Uri.parse(Constants.Url.OSM_ABOUT)));
@@ -377,31 +498,43 @@ public class EditorFragment extends BaseMwmFragment implements View.OnClickListe
     }
   }
 
-  private void refreshLocalizedNames()
+  private void showAdditionalNames(boolean show)
   {
-    // TODO uncomment and finish localized names
-    //    UiUtils.showIf(mLocalizedNamesAdapter.getItemCount() > 0, mLocalizedShow);
-    UiUtils.hide(mLocalizedNames, mLocalizedShow);
+    mNamesAdapter.showAdditionalLanguages(show);
+
+    refreshNamesCaption();
   }
 
-  private void showLocalizedNames(boolean show)
+  private void refreshNamesCaption()
   {
-    mIsLocalizedShown = show;
-    if (show)
-    {
-      UiUtils.show(mLocalizedNames);
-      setLocalizedShowDrawable(R.drawable.ic_expand_less);
-    }
+    if (mNamesAdapter.getNamesCount() <= mNamesAdapter.getMandatoryNamesCount())
+      setNamesArrow(0 /* arrowResourceId */);  // bind arrow with empty resource (do not draw arrow)
+    else if (mNamesAdapter.areAdditionalLanguagesShown())
+      setNamesArrow(R.drawable.ic_expand_less);
     else
-    {
-      UiUtils.hide(mLocalizedNames);
-      setLocalizedShowDrawable(R.drawable.ic_expand_more);
-    }
+      setNamesArrow(R.drawable.ic_expand_more);
+
+    boolean showAddLanguage = mNamesAdapter.getNamesCount() <= mNamesAdapter.getMandatoryNamesCount() ||
+      mNamesAdapter.areAdditionalLanguagesShown();
+
+    UiUtils.showIf(showAddLanguage, mAddLanguage);
+    UiUtils.showIf(!showAddLanguage, mMoreLanguages);
   }
 
-  private void setLocalizedShowDrawable(@DrawableRes int right)
+  // Bind arrow in the top right corner of names caption with needed resource.
+  private void setNamesArrow(@DrawableRes int arrowResourceId)
   {
-    mLocalizedShow.setCompoundDrawablesWithIntrinsicBounds(null, null, Graphics.tint(getActivity(), right, R.attr.iconTint), null);
+    if (arrowResourceId == 0)
+    {
+      mNamesCaption.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+      return;
+    }
+
+    mNamesCaption.setCompoundDrawablesWithIntrinsicBounds(
+      null,
+      null,
+      Graphics.tint(getActivity(), arrowResourceId, R.attr.iconTint),
+      null);
   }
 
   private void refreshResetButton()

@@ -471,31 +471,33 @@ class SelectObjectMessage : public Message
 {
 public:
   struct DismissTag {};
+
   SelectObjectMessage(DismissTag)
-    : SelectObjectMessage(SelectionShape::OBJECT_EMPTY, m2::PointD::Zero(), false, true)
+    : m_selected(SelectionShape::OBJECT_EMPTY)
+    , m_glbPoint(m2::PointD::Zero())
+    , m_isAnim(false)
+    , m_isDismiss(true)
   {}
 
-  SelectObjectMessage(SelectionShape::ESelectedObject selectedObject, m2::PointD const & glbPoint, bool isAnim)
-    : SelectObjectMessage(selectedObject, glbPoint, isAnim, false)
+  SelectObjectMessage(SelectionShape::ESelectedObject selectedObject, m2::PointD const & glbPoint, FeatureID const & featureID,  bool isAnim)
+    : m_selected(selectedObject)
+    , m_glbPoint(glbPoint)
+    , m_featureID(featureID)
+    , m_isAnim(isAnim)
+    , m_isDismiss(false)
   {}
 
   Type GetType() const override { return SelectObject; }
   m2::PointD const & GetPosition() const { return m_glbPoint; }
   SelectionShape::ESelectedObject GetSelectedObject() const { return m_selected; }
+  FeatureID const & GetFeatureID() const { return m_featureID; }
   bool IsAnim() const { return m_isAnim; }
   bool IsDismiss() const { return m_isDismiss; }
 
 private:
-  SelectObjectMessage(SelectionShape::ESelectedObject obj, m2::PointD const & pt, bool isAnim, bool isDismiss)
-    : m_selected(obj)
-    , m_glbPoint(pt)
-    , m_isAnim(isAnim)
-    , m_isDismiss(isDismiss)
-  {}
-
-private:
   SelectionShape::ESelectedObject m_selected;
   m2::PointD m_glbPoint;
+  FeatureID m_featureID;
   bool m_isAnim;
   bool m_isDismiss;
 };
@@ -643,24 +645,21 @@ public:
 class FollowRouteMessage : public Message
 {
 public:
-  FollowRouteMessage(int preferredZoomLevel, int preferredZoomLevelIn3d, double rotationAngle, double angleFOV)
+  FollowRouteMessage(int preferredZoomLevel, int preferredZoomLevelIn3d, bool enableAutoZoom)
     : m_preferredZoomLevel(preferredZoomLevel)
     , m_preferredZoomLevelIn3d(preferredZoomLevelIn3d)
-    , m_rotationAngle(rotationAngle)
-    , m_angleFOV(angleFOV)
+    , m_enableAutoZoom(enableAutoZoom)
   {}
 
   Type GetType() const override { return Message::FollowRoute; }
   int GetPreferredZoomLevel() const { return m_preferredZoomLevel; }
   int GetPreferredZoomLevelIn3d() const { return m_preferredZoomLevelIn3d; }
-  double GetRotationAngle() const { return m_rotationAngle; }
-  double GetAngleFOV() const { return m_angleFOV; }
+  bool EnableAutoZoom() const { return m_enableAutoZoom; }
 
 private:
   int const m_preferredZoomLevel;
   int const m_preferredZoomLevelIn3d;
-  double const m_rotationAngle;
-  double const m_angleFOV;
+  bool const m_enableAutoZoom;
 };
 
 class InvalidateTexturesMessage : public BaseBlockingMessage
@@ -692,24 +691,32 @@ public:
 class Allow3dModeMessage : public Message
 {
 public:
-  Allow3dModeMessage(bool allowPerspective, bool allow3dBuildings, double rotationAngle, double angleFOV)
+  Allow3dModeMessage(bool allowPerspective, bool allow3dBuildings)
     : m_allowPerspective(allowPerspective)
     , m_allow3dBuildings(allow3dBuildings)
-    , m_rotationAngle(rotationAngle)
-    , m_angleFOV(angleFOV)
   {}
 
   Type GetType() const override { return Message::Allow3dMode; }
   bool AllowPerspective() const { return m_allowPerspective; }
   bool Allow3dBuildings() const { return m_allow3dBuildings; }
-  double GetRotationAngle() const { return m_rotationAngle; }
-  double GetAngleFOV() const { return m_angleFOV; }
 
 private:
   bool const m_allowPerspective;
   bool const m_allow3dBuildings;
-  double const m_rotationAngle;
-  double const m_angleFOV;
+};
+
+class AllowAutoZoomMessage : public Message
+{
+public:
+  AllowAutoZoomMessage(bool allowAutoZoom)
+    : m_allowAutoZoom(allowAutoZoom)
+  {}
+
+  Type GetType() const override { return Message::AllowAutoZoom; }
+  bool AllowAutoZoom() const { return m_allowAutoZoom; }
+
+private:
+  bool const m_allowAutoZoom;
 };
 
 class Allow3dBuildingsMessage : public Message
@@ -729,19 +736,9 @@ private:
 class EnablePerspectiveMessage : public Message
 {
 public:
-  EnablePerspectiveMessage(double rotationAngle, double angleFOV)
-    : m_rotationAngle(rotationAngle)
-    , m_angleFOV(angleFOV)
-  {}
+  EnablePerspectiveMessage() = default;
 
   Type GetType() const override { return Message::EnablePerspective; }
-
-  double GetRotationAngle() const { return m_rotationAngle; }
-  double GetAngleFOV() const { return m_angleFOV; }
-
-private:
-  double const m_rotationAngle;
-  double const m_angleFOV;
 };
 
 class CacheGpsTrackPointsMessage : public Message
