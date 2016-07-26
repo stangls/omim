@@ -89,6 +89,7 @@ class GeomsParser
     int m_p1, m_p2, m_p3;
     vector<m2::PointF> m_points;
     vector<size_t> m_triangles;
+    dp::Color m_color;
 
     void Reset() { }
 
@@ -111,7 +112,7 @@ public:
         if (tag=="trianglelist"){
             m_points.clear();
             m_triangles.clear();
-            m_color=dp::Color.Black();
+            m_color=dp::Color::Black();
         }
         return true;
     }
@@ -123,7 +124,7 @@ public:
         strings::AsciiToLower(attrInLowerCase);
 
         if (IsValidAttribute("trianglelist", attrInLowerCase, "color", value)){
-            m_color = atoi(value.c_str());
+            m_color = dp::Extract(atoi(value.c_str()));
         }
         if (IsValidAttribute("point", attrInLowerCase, "x", value)){
             m_px = atof(value.c_str());
