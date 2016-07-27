@@ -1798,7 +1798,8 @@ public class MwmActivity extends BaseMwmFragmentActivity
       @Override
       public void run() {
         if (mRowMissionActivity==null || mTextMissionActivity==null) return;
-        com.mobidat.persistence.Activity act = missionStatus.getActivity();
+        com.mobidat.persistence.Activity act = null;
+        if (missionStatus!=null) act = missionStatus.getActivity();
         if (act!=null){
           mTextMissionActivity.setText(act.getName());
           mRowMissionActivity.setVisibility(View.VISIBLE);

@@ -1041,7 +1041,7 @@ Java_com_mapswithme_maps_Framework_nativeZoomToPoint(JNIEnv * env, jclass, jdoub
   Java_com_mapswithme_maps_Framework_nativeLoadGeomsXml(JNIEnv * env, jclass thiz, jstring filePath)
   {
     auto nativeFilePath = jni::ToNativeString(env, filePath);
-    frm()->LoadGeomsXml( nativeFilePath, position, 0 );
+    frm()->LoadGeomsXml( nativeFilePath );
   }
 
 

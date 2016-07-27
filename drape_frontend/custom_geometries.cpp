@@ -23,32 +23,34 @@ ConvexGeom::ConvexGeom(vector<m2::PointF> &outerPoints, dp::Color& color) :
     m_color = color;
 }
 
+void callInOrder(TPolyFun callback, m2::PointF p1, m2::PointF p2, m2::PointF p3){
+    double const kEps = 1e-7;
+    // logic copied from apply_feature_functors.cpp : ApplyAreaFeature::operator()
+    m2::PointD const v1 = p2 - p1;
+    m2::PointD const v2 = p3 - p1;
+    if (v1.IsAlmostZero() || v2.IsAlmostZero())
+      return;
+    double const crossProduct = m2::CrossProduct(v1.Normalize(), v2.Normalize());
+    if (fabs(crossProduct) < kEps)
+      return;
+    if (m2::CrossProduct(v1, v2) < 0)
+        callback( p1, p2, p3 );
+    else
+        callback( p1, p3, p2 );
+}
+
 void ConvexGeom::CreatePolys(TPolyFun callback)
 {
     LOG(my::LINFO,("creating other polygons"));
     if (m_outerPoints.size()<3)
         return;
-    double const kEps = 1e-7;
     auto it = m_outerPoints.cbegin();
     auto p1 = *(it++);
     auto p2 = *(it++);
     while (it!=m_outerPoints.cend()){
         // iterate
         auto p3=*(it++);
-
-        // logic copied from apply_feature_functors.cpp : ApplyAreaFeature::operator()
-        m2::PointD const v1 = p2 - p1;
-        m2::PointD const v2 = p3 - p1;
-        if (v1.IsAlmostZero() || v2.IsAlmostZero())
-          continue;
-        double const crossProduct = m2::CrossProduct(v1.Normalize(), v2.Normalize());
-        if (fabs(crossProduct) < kEps)
-          continue;
-        if (m2::CrossProduct(v1, v2) < 0)
-            callback( p1, p2, p3 );
-        else
-            callback( p1, p3, p2 );
-
+        callInOrder(callback,p1,p2,p3);
         // iterate
         p2=p3;
     }
@@ -72,7 +74,7 @@ void TriangleGeom::CreatePolys(TPolyFun callback)
 {
     ASSERT( m_triangles.size()%3==0, () );
     for (auto it = m_triangles.begin(); it!=m_triangles.end(); it++){
-        callback ( m_points[(*it++)], m_points[(*it++)], m_points[(*it++)] );
+        callInOrder( callback, m_points[*(it++)], m_points[*(it++)], m_points[*it] );
     }
 }
 
@@ -155,12 +157,14 @@ public:
     {
         ASSERT_EQUAL(m_tags.back(), tag, ());
         if (tag=="trianglelist") {
-            m_geoms.push_back( shared_ptr<CustomGeom>( (CustomGeom*)new TriangleGeom( m_points, m_triangles, m_color ) ) );
+            CustomGeom *cg = (CustomGeom*)new TriangleGeom( m_points, m_triangles, m_color );
+            LOG(my::LINFO,("read geometry",*cg));
+            m_geoms.push_back( shared_ptr<CustomGeom>( cg ) );
             m_points.clear();
             m_triangles.clear();
         }
         if (tag=="point") {
-            m_points.emplace_back( m_px, m_py );
+            m_points.emplace_back( MercatorBounds::LonToX(m_px), MercatorBounds::LatToY(m_py) );
         }
         if (tag=="triangle") {
             m_triangles.emplace_back( m_p1 );
@@ -216,8 +220,8 @@ CustomGeometries::CustomGeometries()
     ReloadGeometries();
 }
 void CustomGeometries::ReloadGeometries(){
-    LOG(my::LINFO,("loading custom geometries"));
     m_geoms.clear();
+    /*
     auto color = dp::Color(255,122,0,50);
     vector<m2::PointF> points;
     points.emplace_back(MercatorBounds::LonToX(12.120659), MercatorBounds::LatToY(47.797162));
@@ -225,6 +229,7 @@ void CustomGeometries::ReloadGeometries(){
     points.emplace_back(MercatorBounds::LonToX(12.120981), MercatorBounds::LatToY(47.797328));
     points.emplace_back(MercatorBounds::LonToX(12.120659), MercatorBounds::LatToY(47.797328));
     m_geoms.push_back(shared_ptr<CustomGeom>((CustomGeom*)new ConvexGeom( points, color )));
+    */
     if (!m_geomsXmlFile.empty()){
         LOG( my::LINFO, ("reading geometries from file ",m_geomsXmlFile) );
         FileReader reader(m_geomsXmlFile);
