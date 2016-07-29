@@ -44,7 +44,7 @@ class ContentRefresherThread(context: Context) : Thread() {
             val f = File(geometriesPath);
             if (f.exists()){
                 if (f.lastModified()>geometriesLastUpdated){
-                    i("Updating geometries.")
+                    i("Updating geometries.");
                     geometriesLastUpdated = f.lastModified()
                     Framework.nativeLoadGeomsXml(f.absolutePath);
                 }

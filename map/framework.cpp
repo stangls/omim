@@ -2191,6 +2191,7 @@ void Framework::LoadGeomsXml(const string &filePath)
     df::CustomGeometries* cg = df::CustomGeometries::GetInstance();
     cg->SetGeomsXmlFile(filePath);
     cg->ReloadGeometries();
+    InvalidateRect(MercatorBounds::FullRect()); // TODO: maybe use better rect?
 }
 
 void Framework::BuildRoute(m2::PointD const & start, m2::PointD const & finish, uint32_t timeoutSec)

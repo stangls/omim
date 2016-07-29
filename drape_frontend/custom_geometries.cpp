@@ -229,9 +229,9 @@ void CustomGeometries::ReloadGeometries(){
         GeomsParser parser(new_geoms);
         ParseXML(src, parser, true);
         LOG( my::LINFO, ("done reading",new_geoms.size(),"geometries from file") );
-        lock_guard<mutex> lock(m_mutex);
-        m_geoms = new_geoms;
     }
+    lock_guard<mutex> lock(m_mutex);
+    m_geoms = new_geoms;
 }
 CustomGeometries* CustomGeometries::s_inst=0;
 
