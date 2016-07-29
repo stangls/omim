@@ -42,10 +42,15 @@ class ContentRefresherThread(context: Context) : Thread() {
         while(true){
             // refresh geometries
             val f = File(geometriesPath);
-            if (f.exists() && f.lastModified()>geometriesLastUpdated){
-                i("Updating geometries.")
-                geometriesLastUpdated = f.lastModified()
-                Framework.nativeLoadGeomsXml(f.absolutePath);
+            if (f.exists()){
+                if (f.lastModified()>geometriesLastUpdated){
+                    i("Updating geometries.")
+                    geometriesLastUpdated = f.lastModified()
+                    Framework.nativeLoadGeomsXml(f.absolutePath);
+                }
+            }else{
+                geometriesLastUpdated = 0;
+                Framework.nativeLoadGeomsXml("");
             }
             sleep(updateCheckIntervalMS)
             if (!running()){ w(); }

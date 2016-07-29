@@ -158,7 +158,7 @@ public:
         ASSERT_EQUAL(m_tags.back(), tag, ());
         if (tag=="trianglelist") {
             CustomGeom *cg = (CustomGeom*)new TriangleGeom( m_points, m_triangles, m_color );
-            LOG(my::LINFO,("read geometry",*cg));
+            //LOG(my::LINFO,("read geometry",*cg));
             m_geoms.push_back( shared_ptr<CustomGeom>( cg ) );
             m_points.clear();
             m_triangles.clear();
