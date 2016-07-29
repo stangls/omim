@@ -24,6 +24,7 @@ import com.mapswithme.maps.downloader.CountryItem;
 import com.mapswithme.maps.downloader.MapManager;
 import com.mapswithme.maps.location.TrackRecorder;
 import com.mapswithme.maps.sound.TtsPlayer;
+import com.mapswithme.mx.ContentRefresherThread;
 import com.mapswithme.util.Config;
 import com.mapswithme.util.Constants;
 import com.mapswithme.util.ThemeSwitcher;
@@ -80,6 +81,7 @@ public class MwmApplication extends MultiDexApplication {
     public void onProgress(String countryId, long localSize, long remoteSize) {}
   };
   private MediaPlayer notificationPlayer;
+  private ContentRefresherThread mContentRefresher;
 
   public MwmApplication()
   {
@@ -119,6 +121,7 @@ public class MwmApplication extends MultiDexApplication {
     initParse();
     mPrefs = getSharedPreferences(getString(R.string.pref_file_name), MODE_PRIVATE);
     mBackgroundTracker = new AppBackgroundTracker();
+    mContentRefresher = new ContentRefresherThread(this);
     TrackRecorder.init();
     //Editor.init();
   }
@@ -136,7 +139,7 @@ public class MwmApplication extends MultiDexApplication {
     BookmarkManager.nativeLoadBookmarks();
     TtsPlayer.INSTANCE.init(this);
     ThemeSwitcher.restart();
-    Framework.nativeLoadGeomsXml(Parameter.getGlobalDirectory()+"/geometries.xml");
+    try{ mContentRefresher.start(); } catch( IllegalThreadStateException ignored ) {}
     mIsFrameworkInitialized = true;
   }
 

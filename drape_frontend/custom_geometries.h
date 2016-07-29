@@ -4,6 +4,7 @@
 #include "drape/color.hpp"
 #include "geometry/rect2d.hpp"
 #include "base/logging.hpp"
+#include "std/mutex.hpp"
 
 using std::shared_ptr;
 
@@ -66,7 +67,7 @@ public:
         m_geomsXmlFile = fileName;
     }
 
-    vector<shared_ptr<CustomGeom>> const GetGeometries(m2::RectD rectangle );
+    Geoms const GetGeometries(m2::RectD rectangle );
     void ReloadGeometries();
 
 private:
@@ -75,7 +76,8 @@ private:
     CustomGeometries( const CustomGeometries& ); // no copy constructor
     ~CustomGeometries () { }
 
-    Geoms m_geoms;
+    mutable mutex m_mutex;
+    Geoms m_geoms; // when accessing lock via m_mutex !
     string m_geomsXmlFile = "";
 };
 

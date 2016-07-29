@@ -202,8 +202,9 @@ public:
 
 // Custom Geometries repository
 
-vector<shared_ptr<CustomGeom>> const CustomGeometries::GetGeometries(m2::RectD rectangle)
+CustomGeometries::Geoms const CustomGeometries::GetGeometries(m2::RectD rectangle)
 {
+    lock_guard<mutex> lock(m_mutex);
     vector<shared_ptr<CustomGeom>> ret;
     for ( auto it=m_geoms.cbegin(); it!=m_geoms.cend(); it++ ){
         shared_ptr<CustomGeom> g = *it;
@@ -220,22 +221,16 @@ CustomGeometries::CustomGeometries()
     ReloadGeometries();
 }
 void CustomGeometries::ReloadGeometries(){
-    m_geoms.clear();
-    /*
-    auto color = dp::Color(255,122,0,50);
-    vector<m2::PointF> points;
-    points.emplace_back(MercatorBounds::LonToX(12.120659), MercatorBounds::LatToY(47.797162));
-    points.emplace_back(MercatorBounds::LonToX(12.120820), MercatorBounds::LatToY(47.797162));
-    points.emplace_back(MercatorBounds::LonToX(12.120981), MercatorBounds::LatToY(47.797328));
-    points.emplace_back(MercatorBounds::LonToX(12.120659), MercatorBounds::LatToY(47.797328));
-    m_geoms.push_back(shared_ptr<CustomGeom>((CustomGeom*)new ConvexGeom( points, color )));
-    */
+    Geoms new_geoms;
     if (!m_geomsXmlFile.empty()){
         LOG( my::LINFO, ("reading geometries from file ",m_geomsXmlFile) );
         FileReader reader(m_geomsXmlFile);
         ReaderSource<FileReader> src(reader);
-        GeomsParser parser(m_geoms);
+        GeomsParser parser(new_geoms);
         ParseXML(src, parser, true);
+        LOG( my::LINFO, ("done reading",new_geoms.size(),"geometries from file") );
+        lock_guard<mutex> lock(m_mutex);
+        m_geoms = new_geoms;
     }
 }
 CustomGeometries* CustomGeometries::s_inst=0;
