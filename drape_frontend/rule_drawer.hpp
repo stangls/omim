@@ -35,7 +35,7 @@ public:
   ~RuleDrawer();
 
   void operator() (FeatureType const & f);
-  void AddCustomGeometry(shared_ptr<CustomGeom> geometry );
+  void AddCustomGeometry(shared_ptr<CustomGeom> geometry , m2::RectD rect);
 
 private:
   bool CheckCancelled();

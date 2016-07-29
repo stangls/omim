@@ -208,7 +208,7 @@ CustomGeometries::Geoms const CustomGeometries::GetGeometries(m2::RectD rectangl
     vector<shared_ptr<CustomGeom>> ret;
     for ( auto it=m_geoms.cbegin(); it!=m_geoms.cend(); it++ ){
         shared_ptr<CustomGeom> g = *it;
-        if (rectangle.IsPointInside(g->GetBoundingBox().Center())/* || rectangle.IsIntersect(g->GetBoundingBox())*/){
+        if (rectangle.IsIntersect(g->GetBoundingBox())){
             ret.push_back( g );
         }
     }

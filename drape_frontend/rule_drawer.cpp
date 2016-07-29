@@ -26,6 +26,8 @@
 #include "base/string_utils.hpp"
 #endif
 
+#include "geometry/clipping.hpp"
+
 namespace df
 {
 
@@ -297,7 +299,7 @@ void RuleDrawer::operator()(FeatureType const & f)
   }
 }
 
-void RuleDrawer::AddCustomGeometry( shared_ptr<CustomGeom> geometry )
+void RuleDrawer::AddCustomGeometry( shared_ptr<CustomGeom> geometry, m2::RectD rect )
 {
     //LOG(my::LINFO,("adding custom geometry shape",*geometry));
     AreaViewParams params;
@@ -313,13 +315,16 @@ void RuleDrawer::AddCustomGeometry( shared_ptr<CustomGeom> geometry )
     vector<BuildingEdge> edges;
 
     vector<m2::PointF> triangles;
-    auto const fun = [&triangles](m2::PointF p1, m2::PointF p2, m2::PointF p3) {
+    auto const funPush = [&triangles](m2::PointF p1, m2::PointF p2, m2::PointF p3) {
         //LOG(my::LDEBUG,("polygon ",p1,p2,p3));
         triangles.push_back( p1 );
         triangles.push_back( p2 );
         triangles.push_back( p3 );
     };
-    geometry->CreatePolys(fun);
+    auto const funClip = [funPush,rect](m2::PointF p1, m2::PointF p2, m2::PointF p3) {
+        m2::ClipTriangleByRect(rect, p1, p2, p3, funPush);
+    };
+    geometry->CreatePolys(funClip);
     //LOG(my::LDEBUG,("#polygon-points=",triangles.size()));
     if (triangles.empty())
         return;

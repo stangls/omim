@@ -18,11 +18,11 @@ class CustomGeom
 public:
 
     dp::Color GetColor() const { return m_color; }
-    m2::RectF GetBoundingBox() const { return m_outerRect; }
+    m2::RectD GetBoundingBox() const { return m_outerRect; }
     virtual void CreatePolys(TPolyFun callback ) = 0;
 
 protected:
-    m2::RectF m_outerRect;
+    m2::RectD m_outerRect;
     dp::Color m_color;
 };
 

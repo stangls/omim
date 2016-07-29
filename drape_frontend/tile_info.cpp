@@ -63,7 +63,7 @@ void TileInfo::ReadFeatureIndex(MapDataProvider const & model)
     }, GetGlobalRect(), GetZoomLevel());
   }
 
-  vector<shared_ptr<CustomGeom>> temp(CustomGeometries::GetInstance()->GetGeometries(rect));
+  CustomGeometries::Geoms temp(CustomGeometries::GetInstance()->GetGeometries(rect));
   m_customGeoms = temp;
 
 }
@@ -97,7 +97,7 @@ void TileInfo::ReadFeatures(MapDataProvider const & model)
     }
 
     for (vector<shared_ptr<CustomGeom>>::const_iterator it = m_customGeoms.cbegin(); it!=m_customGeoms.cend(); it++){
-        drawer.AddCustomGeometry(*it);
+        drawer.AddCustomGeometry(*it,rect);
     }
   }
 
