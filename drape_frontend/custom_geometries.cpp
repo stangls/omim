@@ -171,6 +171,7 @@ public:
             m_geoms.push_back( shared_ptr<CustomGeom>( cg ) );
             m_points.clear();
             m_triangles.clear();
+            m_name="";
         }
         if (tag=="point") {
             m_points.emplace_back( MercatorBounds::LonToX(m_px), MercatorBounds::LatToY(m_py) );

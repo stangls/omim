@@ -351,7 +351,7 @@ void RuleDrawer::AddCustomGeometry( shared_ptr<CustomGeom> geometry, m2::RectD r
 
         TextViewParams viewParams;
         viewParams.m_depth = 0.0;
-        viewParams.m_minVisibleScale = 0;
+        viewParams.m_minVisibleScale = 16;
         viewParams.m_rank = 0;
         viewParams.m_anchor = dp::Center;
         viewParams.m_featureID = FeatureID(); // TODO?
@@ -362,7 +362,9 @@ void RuleDrawer::AddCustomGeometry( shared_ptr<CustomGeom> geometry, m2::RectD r
         viewParams.m_secondaryOptional = true;
         viewParams.m_extendingSize = 0; // TODO?
 
-        //params.m_posZ = 1; // TODO?
+        viewParams.m_posZ = 1; // TODO?
+
+        //LOG(my::LDEBUG,("geom-text:",viewParams.m_primaryText));
 
         if(!viewParams.m_primaryText.empty() || !viewParams.m_secondaryText.empty())
         {
