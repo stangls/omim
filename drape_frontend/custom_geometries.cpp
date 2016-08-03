@@ -10,6 +10,30 @@
 namespace df
 {
 
+// Helper. Returns Zero-Point if no area is available.
+// see https://en.wikipedia.org/wiki/Centroid#Centroid_of_polygon
+m2::PointF CenterFromPoints( vector<m2::PointF> const &points ){
+    float signedArea = 0;
+    float cx=0, cy=0;
+    if (points.size()>=2){
+        auto it = points.cbegin();
+        m2::PointF p1 = (*(it++));
+        for (; it!=points.cend(); it++){
+            m2::PointF p2 = (*it);
+            float a = (p1.x*p2.y-p2.x*p1.y);
+            signedArea += a;
+            cx += (p1.x+p2.x)*a;
+            cy += (p1.y+p2.y)*a;
+            p1 = p2;
+        }
+    }
+    if (signedArea!=0){
+        return m2::PointF::Zero();
+    }
+    signedArea/=2;
+    return m2::PointF(cx/(6*signedArea),cy/(6*signedArea));
+}
+
 // Convex Geometry
 
 ConvexGeom::ConvexGeom(string title, vector<m2::PointF> &outerPoints, dp::Color& color) :
@@ -40,7 +64,7 @@ void callInOrder(TPolyFun callback, m2::PointF p1, m2::PointF p2, m2::PointF p3)
         callback( p1, p3, p2 );
 }
 
-void ConvexGeom::CreatePolys(TPolyFun callback)
+void ConvexGeom::CreatePolys(TPolyFun callback) const
 {
     LOG(my::LINFO,("creating other polygons"));
     if (m_outerPoints.size()<3)
@@ -57,6 +81,11 @@ void ConvexGeom::CreatePolys(TPolyFun callback)
     }
 }
 
+m2::PointF ConvexGeom::GetCenter() const
+{
+    return CenterFromPoints(m_outerPoints);
+}
+
 // TriangleGeom
 
 TriangleGeom::TriangleGeom(string title, vector<m2::PointF> &points, vector<size_t> triangles, dp::Color &color)
@@ -70,9 +99,15 @@ TriangleGeom::TriangleGeom(string title, vector<m2::PointF> &points, vector<size
     };
     m_color = color;
     m_title = title;
+    m_center = CenterFromPoints(m_points);
 }
 
-void TriangleGeom::CreatePolys(TPolyFun callback)
+m2::PointF TriangleGeom::GetCenter() const
+{
+    return m_center;
+}
+
+void TriangleGeom::CreatePolys(TPolyFun callback) const
 {
     ASSERT( m_triangles.size()%3==0, () );
     for (auto it = m_triangles.begin(); it!=m_triangles.end(); it++){

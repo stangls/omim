@@ -351,25 +351,25 @@ void RuleDrawer::AddCustomGeometry( shared_ptr<CustomGeom> geometry, m2::RectD r
 
         TextViewParams viewParams;
         viewParams.m_depth = 0.0;
-        viewParams.m_minVisibleScale = 16;
-        viewParams.m_rank = 0;
+        viewParams.m_minVisibleScale = scales::GetNavigationScale();
+        viewParams.m_rank = 100; // TODO
         viewParams.m_anchor = dp::Center;
-        viewParams.m_featureID = FeatureID(); // TODO?
+        viewParams.m_featureID = FeatureID(); // this seems to be okay..
         viewParams.m_primaryText = geometry->GetTitle();
         viewParams.m_primaryTextFont = decl;
         viewParams.m_primaryOffset = m2::PointF(0, 0);
         viewParams.m_primaryOptional = true;
         viewParams.m_secondaryOptional = true;
-        viewParams.m_extendingSize = 0; // TODO?
+        viewParams.m_extendingSize = 10; // TODO
 
         viewParams.m_posZ = 1; // TODO?
 
-        //LOG(my::LDEBUG,("geom-text:",viewParams.m_primaryText));
+        LOG(my::LDEBUG,("visible scale:",df::VisualParams::Instance().GetVisualScale()));
 
         if(!viewParams.m_primaryText.empty() || !viewParams.m_secondaryText.empty())
         {
           drape_ptr<TextShape> textShape = make_unique_dp<TextShape>(
-            bbox.Center(), viewParams, false /*hasPOI*/, 0 /* textIndex */, false /* affectedByZoomPriority */
+            geometry->GetCenter(), viewParams, false /*hasPOI*/, 0 /* textIndex */, true /* affectedByZoomPriority */
           );
           m_mapShapes[df::OverlayType].push_back(move(textShape));
         }

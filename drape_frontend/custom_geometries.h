@@ -19,8 +19,9 @@ public:
 
     dp::Color GetColor() const { return m_color; }
     m2::RectD GetBoundingBox() const { return m_outerRect; }
-    virtual void CreatePolys(TPolyFun callback ) = 0;
+    virtual void CreatePolys(TPolyFun callback ) const = 0;
     string GetTitle() const { return m_title; }
+    virtual m2::PointF GetCenter() const = 0;
 
 protected:
     m2::RectD m_outerRect;
@@ -32,7 +33,8 @@ class ConvexGeom : CustomGeom
 {
 public:
     ConvexGeom(string title, vector<m2::PointF> &outerPoints, dp::Color &color );
-    void CreatePolys(TPolyFun callback );
+    void CreatePolys(TPolyFun callback ) const;
+    m2::PointF GetCenter() const;
 private:
     vector<m2::PointF> m_outerPoints;
 };
@@ -41,10 +43,12 @@ class TriangleGeom : CustomGeom
 {
 public:
     TriangleGeom( string title, vector<m2::PointF> &points, vector<size_t> triangles, dp::Color &color );
-    void CreatePolys( TPolyFun callback );
+    void CreatePolys( TPolyFun callback ) const;
+    m2::PointF GetCenter() const;
 private:
     vector<m2::PointF> m_points;
     vector<size_t> m_triangles;
+    m2::PointF m_center;
 };
 
 inline string DebugPrint(CustomGeom const & c)
