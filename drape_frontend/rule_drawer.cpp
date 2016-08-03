@@ -4,7 +4,6 @@
 #include "drape_frontend/apply_feature_functors.hpp"
 #include "drape_frontend/visual_params.hpp"
 
-#include "drape_frontend/area_shape.hpp"
 
 #include "indexer/feature.hpp"
 #include "indexer/feature_algo.hpp"
@@ -26,7 +25,12 @@
 #include "base/string_utils.hpp"
 #endif
 
+// required for custom-geoms injection
+#include "drape_frontend/area_shape.hpp"
 #include "geometry/clipping.hpp"
+#include "drape/color.hpp"
+#include "drape_frontend/text_shape.hpp"
+// end: required for custom-geoms injection
 
 namespace df
 {
@@ -301,40 +305,73 @@ void RuleDrawer::operator()(FeatureType const & f)
 
 void RuleDrawer::AddCustomGeometry( shared_ptr<CustomGeom> geometry, m2::RectD rect )
 {
-    //LOG(my::LINFO,("adding custom geometry shape",*geometry));
-    AreaViewParams params;
-    params.m_depth = 0;
-    params.m_color = geometry->GetColor();
-    params.m_minVisibleScale = 0;
-    params.m_rank = 0;
-    params.m_minPosZ = 0;
-    params.m_posZ = 0;
 
-    auto bbox = geometry->GetBoundingBox();
+    m2::RectD bbox = geometry->GetBoundingBox();
 
-    vector<BuildingEdge> edges;
+    {
+        //LOG(my::LINFO,("adding custom geometry shape",*geometry));
+        AreaViewParams params;
+        params.m_depth = 0;
+        params.m_color = geometry->GetColor();
+        params.m_minVisibleScale = 0;
+        params.m_rank = 0;
+        params.m_minPosZ = 0;
+        params.m_posZ = 0;
 
-    vector<m2::PointF> triangles;
-    auto const funPush = [&triangles](m2::PointF p1, m2::PointF p2, m2::PointF p3) {
-        //LOG(my::LDEBUG,("polygon ",p1,p2,p3));
-        triangles.push_back( p1 );
-        triangles.push_back( p2 );
-        triangles.push_back( p3 );
-    };
-    auto const funClip = [funPush,rect](m2::PointF p1, m2::PointF p2, m2::PointF p3) {
-        m2::ClipTriangleByRect(rect, p1, p2, p3, funPush);
-    };
-    geometry->CreatePolys(funClip);
-    //LOG(my::LDEBUG,("#polygon-points=",triangles.size()));
-    if (triangles.empty())
-        return;
+        vector<BuildingEdge> edges;
 
-    drape_ptr<AreaShape> shape = make_unique_dp<AreaShape>(move(triangles), move(edges), params);
+        vector<m2::PointF> triangles;
+        auto const funPush = [&triangles](m2::PointF p1, m2::PointF p2, m2::PointF p3) {
+            //LOG(my::LDEBUG,("polygon ",p1,p2,p3));
+            triangles.push_back( p1 );
+            triangles.push_back( p2 );
+            triangles.push_back( p3 );
+        };
+        auto const funClip = [funPush,rect](m2::PointF p1, m2::PointF p2, m2::PointF p3) {
+            m2::ClipTriangleByRect(rect, p1, p2, p3, funPush);
+        };
+        geometry->CreatePolys(funClip);
+        //LOG(my::LDEBUG,("#polygon-points=",triangles.size()));
+        if (triangles.empty())
+            return;
 
-    shape->SetFeatureMinZoom(0);
+        drape_ptr<AreaShape> shape = make_unique_dp<AreaShape>(move(triangles), move(edges), params);
 
-    // we explicitly use OverlayType to flush correctly (see above) and to show custom geometries as overlays, instead of using shape->GetType()
-    m_mapShapes[df::OverlayType].push_back(move(shape));
+        shape->SetFeatureMinZoom(0);
+
+        // we explicitly use OverlayType to flush correctly (see above) and to show custom geometries as overlays, instead of using shape->GetType()
+        m_mapShapes[df::OverlayType].push_back(move(shape));
+    }
+
+    {
+        dp::FontDecl decl;
+        decl.m_color = dp::Color::Black();
+        decl.m_size = 18.0;
+        decl.m_outlineColor = dp::Color::White();
+
+        TextViewParams viewParams;
+        viewParams.m_depth = 0.0;
+        viewParams.m_minVisibleScale = 0;
+        viewParams.m_rank = 0;
+        viewParams.m_anchor = dp::Center;
+        viewParams.m_featureID = FeatureID(); // TODO?
+        viewParams.m_primaryText = geometry->GetTitle();
+        viewParams.m_primaryTextFont = decl;
+        viewParams.m_primaryOffset = m2::PointF(0, 0);
+        viewParams.m_primaryOptional = true;
+        viewParams.m_secondaryOptional = true;
+        viewParams.m_extendingSize = 0; // TODO?
+
+        //params.m_posZ = 1; // TODO?
+
+        if(!viewParams.m_primaryText.empty() || !viewParams.m_secondaryText.empty())
+        {
+          drape_ptr<TextShape> textShape = make_unique_dp<TextShape>(
+            bbox.Center(), viewParams, false /*hasPOI*/, 0 /* textIndex */, false /* affectedByZoomPriority */
+          );
+          m_mapShapes[df::OverlayType].push_back(move(textShape));
+        }
+    }
 }
 
 } // namespace df

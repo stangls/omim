@@ -20,16 +20,18 @@ public:
     dp::Color GetColor() const { return m_color; }
     m2::RectD GetBoundingBox() const { return m_outerRect; }
     virtual void CreatePolys(TPolyFun callback ) = 0;
+    string GetTitle() const { return m_title; }
 
 protected:
     m2::RectD m_outerRect;
     dp::Color m_color;
+    string m_title = "";
 };
 
 class ConvexGeom : CustomGeom
 {
 public:
-    ConvexGeom(vector<m2::PointF> &outerPoints, dp::Color &color );
+    ConvexGeom(string title, vector<m2::PointF> &outerPoints, dp::Color &color );
     void CreatePolys(TPolyFun callback );
 private:
     vector<m2::PointF> m_outerPoints;
@@ -38,7 +40,7 @@ private:
 class TriangleGeom : CustomGeom
 {
 public:
-    TriangleGeom(vector<m2::PointF> &points, vector<size_t> triangles, dp::Color &color );
+    TriangleGeom( string title, vector<m2::PointF> &points, vector<size_t> triangles, dp::Color &color );
     void CreatePolys( TPolyFun callback );
 private:
     vector<m2::PointF> m_points;
@@ -48,8 +50,9 @@ private:
 inline string DebugPrint(CustomGeom const & c)
 {
   ostringstream out;
-  out << "BoundingBox = " << DebugPrint(c.GetBoundingBox());
+  out << "Name = " << c.GetTitle();
   out << "Color = ( " << DebugPrint(c.GetColor()) << " ) ";
+  out << "BoundingBox = " << DebugPrint(c.GetBoundingBox());
   return out.str();
 }
 

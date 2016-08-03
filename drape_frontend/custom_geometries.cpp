@@ -12,7 +12,7 @@ namespace df
 
 // Convex Geometry
 
-ConvexGeom::ConvexGeom(vector<m2::PointF> &outerPoints, dp::Color& color) :
+ConvexGeom::ConvexGeom(string title, vector<m2::PointF> &outerPoints, dp::Color& color) :
     CustomGeom(),
     m_outerPoints(outerPoints)
 {
@@ -21,6 +21,7 @@ ConvexGeom::ConvexGeom(vector<m2::PointF> &outerPoints, dp::Color& color) :
         m_outerRect.Add(*it);
     };
     m_color = color;
+    m_title = title;
 }
 
 void callInOrder(TPolyFun callback, m2::PointF p1, m2::PointF p2, m2::PointF p3){
@@ -58,7 +59,7 @@ void ConvexGeom::CreatePolys(TPolyFun callback)
 
 // TriangleGeom
 
-TriangleGeom::TriangleGeom(vector<m2::PointF> &points, vector<size_t> triangles, dp::Color &color)
+TriangleGeom::TriangleGeom(string title, vector<m2::PointF> &points, vector<size_t> triangles, dp::Color &color)
     : CustomGeom(),
       m_points(points),
       m_triangles(triangles)
@@ -68,6 +69,7 @@ TriangleGeom::TriangleGeom(vector<m2::PointF> &points, vector<size_t> triangles,
         m_outerRect.Add(*it);
     };
     m_color = color;
+    m_title = title;
 }
 
 void TriangleGeom::CreatePolys(TPolyFun callback)
@@ -92,6 +94,7 @@ class GeomsParser
     vector<m2::PointF> m_points;
     vector<size_t> m_triangles;
     dp::Color m_color;
+    string m_name = "";
 
     void Reset() { }
 
@@ -128,18 +131,24 @@ public:
         if (IsValidAttribute("trianglelist", attrInLowerCase, "color", value)){
             m_color = dp::Extract(atoi(value.c_str()));
         }
+        if (IsValidAttribute("trianglelist", attrInLowerCase, "name", value)){
+            m_name = value.c_str();
+        }
         if (IsValidAttribute("point", attrInLowerCase, "x", value)){
             m_px = atof(value.c_str());
         }
         if (IsValidAttribute("point", attrInLowerCase, "y", value)){
             m_py = atof(value.c_str());
         }
-        if (IsValidAttribute("triangle", attrInLowerCase, "p1", value))
+        if (IsValidAttribute("triangle", attrInLowerCase, "p1", value)){
             m_p1 = atoi(value.c_str());
-        if (IsValidAttribute("triangle", attrInLowerCase, "p2", value))
+        }
+        if (IsValidAttribute("triangle", attrInLowerCase, "p2", value)){
             m_p2 = atoi(value.c_str());
-        if (IsValidAttribute("triangle", attrInLowerCase, "p3", value))
+        }
+        if (IsValidAttribute("triangle", attrInLowerCase, "p3", value)){
             m_p3 = atoi(value.c_str());
+        }
     }
 
     bool IsValidAttribute(string const & tag, string const & attrInLowerCase, string const & attrShouldBe, string const & value) const
@@ -157,7 +166,7 @@ public:
     {
         ASSERT_EQUAL(m_tags.back(), tag, ());
         if (tag=="trianglelist") {
-            CustomGeom *cg = (CustomGeom*)new TriangleGeom( m_points, m_triangles, m_color );
+            CustomGeom *cg = (CustomGeom*)new TriangleGeom( m_name, m_points, m_triangles, m_color );
             //LOG(my::LINFO,("read geometry",*cg));
             m_geoms.push_back( shared_ptr<CustomGeom>( cg ) );
             m_points.clear();
