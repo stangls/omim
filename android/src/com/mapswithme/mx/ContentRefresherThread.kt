@@ -26,7 +26,7 @@ class ContentRefresherThread(context: Context) : Thread() {
             override fun onActivityDestroyed(activity: Activity?) {}
             override fun onActivitySaveInstanceState(activity: Activity?, outState: Bundle?) {}
             override fun onActivityCreated(activity: Activity?, savedInstanceState: Bundle?) {}
-            override fun onActivityResumed(activity: Activity?) {}
+            override fun onActivityResumed(activity: Activity?) { if (running()){ n(); } }
             override fun onActivityStarted(activity: Activity?) { if (running()){ n(); } }
             override fun onActivityStopped(activity: Activity?) { }
         })
