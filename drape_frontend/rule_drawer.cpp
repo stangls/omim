@@ -369,7 +369,7 @@ void RuleDrawer::AddCustomGeometry( shared_ptr<CustomGeom> geometry, m2::RectD r
         if(!viewParams.m_primaryText.empty() || !viewParams.m_secondaryText.empty())
         {
           drape_ptr<TextShape> textShape = make_unique_dp<TextShape>(
-            geometry->GetCenter(), viewParams, false /*hasPOI*/, 0 /* textIndex */, true /* affectedByZoomPriority */
+            bbox.Center(), viewParams, false /*hasPOI*/, 0 /* textIndex */, true /* affectedByZoomPriority */
           );
           m_mapShapes[df::OverlayType].push_back(move(textShape));
         }
