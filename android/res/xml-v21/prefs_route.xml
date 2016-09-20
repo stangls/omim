@@ -19,8 +19,8 @@
     android:switchTextOff=""/>
 
   <SwitchPreference
-    android:key="@string/gps_simulation_choose"
-    android:title="@string/pref_gps_simulation"
+    android:key="@string/pref_gps_simulation"
+    android:title="@string/pref_gps_simulation_title"
     android:switchTextOn=""
     android:switchTextOff=""/>
 

@@ -1842,49 +1842,54 @@ public class MwmActivity extends BaseMwmFragmentActivity
     }
   }
   public void gpsStop(View ignored){
-    MwmApplication.gps().setSimulation(false);
+    gpsSimulation(false);
   }
 
-  public void gpsChoose(View ignored) {
-    String baseDir = Parameter.getGlobalDirectory();
-    final LinkedList<File> simuFiles = new LinkedList<>();
-    final LinkedList<String> simuNames = new LinkedList<>();
-    File simuLog = new File(baseDir + "/simulation.log");
-    if (simuLog.exists()) {
-      simuFiles.add(simuLog);
-      simuNames.add("simulation.log");
-    }
-    final String tourPrefix = "Tour: ";
-    DbHelper.block(new Runnable() {
-      @Override
-      public void run() {
-        for (Tour t : DaoTour.getInstance().getAll()) {
-          simuFiles.add(new File(t.getFile()));
-          simuNames.add(tourPrefix+t.getName());
-        }
+  public void gpsSimulation(Boolean enable) {
+    if (enable) {
+      String baseDir = Parameter.getGlobalDirectory();
+      final LinkedList<File> simuFiles = new LinkedList<>();
+      final LinkedList<String> simuNames = new LinkedList<>();
+      File simuLog = new File(baseDir + "/simulation.log");
+      if (simuLog.exists()) {
+        simuFiles.add(simuLog);
+        simuNames.add("simulation.log");
       }
-    });
-    final String[] simulationNames = simuNames.toArray(new String[simuNames.size()]);
-    new AlertDialog.Builder(this)
-      .setTitle("Simulationsdaten wählen")
-      .setItems(simulationNames, new DialogInterface.OnClickListener() {
+      final String tourPrefix = "Tour: ";
+      DbHelper.block(new Runnable() {
         @Override
-        public void onClick(DialogInterface dialog, int which) {
-          if (simuNames.get(which).startsWith(tourPrefix)){
-            MwmApplication.gps().useSimulationTour(simuFiles.get(which).getAbsolutePath());
-          }else{
-            MwmApplication.gps().useSimulationLog();
+        public void run() {
+          for (Tour t : DaoTour.getInstance().getAll()) {
+            simuFiles.add(new File(t.getFile()));
+            simuNames.add(tourPrefix+t.getName());
           }
-          MwmApplication.gps().restartEmulation();
-          dialog.dismiss();
         }
-      }).setOnDismissListener(new DialogInterface.OnDismissListener() {
-        @Override
-        public void onDismiss(DialogInterface dialog) {
-          MwmActivity.this.hideStatusBar();
-        }
-      })
-      .show();
+      });
+      final String[] simulationNames = simuNames.toArray(new String[simuNames.size()]);
+      new AlertDialog.Builder(this)
+        .setTitle("Simulationsdaten wählen")
+        .setItems(simulationNames, new DialogInterface.OnClickListener() {
+          @Override
+          public void onClick(DialogInterface dialog, int which) {
+            if (simuNames.get(which).startsWith(tourPrefix)){
+              MwmApplication.gps().useSimulationTour(simuFiles.get(which).getAbsolutePath());
+            }else{
+              MwmApplication.gps().useSimulationLog();
+            }
+            MwmApplication.gps().restartEmulation();
+            dialog.dismiss();
+          }
+        }).setOnDismissListener(new DialogInterface.OnDismissListener() {
+          @Override
+          public void onDismiss(DialogInterface dialog) {
+            MwmActivity.this.hideStatusBar();
+          }
+        })
+        .show();
+    }else{
+      MwmApplication.gps().setSimulation(false);
+    }
+    mSimulationMenu.setVisibility( enable ? View.VISIBLE : View.GONE );
   }
 
 }

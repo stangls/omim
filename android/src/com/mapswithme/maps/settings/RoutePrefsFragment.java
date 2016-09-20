@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.mapswithme.maps.Framework;
+import com.mapswithme.maps.MwmActivity;
 import com.mapswithme.maps.R;
 import com.mapswithme.maps.sound.LanguageData;
 import com.mapswithme.maps.sound.TtsPlayer;
@@ -26,6 +27,7 @@ public class RoutePrefsFragment extends PreferenceFragment
 
   private TwoStatePreference mPrefEnabled;
   private ListPreference mPrefLanguages;
+  private TwoStatePreference mPrefGPS;
 
   private final Map<String, LanguageData> mLanguages = new HashMap<>();
   private LanguageData mCurrentLanguage;
@@ -151,6 +153,7 @@ public class RoutePrefsFragment extends PreferenceFragment
 
     mPrefEnabled = (TwoStatePreference) findPreference(getString(R.string.pref_tts_enabled));
     mPrefLanguages = (ListPreference) findPreference(getString(R.string.pref_tts_language));
+    mPrefGPS = (TwoStatePreference) findPreference(getString(R.string.pref_gps_simulation));
 
     final Framework.Params3dMode _3d = new Framework.Params3dMode();
     Framework.nativeGet3dMode(_3d);
@@ -164,6 +167,13 @@ public class RoutePrefsFragment extends PreferenceFragment
       public boolean onPreferenceChange(Preference preference, Object newValue)
       {
         Framework.nativeSet3dMode((Boolean)newValue, _3d.buildings);
+        return true;
+      }
+    });
+    mPrefGPS.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener(){
+      @Override
+      public boolean onPreferenceChange(Preference preference, Object newValue) {
+        MwmActivity.getInstance().gpsSimulation((Boolean)newValue);
         return true;
       }
     });
