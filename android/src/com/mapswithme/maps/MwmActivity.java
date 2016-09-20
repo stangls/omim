@@ -461,6 +461,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     Log.d(TAG, "onCreate: "+(i++));
 
     mSimulationMenu = (View)findViewById(R.id.simulationMenu);
+    mSimulationMenu.setVisibility(View.GONE);
     mBreakButton = (ImageButton)findViewById(R.id.breakButton);
     mSimulationPauseButton = (ImageButton)findViewById(R.id.simulationPauseButton);
     mLegend = (View)findViewById(R.id.legend);
@@ -1250,8 +1251,6 @@ public class MwmActivity extends BaseMwmFragmentActivity
     RoutingController.get().setTourStatusListener(this);
     /*updateGpsSimulationActive(false);
     MwmApplication.gps().setSimulation(false);*/
-
-    mSimulationMenu.setVisibility(View.GONE);
   }
 
   public void hideStatusBar() {
@@ -1272,11 +1271,6 @@ public class MwmActivity extends BaseMwmFragmentActivity
   @Override
   public void onBackPressed()
   {
-    if (mSimulationMenu.getVisibility()!=View.GONE){
-      mSimulationMenu.setVisibility(View.GONE);
-      return;
-    }
-
     if (mMainMenu.close(true))
     {
       mFadeView.fadeOut(false);
@@ -1517,10 +1511,6 @@ public class MwmActivity extends BaseMwmFragmentActivity
   @Override
   public boolean onTouch(View view, MotionEvent event)
   {
-    if (mSimulationMenu.getVisibility()!=View.GONE){
-      mSimulationMenu.setVisibility(View.GONE);
-      return true;
-    }
     return /*mPlacePage.hideOnTouch() ||*/
            mMapFragment.onTouch(view, event);
   }
@@ -1844,10 +1834,6 @@ public class MwmActivity extends BaseMwmFragmentActivity
     mLegend.setVisibility( mLegend.getVisibility()==View.GONE?View.VISIBLE:View.GONE );
   }
 
-  public void simulationMenuButtonClicked(View button){
-    mSimulationMenu.setVisibility(mSimulationMenu.getVisibility()==View.GONE?View.VISIBLE:View.GONE);
-  }
-
   public void gpsPause(View ignored){
     if (gpsSimulationActive){
       MwmApplication.gps().pauseEmulation();
@@ -1859,7 +1845,7 @@ public class MwmActivity extends BaseMwmFragmentActivity
     MwmApplication.gps().setSimulation(false);
   }
 
-  public void gpsRestart(View ignored) {
+  public void gpsChoose(View ignored) {
     String baseDir = Parameter.getGlobalDirectory();
     final LinkedList<File> simuFiles = new LinkedList<>();
     final LinkedList<String> simuNames = new LinkedList<>();

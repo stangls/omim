@@ -30,17 +30,6 @@
         android:alpha="0.6"
       />
 
-    <ImageButton
-        style="@style/MwmTheme.Menu.Line.Button"
-        android:src="@android:drawable/ic_menu_rotate"
-        android:onClick="gpsRestart"
-        android:layout_width="@dimen/menu_line_button_width"
-        android:layout_height="@dimen/menu_line_height_minusText"
-        android:contentDescription="@string/gps_simulation_restart"
-        android:layout_row="3"
-        android:layout_column="2"
-      />
-
     <View
         android:background="@android:color/darker_gray"
         android:layout_height="1px"

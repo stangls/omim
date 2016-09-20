@@ -16,14 +16,12 @@
     android:layout_height="match_parent"
     tools:background="#4000F000"/>
 
-  <Button
+  <include
+      layout="@layout/simulation_menu"
       android:layout_width="wrap_content"
       android:layout_height="wrap_content"
-      android:textAppearance="?android:attr/textAppearanceMedium"
-      android:text="GPS\nSimulation"
-      android:background="@android:color/transparent"
-      android:onClick="simulationMenuButtonClicked"
-      android:layout_gravity="bottom"/>
+      android:layout_gravity="bottom"
+    />
 
 
   <TextView

@@ -17,4 +17,11 @@
     android:title="@string/pref_map_3d_title"
     android:switchTextOn=""
     android:switchTextOff=""/>
+
+  <SwitchPreference
+    android:key="@string/gps_simulation_choose"
+    android:title="@string/pref_gps_simulation"
+    android:switchTextOn=""
+    android:switchTextOff=""/>
+
 </PreferenceScreen>

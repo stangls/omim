@@ -917,7 +917,8 @@
 	<string name="tour_continue">Continue here</string>
 	<string name="gps_simulation_pause">Pause GPS-Simulation</string>
 	<string name="gps_simulation_stop">Stop GPS-Simulation</string>
-	<string name="gps_simulation_restart">Choose GPS-Simulation</string>
+	<string name="gps_simulation_choose">Choose GPS-Simulation</string>
 	<string name="legende">Map Key (Legend)</string>
 	<string name="title_tour_guidance">Tour Guidance</string>
+	<string name="pref_gps_simulation">GPS simulation</string>
 </resources>
