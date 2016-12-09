@@ -67,11 +67,11 @@ dependencies {
 
   // mobiworx
   compile 'com.mobidat.wp2:gpsprovider:1.9.2@aar'
-  compile('com.mobidat.wp2:missionservice:1.6.3@aar') {
+  compile('com.mobidat.wp2:missionservice:1.10.1@aar') {
     transitive = true
     exclude group: 'com.android.support'
   }
-  compile ('com.mobidat.wp2:databaseaccess:1.17@aar') {
+  compile ('com.mobidat.wp2:databaseaccess:1.26.1@aar') {
     transitive=true
     exclude group: 'com.android.support'
   }
