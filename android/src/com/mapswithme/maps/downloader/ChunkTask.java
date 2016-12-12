@@ -2,18 +2,25 @@ package com.mapswithme.maps.downloader;
 
 import android.os.AsyncTask;
 import android.util.Log;
+import android.widget.Toast;
 
 import java.io.BufferedInputStream;
 import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.channels.FileChannel;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
+import com.mapswithme.maps.MwmApplication;
 import com.mapswithme.util.Constants;
 import com.mapswithme.util.StringUtils;
 import com.mapswithme.util.Utils;
@@ -54,10 +61,42 @@ class ChunkTask extends AsyncTask<Void, byte[], Boolean>
     mExpectedFileSize = expectedFileSize;
     mPostBody = postBody; // 160426/Germany_Free State of Bavaria_Upper Bavaria_East
     mUserAgent = userAgent;
-    Log.d(TAG, "ChunkTask: Trying to download "+(new String(postBody))+" at url \""+url+"\"");
+    String fileName = (new String(postBody));
+    Log.d(TAG, "Trying to download "+fileName+" at url \""+url+"\"");
+
+    if (fileName.matches("^[0-9]+/[^/]+")){
+      String mapFile = fileName.replaceFirst("^[0-9]*/", "");
+      Log.d(TAG, "This seems to be a map file : "+mapFile);
+      try ( FileWriter out = new FileWriter(new File("/sdcard/MapsWithMe/map.dest"))){
+        out.write("/sdcard/MapsWithMe/151103/"+mapFile+".mwm\n");
+      }catch(IOException e){
+        e.printStackTrace();
+      }
+      cp("/sdcard/mobidat/map.mwm","/sdcard/MapsWithMe/151103/"+mapFile+".mwm");
+      cp("/sdcard/mobidat/map.mwm.routing","/sdcard/MapsWithMe/151103/"+mapFile+".mwm.routing");
+
+      System.exit(1);
+    }
     // Cancel downloading and notify about error.
     cancel(false);
-    nativeOnFinish(mHttpCallbackID, NOT_SET, mBeg, mEnd);
+    nativeOnFinish(mHttpCallbackID, INVALID_URL, mBeg, mEnd);
+  }
+
+  private void cp(String src, String dest) {
+    File f = new File(src);
+    if (f.exists()){
+      File f2 = new File(dest);
+      f2.getParentFile().mkdirs();
+      Log.d(TAG, "Using mobidat map-file as replacement :-P");
+      try(
+        FileChannel in = new FileInputStream(f).getChannel();
+        FileChannel out = new FileOutputStream(f2).getChannel()
+      ){
+        in.transferTo(0,in.size(),out);
+      }catch(IOException e){
+        e.printStackTrace();
+      }
+    }
   }
 
 
